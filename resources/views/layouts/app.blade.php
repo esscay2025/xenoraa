@@ -6,6 +6,9 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Gopi K | Portfolio')</title>
     <meta name="description" content="@yield('description', 'Founder of Go Esscay Solutions | IT, Automation & Open-Source Expert | Greater Chennai Area')">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
+    <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('favicon-64.png') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -21,7 +24,8 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); margin: 0; padding: 0; line-height: 1.6; }
         .navbar { background-color: rgba(10,10,10,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; padding: 0 2rem; }
         .navbar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
-        .navbar-brand { font-size: 1.4rem; font-weight: 800; color: var(--text-primary); text-decoration: none; letter-spacing: -0.5px; }
+        .navbar-brand { display: flex; align-items: center; text-decoration: none; }
+        .navbar-brand img { height: 38px; width: auto; display: block; }
         .navbar-brand span { color: var(--text-secondary); }
         .navbar-nav { display: flex; align-items: center; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
         .navbar-nav a { color: var(--text-secondary); text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
@@ -80,7 +84,9 @@
 <body>
     <nav class="navbar">
         <div class="navbar-inner">
-            <a href="{{ route('home') }}" class="navbar-brand">Gopi<span>.K</span></a>
+            <a href="{{ route('home') }}" class="navbar-brand" title="Gopi K | Home">
+                <img src="{{ asset('images/gopi-logo-nav.png') }}" alt="Gopi K Logo" loading="eager">
+            </a>
             <ul class="navbar-nav">
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
                 <li><a href="{{ route('blog') }}" class="{{ request()->routeIs('blog*') ? 'active' : '' }}">Blog</a></li>
@@ -115,7 +121,7 @@
         <div class="footer-inner">
             <div class="grid-3" style="margin-bottom: 2rem;">
                 <div>
-                    <h3 style="font-size: 1.2rem; font-weight: 700; margin-bottom: 0.75rem;">Gopi K</h3>
+                    <img src="{{ asset('images/gopi-logo-nav.png') }}" alt="Gopi K" style="height: 48px; width: auto; margin-bottom: 0.75rem; display: block;">
                     <p class="text-secondary text-sm">Founder of Go Esscay Solutions. Passionate about creating impact through technology, automation, and open-source solutions.</p>
                 </div>
                 <div>
