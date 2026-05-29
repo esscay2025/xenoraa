@@ -73,24 +73,39 @@
         align-items: center;
     }
     .hero-avatar {
-        width: 320px;
-        height: 320px;
+        width: 340px;
+        height: 340px;
         border-radius: 50%;
         background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
-        border: 2px solid var(--border-light);
+        border: 3px solid rgba(255,255,255,0.15);
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 8rem;
         color: var(--text-secondary);
         position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 60px rgba(255,255,255,0.05), 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .hero-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center top;
+        border-radius: 50%;
+        display: block;
+        transition: transform 0.4s ease;
+    }
+    .hero-avatar:hover img {
+        transform: scale(1.04);
     }
     .hero-avatar::after {
         content: '';
         position: absolute;
-        inset: -8px;
+        inset: -10px;
         border-radius: 50%;
-        border: 1px dashed rgba(255,255,255,0.1);
+        border: 1px dashed rgba(255,255,255,0.12);
+        pointer-events: none;
     }
     .section { padding: 5rem 2rem; }
     .section-title {
@@ -195,7 +210,7 @@
         </div>
         <div class="hero-image">
             <div class="hero-avatar">
-                <i class="fas fa-user"></i>
+                <img src="{{ asset('images/gopi-profile.png') }}" alt="Gopi K — Founder of Go Esscay Solutions" loading="eager">
             </div>
         </div>
     </div>

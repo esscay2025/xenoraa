@@ -76,8 +76,8 @@
             margin-bottom: 0.75rem;
         }
         .sidebar-avatar {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: var(--bg-card);
             border: 1px solid var(--border);
@@ -86,6 +86,15 @@
             justify-content: center;
             font-size: 0.875rem;
             color: var(--text-secondary);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .sidebar-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            border-radius: 50%;
         }
         .sidebar-user-name { font-size: 0.875rem; font-weight: 600; }
         .sidebar-user-role { font-size: 0.75rem; color: var(--text-muted); }
@@ -226,7 +235,13 @@
 
         <div class="sidebar-footer">
             <div class="sidebar-user">
-                <div class="sidebar-avatar"><i class="fas fa-user"></i></div>
+                <div class="sidebar-avatar">
+                    @if(auth()->user()->email === 'gopi@outlook.in')
+                        <img src="{{ asset('images/gopi-profile.png') }}" alt="{{ auth()->user()->name }}">
+                    @else
+                        <i class="fas fa-user"></i>
+                    @endif
+                </div>
                 <div>
                     <div class="sidebar-user-name">{{ auth()->user()->name }}</div>
                     <div class="sidebar-user-role">{{ ucfirst(auth()->user()->role?->name ?? 'Admin') }}</div>
