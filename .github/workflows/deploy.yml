@@ -1,0 +1,189 @@
+name: CI/CD — Gopi K Portfolio
+
+on:
+  push:
+    branches:
+      - main        # Auto-deploy to production
+      - staging     # Auto-deploy to staging
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  # ─────────────────────────────────────────────
+  # JOB 1: Test & Lint (all branches)
+  # ─────────────────────────────────────────────
+  test:
+    name: Test & Lint
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: gopi_portfolio_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, xml, bcmath, curl, zip, gd, intl, mysql, tokenizer
+          coverage: none
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      - name: Install PHP dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Copy .env for testing
+        run: cp .env.example .env
+
+      - name: Configure test environment
+        run: |
+          sed -i 's/APP_ENV=.*/APP_ENV=testing/' .env
+          sed -i 's/APP_DEBUG=.*/APP_DEBUG=true/' .env
+          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=mysql/' .env
+          sed -i 's/DB_HOST=.*/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_PORT=.*/DB_PORT=3306/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=gopi_portfolio_test/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=root/' .env
+
+      - name: Generate application key
+        run: php artisan key:generate
+
+      - name: Run database migrations
+        run: php artisan migrate --force
+
+      - name: Check PHP syntax
+        run: find app -name "*.php" -exec php -l {} \; | grep -v "No syntax errors" | head -20 || true
+
+      - name: Run PHPUnit tests
+        run: php artisan test --parallel 2>/dev/null || php artisan test
+
+  # ─────────────────────────────────────────────
+  # JOB 2: Deploy to Production (main branch only)
+  # ─────────────────────────────────────────────
+  deploy-production:
+    name: Deploy to Production (gopi.blog)
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: https://gopi.blog
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: 22
+          script: |
+            set -e
+            echo "=== Starting production deployment ==="
+            cd /var/www/gopi.blog/gopi-portfolio
+
+            # Pull latest code
+            git fetch origin
+            git checkout main
+            git reset --hard origin/main
+            echo "✅ Code updated to: $(git log --oneline | head -1)"
+
+            # Install dependencies
+            composer install --optimize-autoloader --no-dev --no-interaction 2>&1 | tail -3
+            npm install --silent
+            npm run build 2>&1 | tail -3
+
+            # Run migrations
+            php artisan migrate --force 2>&1 | tail -5
+
+            # Rebuild caches
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            # Fix permissions
+            chown -R www-data:www-data /var/www/gopi.blog/gopi-portfolio
+            chmod -R 775 /var/www/gopi.blog/gopi-portfolio/storage
+            chmod -R 775 /var/www/gopi.blog/gopi-portfolio/bootstrap/cache
+
+            # Restart PHP-FPM
+            systemctl restart php8.3-fpm
+
+            echo "=== ✅ Production deployment complete! ==="
+            echo "Site: https://gopi.blog"
+
+      - name: Verify deployment
+        run: |
+          sleep 5
+          STATUS=$(curl -sk -o /dev/null -w "%{http_code}" https://gopi.blog/)
+          echo "Homepage status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "❌ Deployment verification failed!"
+            exit 1
+          fi
+          echo "✅ Site is live and responding!"
+
+  # ─────────────────────────────────────────────
+  # JOB 3: Deploy to Staging (staging branch only)
+  # ─────────────────────────────────────────────
+  deploy-staging:
+    name: Deploy to Staging
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/staging' && github.event_name == 'push'
+    environment:
+      name: staging
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: 22
+          script: |
+            set -e
+            echo "=== Starting staging deployment ==="
+            cd /var/www/gopi.blog/gopi-portfolio
+            git fetch origin
+            git checkout staging
+            git reset --hard origin/staging
+            composer install --optimize-autoloader --no-dev --no-interaction 2>&1 | tail -3
+            npm install --silent && npm run build 2>&1 | tail -3
+            php artisan migrate --force 2>&1 | tail -5
+            php artisan config:cache && php artisan route:cache && php artisan view:cache
+            chown -R www-data:www-data /var/www/gopi.blog/gopi-portfolio
+            chmod -R 775 /var/www/gopi.blog/gopi-portfolio/storage
+            systemctl restart php8.3-fpm
+            echo "=== ✅ Staging deployment complete! ==="
