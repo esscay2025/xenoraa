@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Route;
 // =============================================
 
 Route::get('/', [PortfolioController::class, 'home'])->name('home');
+Route::get('/about', [PortfolioController::class, 'about'])->name('about');
 Route::get('/blog', [PortfolioController::class, 'blog'])->name('blog');
 Route::get('/blog/{slug}', [PortfolioController::class, 'blogShow'])->name('blog.show');
 Route::post('/blog/{slug}/comment', [PortfolioController::class, 'submitComment'])->name('blog.comment');

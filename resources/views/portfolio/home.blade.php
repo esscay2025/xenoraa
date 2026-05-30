@@ -171,19 +171,19 @@
     <div class="container">
         <div class="grid-4">
             <div class="stat-card">
-                <div class="stat-number">1+</div>
-                <div class="stat-label">Year of Entrepreneurship</div>
+                <div class="stat-number">14+</div>
+                <div class="stat-label">Years in Technology</div>
             </div>
             <div class="stat-card">
-                <div class="stat-number">242</div>
-                <div class="stat-label">LinkedIn Connections</div>
+                <div class="stat-number">3</div>
+                <div class="stat-label">Global Enterprises</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">2025</div>
+                <div class="stat-label">Founded Go Esscay</div>
             </div>
             <div class="stat-card">
                 <div class="stat-number">∞</div>
-                <div class="stat-label">Ideas in Progress</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">100%</div>
                 <div class="stat-label">Passion for Tech</div>
             </div>
         </div>
@@ -203,7 +203,7 @@
                 <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
                     {{ $siteSettings['about_text_2'] ?? 'Based in Greater Chennai Area, I am passionate about making technology simple, affordable, and accessible for every business. My mission is to bridge the gap between complex technology and everyday business needs.' }}
                 </p>
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.75rem;">
                     <div style="text-align: center; padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; min-width: 100px;">
                         <div style="font-size: 1.25rem; font-weight: 700;">{{ $siteSettings['location'] ?? 'Chennai' }}</div>
                         <div class="text-sm text-muted">Location</div>
@@ -212,7 +212,14 @@
                         <div style="font-size: 1.25rem; font-weight: 700;">{{ $siteSettings['founded_year'] ?? '2025' }}</div>
                         <div class="text-sm text-muted">Founded</div>
                     </div>
+                    <div style="text-align: center; padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; min-width: 100px;">
+                        <div style="font-size: 1.25rem; font-weight: 700;">14+</div>
+                        <div class="text-sm text-muted">Years Exp.</div>
+                    </div>
                 </div>
+                <a href="{{ route('about') }}" class="btn btn-outline" style="padding: 0.625rem 1.5rem;">
+                    <i class="fas fa-user"></i> Read More About Me &nbsp;<i class="fas fa-arrow-right" style="font-size:0.75rem;"></i>
+                </a>
             </div>
             <div>
                 <p class="text-sm text-secondary" style="text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Skills</p>

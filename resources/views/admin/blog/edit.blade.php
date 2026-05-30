@@ -143,16 +143,18 @@
                 <div style="display: flex; flex-direction: column; gap: 0.75rem; padding-top: 0.5rem;">
                     <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.75rem;"><i class="fas fa-save"></i> Update Post</button>
                     <a href="{{ route('admin.blog.index') }}" class="btn btn-outline" style="width: 100%; justify-content: center;">Cancel</a>
-                    <form method="POST" action="{{ route('admin.blog.destroy', $blog) }}" onsubmit="return confirm('Delete this post?')">
-                        @csrf @method('DELETE')
-                        <button type="submit" class="btn" style="width: 100%; justify-content: center; background: rgba(239,68,68,0.1); color: #ef4444; border-color: rgba(239,68,68,0.3);">
-                            <i class="fas fa-trash"></i> Delete Post
-                        </button>
-                    </form>
+                    <button type="button" class="btn" onclick="if(confirm('Are you sure you want to delete this post? This cannot be undone.')) { document.getElementById('deletePostForm').submit(); }" style="width: 100%; justify-content: center; background: rgba(239,68,68,0.1); color: #ef4444; border-color: rgba(239,68,68,0.3);">
+                        <i class="fas fa-trash"></i> Delete Post
+                    </button>
                 </div>
             </div>
         </div>
     </form>
+
+{{-- Delete form placed OUTSIDE the main update form to avoid nested form issue --}}
+<form id="deletePostForm" method="POST" action="{{ route('admin.blog.destroy', $blog) }}" style="display:none;">
+    @csrf @method('DELETE')
+</form>
 </div>
 
 <div class="modal-overlay" id="imageModal">

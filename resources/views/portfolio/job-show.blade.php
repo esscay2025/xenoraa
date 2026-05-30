@@ -32,7 +32,7 @@
             <div class="card" style="margin-bottom: 1.5rem;">
                 <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Job Description</h3>
                 <div style="color: var(--text-secondary); line-height: 1.8; font-size: 0.95rem;">
-                    {!! nl2br(e($job->description)) !!}
+                    {!! $job->description !!}
                 </div>
             </div>
 
@@ -40,7 +40,7 @@
             <div class="card">
                 <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 1rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;">Requirements</h3>
                 <div style="color: var(--text-secondary); line-height: 1.8; font-size: 0.95rem;">
-                    {!! nl2br(e($job->requirements)) !!}
+                    {!! $job->requirements !!}
                 </div>
             </div>
             @endif

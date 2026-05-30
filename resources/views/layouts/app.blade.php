@@ -6,6 +6,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Gopi K | Portfolio')</title>
     <meta name="description" content="@yield('description', 'Founder of Go Esscay Solutions | IT, Automation & Open-Source Expert | Greater Chennai Area')">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
     <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('favicon-64.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
@@ -116,12 +118,13 @@
     <nav class="navbar">
         <div class="navbar-inner">
             <a href="{{ route('home') }}" class="navbar-brand" title="Gopi K | Home">
-                <img src="{{ asset('images/gopi-logo-nav.png') }}" alt="Gopi K Logo" loading="eager">
+                <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K Logo" loading="eager" style="height:40px;width:auto;">
             </a>
 
             {{-- Desktop Nav --}}
             <ul class="navbar-nav">
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
+                <li><a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">About</a></li>
                 <li><a href="{{ route('blog') }}" class="{{ request()->routeIs('blog*') ? 'active' : '' }}">Blog</a></li>
                 <li><a href="{{ route('jobs') }}" class="{{ request()->routeIs('jobs*') ? 'active' : '' }}">Jobs</a></li>
                 @auth
@@ -153,6 +156,9 @@
     <div class="mobile-menu" id="mobileMenu">
         <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">
             <i class="fas fa-home" style="width:20px;"></i> Home
+        </a>
+        <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">
+            <i class="fas fa-user" style="width:20px;"></i> About
         </a>
         <a href="{{ route('blog') }}" class="{{ request()->routeIs('blog*') ? 'active' : '' }}">
             <i class="fas fa-pen-nib" style="width:20px;"></i> Blog
@@ -203,7 +209,7 @@
         <div class="footer-inner">
             <div class="grid-3" style="margin-bottom: 2rem;">
                 <div>
-                    <img src="{{ asset('images/gopi-logo-nav.png') }}" alt="Gopi K" style="height: 44px; width: auto; margin-bottom: 0.75rem; display: block; background:#000; padding:4px 8px; border-radius:6px;">
+                    <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K" style="height: 44px; width: auto; margin-bottom: 0.75rem; display: block;">
                     @php $siteSettings = \App\Models\SiteSetting::getSettings(); @endphp
                     <p class="text-secondary text-sm">{{ $siteSettings['footer_tagline'] ?? 'Founder of Go Esscay Solutions. Passionate about creating impact through technology, automation, and open-source solutions.' }}</p>
                 </div>

@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin') | Gopi K Portfolio</title>
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
     <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('favicon-64.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
@@ -187,7 +189,7 @@
     <aside class="sidebar">
         <div class="sidebar-header">
             <a href="{{ route('home') }}" class="sidebar-brand" title="View Website" target="_blank">
-                <img src="{{ asset('images/gopi-logo-nav.png') }}" alt="Gopi K">
+                <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K" style="height:36px;width:auto;">
             </a>
             <p class="sidebar-role">Admin Panel</p>
         </div>

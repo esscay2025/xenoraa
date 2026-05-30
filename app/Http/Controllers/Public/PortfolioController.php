@@ -27,6 +27,15 @@ class PortfolioController extends Controller
     }
 
     /**
+     * Display the About page.
+     */
+    public function about()
+    {
+        $socialLinks = SocialLink::where('is_active', true)->get();
+        return view('portfolio.about', compact('socialLinks'));
+    }
+
+    /**
      * Display the blog listing page.
      */
     public function blog(Request $request)

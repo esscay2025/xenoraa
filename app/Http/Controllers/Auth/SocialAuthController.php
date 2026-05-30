@@ -17,7 +17,19 @@ class SocialAuthController extends Controller
     public function redirect(string $provider)
     {
         $this->validateProvider($provider);
-        return Socialite::driver($provider)->redirect();
+
+        // Check if credentials are configured
+        if (!$this->hasCredentials($provider)) {
+            return redirect()->route('login')
+                ->with('error', ucfirst($provider) . ' login is not configured yet. Please use email/password to sign in.');
+        }
+
+        try {
+            return Socialite::driver($provider)->redirect();
+        } catch (\Exception $e) {
+            return redirect()->route('login')
+                ->with('error', 'Could not connect to ' . ucfirst($provider) . '. Please try again or use email/password.');
+        }
     }
 
     /**
@@ -59,6 +71,18 @@ class SocialAuthController extends Controller
         }
 
         return redirect()->route('home');
+    }
+
+    /**
+     * Check if OAuth credentials are configured for the provider
+     */
+    private function hasCredentials(string $provider): bool
+    {
+        $clientId = config("services.{$provider}.client_id");
+        return !empty($clientId)
+            && $clientId !== 'your-google-client-id'
+            && $clientId !== 'your-facebook-client-id'
+            && $clientId !== null;
     }
 
     /**
