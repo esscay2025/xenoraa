@@ -5,7 +5,9 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\JobController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Public\PortfolioController;
+use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -31,6 +33,12 @@ Route::post('/jobs/{slug}/apply', [PortfolioController::class, 'applyJob'])->nam
 // AUTHENTICATION ROUTES (Breeze)
 // =============================================
 require __DIR__.'/auth.php';
+
+// =============================================
+// SOCIAL OAUTH ROUTES
+// =============================================
+Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'])->name('social.redirect');
+Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
 
 // =============================================
 // AUTHENTICATED USER PROFILE
@@ -67,6 +75,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::resource('expenses', ExpenseController::class);
     Route::patch('/expenses/{expense}/approve', [ExpenseController::class, 'approve'])->name('expenses.approve');
     Route::patch('/expenses/{expense}/reject', [ExpenseController::class, 'reject'])->name('expenses.reject');
+
+    // Site Settings
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    Route::put('/settings/social/{social}', [SettingsController::class, 'updateSocial'])->name('settings.social.update');
 });
 
 // =============================================

@@ -22,14 +22,31 @@
         }
         * { box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); margin: 0; padding: 0; line-height: 1.6; }
-        .navbar { background-color: rgba(10,10,10,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; padding: 0 2rem; }
+
+        /* ── NAVBAR ── */
+        .navbar { background-color: rgba(10,10,10,0.97); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; padding: 0 2rem; }
         .navbar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
-        .navbar-brand { display: flex; align-items: center; text-decoration: none; }
-        .navbar-brand img { height: 38px; width: auto; display: block; }
-        .navbar-brand span { color: var(--text-secondary); }
+        .navbar-brand { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
+        .navbar-brand img { height: 36px; width: auto; display: block; }
         .navbar-nav { display: flex; align-items: center; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
-        .navbar-nav a { color: var(--text-secondary); text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
+        .navbar-nav a { color: var(--text-secondary); text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; white-space: nowrap; }
         .navbar-nav a:hover, .navbar-nav a.active { color: var(--text-primary); background-color: var(--bg-card); }
+
+        /* ── HAMBURGER BUTTON ── */
+        .navbar-toggler { display: none; background: none; border: 1px solid var(--border-light); border-radius: 6px; color: var(--text-primary); padding: 0.4rem 0.6rem; cursor: pointer; font-size: 1.1rem; line-height: 1; }
+        .navbar-toggler:hover { background-color: var(--bg-card); }
+
+        /* ── MOBILE MENU ── */
+        .mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background-color: rgba(10,10,10,0.98); z-index: 999; padding: 1.5rem 2rem; overflow-y: auto; flex-direction: column; gap: 0.5rem; }
+        .mobile-menu.open { display: flex; }
+        .mobile-menu a, .mobile-menu button { color: var(--text-primary); text-decoration: none; padding: 0.875rem 1rem; border-radius: 8px; font-size: 1rem; font-weight: 500; border: none; background: none; cursor: pointer; text-align: left; width: 100%; display: flex; align-items: center; gap: 0.75rem; transition: background 0.2s; }
+        .mobile-menu a:hover, .mobile-menu button:hover { background-color: var(--bg-card); }
+        .mobile-menu .mobile-divider { border: none; border-top: 1px solid var(--border); margin: 0.5rem 0; }
+        .mobile-menu .mobile-auth { display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); }
+        .mobile-menu .btn-mobile-primary { background-color: var(--text-primary); color: var(--bg-primary); border-radius: 8px; padding: 0.875rem 1rem; font-weight: 600; justify-content: center; }
+        .mobile-menu .btn-mobile-outline { border: 1px solid var(--border-light); border-radius: 8px; padding: 0.875rem 1rem; justify-content: center; }
+
+        /* ── BUTTONS ── */
         .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1.25rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; }
         .btn-primary { background-color: var(--text-primary); color: var(--bg-primary); }
         .btn-primary:hover { background-color: #e0e0e0; color: var(--bg-primary); }
@@ -38,6 +55,8 @@
         .btn-danger { background-color: var(--danger); color: white; }
         .btn-success { background-color: var(--success); color: white; }
         .btn-sm { padding: 0.3rem 0.75rem; font-size: 0.8rem; }
+
+        /* ── COMPONENTS ── */
         .card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; }
         .alert { padding: 0.875rem 1.25rem; border-radius: 8px; margin-bottom: 1rem; font-size: 0.9rem; }
         .alert-success { background-color: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3); color: #86efac; }
@@ -60,11 +79,15 @@
         .table th { text-align: left; padding: 0.75rem 1rem; background-color: var(--bg-secondary); color: var(--text-secondary); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border); }
         .table td { padding: 0.875rem 1rem; border-bottom: 1px solid var(--border); color: var(--text-primary); }
         .table tr:hover td { background-color: var(--bg-hover); }
+
+        /* ── FOOTER ── */
         .footer { background-color: var(--bg-secondary); border-top: 1px solid var(--border); padding: 3rem 2rem; margin-top: 5rem; }
         .footer-inner { max-width: 1200px; margin: 0 auto; }
         .social-links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
         .social-link { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; background-color: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none; font-size: 1rem; transition: all 0.2s; }
         .social-link:hover { background-color: var(--text-primary); color: var(--bg-primary); border-color: var(--text-primary); }
+
+        /* ── UTILITIES ── */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
         .mt-4 { margin-top: 1rem; } .mt-6 { margin-top: 1.5rem; } .mt-8 { margin-top: 2rem; }
         .mb-4 { margin-bottom: 1rem; } .mb-6 { margin-bottom: 1.5rem; } .mb-8 { margin-bottom: 2rem; }
@@ -77,7 +100,15 @@
         .grid-2 { grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
         .grid-3 { grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
         .grid-4 { grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
-        @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } .navbar-nav { display: none; } .container { padding: 0 1rem; } }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .navbar-nav { display: none; }
+            .navbar-toggler { display: block; }
+            .container { padding: 0 1rem; }
+            .navbar { padding: 0 1rem; }
+        }
     </style>
     @stack('styles')
 </head>
@@ -87,6 +118,8 @@
             <a href="{{ route('home') }}" class="navbar-brand" title="Gopi K | Home">
                 <img src="{{ asset('images/gopi-logo-nav.png') }}" alt="Gopi K Logo" loading="eager">
             </a>
+
+            {{-- Desktop Nav --}}
             <ul class="navbar-nav">
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
                 <li><a href="{{ route('blog') }}" class="{{ request()->routeIs('blog*') ? 'active' : '' }}">Blog</a></li>
@@ -108,21 +141,71 @@
                     <li><a href="{{ route('register') }}" class="btn btn-primary btn-sm">Sign Up</a></li>
                 @endauth
             </ul>
+
+            {{-- Mobile Hamburger --}}
+            <button class="navbar-toggler" id="navToggler" aria-label="Toggle navigation" aria-expanded="false">
+                <i class="fas fa-bars" id="navIcon"></i>
+            </button>
         </div>
     </nav>
+
+    {{-- Mobile Slide-down Menu --}}
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">
+            <i class="fas fa-home" style="width:20px;"></i> Home
+        </a>
+        <a href="{{ route('blog') }}" class="{{ request()->routeIs('blog*') ? 'active' : '' }}">
+            <i class="fas fa-pen-nib" style="width:20px;"></i> Blog
+        </a>
+        <a href="{{ route('jobs') }}" class="{{ request()->routeIs('jobs*') ? 'active' : '' }}">
+            <i class="fas fa-briefcase" style="width:20px;"></i> Jobs
+        </a>
+        @auth
+            @if(auth()->user()->isAdmin())
+                <a href="{{ route('admin.dashboard') }}">
+                    <i class="fas fa-tachometer-alt" style="width:20px;"></i> Admin Dashboard
+                </a>
+            @elseif(auth()->user()->isStaff())
+                <a href="{{ route('staff.dashboard') }}">
+                    <i class="fas fa-user-tie" style="width:20px;"></i> Staff Panel
+                </a>
+            @endif
+            <hr class="mobile-divider">
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" style="color:#fca5a5;">
+                    <i class="fas fa-sign-out-alt" style="width:20px;"></i> Sign Out
+                </button>
+            </form>
+        @else
+            <hr class="mobile-divider">
+            <div class="mobile-auth">
+                <a href="{{ route('login') }}" class="btn-mobile-outline">
+                    <i class="fas fa-sign-in-alt" style="width:20px;"></i> Sign In
+                </a>
+                <a href="{{ route('register') }}" class="btn-mobile-primary">
+                    <i class="fas fa-user-plus" style="width:20px;"></i> Sign Up
+                </a>
+            </div>
+        @endauth
+    </div>
+
     @if(session('success'))
         <div class="container mt-4"><div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div></div>
     @endif
     @if(session('error'))
         <div class="container mt-4"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> {{ session('error') }}</div></div>
     @endif
+
     <main>@yield('content')</main>
+
     <footer class="footer">
         <div class="footer-inner">
             <div class="grid-3" style="margin-bottom: 2rem;">
                 <div>
-                    <img src="{{ asset('images/gopi-logo-nav.png') }}" alt="Gopi K" style="height: 48px; width: auto; margin-bottom: 0.75rem; display: block;">
-                    <p class="text-secondary text-sm">Founder of Go Esscay Solutions. Passionate about creating impact through technology, automation, and open-source solutions.</p>
+                    <img src="{{ asset('images/gopi-logo-nav.png') }}" alt="Gopi K" style="height: 44px; width: auto; margin-bottom: 0.75rem; display: block; background:#000; padding:4px 8px; border-radius:6px;">
+                    @php $siteSettings = \App\Models\SiteSetting::getSettings(); @endphp
+                    <p class="text-secondary text-sm">{{ $siteSettings['footer_tagline'] ?? 'Founder of Go Esscay Solutions. Passionate about creating impact through technology, automation, and open-source solutions.' }}</p>
                 </div>
                 <div>
                     <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Quick Links</h4>
@@ -143,17 +226,50 @@
                         @endforeach
                     </div>
                     <p class="text-sm text-muted" style="margin-top: 1rem;">
-                        <i class="fas fa-phone" style="margin-right: 0.4rem;"></i>+91-95500 33333<br>
-                        <i class="fas fa-globe" style="margin-right: 0.4rem;"></i>www.esscay.com
+                        @if(!empty($siteSettings['contact_phone']))<i class="fas fa-phone" style="margin-right: 0.4rem;"></i>{{ $siteSettings['contact_phone'] }}<br>@endif
+                        @if(!empty($siteSettings['contact_website']))<i class="fas fa-globe" style="margin-right: 0.4rem;"></i>{{ $siteSettings['contact_website'] }}@endif
                     </p>
                 </div>
             </div>
             <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                <p class="text-muted text-sm">&copy; {{ date('Y') }} Gopi K &mdash; Go Esscay Solutions. All rights reserved.</p>
-                <p class="text-muted text-sm">Greater Chennai Area, India</p>
+                <p class="text-muted text-sm">&copy; {{ date('Y') }} {{ $siteSettings['owner_name'] ?? 'Gopi K' }} &mdash; {{ $siteSettings['company_name'] ?? 'Go Esscay Solutions' }}. All rights reserved.</p>
+                <p class="text-muted text-sm">{{ $siteSettings['location'] ?? 'Greater Chennai Area, India' }}</p>
             </div>
         </div>
     </footer>
+
     @stack('scripts')
+    <script>
+        // Mobile menu toggle
+        const toggler = document.getElementById('navToggler');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const navIcon = document.getElementById('navIcon');
+
+        toggler.addEventListener('click', function() {
+            const isOpen = mobileMenu.classList.toggle('open');
+            navIcon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
+            toggler.setAttribute('aria-expanded', isOpen);
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = isOpen ? 'hidden' : '';
+        });
+
+        // Close mobile menu when a link is clicked
+        mobileMenu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('open');
+                navIcon.className = 'fas fa-bars';
+                document.body.style.overflow = '';
+            });
+        });
+
+        // Close on resize to desktop
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                mobileMenu.classList.remove('open');
+                navIcon.className = 'fas fa-bars';
+                document.body.style.overflow = '';
+            }
+        });
+    </script>
 </body>
 </html>

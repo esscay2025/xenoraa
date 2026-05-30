@@ -32,3 +32,4 @@ return [
     ],
 
 ];
+// This file already has the closing array bracket, so we need to add before it

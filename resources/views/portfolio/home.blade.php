@@ -1,7 +1,11 @@
 @extends('layouts.app')
 
-@section('title', 'Gopi K | Founder of Go Esscay Solutions')
-@section('description', 'Personal portfolio of Gopi K - Founder of Go Esscay Solutions. IT, Automation & Open-Source Expert based in Greater Chennai Area.')
+@php
+    $siteSettings = \App\Models\SiteSetting::getSettings();
+@endphp
+
+@section('title', ($siteSettings['owner_name'] ?? 'Gopi K') . ' | Founder of ' . ($siteSettings['company_name'] ?? 'Go Esscay Solutions'))
+@section('description', 'Personal portfolio of ' . ($siteSettings['owner_name'] ?? 'Gopi K') . ' - Founder of ' . ($siteSettings['company_name'] ?? 'Go Esscay Solutions') . '. IT, Automation & Open-Source Expert.')
 
 @push('styles')
 <style>
@@ -99,85 +103,31 @@
     .hero-avatar:hover img {
         transform: scale(1.04);
     }
-    .hero-avatar::after {
-        content: '';
-        position: absolute;
-        inset: -10px;
-        border-radius: 50%;
-        border: 1px dashed rgba(255,255,255,0.12);
-        pointer-events: none;
-    }
-    .section { padding: 5rem 2rem; }
-    .section-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        letter-spacing: -0.5px;
-    }
-    .section-subtitle { color: var(--text-secondary); margin-bottom: 3rem; }
+    .section { padding: 6rem 2rem; }
+    .section-title { font-size: 2.25rem; font-weight: 800; margin: 0 0 2.5rem; letter-spacing: -0.5px; }
+    .stat-card { background-color: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 2rem; text-align: center; }
+    .stat-number { font-size: 3rem; font-weight: 800; line-height: 1; margin-bottom: 0.5rem; }
+    .stat-label { font-size: 0.875rem; color: var(--text-secondary); font-weight: 500; }
     .skills-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-    .skill-tag {
-        padding: 0.5rem 1rem;
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-        transition: all 0.2s;
-    }
-    .skill-tag:hover { border-color: #555; color: var(--text-primary); }
-    .experience-item {
-        display: flex;
-        gap: 1.5rem;
-        padding: 1.5rem 0;
-        border-bottom: 1px solid var(--border);
-    }
-    .experience-item:last-child { border-bottom: none; }
-    .exp-dot {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: var(--text-primary);
-        margin-top: 0.4rem;
-        flex-shrink: 0;
-    }
-    .blog-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        overflow: hidden;
-        transition: all 0.2s;
-        text-decoration: none;
-        color: inherit;
-        display: block;
-    }
-    .blog-card:hover { border-color: #444; transform: translateY(-2px); }
-    .blog-card-body { padding: 1.25rem; }
-    .blog-card-title { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
-    .blog-card-summary { font-size: 0.875rem; color: var(--text-secondary); }
-    .job-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 1.25rem;
-        transition: all 0.2s;
-        text-decoration: none;
-        color: inherit;
-        display: block;
-    }
-    .job-card:hover { border-color: #444; }
-    .stat-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 1.5rem;
-        text-align: center;
-    }
-    .stat-number { font-size: 2.5rem; font-weight: 800; }
-    .stat-label { color: var(--text-secondary); font-size: 0.875rem; }
-    @media (max-width: 768px) {
-        .hero-inner { grid-template-columns: 1fr; gap: 2rem; }
-        .hero h1 { font-size: 2.5rem; }
+    .skill-tag { background-color: var(--bg-card); border: 1px solid var(--border); color: var(--text-primary); padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.875rem; font-weight: 500; }
+    .experience-item { display: flex; gap: 2rem; position: relative; padding-bottom: 2.5rem; }
+    .experience-item:last-child { padding-bottom: 0; }
+    .experience-item::before { content: ''; position: absolute; left: 15px; top: 24px; bottom: 0; width: 2px; background-color: var(--border); }
+    .experience-item:last-child::before { display: none; }
+    .exp-dot { width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-primary); border: 2px solid var(--text-primary); display: flex; align-items: center; justify-content: center; font-size: 0.875rem; z-index: 1; flex-shrink: 0; }
+    .blog-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: transform 0.2s; display: flex; flex-direction: column; height: 100%; text-decoration: none; color: inherit; }
+    .blog-card:hover { transform: translateY(-4px); }
+    .blog-card-img { height: 200px; background-color: var(--bg-secondary); background-size: cover; background-position: center; border-bottom: 1px solid var(--border); }
+    .blog-card-content { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
+    .blog-card-date { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+    .blog-card-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem; line-height: 1.3; }
+    .blog-card-excerpt { font-size: 0.9rem; color: var(--text-secondary); margin: 0; flex: 1; }
+    @media (max-width: 992px) {
+        .hero-inner { grid-template-columns: 1fr; gap: 3rem; text-align: center; }
+        .hero h1 { font-size: 2.75rem; }
+        .hero p { margin: 0 auto 2rem; }
+        .hero-actions { justify-content: center; }
+        .hero-avatar { width: 280px; height: 380px; }
         .hero-image { display: none; }
     }
 </style>
@@ -190,8 +140,8 @@
     <div class="hero-inner">
         <div>
             <div class="hero-badge">Available for Projects</div>
-            <h1>Hi, I'm <span>Gopi K</span><br>Founder & Tech<br>Entrepreneur</h1>
-            <p>Founder of Go Esscay Solutions. Passionate about creating impact in society through IT, automation, and open-source technologies. Turning ideas into reality.</p>
+            <h1>{!! nl2br(e($siteSettings['hero_title'] ?? "Hi, I'm Gopi K")) !!}<br><span>{{ $siteSettings['hero_subtitle'] ?? 'Founder & Tech Entrepreneur' }}</span></h1>
+            <p>{{ $siteSettings['hero_description'] ?? 'Founder of Go Esscay Solutions. Passionate about creating impact in society through IT, automation, and open-source technologies. Turning ideas into reality.' }}</p>
             <div class="hero-actions">
                 <a href="{{ route('blog') }}" class="btn btn-primary">
                     <i class="fas fa-pen-nib"></i> Read My Blog
@@ -246,20 +196,20 @@
         <div class="grid-2" style="align-items: start;">
             <div>
                 <p class="text-sm text-secondary" style="text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">About Me</p>
-                <h2 class="section-title">Turning Ideas Into Reality</h2>
+                <h2 class="section-title">{{ $siteSettings['about_title'] ?? 'Turning Ideas Into Reality' }}</h2>
                 <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-                    I am the Founder of <strong style="color: white;">Go Esscay Solutions</strong>, a company dedicated to helping startups and small businesses implement IT, automation, and open-source applications to run their operations smarter, faster, and more efficiently.
+                    {{ $siteSettings['about_text_1'] ?? 'I am the Founder of Go Esscay Solutions, a company dedicated to helping startups and small businesses implement IT, automation, and open-source applications to run their operations smarter, faster, and more efficiently.' }}
                 </p>
                 <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-                    Based in Greater Chennai Area, I am passionate about making technology <strong style="color: white;">simple, affordable, and accessible</strong> for every business. My mission is to bridge the gap between complex technology and everyday business needs.
+                    {{ $siteSettings['about_text_2'] ?? 'Based in Greater Chennai Area, I am passionate about making technology simple, affordable, and accessible for every business. My mission is to bridge the gap between complex technology and everyday business needs.' }}
                 </p>
                 <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
                     <div style="text-align: center; padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; min-width: 100px;">
-                        <div style="font-size: 1.5rem; font-weight: 700;">Chennai</div>
+                        <div style="font-size: 1.25rem; font-weight: 700;">{{ $siteSettings['location'] ?? 'Chennai' }}</div>
                         <div class="text-sm text-muted">Location</div>
                     </div>
                     <div style="text-align: center; padding: 1rem; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; min-width: 100px;">
-                        <div style="font-size: 1.5rem; font-weight: 700;">2025</div>
+                        <div style="font-size: 1.25rem; font-weight: 700;">{{ $siteSettings['founded_year'] ?? '2025' }}</div>
                         <div class="text-sm text-muted">Founded</div>
                     </div>
                 </div>
@@ -298,105 +248,48 @@
                 <div style="flex: 1;">
                     <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 0.5rem;">
                         <div>
-                            <h3 style="font-size: 1.1rem; font-weight: 600; margin: 0 0 0.25rem;">{{ $exp->role }}</h3>
-                            <p style="color: var(--text-secondary); margin: 0 0 0.5rem; font-size: 0.9rem;">{{ $exp->company_name }}</p>
+                            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0;">{{ $exp->title }}</h3>
+                            <div style="font-size: 0.95rem; color: var(--text-secondary); margin-top: 0.25rem;">{{ $exp->company }}</div>
                         </div>
-                        <div style="text-align: right;">
-                            <span class="text-sm text-muted">{{ $exp->start_date->format('M Y') }} &mdash; {{ $exp->is_current ? 'Present' : $exp->end_date->format('M Y') }}</span>
-                            @if($exp->is_current)
-                                <span class="badge badge-success" style="display: block; margin-top: 0.25rem;">Current</span>
-                            @endif
+                        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
+                            {{ $exp->start_date->format('M Y') }} &mdash; {{ $exp->is_current ? 'Present' : $exp->end_date->format('M Y') }}
                         </div>
                     </div>
-                    @if($exp->description)
-                    <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">{{ $exp->description }}</p>
-                    @endif
+                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 1rem; line-height: 1.6;">
+                        {{ $exp->description }}
+                    </p>
                 </div>
             </div>
             @empty
-            <p class="text-secondary">No experience listed yet.</p>
+            <p class="text-muted">No experience history found.</p>
             @endforelse
         </div>
     </div>
 </section>
 
-<!-- Recent Blog Posts -->
-@if($recentPosts->count() > 0)
+<!-- Blog Section -->
 <section class="section" style="background-color: var(--bg-secondary);">
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem;">
             <div>
                 <p class="text-sm text-secondary" style="text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Writing</p>
-                <h2 class="section-title" style="margin-bottom: 0;">Latest Blog Posts</h2>
+                <h2 class="section-title" style="margin: 0;">Latest Blog Posts</h2>
             </div>
-            <a href="{{ route('blog') }}" class="btn btn-outline btn-sm">View All <i class="fas fa-arrow-right"></i></a>
+            <a href="{{ route('blog') }}" class="btn btn-outline btn-sm">View All</a>
         </div>
         <div class="grid-3">
-            @foreach($recentPosts as $post)
+            @forelse($recentPosts as $post)
             <a href="{{ route('blog.show', $post->slug) }}" class="blog-card">
-                @if($post->featured_image)
-                <img src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}" style="width: 100%; height: 180px; object-fit: cover;">
-                @else
-                <div style="width: 100%; height: 180px; background: linear-gradient(135deg, #1a1a1a, #2a2a2a); display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-pen-nib" style="font-size: 2rem; color: var(--text-muted);"></i>
-                </div>
-                @endif
-                <div class="blog-card-body">
-                    @if($post->category)
-                    <span class="badge badge-secondary" style="margin-bottom: 0.5rem;">{{ $post->category->name }}</span>
-                    @endif
+                <div class="blog-card-img" style="background-image: url('{{ $post->featured_image ? Storage::url($post->featured_image) : asset('images/blog-placeholder.png') }}')"></div>
+                <div class="blog-card-content">
+                    <div class="blog-card-date">{{ $post->published_at->format('M d, Y') }}</div>
                     <h3 class="blog-card-title">{{ $post->title }}</h3>
-                    <p class="blog-card-summary">{{ Str::limit($post->summary ?? strip_tags($post->content), 100) }}</p>
-                    <p class="text-xs text-muted" style="margin-top: 0.75rem;">{{ $post->published_at?->format('M d, Y') }}</p>
+                    <p class="blog-card-excerpt">{{ Str::limit($post->summary, 100) }}</p>
                 </div>
             </a>
-            @endforeach
-        </div>
-    </div>
-</section>
-@endif
-
-<!-- Active Jobs -->
-@if($activeJobs->count() > 0)
-<section class="section">
-    <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <div>
-                <p class="text-sm text-secondary" style="text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Hiring</p>
-                <h2 class="section-title" style="margin-bottom: 0;">Open Positions</h2>
-            </div>
-            <a href="{{ route('jobs') }}" class="btn btn-outline btn-sm">View All <i class="fas fa-arrow-right"></i></a>
-        </div>
-        <div class="grid-3">
-            @foreach($activeJobs as $job)
-            <a href="{{ route('jobs.show', $job->slug) }}" class="job-card">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.75rem;">
-                    <h3 style="font-size: 1rem; font-weight: 600; margin: 0;">{{ $job->title }}</h3>
-                    <span class="badge badge-success">Active</span>
-                </div>
-                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
-                    <span class="text-sm text-secondary"><i class="fas fa-map-marker-alt"></i> {{ $job->location }}</span>
-                    <span class="text-sm text-secondary"><i class="fas fa-clock"></i> {{ $job->type }}</span>
-                </div>
-                @if($job->salary_range)
-                <p class="text-sm text-muted">{{ $job->salary_range }}</p>
-                @endif
-                <p class="text-sm" style="color: var(--info); margin-top: 0.5rem;">Apply Now <i class="fas fa-arrow-right"></i></p>
-            </a>
-            @endforeach
-        </div>
-    </div>
-</section>
-@endif
-
-<!-- CTA Section -->
-<section class="section" style="background-color: var(--bg-secondary); text-align: center;">
-    <div class="container" style="max-width: 600px;">
-        <h2 style="font-size: 2rem; font-weight: 700; margin-bottom: 1rem;">Let's Work Together</h2>
-        <p style="color: var(--text-secondary); margin-bottom: 2rem;">Whether you need IT consulting, automation solutions, or want to explore open-source opportunities for your business, I'm here to help.</p>
-        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-            <a href="mailto:gopi@esscay.com" class="btn btn-primary"><i class="fas fa-envelope"></i> Get In Touch</a>
-            <a href="{{ route('jobs') }}" class="btn btn-outline"><i class="fas fa-briefcase"></i> View Opportunities</a>
+            @empty
+            <p class="text-muted">No blog posts found.</p>
+            @endforelse
         </div>
     </div>
 </section>

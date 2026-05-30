@@ -234,6 +234,9 @@
             </a>
 
             <p class="sidebar-section-label" style="margin-top: 0.75rem;">Site</p>
+            <a href="{{ route('admin.settings.index') }}" class="sidebar-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
+                <i class="fas fa-cog"></i> Site Settings
+            </a>
             <a href="{{ route('home') }}" class="sidebar-link" target="_blank">
                 <i class="fas fa-external-link-alt"></i> View Website
             </a>
