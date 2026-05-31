@@ -12,7 +12,7 @@ class SettingsController extends Controller
     public function index()
     {
         $settings = SiteSetting::getSettings();
-        $socialLinks = SocialLink::orderBy('order')->get();
+        $socialLinks = SocialLink::orderBy('sort_order')->get();
         return view('admin.settings.index', compact('settings', 'socialLinks'));
     }
 
