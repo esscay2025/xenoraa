@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\JobController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Public\PortfolioController;
+use App\Http\Controllers\Public\NewsletterController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -34,6 +35,12 @@ Route::post('/jobs/{slug}/apply', [PortfolioController::class, 'applyJob'])->nam
 // AUTHENTICATION ROUTES (Breeze)
 // =============================================
 require __DIR__.'/auth.php';
+
+// =============================================
+// NEWSLETTER ROUTES
+// =============================================
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::get('/newsletter/unsubscribe/{token}', [NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
 // =============================================
 // SOCIAL OAUTH ROUTES

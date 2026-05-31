@@ -753,4 +753,8 @@
     </div>
 </section>
 
+<div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem 3rem;">
+    <x-newsletter-subscribe variant="hero" />
+</div>
+
 @endsection

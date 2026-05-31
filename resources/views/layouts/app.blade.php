@@ -202,12 +202,15 @@
     @if(session('error'))
         <div class="container mt-4"><div class="alert alert-error"><i class="fas fa-exclamation-circle"></i> {{ session('error') }}</div></div>
     @endif
+    @if(session('newsletter_success'))
+        <div class="container mt-4"><div class="alert alert-success"><i class="fas fa-check-circle"></i> {{ session('newsletter_success') }}</div></div>
+    @endif
 
     <main>@yield('content')</main>
 
     <footer class="footer">
         <div class="footer-inner">
-            <div class="grid-3" style="margin-bottom: 2rem;">
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1.6fr; gap: 2rem; margin-bottom: 2rem;">
                 <div>
                     <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K" style="height: 44px; width: auto; margin-bottom: 0.75rem; display: block;">
                     @php $siteSettings = \App\Models\SiteSetting::getSettings(); @endphp
@@ -217,6 +220,7 @@
                     <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Quick Links</h4>
                     <div style="display: flex; flex-direction: column; gap: 0.4rem;">
                         <a href="{{ route('home') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">Home</a>
+                        <a href="{{ route('about') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">About</a>
                         <a href="{{ route('blog') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">Blog</a>
                         <a href="{{ route('jobs') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">Jobs</a>
                     </div>
@@ -235,6 +239,9 @@
                         @if(!empty($siteSettings['contact_phone']))<i class="fas fa-phone" style="margin-right: 0.4rem;"></i>{{ $siteSettings['contact_phone'] }}<br>@endif
                         @if(!empty($siteSettings['contact_website']))<i class="fas fa-globe" style="margin-right: 0.4rem;"></i>{{ $siteSettings['contact_website'] }}@endif
                     </p>
+                </div>
+                <div>
+                    <x-newsletter-subscribe variant="compact" />
                 </div>
             </div>
             <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">

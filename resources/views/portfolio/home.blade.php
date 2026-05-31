@@ -301,4 +301,8 @@
     </div>
 </section>
 
+<div class="container">
+    <x-newsletter-subscribe variant="hero" />
+</div>
+
 @endsection
