@@ -1,103 +1,80 @@
-# Gopi K — Personal Portfolio Application
+# Gopi K — Portfolio & Blog System
 
-A comprehensive personal portfolio web application built with **Laravel (PHP)** and **MySQL**, featuring a blog, job portal, expense manager, and role-based user management. Designed with a sleek **black/white theme** (70% black, 30% white) and built for continuous enhancement including future mobile app (Android/iOS) integration.
+Welcome to the repository for **gopi.blog**, the professional portfolio, blog, and job listing system of Gopi K (Founder & Tech Entrepreneur, Go Esscay Solutions).
 
----
-
-## Tech Stack
-
-| Layer | Technology |
-|---|---|
-| Backend Framework | PHP 8.1+ with Laravel 10 |
-| Database | MySQL (phpMyAdmin compatible) / SQLite (local dev) |
-| Frontend | Blade Templates, Tailwind CSS, Vite |
-| Authentication | Laravel Breeze |
-| File Storage | Laravel Storage (local/S3 ready) |
-| API | Laravel Sanctum (mobile app ready) |
-| CI/CD | GitHub Actions |
+Built on **Laravel 10**, **Blade**, **Tailwind CSS**, and **MySQL**, this system serves as Gopi's central hub for business consulting, professional writing, and enterprise automation insights.
 
 ---
 
-## Modules
+## 🚀 Key Features & Modules
 
-- **Public Portfolio** — Hero, skills, experience, blog, jobs
-- **Blog** — Create/manage posts, visitor comments & reviews
-- **Job Portal** — Post jobs, manage applications, resume uploads
-- **Expense Manager** — Personal & business expense tracking with approval workflow
-- **User Management** — RBAC with Admin, Staff, and Visitor roles
-
----
-
-## User Roles
-
-| Role | Access |
-|---|---|
-| **Admin** | Full access to all modules and user management |
-| **Staff** | Expense Manager (own expenses), Blog/Jobs (read) |
-| **Visitor** | Blog (read + comment), Jobs (read + apply) |
+* **Public Portfolio:** Sleek, modern black/white themed portfolio showcasing Gopi's 14+ year journey, skills, and career timeline.
+* **Writing & Blog System:** Interactive blog platform covering enterprise architecture, business automation, AI, and ethical hacking.
+* **Newsletter Subscription:** Fully-integrated email subscription system on the Homepage, About page, and Footer to keep subscribers updated.
+* **Social Login (OAuth):** Seamless registration and login using Google and Facebook accounts.
+* **Job Board:** View open roles and consulting opportunities at Go Esscay Solutions, with resume upload and application tracking.
+* **Expense Manager:** Personal and business expense tracking with built-in approval workflows.
+* **User Management:** Role-Based Access Control (RBAC) supporting Admin, Staff, and Visitor roles.
+* **API Integration:** Ready for future mobile app (Android/iOS) integration via Laravel Sanctum.
 
 ---
 
-## Default Admin Credentials
+## 🛠️ Tech Stack
 
-```
-Email:    gopi@outlook.in
-Password: @biSou20717
-```
-
-> **Change this password immediately after first login in production.**
+* **Backend:** PHP 8.2+ / Laravel 10
+* **Frontend:** Blade Templates, Alpine.js, Tailwind CSS, Vite
+* **Database:** MySQL 8.0+
+* **Authentication:** Laravel Breeze & Socialite (Google, Facebook)
+* **Hosting:** Hostinger VPS / Ubuntu Linux / Nginx
 
 ---
 
-## Installation
+## 📖 Developer Documentation
+
+We have compiled comprehensive guides to help you set up, develop, and deploy this project:
+
+* **[Developer Setup & Deployment Guide (docs/DEVELOPMENT_GUIDE.md)](docs/DEVELOPMENT_GUIDE.md):** Step-by-step instructions on setting up your local environment, git branching strategy, manual deployment, and database migrations.
+* **[Production Deployment Guide (docs/DEPLOYMENT.md)](docs/DEPLOYMENT.md):** Hostinger-specific deployment steps, directory structure setups, and symlink configurations.
+* **[CI/CD Workflow (docs/ci-cd-workflow.yml)](docs/ci-cd-workflow.yml):** Configuration template for automated testing, staging deployment, and production release pipelines via GitHub Actions.
+
+---
+
+## ⚡ Quick Start (Local Development)
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/gopi-portfolio.git
+# 1. Clone the repository
+git clone https://github.com/esscay2025/gopi-portfolio.git
 cd gopi-portfolio
+
+# 2. Install dependencies
 composer install
 npm install
+
+# 3. Setup environment variables
 cp .env.example .env
 php artisan key:generate
-# Configure DB in .env, then:
+
+# 4. Run migrations & seed data
 php artisan migrate --seed
 php artisan storage:link
-npm run build
+
+# 5. Run development servers
 php artisan serve
+npm run dev
 ```
 
----
-
-## MySQL Setup
-
-```sql
-CREATE DATABASE gopi_portfolio CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'gopi_user'@'localhost' IDENTIFIED BY 'your_secure_password';
-GRANT ALL PRIVILEGES ON gopi_portfolio.* TO 'gopi_user'@'localhost';
-FLUSH PRIVILEGES;
-```
+Visit [http://localhost:8000](http://localhost:8000) to view the site locally.
 
 ---
 
-## CI/CD Pipeline
+## 🔑 Default Admin Credentials
 
-GitHub Actions runs on every push to `main` or `develop`:
-1. **Code Quality** — PHP syntax checking
-2. **Tests** — PHPUnit with MySQL service
-3. **Deploy Staging** — Triggered on `develop` branch
-4. **Deploy Production** — Triggered on `main` branch
+* **Email:** `gopi@outlook.in`
+* **Password:** `Admin@2025!` *(Change this password immediately after first login in production)*
 
 ---
 
-## Mobile App (Future Phase)
+## 🔒 License & Ownership
 
-Built API-ready with Laravel Sanctum. Future mobile app endpoints:
-- `GET /api/posts` — Blog posts
-- `GET /api/jobs` — Job listings
-- `POST /api/jobs/{slug}/apply` — Job applications
-- `POST /api/auth/login` — Authentication
-
----
-
-## License
-
-Private — All rights reserved by Gopi K / Go Esscay Solutions.
+Copyright © 2026 Gopi K — Go Esscay Solutions. All rights reserved.
+This repository is private and proprietary. Unauthorized copying, distribution, or use is strictly prohibited.
