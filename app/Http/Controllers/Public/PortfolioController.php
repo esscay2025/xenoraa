@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
+use App\Models\BlogCategory;
 use App\Models\BlogComment;
 use App\Models\BlogPost;
 use App\Models\Job;
@@ -20,10 +21,35 @@ class PortfolioController extends Controller
     {
         $experiences = PortfolioExperience::orderBy('start_date', 'desc')->get();
         $socialLinks = SocialLink::where('is_active', true)->get();
-        $recentPosts = BlogPost::where('status', 'published')->orderBy('published_at', 'desc')->take(3)->get();
         $activeJobs = Job::where('status', 'active')->orderBy('created_at', 'desc')->take(3)->get();
 
-        return view('portfolio.home', compact('experiences', 'socialLinks', 'recentPosts', 'activeJobs'));
+        // Category-grouped blog posts for homepage
+        $blogCategories = BlogCategory::withCount(['posts' => fn($q) => $q->where('status', 'published')])
+            ->having('posts_count', '>', 0)
+            ->get();
+
+        $categoryPosts = [];
+        foreach ($blogCategories as $cat) {
+            $categoryPosts[$cat->slug] = [
+                'category' => $cat,
+                'posts'    => BlogPost::with('category')
+                    ->where('status', 'published')
+                    ->where('category_id', $cat->id)
+                    ->orderBy('published_at', 'desc')
+                    ->take(3)
+                    ->get(),
+            ];
+        }
+
+        // Featured post (most viewed)
+        $featuredPost = BlogPost::where('status', 'published')
+            ->orderBy('views_count', 'desc')
+            ->first();
+
+        return view('portfolio.home', compact(
+            'experiences', 'socialLinks', 'activeJobs',
+            'blogCategories', 'categoryPosts', 'featuredPost'
+        ));
     }
 
     /**

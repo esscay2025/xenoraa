@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Public\PortfolioController;
 use App\Http\Controllers\Public\NewsletterController;
+use App\Http\Controllers\Public\CalendarController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -32,9 +33,26 @@ Route::get('/jobs/{slug}', [PortfolioController::class, 'jobShow'])->name('jobs.
 Route::post('/jobs/{slug}/apply', [PortfolioController::class, 'applyJob'])->name('jobs.apply');
 
 // =============================================
+// SOLUTIONS ROUTES
+// =============================================
+require __DIR__.'/solutions.php';
+
+// =============================================
 // AUTHENTICATION ROUTES (Breeze)
 // =============================================
 require __DIR__.'/auth.php';
+
+// =============================================
+// CALENDAR & NOTES MODULE (accessible to all)
+// =============================================
+Route::get('/calendar', [CalendarController::class, 'index'])->name('calendar.index');
+Route::post('/calendar/events', [CalendarController::class, 'storeEvent'])->name('calendar.events.store');
+Route::put('/calendar/events/{event}', [CalendarController::class, 'updateEvent'])->name('calendar.events.update');
+Route::delete('/calendar/events/{event}', [CalendarController::class, 'destroyEvent'])->name('calendar.events.destroy');
+Route::post('/calendar/notes', [CalendarController::class, 'storeNote'])->name('calendar.notes.store');
+Route::put('/calendar/notes/{note}', [CalendarController::class, 'updateNote'])->name('calendar.notes.update');
+Route::delete('/calendar/notes/{note}', [CalendarController::class, 'destroyNote'])->name('calendar.notes.destroy');
+Route::patch('/calendar/notes/{note}/pin', [CalendarController::class, 'togglePin'])->name('calendar.notes.pin');
 
 // =============================================
 // NEWSLETTER ROUTES

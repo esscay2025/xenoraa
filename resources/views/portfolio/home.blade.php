@@ -115,13 +115,35 @@
     .experience-item::before { content: ''; position: absolute; left: 15px; top: 24px; bottom: 0; width: 2px; background-color: var(--border); }
     .experience-item:last-child::before { display: none; }
     .exp-dot { width: 32px; height: 32px; border-radius: 50%; background-color: var(--bg-primary); border: 2px solid var(--text-primary); display: flex; align-items: center; justify-content: center; font-size: 0.875rem; z-index: 1; flex-shrink: 0; }
-    .blog-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: transform 0.2s; display: flex; flex-direction: column; height: 100%; text-decoration: none; color: inherit; }
-    .blog-card:hover { transform: translateY(-4px); }
-    .blog-card-img { height: 200px; background-color: var(--bg-secondary); background-size: cover; background-position: center; border-bottom: 1px solid var(--border); }
-    .blog-card-content { padding: 1.5rem; flex: 1; display: flex; flex-direction: column; }
-    .blog-card-date { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; }
-    .blog-card-title { font-size: 1.25rem; font-weight: 700; margin: 0 0 0.75rem; line-height: 1.3; }
-    .blog-card-excerpt { font-size: 0.9rem; color: var(--text-secondary); margin: 0; flex: 1; }
+    /* ── Blog Section ── */
+    .blog-section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .blog-tabs { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem; }
+    .blog-tab { padding: 0.45rem 1rem; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--text-secondary); font-size: 0.82rem; font-weight: 500; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+    .blog-tab:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .blog-tab.active { background: var(--text-primary); color: var(--bg-primary); border-color: var(--text-primary); }
+    .blog-category-panel { display: none; }
+    .blog-category-panel.active { display: block; }
+    .blog-grid-home { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; }
+    @media (max-width: 900px) { .blog-grid-home { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 600px) { .blog-grid-home { grid-template-columns: 1fr; } }
+    .blog-card { background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; height: 100%; text-decoration: none; color: inherit; }
+    .blog-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+    .blog-card-img { height: 180px; background-color: var(--bg-secondary); background-size: cover; background-position: center; border-bottom: 1px solid var(--border); position: relative; }
+    .blog-card-cat-badge { position: absolute; top: 0.75rem; left: 0.75rem; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .blog-card-content { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
+    .blog-card-meta { display: flex; align-items: center; gap: 0.75rem; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.6rem; }
+    .blog-card-title { font-size: 1rem; font-weight: 700; margin: 0 0 0.5rem; line-height: 1.4; }
+    .blog-card-excerpt { font-size: 0.85rem; color: var(--text-secondary); margin: 0; flex: 1; line-height: 1.6; }
+    .blog-card-footer { margin-top: 1rem; display: flex; align-items: center; justify-content: space-between; }
+    .blog-read-more { font-size: 0.8rem; color: var(--text-primary); font-weight: 600; display: flex; align-items: center; gap: 0.3rem; }
+    .blog-featured { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; display: grid; grid-template-columns: 1fr 1fr; margin-bottom: 2rem; text-decoration: none; color: inherit; transition: box-shadow 0.2s; }
+    .blog-featured:hover { box-shadow: 0 8px 40px rgba(0,0,0,0.4); }
+    .blog-featured-img { min-height: 280px; background-size: cover; background-position: center; background-color: var(--bg-secondary); }
+    .blog-featured-content { padding: 2rem; display: flex; flex-direction: column; justify-content: center; }
+    .blog-featured-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 0.75rem; }
+    .blog-featured-title { font-size: 1.5rem; font-weight: 800; line-height: 1.3; margin: 0 0 1rem; }
+    .blog-featured-excerpt { font-size: 0.9rem; color: var(--text-secondary); line-height: 1.7; margin: 0 0 1.5rem; }
+    @media (max-width: 700px) { .blog-featured { grid-template-columns: 1fr; } .blog-featured-img { min-height: 200px; } }
     @media (max-width: 992px) {
         .hero-inner { grid-template-columns: 1fr; gap: 3rem; text-align: center; }
         .hero h1 { font-size: 2.75rem; }
@@ -274,32 +296,99 @@
     </div>
 </section>
 
-<!-- Blog Section -->
+<!-- Blog Section (Category-Based) -->
 <section class="section" style="background-color: var(--bg-secondary);">
     <div class="container">
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2.5rem;">
+        <div class="blog-section-header">
             <div>
-                <p class="text-sm text-secondary" style="text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Writing</p>
-                <h2 class="section-title" style="margin: 0;">Latest Blog Posts</h2>
+                <p class="text-sm text-secondary" style="text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Knowledge Hub</p>
+                <h2 class="section-title" style="margin: 0;">Explore by Category</h2>
             </div>
-            <a href="{{ route('blog') }}" class="btn btn-outline btn-sm">View All</a>
+            <a href="{{ route('blog') }}" class="btn btn-outline btn-sm"><i class="fas fa-book-open" style="margin-right:0.4rem;"></i>All Articles</a>
         </div>
-        <div class="grid-3">
-            @forelse($recentPosts as $post)
-            <a href="{{ route('blog.show', $post->slug) }}" class="blog-card">
-                <div class="blog-card-img" style="background-image: url('{{ $post->featured_image ? Storage::url($post->featured_image) : asset('images/blog-placeholder.png') }}')"></div>
-                <div class="blog-card-content">
-                    <div class="blog-card-date">{{ $post->published_at->format('M d, Y') }}</div>
-                    <h3 class="blog-card-title">{{ $post->title }}</h3>
-                    <p class="blog-card-excerpt">{{ Str::limit($post->summary, 100) }}</p>
+
+        {{-- Featured Post --}}
+        @if($featuredPost)
+        <a href="{{ route('blog.show', $featuredPost->slug) }}" class="blog-featured">
+            <div class="blog-featured-img" style="background-image: url('{{ $featuredPost->featured_image ? Storage::url($featuredPost->featured_image) : asset('images/blog-placeholder.png') }}')"></div>
+            <div class="blog-featured-content">
+                <div class="blog-featured-label"><i class="fas fa-star" style="margin-right:0.3rem;"></i>Featured Article</div>
+                @if($featuredPost->category)
+                    <span style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.5rem;display:block;">{{ $featuredPost->category->name }}</span>
+                @endif
+                <h3 class="blog-featured-title">{{ $featuredPost->title }}</h3>
+                <p class="blog-featured-excerpt">{{ Str::limit($featuredPost->summary, 140) }}</p>
+                <div style="display:flex;align-items:center;gap:1rem;font-size:0.8rem;color:var(--text-muted);">
+                    <span><i class="fas fa-calendar" style="margin-right:0.3rem;"></i>{{ $featuredPost->published_at->format('M d, Y') }}</span>
+                    <span><i class="fas fa-eye" style="margin-right:0.3rem;"></i>{{ number_format($featuredPost->views_count) }} views</span>
+                    <span class="blog-read-more">Read Article <i class="fas fa-arrow-right"></i></span>
                 </div>
-            </a>
-            @empty
-            <p class="text-muted">No blog posts found.</p>
-            @endforelse
+            </div>
+        </a>
+        @endif
+
+        {{-- Category Tabs --}}
+        @if($blogCategories->isNotEmpty())
+        <div class="blog-tabs" id="blogTabs">
+            @foreach($blogCategories as $i => $cat)
+            <button class="blog-tab {{ $i === 0 ? 'active' : '' }}"
+                    onclick="switchBlogTab('{{ $cat->slug }}', this)">
+                {{ $cat->name }}
+                <span style="font-size:0.7rem;opacity:0.6;margin-left:0.3rem;">({{ $cat->posts_count }})</span>
+            </button>
+            @endforeach
         </div>
+
+        {{-- Category Panels --}}
+        @foreach($blogCategories as $i => $cat)
+        @php $catData = $categoryPosts[$cat->slug] ?? null; @endphp
+        <div class="blog-category-panel {{ $i === 0 ? 'active' : '' }}" id="panel-{{ $cat->slug }}">
+            @if($catData && $catData['posts']->isNotEmpty())
+            <div class="blog-grid-home">
+                @foreach($catData['posts'] as $post)
+                <a href="{{ route('blog.show', $post->slug) }}" class="blog-card">
+                    <div class="blog-card-img" style="background-image: url('{{ $post->featured_image ? Storage::url($post->featured_image) : asset('images/blog-placeholder.png') }}')">
+                        <span class="blog-card-cat-badge">{{ $cat->name }}</span>
+                    </div>
+                    <div class="blog-card-content">
+                        <div class="blog-card-meta">
+                            <span><i class="fas fa-calendar" style="margin-right:0.2rem;"></i>{{ $post->published_at->format('M d, Y') }}</span>
+                            <span><i class="fas fa-eye" style="margin-right:0.2rem;"></i>{{ number_format($post->views_count) }}</span>
+                        </div>
+                        <h3 class="blog-card-title">{{ $post->title }}</h3>
+                        <p class="blog-card-excerpt">{{ Str::limit($post->summary, 90) }}</p>
+                        <div class="blog-card-footer">
+                            <span class="blog-read-more">Read More <i class="fas fa-arrow-right"></i></span>
+                        </div>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+            <div style="text-align:center;margin-top:1.5rem;">
+                <a href="{{ route('blog', ['category' => $cat->slug]) }}" class="btn btn-outline btn-sm">
+                    <i class="fas fa-th-list" style="margin-right:0.4rem;"></i>All {{ $cat->name }} Articles
+                </a>
+            </div>
+            @else
+            <p class="text-muted" style="text-align:center;padding:2rem;">No posts in this category yet.</p>
+            @endif
+        </div>
+        @endforeach
+        @endif
     </div>
 </section>
+
+@push('scripts')
+<script>
+function switchBlogTab(slug, btn) {
+    document.querySelectorAll('.blog-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.blog-category-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const panel = document.getElementById('panel-' + slug);
+    if (panel) panel.classList.add('active');
+}
+</script>
+@endpush
 
 <div class="container">
     <x-newsletter-subscribe variant="hero" />

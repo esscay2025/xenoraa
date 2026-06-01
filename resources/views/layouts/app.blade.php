@@ -31,22 +31,38 @@
         .navbar-brand { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
         .navbar-brand img { height: 36px; width: auto; display: block; }
         .navbar-nav { display: flex; align-items: center; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
-        .navbar-nav a { color: var(--text-secondary); text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; white-space: nowrap; }
-        .navbar-nav a:hover, .navbar-nav a.active { color: var(--text-primary); background-color: var(--bg-card); }
+        .navbar-nav > li { position: relative; }
+        .navbar-nav > li > a, .navbar-nav > li > button { color: var(--text-secondary); text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; white-space: nowrap; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; }
+        .navbar-nav > li > a:hover, .navbar-nav > li > a.active, .navbar-nav > li > button:hover { color: var(--text-primary); background-color: var(--bg-card); }
+
+        /* ── DROPDOWN MEGA MENU ── */
+        .nav-dropdown { position: absolute; top: calc(100% + 0.5rem); left: 50%; transform: translateX(-50%); background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; min-width: 220px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s, transform 0.2s; transform: translateX(-50%) translateY(-6px); z-index: 2000; }
+        .navbar-nav > li:hover .nav-dropdown { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+        .nav-dropdown a { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.625rem 0.75rem; border-radius: 8px; color: var(--text-secondary); text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: all 0.15s; }
+        .nav-dropdown a:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .nav-dropdown a i { margin-top: 2px; font-size: 0.85rem; color: var(--text-muted); flex-shrink: 0; width: 16px; text-align: center; }
+        .nav-dropdown a:hover i { color: var(--text-primary); }
+        .nav-dropdown-divider { border: none; border-top: 1px solid var(--border); margin: 0.5rem 0; }
+        .nav-dropdown-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 0.25rem 0.75rem; }
+
+        /* ── BLOG MEGA MENU (wider) ── */
+        .nav-mega { min-width: 520px; display: grid; grid-template-columns: 1fr 1fr; gap: 0.25rem; }
 
         /* ── HAMBURGER BUTTON ── */
         .navbar-toggler { display: none; background: none; border: 1px solid var(--border-light); border-radius: 6px; color: var(--text-primary); padding: 0.4rem 0.6rem; cursor: pointer; font-size: 1.1rem; line-height: 1; }
         .navbar-toggler:hover { background-color: var(--bg-card); }
 
         /* ── MOBILE MENU ── */
-        .mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background-color: rgba(10,10,10,0.98); z-index: 999; padding: 1.5rem 2rem; overflow-y: auto; flex-direction: column; gap: 0.5rem; }
+        .mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background-color: rgba(10,10,10,0.99); z-index: 999; padding: 1rem 1.5rem 2rem; overflow-y: auto; flex-direction: column; gap: 0; }
         .mobile-menu.open { display: flex; }
-        .mobile-menu a, .mobile-menu button { color: var(--text-primary); text-decoration: none; padding: 0.875rem 1rem; border-radius: 8px; font-size: 1rem; font-weight: 500; border: none; background: none; cursor: pointer; text-align: left; width: 100%; display: flex; align-items: center; gap: 0.75rem; transition: background 0.2s; }
-        .mobile-menu a:hover, .mobile-menu button:hover { background-color: var(--bg-card); }
-        .mobile-menu .mobile-divider { border: none; border-top: 1px solid var(--border); margin: 0.5rem 0; }
-        .mobile-menu .mobile-auth { display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); }
-        .mobile-menu .btn-mobile-primary { background-color: var(--text-primary); color: var(--bg-primary); border-radius: 8px; padding: 0.875rem 1rem; font-weight: 600; justify-content: center; }
-        .mobile-menu .btn-mobile-outline { border: 1px solid var(--border-light); border-radius: 8px; padding: 0.875rem 1rem; justify-content: center; }
+        .mobile-menu a, .mobile-menu > button { color: var(--text-primary); text-decoration: none; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; font-weight: 500; border: none; background: none; cursor: pointer; text-align: left; width: 100%; display: flex; align-items: center; gap: 0.75rem; transition: background 0.2s; }
+        .mobile-menu a:hover, .mobile-menu > button:hover { background-color: var(--bg-card); }
+        .mobile-section-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 1rem 1rem 0.25rem; }
+        .mobile-sub-link { padding-left: 2.5rem !important; font-size: 0.875rem !important; color: var(--text-secondary) !important; }
+        .mobile-divider { border: none; border-top: 1px solid var(--border); margin: 0.5rem 0; width: 100%; }
+        .mobile-auth { display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); }
+        .btn-mobile-primary { background-color: var(--text-primary) !important; color: var(--bg-primary) !important; border-radius: 8px; padding: 0.875rem 1rem !important; font-weight: 600 !important; justify-content: center !important; }
+        .btn-mobile-outline { border: 1px solid var(--border-light) !important; border-radius: 8px; padding: 0.875rem 1rem !important; justify-content: center !important; }
 
         /* ── BUTTONS ── */
         .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1.25rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; }
@@ -104,10 +120,12 @@
         .grid-4 { grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
 
         /* ── RESPONSIVE ── */
-        @media (max-width: 768px) {
-            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+        @media (max-width: 1024px) {
             .navbar-nav { display: none; }
             .navbar-toggler { display: block; }
+        }
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
             .container { padding: 0 1rem; }
             .navbar { padding: 0 1rem; }
         }
@@ -125,9 +143,43 @@
             <ul class="navbar-nav">
                 <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
                 <li><a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">About</a></li>
-                <li><a href="{{ route('blog') }}" class="{{ request()->routeIs('blog*') ? 'active' : '' }}">Blog</a></li>
+
+                {{-- Solutions Dropdown --}}
+                <li>
+                    <button class="{{ request()->routeIs('solutions.*') ? 'active' : '' }}" type="button">
+                        Solutions <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
+                    </button>
+                    <div class="nav-dropdown">
+                        <div class="nav-dropdown-label">What We Offer</div>
+                        <a href="{{ route('solutions.ai-automation') }}"><i class="fas fa-robot"></i> AI Solutions & Automation</a>
+                        <a href="{{ route('solutions.custom-app') }}"><i class="fas fa-laptop-code"></i> Custom Application Development</a>
+                        <a href="{{ route('solutions.digital-transformation') }}"><i class="fas fa-sync-alt"></i> Digital Transformation</a>
+                        <a href="{{ route('solutions.startup-product') }}"><i class="fas fa-rocket"></i> Startup Product Development</a>
+                        <a href="{{ route('solutions.branding-digital') }}"><i class="fas fa-palette"></i> Branding & Digital Presence</a>
+                    </div>
+                </li>
+
+                {{-- Blog Mega Menu --}}
+                <li>
+                    <a href="{{ route('blog') }}" class="{{ request()->routeIs('blog*') ? 'active' : '' }}">
+                        Blog <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
+                    </a>
+                    <div class="nav-dropdown nav-mega">
+                        <div style="grid-column: 1/-1;"><div class="nav-dropdown-label">Browse by Category</div></div>
+                        <a href="{{ route('blog', ['category' => 'ai-automation']) }}"><i class="fas fa-robot"></i> AI & Automation</a>
+                        <a href="{{ route('blog', ['category' => 'hacking-security']) }}"><i class="fas fa-shield-alt"></i> Hacking & Security</a>
+                        <a href="{{ route('blog', ['category' => 'startup-product']) }}"><i class="fas fa-rocket"></i> Startup & Product Dev</a>
+                        <a href="{{ route('blog', ['category' => 'software-technology']) }}"><i class="fas fa-code"></i> Software & Technology</a>
+                        <a href="{{ route('blog', ['category' => 'digital-transformation']) }}"><i class="fas fa-chart-line"></i> Digital Transformation</a>
+                        <a href="{{ route('blog', ['category' => 'personal-branding']) }}"><i class="fas fa-user-tie"></i> Personal Branding</a>
+                        <div style="grid-column: 1/-1;"><hr class="nav-dropdown-divider"></div>
+                        <div style="grid-column: 1/-1;"><a href="{{ route('blog') }}" style="font-weight:600;"><i class="fas fa-th-large"></i> View All Posts</a></div>
+                    </div>
+                </li>
+
                 <li><a href="{{ route('jobs') }}" class="{{ request()->routeIs('jobs*') ? 'active' : '' }}">Jobs</a></li>
                 @auth
+                    <li><a href="{{ route('calendar.index') }}" class="{{ request()->routeIs('calendar*') ? 'active' : '' }}"><i class="fas fa-calendar-alt" style="margin-right:0.25rem;"></i>Calendar</a></li>
                     @if(auth()->user()->isAdmin())
                         <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.*') ? 'active' : '' }}">Dashboard</a></li>
                     @elseif(auth()->user()->isStaff())
@@ -160,13 +212,31 @@
         <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">
             <i class="fas fa-user" style="width:20px;"></i> About
         </a>
-        <a href="{{ route('blog') }}" class="{{ request()->routeIs('blog*') ? 'active' : '' }}">
-            <i class="fas fa-pen-nib" style="width:20px;"></i> Blog
-        </a>
+
+        <div class="mobile-section-label">Solutions</div>
+        <a href="{{ route('solutions.ai-automation') }}" class="mobile-sub-link"><i class="fas fa-robot" style="width:20px;"></i> AI Solutions & Automation</a>
+        <a href="{{ route('solutions.custom-app') }}" class="mobile-sub-link"><i class="fas fa-laptop-code" style="width:20px;"></i> Custom App Development</a>
+        <a href="{{ route('solutions.digital-transformation') }}" class="mobile-sub-link"><i class="fas fa-sync-alt" style="width:20px;"></i> Digital Transformation</a>
+        <a href="{{ route('solutions.startup-product') }}" class="mobile-sub-link"><i class="fas fa-rocket" style="width:20px;"></i> Startup Product Dev</a>
+        <a href="{{ route('solutions.branding-digital') }}" class="mobile-sub-link"><i class="fas fa-palette" style="width:20px;"></i> Branding & Digital Presence</a>
+
+        <div class="mobile-section-label">Blog</div>
+        <a href="{{ route('blog') }}" class="mobile-sub-link"><i class="fas fa-th-large" style="width:20px;"></i> All Posts</a>
+        <a href="{{ route('blog', ['category' => 'ai-automation']) }}" class="mobile-sub-link"><i class="fas fa-robot" style="width:20px;"></i> AI & Automation</a>
+        <a href="{{ route('blog', ['category' => 'hacking-security']) }}" class="mobile-sub-link"><i class="fas fa-shield-alt" style="width:20px;"></i> Hacking & Security</a>
+        <a href="{{ route('blog', ['category' => 'startup-product']) }}" class="mobile-sub-link"><i class="fas fa-rocket" style="width:20px;"></i> Startup & Product Dev</a>
+        <a href="{{ route('blog', ['category' => 'software-technology']) }}" class="mobile-sub-link"><i class="fas fa-code" style="width:20px;"></i> Software & Technology</a>
+        <a href="{{ route('blog', ['category' => 'digital-transformation']) }}" class="mobile-sub-link"><i class="fas fa-chart-line" style="width:20px;"></i> Digital Transformation</a>
+        <a href="{{ route('blog', ['category' => 'personal-branding']) }}" class="mobile-sub-link"><i class="fas fa-user-tie" style="width:20px;"></i> Personal Branding</a>
+
+        <hr class="mobile-divider">
         <a href="{{ route('jobs') }}" class="{{ request()->routeIs('jobs*') ? 'active' : '' }}">
             <i class="fas fa-briefcase" style="width:20px;"></i> Jobs
         </a>
         @auth
+            <a href="{{ route('calendar.index') }}" class="{{ request()->routeIs('calendar*') ? 'active' : '' }}">
+                <i class="fas fa-calendar-alt" style="width:20px;"></i> Calendar & Notes
+            </a>
             @if(auth()->user()->isAdmin())
                 <a href="{{ route('admin.dashboard') }}">
                     <i class="fas fa-tachometer-alt" style="width:20px;"></i> Admin Dashboard
@@ -177,9 +247,9 @@
                 </a>
             @endif
             <hr class="mobile-divider">
-            <form method="POST" action="{{ route('logout') }}">
+            <form method="POST" action="{{ route('logout') }}" style="width:100%;">
                 @csrf
-                <button type="submit" style="color:#fca5a5;">
+                <button type="submit" style="color:#fca5a5;width:100%;display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:none;border:none;cursor:pointer;font-size:0.95rem;">
                     <i class="fas fa-sign-out-alt" style="width:20px;"></i> Sign Out
                 </button>
             </form>
@@ -262,7 +332,6 @@
             const isOpen = mobileMenu.classList.toggle('open');
             navIcon.className = isOpen ? 'fas fa-times' : 'fas fa-bars';
             toggler.setAttribute('aria-expanded', isOpen);
-            // Prevent body scroll when menu is open
             document.body.style.overflow = isOpen ? 'hidden' : '';
         });
 
@@ -277,7 +346,7 @@
 
         // Close on resize to desktop
         window.addEventListener('resize', () => {
-            if (window.innerWidth > 768) {
+            if (window.innerWidth > 1024) {
                 mobileMenu.classList.remove('open');
                 navIcon.className = 'fas fa-bars';
                 document.body.style.overflow = '';
