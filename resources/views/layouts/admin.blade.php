@@ -175,6 +175,30 @@
         .font-bold { font-weight: 700; } .font-semibold { font-weight: 600; }
         .mt-4 { margin-top: 1rem; } .mt-6 { margin-top: 1.5rem; } .mt-8 { margin-top: 2rem; }
         .mb-4 { margin-bottom: 1rem; } .mb-6 { margin-bottom: 1.5rem; } .mb-8 { margin-bottom: 2rem; }
+        /* Sidebar Accordion */
+        .sidebar-group-btn {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.625rem 1.5rem; width: 100%; background: none; border: none;
+            color: var(--text-secondary); font-size: 0.875rem; font-weight: 600;
+            cursor: pointer; text-align: left; transition: all 0.15s;
+            border-left: 3px solid transparent;
+        }
+        .sidebar-group-btn:hover { color: var(--text-primary); background-color: var(--bg-hover); }
+        .sidebar-group-btn i.group-icon { width: 18px; text-align: center; font-size: 0.9rem; }
+        .sidebar-group-btn .group-chevron { margin-left: auto; font-size: 0.7rem; transition: transform 0.25s; color: var(--text-muted); }
+        .sidebar-group-btn.open .group-chevron { transform: rotate(180deg); }
+        .sidebar-group-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .sidebar-group-panel.open { max-height: 600px; }
+        .sidebar-sub-link {
+            display: flex; align-items: center; gap: 0.75rem;
+            padding: 0.5rem 1.5rem 0.5rem 3rem;
+            color: var(--text-muted); text-decoration: none;
+            font-size: 0.825rem; font-weight: 500; transition: all 0.15s;
+            border-left: 3px solid transparent;
+        }
+        .sidebar-sub-link:hover { color: var(--text-primary); background-color: var(--bg-hover); }
+        .sidebar-sub-link.active { color: var(--text-primary); background-color: rgba(255,255,255,0.05); border-left-color: var(--text-primary); }
+        .sidebar-sub-link i { width: 14px; text-align: center; font-size: 0.8rem; }
         /* Mobile Hamburger Button */
         .mobile-menu-btn {
             display: none;
@@ -221,53 +245,80 @@
         </div>
 
         <nav class="sidebar-nav">
+            {{-- Overview --}}
             <p class="sidebar-section-label">Overview</p>
             <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <i class="fas fa-tachometer-alt"></i> Dashboard
             </a>
 
-            <p class="sidebar-section-label" style="margin-top: 0.75rem;">Content</p>
-            <a href="{{ route('admin.blog.index') }}" class="sidebar-link {{ request()->routeIs('admin.blog*') ? 'active' : '' }}">
-                <i class="fas fa-pen-nib"></i> Blog Posts
-            </a>
-            <a href="{{ route('admin.blog.create') }}" class="sidebar-link {{ request()->routeIs('admin.blog.create') ? 'active' : '' }}">
-                <i class="fas fa-plus-circle"></i> New Post
-            </a>
-            <a href="{{ route('admin.blog.comments') }}" class="sidebar-link">
-                <i class="fas fa-comments"></i> Comments
-            </a>
+            {{-- Content Group --}}
+            @php $contentActive = request()->routeIs('admin.blog*'); @endphp
+            <button class="sidebar-group-btn {{ $contentActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgContent', this)">
+                <i class="fas fa-pen-nib group-icon"></i> Content
+                <i class="fas fa-chevron-down group-chevron"></i>
+            </button>
+            <div class="sidebar-group-panel {{ $contentActive ? 'open' : '' }}" id="sgContent">
+                <a href="{{ route('admin.blog.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.blog.index') ? 'active' : '' }}"><i class="fas fa-list"></i> All Posts</a>
+                <a href="{{ route('admin.blog.create') }}" class="sidebar-sub-link {{ request()->routeIs('admin.blog.create') ? 'active' : '' }}"><i class="fas fa-plus-circle"></i> New Post</a>
+                <a href="{{ route('admin.blog.comments') }}" class="sidebar-sub-link"><i class="fas fa-comments"></i> Comments</a>
+            </div>
 
-            <p class="sidebar-section-label" style="margin-top: 0.75rem;">Recruitment</p>
-            <a href="{{ route('admin.jobs.index') }}" class="sidebar-link {{ request()->routeIs('admin.jobs*') ? 'active' : '' }}">
-                <i class="fas fa-briefcase"></i> Job Listings
-            </a>
-            <a href="{{ route('admin.jobs.create') }}" class="sidebar-link">
-                <i class="fas fa-plus-circle"></i> Post a Job
-            </a>
+            {{-- Recruitment Group --}}
+            @php $jobsActive = request()->routeIs('admin.jobs*'); @endphp
+            <button class="sidebar-group-btn {{ $jobsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgJobs', this)">
+                <i class="fas fa-briefcase group-icon"></i> Recruitment
+                <i class="fas fa-chevron-down group-chevron"></i>
+            </button>
+            <div class="sidebar-group-panel {{ $jobsActive ? 'open' : '' }}" id="sgJobs">
+                <a href="{{ route('admin.jobs.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.jobs.index') ? 'active' : '' }}"><i class="fas fa-list"></i> Job Listings</a>
+                <a href="{{ route('admin.jobs.create') }}" class="sidebar-sub-link"><i class="fas fa-plus-circle"></i> Post a Job</a>
+            </div>
 
-            <p class="sidebar-section-label" style="margin-top: 0.75rem;">Finance</p>
-            <a href="{{ route('admin.expenses.index') }}" class="sidebar-link {{ request()->routeIs('admin.expenses*') ? 'active' : '' }}">
-                <i class="fas fa-wallet"></i> Expenses
-            </a>
-            <a href="{{ route('admin.expenses.create') }}" class="sidebar-link">
-                <i class="fas fa-plus-circle"></i> Add Expense
-            </a>
+            {{-- Finance Group --}}
+            @php $financeActive = request()->routeIs('admin.expenses*'); @endphp
+            <button class="sidebar-group-btn {{ $financeActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgFinance', this)">
+                <i class="fas fa-wallet group-icon"></i> Finance
+                <i class="fas fa-chevron-down group-chevron"></i>
+            </button>
+            <div class="sidebar-group-panel {{ $financeActive ? 'open' : '' }}" id="sgFinance">
+                <a href="{{ route('admin.expenses.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.expenses.index') ? 'active' : '' }}"><i class="fas fa-list"></i> All Expenses</a>
+                <a href="{{ route('admin.expenses.create') }}" class="sidebar-sub-link"><i class="fas fa-plus-circle"></i> Add Expense</a>
+            </div>
 
-            <p class="sidebar-section-label" style="margin-top: 0.75rem;">Administration</p>
-            <a href="{{ route('admin.users.index') }}" class="sidebar-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}">
-                <i class="fas fa-users"></i> Users
-            </a>
-            <a href="{{ route('admin.users.create') }}" class="sidebar-link">
-                <i class="fas fa-user-plus"></i> Add User
-            </a>
+            {{-- Administration Group --}}
+            @php $usersActive = request()->routeIs('admin.users*'); @endphp
+            <button class="sidebar-group-btn {{ $usersActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgUsers', this)">
+                <i class="fas fa-users group-icon"></i> Administration
+                <i class="fas fa-chevron-down group-chevron"></i>
+            </button>
+            <div class="sidebar-group-panel {{ $usersActive ? 'open' : '' }}" id="sgUsers">
+                <a href="{{ route('admin.users.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}"><i class="fas fa-list"></i> All Users</a>
+                <a href="{{ route('admin.users.create') }}" class="sidebar-sub-link"><i class="fas fa-user-plus"></i> Add User</a>
+            </div>
 
-            <p class="sidebar-section-label" style="margin-top: 0.75rem;">Site</p>
-            <a href="{{ route('admin.settings.index') }}" class="sidebar-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}">
-                <i class="fas fa-cog"></i> Site Settings
-            </a>
-            <a href="{{ route('home') }}" class="sidebar-link" target="_blank">
-                <i class="fas fa-external-link-alt"></i> View Website
-            </a>
+            {{-- Community Group --}}
+            @php $communityActive = request()->routeIs('admin.forum*') || request()->routeIs('admin.chat*') || request()->routeIs('admin.calendar*') || request()->routeIs('admin.newsletter*'); @endphp
+            <button class="sidebar-group-btn {{ $communityActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgCommunity', this)">
+                <i class="fas fa-users-cog group-icon"></i> Community
+                <i class="fas fa-chevron-down group-chevron"></i>
+            </button>
+            <div class="sidebar-group-panel {{ $communityActive ? 'open' : '' }}" id="sgCommunity">
+                <a href="{{ route('admin.forum.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.forum*') ? 'active' : '' }}"><i class="fas fa-comments"></i> Forum Control</a>
+                <a href="{{ route('admin.chat.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.chat*') ? 'active' : '' }}"><i class="fas fa-comment-dots"></i> Chat Monitor</a>
+                <a href="{{ route('admin.calendar.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.calendar*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Calendar Events</a>
+                <a href="{{ route('admin.newsletter.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Newsletter</a>
+            </div>
+
+            {{-- Site Group --}}
+            @php $siteActive = request()->routeIs('admin.settings*'); @endphp
+            <button class="sidebar-group-btn {{ $siteActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgSite', this)">
+                <i class="fas fa-cog group-icon"></i> Site
+                <i class="fas fa-chevron-down group-chevron"></i>
+            </button>
+            <div class="sidebar-group-panel {{ $siteActive ? 'open' : '' }}" id="sgSite">
+                <a href="{{ route('admin.settings.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}"><i class="fas fa-sliders-h"></i> Site Settings</a>
+                <a href="{{ route('home') }}" class="sidebar-sub-link" target="_blank"><i class="fas fa-external-link-alt"></i> View Website</a>
+            </div>
         </nav>
 
         <div class="sidebar-footer">
@@ -325,6 +376,13 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleAdminSidebar()"></div>
 
     <script>
+        function toggleSidebarGroup(panelId, btn) {
+            const panel = document.getElementById(panelId);
+            const isOpen = panel.classList.contains('open');
+            panel.classList.toggle('open', !isOpen);
+            btn.classList.toggle('open', !isOpen);
+        }
+
         function toggleAdminSidebar() {
             const sidebar = document.querySelector('.sidebar');
             const overlay = document.getElementById('sidebarOverlay');

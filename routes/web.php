@@ -146,6 +146,31 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::put('/settings/social/{social}', [SettingsController::class, 'updateSocial'])->name('settings.social.update');
+
+    // Community: Forum Admin
+    Route::get('/forum', [\App\Http\Controllers\Admin\ForumAdminController::class, 'index'])->name('forum.index');
+    Route::get('/forum/{topic}', [\App\Http\Controllers\Admin\ForumAdminController::class, 'show'])->name('forum.show');
+    Route::patch('/forum/{topic}/pin', [\App\Http\Controllers\Admin\ForumAdminController::class, 'pin'])->name('forum.pin');
+    Route::patch('/forum/{topic}/lock', [\App\Http\Controllers\Admin\ForumAdminController::class, 'lock'])->name('forum.lock');
+    Route::delete('/forum/{topic}', [\App\Http\Controllers\Admin\ForumAdminController::class, 'destroy'])->name('forum.destroy');
+    Route::delete('/forum/reply/{reply}', [\App\Http\Controllers\Admin\ForumAdminController::class, 'destroyReply'])->name('forum.reply.destroy');
+    Route::patch('/forum/reply/{reply}/restore', [\App\Http\Controllers\Admin\ForumAdminController::class, 'approveReply'])->name('forum.reply.restore');
+
+    // Community: Chat Admin
+    Route::get('/chat', [\App\Http\Controllers\Admin\ChatAdminController::class, 'index'])->name('chat.index');
+    Route::delete('/chat/{message}', [\App\Http\Controllers\Admin\ChatAdminController::class, 'destroy'])->name('chat.destroy');
+    Route::patch('/chat/{message}/restore', [\App\Http\Controllers\Admin\ChatAdminController::class, 'restore'])->name('chat.restore');
+    Route::post('/chat/clear-channel', [\App\Http\Controllers\Admin\ChatAdminController::class, 'clearChannel'])->name('chat.clear');
+
+    // Community: Calendar Admin
+    Route::get('/calendar', [\App\Http\Controllers\Admin\CalendarAdminController::class, 'index'])->name('calendar.index');
+    Route::delete('/calendar/events/{event}', [\App\Http\Controllers\Admin\CalendarAdminController::class, 'destroy'])->name('calendar.destroy');
+    Route::delete('/calendar/notes/{note}', [\App\Http\Controllers\Admin\CalendarAdminController::class, 'destroyNote'])->name('calendar.note.destroy');
+
+    // Newsletter Admin
+    Route::get('/newsletter', [\App\Http\Controllers\Admin\NewsletterAdminController::class, 'index'])->name('newsletter.index');
+    Route::delete('/newsletter/{subscriber}', [\App\Http\Controllers\Admin\NewsletterAdminController::class, 'destroy'])->name('newsletter.destroy');
+    Route::get('/newsletter/export', [\App\Http\Controllers\Admin\NewsletterAdminController::class, 'export'])->name('newsletter.export');
 });
 
 // =============================================

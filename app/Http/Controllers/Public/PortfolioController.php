@@ -123,7 +123,16 @@ class PortfolioController extends Controller
         $comments = $post->comments()->where('is_approved', true)->orderBy('created_at', 'desc')->get();
         $socialLinks = SocialLink::where('is_active', true)->get();
 
-        return view('portfolio.blog-show', compact('post', 'comments', 'socialLinks'));
+        // Related posts: same category, exclude current
+        $relatedPosts = BlogPost::with(['category'])
+            ->where('status', 'published')
+            ->where('id', '!=', $post->id)
+            ->when($post->category_id, fn($q) => $q->where('category_id', $post->category_id))
+            ->orderByDesc('views_count')
+            ->limit(4)
+            ->get();
+
+        return view('portfolio.blog-show', compact('post', 'comments', 'socialLinks', 'relatedPosts'));
     }
 
     /**

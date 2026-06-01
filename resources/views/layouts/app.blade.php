@@ -53,12 +53,20 @@
         .navbar-toggler:hover { background-color: var(--bg-card); }
 
         /* ── MOBILE MENU ── */
-        .mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background-color: rgba(10,10,10,0.99); z-index: 999; padding: 1rem 1.5rem 2rem; overflow-y: auto; flex-direction: column; gap: 0; }
+        .mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background-color: rgba(10,10,10,0.99); z-index: 999; padding: 1rem 1.25rem 2rem; overflow-y: auto; flex-direction: column; gap: 0; }
         .mobile-menu.open { display: flex; }
-        .mobile-menu a, .mobile-menu > button { color: var(--text-primary); text-decoration: none; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; font-weight: 500; border: none; background: none; cursor: pointer; text-align: left; width: 100%; display: flex; align-items: center; gap: 0.75rem; transition: background 0.2s; }
-        .mobile-menu a:hover, .mobile-menu > button:hover { background-color: var(--bg-card); }
-        .mobile-section-label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 1rem 1rem 0.25rem; }
-        .mobile-sub-link { padding-left: 2.5rem !important; font-size: 0.875rem !important; color: var(--text-secondary) !important; }
+        .mobile-menu a.mob-link { color: var(--text-primary); text-decoration: none; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; gap: 0.75rem; transition: background 0.2s; }
+        .mobile-menu a.mob-link:hover { background-color: var(--bg-card); }
+        /* Accordion toggle button */
+        .mob-accordion-btn { color: var(--text-primary); padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; font-weight: 500; border: none; background: none; cursor: pointer; text-align: left; width: 100%; display: flex; align-items: center; gap: 0.75rem; transition: background 0.2s; }
+        .mob-accordion-btn:hover { background-color: var(--bg-card); }
+        .mob-accordion-btn .mob-chevron { margin-left: auto; font-size: 0.75rem; transition: transform 0.25s; color: var(--text-muted); }
+        .mob-accordion-btn.open .mob-chevron { transform: rotate(180deg); }
+        /* Accordion panel */
+        .mob-accordion-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .mob-accordion-panel.open { max-height: 600px; }
+        .mob-sub-link { color: var(--text-secondary) !important; text-decoration: none; padding: 0.6rem 1rem 0.6rem 2.75rem; border-radius: 8px; font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 0.65rem; transition: background 0.2s; }
+        .mob-sub-link:hover { background-color: var(--bg-card); color: var(--text-primary) !important; }
         .mobile-divider { border: none; border-top: 1px solid var(--border); margin: 0.5rem 0; width: 100%; }
         .mobile-auth { display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); }
         .btn-mobile-primary { background-color: var(--text-primary) !important; color: var(--bg-primary) !important; border-radius: 8px; padding: 0.875rem 1rem !important; font-weight: 600 !important; justify-content: center !important; }
@@ -208,64 +216,107 @@
 
     {{-- Mobile Slide-down Menu --}}
     <div class="mobile-menu" id="mobileMenu">
-        <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">
-            <i class="fas fa-home" style="width:20px;"></i> Home
+
+        {{-- Home & About --}}
+        <a href="{{ route('home') }}" class="mob-link {{ request()->routeIs('home') ? 'active' : '' }}">
+            <i class="fas fa-home" style="width:20px;color:var(--text-muted);"></i> Home
         </a>
-        <a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">
-            <i class="fas fa-user" style="width:20px;"></i> About
+        <a href="{{ route('about') }}" class="mob-link {{ request()->routeIs('about') ? 'active' : '' }}">
+            <i class="fas fa-user" style="width:20px;color:var(--text-muted);"></i> About
         </a>
 
-        <div class="mobile-section-label">Solutions</div>
-        <a href="{{ route('solutions.ai-automation') }}" class="mobile-sub-link"><i class="fas fa-robot" style="width:20px;"></i> AI Solutions & Automation</a>
-        <a href="{{ route('solutions.custom-app') }}" class="mobile-sub-link"><i class="fas fa-laptop-code" style="width:20px;"></i> Custom App Development</a>
-        <a href="{{ route('solutions.digital-transformation') }}" class="mobile-sub-link"><i class="fas fa-sync-alt" style="width:20px;"></i> Digital Transformation</a>
-        <a href="{{ route('solutions.startup-product') }}" class="mobile-sub-link"><i class="fas fa-rocket" style="width:20px;"></i> Startup Product Dev</a>
-        <a href="{{ route('solutions.branding-digital') }}" class="mobile-sub-link"><i class="fas fa-palette" style="width:20px;"></i> Branding & Digital Presence</a>
+        {{-- Solutions Accordion --}}
+        <button class="mob-accordion-btn" onclick="toggleAccordion('mobSolutions', this)">
+            <i class="fas fa-lightbulb" style="width:20px;color:var(--text-muted);"></i>
+            Solutions
+            <i class="fas fa-chevron-down mob-chevron"></i>
+        </button>
+        <div class="mob-accordion-panel" id="mobSolutions">
+            <a href="{{ route('solutions.ai-automation') }}" class="mob-sub-link"><i class="fas fa-robot" style="width:16px;"></i> AI Solutions & Automation</a>
+            <a href="{{ route('solutions.custom-app') }}" class="mob-sub-link"><i class="fas fa-laptop-code" style="width:16px;"></i> Custom App Development</a>
+            <a href="{{ route('solutions.digital-transformation') }}" class="mob-sub-link"><i class="fas fa-sync-alt" style="width:16px;"></i> Digital Transformation</a>
+            <a href="{{ route('solutions.startup-product') }}" class="mob-sub-link"><i class="fas fa-rocket" style="width:16px;"></i> Startup Product Dev</a>
+            <a href="{{ route('solutions.branding-digital') }}" class="mob-sub-link"><i class="fas fa-palette" style="width:16px;"></i> Branding & Digital Presence</a>
+        </div>
 
-        <div class="mobile-section-label">Blog</div>
-        <a href="{{ route('blog') }}" class="mobile-sub-link"><i class="fas fa-th-large" style="width:20px;"></i> All Posts</a>
-        <a href="{{ route('blog.category', 'ai-automation') }}" class="mobile-sub-link"><i class="fas fa-robot" style="width:20px;"></i> AI & Automation</a>
-        <a href="{{ route('blog.category', 'hacking-security') }}" class="mobile-sub-link"><i class="fas fa-shield-alt" style="width:20px;"></i> Hacking & Security</a>
-        <a href="{{ route('blog.category', 'startup-product') }}" class="mobile-sub-link"><i class="fas fa-rocket" style="width:20px;"></i> Startup & Product Dev</a>
-        <a href="{{ route('blog.category', 'software-technology') }}" class="mobile-sub-link"><i class="fas fa-code" style="width:20px;"></i> Software & Technology</a>
-        <a href="{{ route('blog.category', 'digital-transformation') }}" class="mobile-sub-link"><i class="fas fa-chart-line" style="width:20px;"></i> Digital Transformation</a>
-        <a href="{{ route('blog.category', 'personal-branding') }}" class="mobile-sub-link"><i class="fas fa-user-tie" style="width:20px;"></i> Personal Branding</a>
+        {{-- Blog Accordion --}}
+        <button class="mob-accordion-btn" onclick="toggleAccordion('mobBlog', this)">
+            <i class="fas fa-pen-nib" style="width:20px;color:var(--text-muted);"></i>
+            Blog
+            <i class="fas fa-chevron-down mob-chevron"></i>
+        </button>
+        <div class="mob-accordion-panel" id="mobBlog">
+            <a href="{{ route('blog') }}" class="mob-sub-link"><i class="fas fa-th-large" style="width:16px;"></i> All Posts</a>
+            <a href="{{ route('blog.category', 'ai-automation') }}" class="mob-sub-link"><i class="fas fa-robot" style="width:16px;"></i> AI & Automation</a>
+            <a href="{{ route('blog.category', 'hacking-security') }}" class="mob-sub-link"><i class="fas fa-shield-alt" style="width:16px;"></i> Hacking & Security</a>
+            <a href="{{ route('blog.category', 'startup-product') }}" class="mob-sub-link"><i class="fas fa-rocket" style="width:16px;"></i> Startup & Product Dev</a>
+            <a href="{{ route('blog.category', 'software-technology') }}" class="mob-sub-link"><i class="fas fa-code" style="width:16px;"></i> Software & Technology</a>
+            <a href="{{ route('blog.category', 'digital-transformation') }}" class="mob-sub-link"><i class="fas fa-chart-line" style="width:16px;"></i> Digital Transformation</a>
+            <a href="{{ route('blog.category', 'personal-branding') }}" class="mob-sub-link"><i class="fas fa-user-tie" style="width:16px;"></i> Personal Branding</a>
+        </div>
 
         <hr class="mobile-divider">
-        <a href="{{ route('jobs') }}" class="{{ request()->routeIs('jobs*') ? 'active' : '' }}">
-            <i class="fas fa-briefcase" style="width:20px;"></i> Jobs
+        <a href="{{ route('jobs') }}" class="mob-link {{ request()->routeIs('jobs*') ? 'active' : '' }}">
+            <i class="fas fa-briefcase" style="width:20px;color:var(--text-muted);"></i> Jobs
         </a>
-        <a href="{{ route('forum.index') }}" class="{{ request()->routeIs('forum*') ? 'active' : '' }}">
-            <i class="fas fa-comments" style="width:20px;"></i> Forum
+        <a href="{{ route('forum.index') }}" class="mob-link {{ request()->routeIs('forum*') ? 'active' : '' }}">
+            <i class="fas fa-comments" style="width:20px;color:var(--text-muted);"></i> Forum
         </a>
+
         @auth
+            <hr class="mobile-divider">
             @if(auth()->user()->isAdmin())
-                <a href="{{ route('admin.dashboard') }}">
-                    <i class="fas fa-tachometer-alt" style="width:20px;"></i> Admin Dashboard
-                </a>
+                {{-- Admin Dashboard Accordion --}}
+                <button class="mob-accordion-btn" onclick="toggleAccordion('mobAdminDash', this)">
+                    <i class="fas fa-tachometer-alt" style="width:20px;color:var(--text-muted);"></i>
+                    Admin Dashboard
+                    <i class="fas fa-chevron-down mob-chevron"></i>
+                </button>
+                <div class="mob-accordion-panel" id="mobAdminDash">
+                    <a href="{{ route('admin.dashboard') }}" class="mob-sub-link"><i class="fas fa-home" style="width:16px;"></i> Overview</a>
+                    <a href="{{ route('admin.blog.index') }}" class="mob-sub-link"><i class="fas fa-pen-nib" style="width:16px;"></i> Blog Posts</a>
+                    <a href="{{ route('admin.jobs.index') }}" class="mob-sub-link"><i class="fas fa-briefcase" style="width:16px;"></i> Job Listings</a>
+                    <a href="{{ route('admin.expenses.index') }}" class="mob-sub-link"><i class="fas fa-wallet" style="width:16px;"></i> Expenses</a>
+                    <a href="{{ route('admin.users.index') }}" class="mob-sub-link"><i class="fas fa-users" style="width:16px;"></i> Users</a>
+                    <a href="{{ route('admin.forum.index') }}" class="mob-sub-link"><i class="fas fa-comments" style="width:16px;"></i> Forum Control</a>
+                    <a href="{{ route('admin.chat.index') }}" class="mob-sub-link"><i class="fas fa-comment-dots" style="width:16px;"></i> Chat Monitor</a>
+                    <a href="{{ route('admin.calendar.index') }}" class="mob-sub-link"><i class="fas fa-calendar-alt" style="width:16px;"></i> Calendar Events</a>
+                    <a href="{{ route('admin.newsletter.index') }}" class="mob-sub-link"><i class="fas fa-envelope" style="width:16px;"></i> Newsletter</a>
+                    <a href="{{ route('admin.settings.index') }}" class="mob-sub-link"><i class="fas fa-cog" style="width:16px;"></i> Site Settings</a>
+                </div>
             @elseif(auth()->user()->isStaff())
-                <a href="{{ route('staff.dashboard') }}">
-                    <i class="fas fa-user-tie" style="width:20px;"></i> Staff Panel
+                <a href="{{ route('staff.dashboard') }}" class="mob-link">
+                    <i class="fas fa-user-tie" style="width:20px;color:var(--text-muted);"></i> Staff Panel
                 </a>
             @else
-                <a href="{{ route('user.dashboard') }}">
-                    <i class="fas fa-th-large" style="width:20px;"></i> My Dashboard
-                </a>
+                {{-- User Dashboard Accordion --}}
+                <button class="mob-accordion-btn" onclick="toggleAccordion('mobUserDash', this)">
+                    <i class="fas fa-th-large" style="width:20px;color:var(--text-muted);"></i>
+                    My Dashboard
+                    <i class="fas fa-chevron-down mob-chevron"></i>
+                </button>
+                <div class="mob-accordion-panel" id="mobUserDash">
+                    <a href="{{ route('user.dashboard') }}" class="mob-sub-link"><i class="fas fa-home" style="width:16px;"></i> Overview</a>
+                    <a href="{{ route('calendar.index') }}" class="mob-sub-link"><i class="fas fa-calendar-alt" style="width:16px;"></i> Calendar</a>
+                    <a href="{{ route('chat.index') }}" class="mob-sub-link"><i class="fas fa-comment-dots" style="width:16px;"></i> Chat</a>
+                    <a href="{{ route('forum.index') }}" class="mob-sub-link"><i class="fas fa-comments" style="width:16px;"></i> Forum</a>
+                    <a href="{{ route('profile.edit') }}" class="mob-sub-link"><i class="fas fa-user-cog" style="width:16px;"></i> Profile</a>
+                </div>
             @endif
             <hr class="mobile-divider">
             <form method="POST" action="{{ route('logout') }}" style="width:100%;">
                 @csrf
-                <button type="submit" style="color:#fca5a5;width:100%;display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:none;border:none;cursor:pointer;font-size:0.95rem;">
+                <button type="submit" style="color:#fca5a5;width:100%;display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:none;border:none;cursor:pointer;font-size:0.95rem;border-radius:8px;">
                     <i class="fas fa-sign-out-alt" style="width:20px;"></i> Sign Out
                 </button>
             </form>
         @else
             <hr class="mobile-divider">
             <div class="mobile-auth">
-                <a href="{{ route('login') }}" class="btn-mobile-outline">
+                <a href="{{ route('login') }}" class="mob-link btn-mobile-outline">
                     <i class="fas fa-sign-in-alt" style="width:20px;"></i> Sign In
                 </a>
-                <a href="{{ route('register') }}" class="btn-mobile-primary">
+                <a href="{{ route('register') }}" class="mob-link btn-mobile-primary">
                     <i class="fas fa-user-plus" style="width:20px;"></i> Sign Up
                 </a>
             </div>
@@ -341,8 +392,8 @@
             document.body.style.overflow = isOpen ? 'hidden' : '';
         });
 
-        // Close mobile menu when a link is clicked
-        mobileMenu.querySelectorAll('a').forEach(link => {
+        // Close mobile menu when a non-accordion link is clicked
+        mobileMenu.querySelectorAll('a.mob-link, a.mob-sub-link').forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu.classList.remove('open');
                 navIcon.className = 'fas fa-bars';
@@ -358,6 +409,20 @@
                 document.body.style.overflow = '';
             }
         });
+
+        // Accordion toggle function
+        function toggleAccordion(panelId, btn) {
+            const panel = document.getElementById(panelId);
+            const isOpen = panel.classList.contains('open');
+            // Close all panels first
+            document.querySelectorAll('.mob-accordion-panel').forEach(p => p.classList.remove('open'));
+            document.querySelectorAll('.mob-accordion-btn').forEach(b => b.classList.remove('open'));
+            // Open clicked if it was closed
+            if (!isOpen) {
+                panel.classList.add('open');
+                btn.classList.add('open');
+            }
+        }
     </script>
 </body>
 </html>
