@@ -9,6 +9,9 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Public\PortfolioController;
 use App\Http\Controllers\Public\NewsletterController;
 use App\Http\Controllers\Public\CalendarController;
+use App\Http\Controllers\Public\UserDashboardController;
+use App\Http\Controllers\Public\ChatController;
+use App\Http\Controllers\Public\ForumController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -68,12 +71,48 @@ Route::get('/auth/{provider}/redirect', [SocialAuthController::class, 'redirect'
 Route::get('/auth/{provider}/callback', [SocialAuthController::class, 'callback'])->name('social.callback');
 
 // =============================================
+// USER DASHBOARD (regular logged-in users)
+// =============================================
+Route::middleware('auth')->group(function () {
+    Route::get('/user/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
+});
+
+// =============================================
 // AUTHENTICATED USER PROFILE
 // =============================================
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// =============================================
+// CHAT MODULE (authenticated users)
+// =============================================
+Route::middleware('auth')->prefix('chat')->name('chat.')->group(function () {
+    Route::get('/', [ChatController::class, 'index'])->name('index');
+    Route::get('/messages', [ChatController::class, 'getMessages'])->name('messages');
+    Route::post('/messages', [ChatController::class, 'sendMessage'])->name('send');
+    Route::delete('/messages/{message}', [ChatController::class, 'deleteMessage'])->name('delete');
+});
+
+// =============================================
+// FORUM MODULE (public read, auth to post)
+// =============================================
+Route::prefix('forum')->name('forum.')->group(function () {
+    Route::get('/', [ForumController::class, 'index'])->name('index');
+    Route::get('/{topic}', [ForumController::class, 'show'])->name('show');
+    Route::middleware('auth')->group(function () {
+        Route::post('/{topic}/reply', [ForumController::class, 'reply'])->name('reply');
+        Route::delete('/reply/{reply}', [ForumController::class, 'deleteReply'])->name('reply.delete');
+        Route::post('/', [ForumController::class, 'createTopic'])->name('create');
+    });
+    // Admin forum management
+    Route::middleware(['auth', 'role:admin'])->group(function () {
+        Route::patch('/{topic}/pin', [ForumController::class, 'togglePin'])->name('pin');
+        Route::patch('/{topic}/lock', [ForumController::class, 'toggleLock'])->name('lock');
+        Route::delete('/{topic}', [ForumController::class, 'deleteTopic'])->name('delete');
+    });
 });
 
 // =============================================
@@ -133,6 +172,6 @@ Route::get('/dashboard', function () {
     } elseif ($user->isStaff()) {
         return redirect()->route('staff.dashboard');
     } else {
-        return redirect()->route('home');
+        return redirect()->route('user.dashboard');
     }
 })->middleware('auth')->name('dashboard');

@@ -178,12 +178,14 @@
                 </li>
 
                 <li><a href="{{ route('jobs') }}" class="{{ request()->routeIs('jobs*') ? 'active' : '' }}">Jobs</a></li>
+                <li><a href="{{ route('forum.index') }}" class="{{ request()->routeIs('forum*') ? 'active' : '' }}">Forum</a></li>
                 @auth
-                    <li><a href="{{ route('calendar.index') }}" class="{{ request()->routeIs('calendar*') ? 'active' : '' }}"><i class="fas fa-calendar-alt" style="margin-right:0.25rem;"></i>Calendar</a></li>
                     @if(auth()->user()->isAdmin())
                         <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.*') ? 'active' : '' }}">Dashboard</a></li>
                     @elseif(auth()->user()->isStaff())
                         <li><a href="{{ route('staff.dashboard') }}">Staff Panel</a></li>
+                    @else
+                        <li><a href="{{ route('user.dashboard') }}" class="{{ request()->routeIs('user.dashboard') ? 'active' : '' }}">Dashboard</a></li>
                     @endif
                     <li>
                         <form method="POST" action="{{ route('logout') }}" style="display:inline;">
@@ -233,10 +235,10 @@
         <a href="{{ route('jobs') }}" class="{{ request()->routeIs('jobs*') ? 'active' : '' }}">
             <i class="fas fa-briefcase" style="width:20px;"></i> Jobs
         </a>
+        <a href="{{ route('forum.index') }}" class="{{ request()->routeIs('forum*') ? 'active' : '' }}">
+            <i class="fas fa-comments" style="width:20px;"></i> Forum
+        </a>
         @auth
-            <a href="{{ route('calendar.index') }}" class="{{ request()->routeIs('calendar*') ? 'active' : '' }}">
-                <i class="fas fa-calendar-alt" style="width:20px;"></i> Calendar & Notes
-            </a>
             @if(auth()->user()->isAdmin())
                 <a href="{{ route('admin.dashboard') }}">
                     <i class="fas fa-tachometer-alt" style="width:20px;"></i> Admin Dashboard
@@ -244,6 +246,10 @@
             @elseif(auth()->user()->isStaff())
                 <a href="{{ route('staff.dashboard') }}">
                     <i class="fas fa-user-tie" style="width:20px;"></i> Staff Panel
+                </a>
+            @else
+                <a href="{{ route('user.dashboard') }}">
+                    <i class="fas fa-th-large" style="width:20px;"></i> My Dashboard
                 </a>
             @endif
             <hr class="mobile-divider">

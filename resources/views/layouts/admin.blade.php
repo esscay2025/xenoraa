@@ -175,10 +175,36 @@
         .font-bold { font-weight: 700; } .font-semibold { font-weight: 600; }
         .mt-4 { margin-top: 1rem; } .mt-6 { margin-top: 1.5rem; } .mt-8 { margin-top: 2rem; }
         .mb-4 { margin-bottom: 1rem; } .mb-6 { margin-bottom: 1.5rem; } .mb-8 { margin-bottom: 2rem; }
+        /* Mobile Hamburger Button */
+        .mobile-menu-btn {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            flex-shrink: 0;
+        }
+        /* Sidebar Overlay */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 99;
+        }
+        .sidebar-overlay.active { display: block; }
         @media (max-width: 1024px) {
-            .sidebar { transform: translateX(-100%); }
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+            .sidebar.open { transform: translateX(0); }
             .main-content { margin-left: 0; }
             .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .mobile-menu-btn { display: flex; }
         }
     </style>
     @stack('styles')
@@ -270,7 +296,12 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="topbar">
-            <h1 class="topbar-title">@yield('page-title', 'Dashboard')</h1>
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+                <button class="mobile-menu-btn" id="adminMenuToggle" onclick="toggleAdminSidebar()">
+                    <i class="fas fa-bars" id="adminMenuIcon"></i>
+                </button>
+                <h1 class="topbar-title">@yield('page-title', 'Dashboard')</h1>
+            </div>
             <div style="display: flex; align-items: center; gap: 1rem;">
                 <a href="{{ route('home') }}" class="btn btn-outline btn-sm" target="_blank">
                     <i class="fas fa-external-link-alt"></i> View Site
@@ -290,6 +321,36 @@
         </div>
     </div>
 
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleAdminSidebar()"></div>
+
+    <script>
+        function toggleAdminSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            const icon = document.getElementById('adminMenuIcon');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            if (sidebar.classList.contains('open')) {
+                icon.className = 'fas fa-times';
+            } else {
+                icon.className = 'fas fa-bars';
+            }
+        }
+        // Close sidebar when a link is clicked on mobile
+        document.querySelectorAll('.sidebar-link').forEach(function(link) {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 1024) {
+                    const sidebar = document.querySelector('.sidebar');
+                    const overlay = document.getElementById('sidebarOverlay');
+                    const icon = document.getElementById('adminMenuIcon');
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('active');
+                    icon.className = 'fas fa-bars';
+                }
+            });
+        });
+    </script>
     @stack('scripts')
 </body>
 </html>
