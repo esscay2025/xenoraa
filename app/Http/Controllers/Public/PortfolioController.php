@@ -86,6 +86,28 @@ class PortfolioController extends Controller
     }
 
     /**
+     * Display blog posts filtered by category.
+     */
+    public function blogCategory(Request $request, string $slug)
+    {
+        $category = BlogCategory::where('slug', $slug)->firstOrFail();
+
+        $posts = BlogPost::with(['author', 'category'])
+            ->where('status', 'published')
+            ->where('category_id', $category->id)
+            ->orderBy('published_at', 'desc')
+            ->paginate(9);
+
+        $allCategories = BlogCategory::withCount(['posts' => fn($q) => $q->where('status', 'published')])
+            ->having('posts_count', '>', 0)
+            ->get();
+
+        $socialLinks = SocialLink::where('is_active', true)->get();
+
+        return view('portfolio.blog', compact('posts', 'socialLinks', 'category', 'allCategories'));
+    }
+
+    /**
      * Display a single blog post.
      */
     public function blogShow(string $slug)

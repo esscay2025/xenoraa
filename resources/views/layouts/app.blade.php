@@ -166,12 +166,12 @@
                     </a>
                     <div class="nav-dropdown nav-mega">
                         <div style="grid-column: 1/-1;"><div class="nav-dropdown-label">Browse by Category</div></div>
-                        <a href="{{ route('blog', ['category' => 'ai-automation']) }}"><i class="fas fa-robot"></i> AI & Automation</a>
-                        <a href="{{ route('blog', ['category' => 'hacking-security']) }}"><i class="fas fa-shield-alt"></i> Hacking & Security</a>
-                        <a href="{{ route('blog', ['category' => 'startup-product']) }}"><i class="fas fa-rocket"></i> Startup & Product Dev</a>
-                        <a href="{{ route('blog', ['category' => 'software-technology']) }}"><i class="fas fa-code"></i> Software & Technology</a>
-                        <a href="{{ route('blog', ['category' => 'digital-transformation']) }}"><i class="fas fa-chart-line"></i> Digital Transformation</a>
-                        <a href="{{ route('blog', ['category' => 'personal-branding']) }}"><i class="fas fa-user-tie"></i> Personal Branding</a>
+                        <a href="{{ route('blog.category', 'ai-automation') }}"><i class="fas fa-robot"></i> AI & Automation</a>
+                        <a href="{{ route('blog.category', 'hacking-security') }}"><i class="fas fa-shield-alt"></i> Hacking & Security</a>
+                        <a href="{{ route('blog.category', 'startup-product') }}"><i class="fas fa-rocket"></i> Startup & Product Dev</a>
+                        <a href="{{ route('blog.category', 'software-technology') }}"><i class="fas fa-code"></i> Software & Technology</a>
+                        <a href="{{ route('blog.category', 'digital-transformation') }}"><i class="fas fa-chart-line"></i> Digital Transformation</a>
+                        <a href="{{ route('blog.category', 'personal-branding') }}"><i class="fas fa-user-tie"></i> Personal Branding</a>
                         <div style="grid-column: 1/-1;"><hr class="nav-dropdown-divider"></div>
                         <div style="grid-column: 1/-1;"><a href="{{ route('blog') }}" style="font-weight:600;"><i class="fas fa-th-large"></i> View All Posts</a></div>
                     </div>
@@ -222,12 +222,12 @@
 
         <div class="mobile-section-label">Blog</div>
         <a href="{{ route('blog') }}" class="mobile-sub-link"><i class="fas fa-th-large" style="width:20px;"></i> All Posts</a>
-        <a href="{{ route('blog', ['category' => 'ai-automation']) }}" class="mobile-sub-link"><i class="fas fa-robot" style="width:20px;"></i> AI & Automation</a>
-        <a href="{{ route('blog', ['category' => 'hacking-security']) }}" class="mobile-sub-link"><i class="fas fa-shield-alt" style="width:20px;"></i> Hacking & Security</a>
-        <a href="{{ route('blog', ['category' => 'startup-product']) }}" class="mobile-sub-link"><i class="fas fa-rocket" style="width:20px;"></i> Startup & Product Dev</a>
-        <a href="{{ route('blog', ['category' => 'software-technology']) }}" class="mobile-sub-link"><i class="fas fa-code" style="width:20px;"></i> Software & Technology</a>
-        <a href="{{ route('blog', ['category' => 'digital-transformation']) }}" class="mobile-sub-link"><i class="fas fa-chart-line" style="width:20px;"></i> Digital Transformation</a>
-        <a href="{{ route('blog', ['category' => 'personal-branding']) }}" class="mobile-sub-link"><i class="fas fa-user-tie" style="width:20px;"></i> Personal Branding</a>
+        <a href="{{ route('blog.category', 'ai-automation') }}" class="mobile-sub-link"><i class="fas fa-robot" style="width:20px;"></i> AI & Automation</a>
+        <a href="{{ route('blog.category', 'hacking-security') }}" class="mobile-sub-link"><i class="fas fa-shield-alt" style="width:20px;"></i> Hacking & Security</a>
+        <a href="{{ route('blog.category', 'startup-product') }}" class="mobile-sub-link"><i class="fas fa-rocket" style="width:20px;"></i> Startup & Product Dev</a>
+        <a href="{{ route('blog.category', 'software-technology') }}" class="mobile-sub-link"><i class="fas fa-code" style="width:20px;"></i> Software & Technology</a>
+        <a href="{{ route('blog.category', 'digital-transformation') }}" class="mobile-sub-link"><i class="fas fa-chart-line" style="width:20px;"></i> Digital Transformation</a>
+        <a href="{{ route('blog.category', 'personal-branding') }}" class="mobile-sub-link"><i class="fas fa-user-tie" style="width:20px;"></i> Personal Branding</a>
 
         <hr class="mobile-divider">
         <a href="{{ route('jobs') }}" class="{{ request()->routeIs('jobs*') ? 'active' : '' }}">
