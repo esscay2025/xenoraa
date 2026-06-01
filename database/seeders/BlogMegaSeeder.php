@@ -1435,7 +1435,7 @@ CMD [\"npm\", \"start\"]</code></pre>
                         'summary' => $blog['summary'],
                         'content' => $blog['content'],
                         'user_id' => $author->id,
-                        'blog_category_id' => $category->id,
+                        'category_id' => $category->id,
                         'status' => 'published',
                         'published_at' => now()->subDays(rand(1, 30)),
                         'views_count' => rand(100, 1500),
