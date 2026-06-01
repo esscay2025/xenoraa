@@ -572,7 +572,7 @@ USER appuser
 
 # Expose port and run application
 EXPOSE 8080
-CMD ["npm", "start"]</code></pre>
+CMD [\"npm\", \"start\"]</code></pre>
 </div>
 
 <h2>Vulnerability Scanning in CI/CD</h2>
