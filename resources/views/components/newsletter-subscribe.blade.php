@@ -58,12 +58,12 @@
 
     <form id="{{ $formId }}" action="{{ route('newsletter.subscribe') }}" method="POST">
         @csrf
-        <div style="display: flex; gap: 0.4rem; margin-bottom: 0.4rem;">
+        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.4rem;">
             <input type="email" name="email" placeholder="your@email.com" required
-                style="flex: 1; padding: 0.55rem 0.75rem; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 6px; color: var(--text-primary); font-size: 0.82rem; outline: none; min-width: 0; transition: border-color 0.2s;"
+                style="flex: 1; min-width: 140px; padding: 0.55rem 0.75rem; background: var(--bg-primary); border: 1px solid var(--border-light); border-radius: 6px; color: var(--text-primary); font-size: 0.82rem; outline: none; transition: border-color 0.2s;"
                 onfocus="this.style.borderColor='#555'" onblur="this.style.borderColor='var(--border-light)'">
             <button type="submit"
-                style="padding: 0.55rem 0.875rem; background: var(--text-primary); color: var(--bg-primary); border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background 0.2s; flex-shrink: 0;"
+                style="padding: 0.55rem 0.875rem; background: var(--text-primary); color: var(--bg-primary); border: none; border-radius: 6px; font-size: 0.82rem; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background 0.2s; flex-shrink: 0; width: 100%; max-width: 120px;"
                 onmouseover="this.style.background='#e0e0e0'" onmouseout="this.style.background='var(--text-primary)'">
                 Subscribe
             </button>

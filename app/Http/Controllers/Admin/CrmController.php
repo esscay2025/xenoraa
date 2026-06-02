@@ -159,4 +159,10 @@ class CrmController extends Controller
         $lead = $messages->first()?->lead;
         return view('admin.crm.conversation-show', compact('messages', 'lead', 'sessionId'));
     }
+
+    public function conversationDestroy($sessionId)
+    {
+        ChatbotConversation::where('session_id', $sessionId)->delete();
+        return redirect()->route('admin.crm.conversations')->with('success', 'Conversation deleted.');
+    }
 }

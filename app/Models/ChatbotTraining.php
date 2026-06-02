@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class ChatbotTraining extends Model
 {
+    protected $table = 'chatbot_training';
+
     protected $fillable = ['category', 'question', 'answer', 'is_active', 'sort_order'];
 
     protected $casts = ['is_active' => 'boolean'];

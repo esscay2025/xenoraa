@@ -305,7 +305,7 @@
             <div class="sidebar-group-panel {{ $communityActive ? 'open' : '' }}" id="sgCommunity">
                 <a href="{{ route('admin.forum.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.forum*') ? 'active' : '' }}"><i class="fas fa-comments"></i> Forum Control</a>
                 <a href="{{ route('admin.chat.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.chat*') ? 'active' : '' }}"><i class="fas fa-comment-dots"></i> Chat Monitor</a>
-                <a href="{{ route('admin.calendar.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.calendar*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Calendar Events</a>
+                <a href="{{ route('admin.calendar.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.calendar*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Calendar &amp; Notes</a>
                 <a href="{{ route('admin.newsletter.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Newsletter</a>
             </div>
 

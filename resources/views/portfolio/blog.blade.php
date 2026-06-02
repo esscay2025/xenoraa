@@ -22,7 +22,10 @@
         @foreach($posts as $post)
         <a href="{{ route('blog.show', $post->slug) }}" style="text-decoration: none; color: inherit; display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: all 0.2s;" onmouseover="this.style.borderColor='#444'" onmouseout="this.style.borderColor='var(--border)'">
             @if($post->featured_image)
-            <img src="{{ asset('storage/' . $post->featured_image) }}" alt="{{ $post->title }}" style="width: 100%; height: 200px; object-fit: cover;">
+            @php
+                $imgSrc = str_starts_with($post->featured_image, 'http') ? $post->featured_image : asset('storage/' . $post->featured_image);
+            @endphp
+            <img src="{{ $imgSrc }}" alt="{{ $post->title }}" style="width: 100%; height: 200px; object-fit: cover;" onerror="this.parentElement.innerHTML='<div style=\'width:100%;height:200px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);display:flex;align-items:center;justify-content:center;\'><i class=\'fas fa-pen-nib\' style=\'font-size:2.5rem;color:#555;\'></i></div>';">
             @else
             <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #1a1a1a, #2a2a2a); display: flex; align-items: center; justify-content: center;">
                 <i class="fas fa-pen-nib" style="font-size: 2.5rem; color: var(--text-muted);"></i>

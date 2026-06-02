@@ -265,36 +265,65 @@
     </div>
 </section>
 
-<!-- Experience Section -->
+<!-- Solutions Section -->
 <section class="section">
     <div class="container">
-        <p class="text-sm text-secondary" style="text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">Career</p>
-        <h2 class="section-title">Professional Experience</h2>
-        <div class="card">
-            @forelse($experiences as $exp)
-            <div class="experience-item">
-                <div class="exp-dot"></div>
-                <div style="flex: 1;">
-                    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 0.5rem;">
-                        <div>
-                            <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0;">{{ $exp->title }}</h3>
-                            <div style="font-size: 0.95rem; color: var(--text-secondary); margin-top: 0.25rem;">{{ $exp->company }}</div>
-                        </div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">
-                            {{ $exp->start_date->format('M Y') }} &mdash; {{ $exp->is_current ? 'Present' : $exp->end_date->format('M Y') }}
-                        </div>
-                    </div>
-                    <p style="font-size: 0.9rem; color: var(--text-secondary); margin-top: 1rem; line-height: 1.6;">
-                        {{ $exp->description }}
-                    </p>
+        <p class="text-sm text-secondary" style="text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem;">What I Do</p>
+        <h2 class="section-title">Solutions I Offer</h2>
+        <div class="solutions-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+
+            <a href="{{ route('solutions.ai-automation') }}" style="text-decoration: none; color: inherit; display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#555';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
+                <div style="width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #6366f1, #8b5cf6); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+                    <i class="fas fa-robot" style="font-size: 1.4rem; color: #fff;"></i>
                 </div>
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.75rem;">AI Automation</h3>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; margin: 0;">Automate repetitive business workflows with intelligent AI agents, chatbots, and process automation pipelines.</p>
+            </a>
+
+            <a href="{{ route('solutions.custom-app-dev') }}" style="text-decoration: none; color: inherit; display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#555';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
+                <div style="width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #06b6d4); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+                    <i class="fas fa-code" style="font-size: 1.4rem; color: #fff;"></i>
+                </div>
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.75rem;">Custom App Development</h3>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; margin: 0;">Full-stack web and mobile applications built with modern frameworks, tailored to your exact business requirements.</p>
+            </a>
+
+            <a href="{{ route('solutions.digital-transformation') }}" style="text-decoration: none; color: inherit; display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#555';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
+                <div style="width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #059669); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+                    <i class="fas fa-digital-tachograph" style="font-size: 1.4rem; color: #fff;"></i>
+                </div>
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.75rem;">Digital Transformation</h3>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; margin: 0;">End-to-end digitisation of business operations — from legacy system migration to cloud-native infrastructure.</p>
+            </a>
+
+            <a href="{{ route('solutions.startup-product-dev') }}" style="text-decoration: none; color: inherit; display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#555';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
+                <div style="width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+                    <i class="fas fa-rocket" style="font-size: 1.4rem; color: #fff;"></i>
+                </div>
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.75rem;">Startup Product Development</h3>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; margin: 0;">From MVP to market — rapid prototyping, product strategy, and scalable architecture for early-stage startups.</p>
+            </a>
+
+            <a href="{{ route('solutions.branding') }}" style="text-decoration: none; color: inherit; display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#555';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
+                <div style="width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #ec4899, #db2777); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
+                    <i class="fas fa-palette" style="font-size: 1.4rem; color: #fff;"></i>
+                </div>
+                <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0 0 0.75rem;">Branding &amp; Digital Presence</h3>
+                <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; margin: 0;">Build a compelling brand identity and online presence — logo, website, SEO, and social media strategy.</p>
+            </a>
+
+            <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.6; margin: 0 0 1.25rem;">Have a unique challenge? Let's talk about a custom solution.</p>
+                <a href="#chatbot-btn" onclick="document.getElementById('chatbot-btn').click(); return false;" class="btn btn-outline btn-sm"><i class="fas fa-comment-dots" style="margin-right: 0.4rem;"></i>Start a Conversation</a>
             </div>
-            @empty
-            <p class="text-muted">No experience history found.</p>
-            @endforelse
+
         </div>
     </div>
 </section>
+<style>
+@media (max-width: 900px) { .solutions-grid { grid-template-columns: repeat(2, 1fr) !important; } }
+@media (max-width: 600px) { .solutions-grid { grid-template-columns: 1fr !important; } }
+</style>
 
 <!-- Blog Section (Category-Based) -->
 <section class="section" style="background-color: var(--bg-secondary);">

@@ -44,4 +44,8 @@ return [
         'redirect'      => env('FACEBOOK_REDIRECT_URI', '/auth/facebook/callback'),
     ],
 
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+    ],
+
 ];
