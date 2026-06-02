@@ -280,7 +280,7 @@
                 <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; margin: 0;">Automate repetitive business workflows with intelligent AI agents, chatbots, and process automation pipelines.</p>
             </a>
 
-            <a href="{{ route('solutions.custom-app-dev') }}" style="text-decoration: none; color: inherit; display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#555';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
+            <a href="{{ route('solutions.custom-app') }}" style="text-decoration: none; color: inherit; display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#555';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
                 <div style="width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #0ea5e9, #06b6d4); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
                     <i class="fas fa-code" style="font-size: 1.4rem; color: #fff;"></i>
                 </div>
@@ -296,7 +296,7 @@
                 <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; margin: 0;">End-to-end digitisation of business operations — from legacy system migration to cloud-native infrastructure.</p>
             </a>
 
-            <a href="{{ route('solutions.startup-product-dev') }}" style="text-decoration: none; color: inherit; display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#555';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
+            <a href="{{ route('solutions.startup-product') }}" style="text-decoration: none; color: inherit; display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#555';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
                 <div style="width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
                     <i class="fas fa-rocket" style="font-size: 1.4rem; color: #fff;"></i>
                 </div>
@@ -304,7 +304,7 @@
                 <p style="color: var(--text-secondary); font-size: 0.875rem; line-height: 1.6; margin: 0;">From MVP to market — rapid prototyping, product strategy, and scalable architecture for early-stage startups.</p>
             </a>
 
-            <a href="{{ route('solutions.branding') }}" style="text-decoration: none; color: inherit; display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#555';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
+            <a href="{{ route('solutions.branding-digital') }}" style="text-decoration: none; color: inherit; display: block; background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; transition: all 0.2s;" onmouseover="this.style.borderColor='#555';this.style.transform='translateY(-4px)'" onmouseout="this.style.borderColor='var(--border)';this.style.transform='none'">
                 <div style="width: 52px; height: 52px; border-radius: 12px; background: linear-gradient(135deg, #ec4899, #db2777); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem;">
                     <i class="fas fa-palette" style="font-size: 1.4rem; color: #fff;"></i>
                 </div>
