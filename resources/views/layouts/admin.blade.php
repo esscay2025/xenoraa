@@ -309,6 +309,32 @@
                 <a href="{{ route('admin.newsletter.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Newsletter</a>
             </div>
 
+            {{-- CRM Group --}}
+            @php $crmActive = request()->routeIs('admin.crm*'); @endphp
+            <button class="sidebar-group-btn {{ $crmActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgCRM', this)">
+                <i class="fas fa-handshake group-icon"></i> CRM
+                <i class="fas fa-chevron-down group-chevron"></i>
+            </button>
+            <div class="sidebar-group-panel {{ $crmActive ? 'open' : '' }}" id="sgCRM">
+                <a href="{{ route('admin.crm.leads') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.leads*') || request()->routeIs('admin.crm.lead*') ? 'active' : '' }}"><i class="fas fa-user-tie"></i> All Leads</a>
+                <a href="{{ route('admin.crm.conversations') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.conversation*') ? 'active' : '' }}"><i class="fas fa-robot"></i> AI Conversations</a>
+                <a href="{{ route('admin.crm.training') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.training*') ? 'active' : '' }}"><i class="fas fa-brain"></i> Train Chatbot</a>
+            </div>
+
+            {{-- E-commerce Group --}}
+            @php $ecommerceActive = request()->routeIs('admin.ecommerce*'); @endphp
+            <button class="sidebar-group-btn {{ $ecommerceActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgEcommerce', this)">
+                <i class="fas fa-store group-icon"></i> E-commerce
+                <i class="fas fa-chevron-down group-chevron"></i>
+            </button>
+            <div class="sidebar-group-panel {{ $ecommerceActive ? 'open' : '' }}" id="sgEcommerce">
+                <a href="{{ route('admin.ecommerce.dashboard') }}" class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.dashboard') ? 'active' : '' }}"><i class="fas fa-chart-bar"></i> Dashboard</a>
+                <a href="{{ route('admin.ecommerce.categories') }}" class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.categories*') ? 'active' : '' }}"><i class="fas fa-tags"></i> Categories</a>
+                <a href="{{ route('admin.ecommerce.products') }}" class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.products*') ? 'active' : '' }}"><i class="fas fa-box"></i> Products</a>
+                <a href="{{ route('admin.ecommerce.products.create') }}" class="sidebar-sub-link"><i class="fas fa-plus-circle"></i> Add Product</a>
+                <a href="{{ route('admin.ecommerce.reviews') }}" class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.reviews*') ? 'active' : '' }}"><i class="fas fa-star"></i> Reviews</a>
+            </div>
+
             {{-- Site Group --}}
             @php $siteActive = request()->routeIs('admin.settings*'); @endphp
             <button class="sidebar-group-btn {{ $siteActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgSite', this)">

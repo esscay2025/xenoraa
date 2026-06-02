@@ -12,6 +12,8 @@ use App\Http\Controllers\Public\CalendarController;
 use App\Http\Controllers\Public\UserDashboardController;
 use App\Http\Controllers\Public\ChatController;
 use App\Http\Controllers\Public\ForumController;
+use App\Http\Controllers\Public\ShopController;
+use App\Http\Controllers\Public\ChatbotController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -40,6 +42,18 @@ Route::post('/jobs/{slug}/apply', [PortfolioController::class, 'applyJob'])->nam
 // SOLUTIONS ROUTES
 // =============================================
 require __DIR__.'/solutions.php';
+
+// =============================================
+// SHOP / E-COMMERCE ROUTES (Public)
+// =============================================
+Route::get('/shop', [ShopController::class, 'index'])->name('shop');
+Route::get('/shop/{product:slug}', [ShopController::class, 'show'])->name('shop.product');
+
+// =============================================
+// AI CHATBOT ROUTES (Public)
+// =============================================
+Route::post('/chatbot/message', [ChatbotController::class, 'message'])->name('chatbot.message');
+Route::post('/chatbot/start', [ChatbotController::class, 'start'])->name('chatbot.start');
 
 // =============================================
 // AUTHENTICATION ROUTES (Breeze)
@@ -171,6 +185,40 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/newsletter', [\App\Http\Controllers\Admin\NewsletterAdminController::class, 'index'])->name('newsletter.index');
     Route::delete('/newsletter/{subscriber}', [\App\Http\Controllers\Admin\NewsletterAdminController::class, 'destroy'])->name('newsletter.destroy');
     Route::get('/newsletter/export', [\App\Http\Controllers\Admin\NewsletterAdminController::class, 'export'])->name('newsletter.export');
+
+    // CRM Module
+    Route::prefix('crm')->name('crm.')->group(function () {
+        Route::get('/leads', [\App\Http\Controllers\Admin\CrmController::class, 'leadsIndex'])->name('leads');
+        Route::get('/leads/{lead}', [\App\Http\Controllers\Admin\CrmController::class, 'leadShow'])->name('lead.show');
+        Route::patch('/leads/{lead}/status', [\App\Http\Controllers\Admin\CrmController::class, 'updateLeadStatus'])->name('lead.status');
+        Route::delete('/leads/{lead}', [\App\Http\Controllers\Admin\CrmController::class, 'destroyLead'])->name('lead.destroy');
+        Route::get('/conversations', [\App\Http\Controllers\Admin\CrmController::class, 'conversationsIndex'])->name('conversations');
+        Route::get('/conversations/{conversation}', [\App\Http\Controllers\Admin\CrmController::class, 'conversationShow'])->name('conversation.show');
+        Route::delete('/conversations/{conversation}', [\App\Http\Controllers\Admin\CrmController::class, 'destroyConversation'])->name('conversation.destroy');
+        Route::get('/training', [\App\Http\Controllers\Admin\CrmController::class, 'trainingIndex'])->name('training');
+        Route::post('/training', [\App\Http\Controllers\Admin\CrmController::class, 'storeTraining'])->name('training.store');
+        Route::put('/training/{training}', [\App\Http\Controllers\Admin\CrmController::class, 'updateTraining'])->name('training.update');
+        Route::delete('/training/{training}', [\App\Http\Controllers\Admin\CrmController::class, 'destroyTraining'])->name('training.destroy');
+    });
+
+    // E-commerce Admin
+    Route::prefix('ecommerce')->name('ecommerce.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\EcommerceController::class, 'dashboard'])->name('dashboard');
+        Route::get('/categories', [\App\Http\Controllers\Admin\EcommerceController::class, 'categories'])->name('categories');
+        Route::post('/categories', [\App\Http\Controllers\Admin\EcommerceController::class, 'storeCategory'])->name('categories.store');
+        Route::put('/categories/{category}', [\App\Http\Controllers\Admin\EcommerceController::class, 'updateCategory'])->name('categories.update');
+        Route::delete('/categories/{category}', [\App\Http\Controllers\Admin\EcommerceController::class, 'destroyCategory'])->name('categories.destroy');
+        Route::get('/products', [\App\Http\Controllers\Admin\EcommerceController::class, 'products'])->name('products');
+        Route::get('/products/create', [\App\Http\Controllers\Admin\EcommerceController::class, 'createProduct'])->name('products.create');
+        Route::post('/products', [\App\Http\Controllers\Admin\EcommerceController::class, 'storeProduct'])->name('products.store');
+        Route::get('/products/{product}/edit', [\App\Http\Controllers\Admin\EcommerceController::class, 'editProduct'])->name('products.edit');
+        Route::put('/products/{product}', [\App\Http\Controllers\Admin\EcommerceController::class, 'updateProduct'])->name('products.update');
+        Route::delete('/products/{product}', [\App\Http\Controllers\Admin\EcommerceController::class, 'destroyProduct'])->name('products.destroy');
+        Route::patch('/products/{product}/toggle', [\App\Http\Controllers\Admin\EcommerceController::class, 'toggleProduct'])->name('products.toggle');
+        Route::get('/reviews', [\App\Http\Controllers\Admin\EcommerceController::class, 'reviews'])->name('reviews');
+        Route::patch('/reviews/{review}/approve', [\App\Http\Controllers\Admin\EcommerceController::class, 'approveReview'])->name('review.approve');
+        Route::delete('/reviews/{review}', [\App\Http\Controllers\Admin\EcommerceController::class, 'destroyReview'])->name('review.destroy');
+    });
 });
 
 // =============================================

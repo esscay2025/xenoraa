@@ -187,6 +187,7 @@
 
                 <li><a href="{{ route('jobs') }}" class="{{ request()->routeIs('jobs*') ? 'active' : '' }}">Jobs</a></li>
                 <li><a href="{{ route('forum.index') }}" class="{{ request()->routeIs('forum*') ? 'active' : '' }}">Forum</a></li>
+                <li><a href="{{ route('shop') }}" class="{{ request()->routeIs('shop*') ? 'active' : '' }}">Shop</a></li>
                 @auth
                     @if(auth()->user()->isAdmin())
                         <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.*') ? 'active' : '' }}">Dashboard</a></li>
@@ -262,6 +263,9 @@
         <a href="{{ route('forum.index') }}" class="mob-link {{ request()->routeIs('forum*') ? 'active' : '' }}">
             <i class="fas fa-comments" style="width:20px;color:var(--text-muted);"></i> Forum
         </a>
+        <a href="{{ route('shop') }}" class="mob-link {{ request()->routeIs('shop*') ? 'active' : '' }}">
+            <i class="fas fa-shopping-bag" style="width:20px;color:var(--text-muted);"></i> Shop
+        </a>
 
         @auth
             <hr class="mobile-divider">
@@ -282,6 +286,9 @@
                     <a href="{{ route('admin.chat.index') }}" class="mob-sub-link"><i class="fas fa-comment-dots" style="width:16px;"></i> Chat Monitor</a>
                     <a href="{{ route('admin.calendar.index') }}" class="mob-sub-link"><i class="fas fa-calendar-alt" style="width:16px;"></i> Calendar Events</a>
                     <a href="{{ route('admin.newsletter.index') }}" class="mob-sub-link"><i class="fas fa-envelope" style="width:16px;"></i> Newsletter</a>
+                    <a href="{{ route('admin.crm.leads') }}" class="mob-sub-link"><i class="fas fa-handshake" style="width:16px;"></i> CRM Leads</a>
+                    <a href="{{ route('admin.crm.conversations') }}" class="mob-sub-link"><i class="fas fa-robot" style="width:16px;"></i> Chatbot Conversations</a>
+                    <a href="{{ route('admin.ecommerce.dashboard') }}" class="mob-sub-link"><i class="fas fa-store" style="width:16px;"></i> E-commerce</a>
                     <a href="{{ route('admin.settings.index') }}" class="mob-sub-link"><i class="fas fa-cog" style="width:16px;"></i> Site Settings</a>
                 </div>
             @elseif(auth()->user()->isStaff())
@@ -377,6 +384,9 @@
             </div>
         </div>
     </footer>
+
+    {{-- AI Chatbot Widget --}}
+    @include('components.chatbot-widget')
 
     @stack('scripts')
     <script>
