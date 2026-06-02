@@ -85,6 +85,15 @@
             <a href="{{ route('admin.users.create') }}" class="btn btn-outline btn-sm" style="justify-content: flex-start;">
                 <i class="fas fa-user-plus"></i> Add User
             </a>
+            <a href="{{ route('admin.calendar.index') }}" class="btn btn-outline btn-sm" style="justify-content: flex-start;">
+                <i class="fas fa-calendar-alt"></i> Calendar &amp; Notes
+            </a>
+            <a href="{{ route('admin.crm.leads') }}" class="btn btn-outline btn-sm" style="justify-content: flex-start;">
+                <i class="fas fa-user-tag"></i> CRM Leads
+            </a>
+            <a href="{{ route('admin.crm.conversations') }}" class="btn btn-outline btn-sm" style="justify-content: flex-start;">
+                <i class="fas fa-comments"></i> Chat Monitor
+            </a>
         </div>
     </div>
 </div>

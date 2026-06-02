@@ -216,6 +216,48 @@ class CrmController extends Controller
         return view('admin.crm.conversation-show', compact('messages', 'lead', 'sessionId'));
     }
 
+    public function conversationReply(Request $request, $sessionId)
+    {
+        $request->validate([
+            'message' => 'required|string|max:2000',
+        ]);
+
+        // Get the lead associated with this session
+        $firstMsg = ChatbotConversation::where('session_id', $sessionId)->first();
+        $lead = $firstMsg?->lead;
+
+        // Save admin reply as assistant message in conversation
+        ChatbotConversation::create([
+            'lead_id'    => $lead?->id,
+            'session_id' => $sessionId,
+            'role'       => 'assistant',
+            'message'    => '[Admin Reply] ' . $request->message,
+        ]);
+
+        // Send email to the lead if they have an email
+        if ($lead && $lead->email) {
+            try {
+                $body = $request->message;
+                $name = $lead->name ?? 'Visitor';
+                Mail::send([], [], function ($message) use ($lead, $name, $body) {
+                    $message->to($lead->email, $name)
+                        ->from(config('mail.from.address'), config('mail.from.name'))
+                        ->subject('Reply from Gopi — gopi.blog')
+                        ->html($this->buildEmailHtml($lead, $body));
+                });
+
+                // Update lead status
+                if ($lead->status === 'new') {
+                    $lead->update(['status' => 'contacted', 'last_contacted_at' => now()]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Conversation reply email error: ' . $e->getMessage());
+            }
+        }
+
+        return back()->with('success', 'Reply sent' . ($lead?->email ? ' and emailed to ' . $lead->email : '') . '.');
+    }
+
     public function conversationDestroy($sessionId)
     {
         ChatbotConversation::where('session_id', $sessionId)->delete();
