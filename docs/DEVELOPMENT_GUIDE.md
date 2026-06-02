@@ -55,6 +55,35 @@ DB_USERNAME=root
 DB_PASSWORD=your_local_mysql_password
 ```
 
+### Step 3b — Configure Email (SMTP)
+For production, the application uses Hostinger SMTP to send emails from `support@gopi.blog`. Update the following in your `.env` (production only — do not commit credentials):
+```env
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.hostinger.com
+MAIL_PORT=465
+MAIL_USERNAME=support@gopi.blog
+MAIL_PASSWORD=your_email_password
+MAIL_ENCRYPTION=ssl
+MAIL_FROM_ADDRESS="support@gopi.blog"
+MAIL_FROM_NAME="Gopi"
+```
+
+For local development, you may use [Mailtrap](https://mailtrap.io) or Laravel's `log` driver:
+```env
+MAIL_MAILER=log
+```
+
+DNS records required for email deliverability (already added to Cloudflare for gopi.blog):
+| Record | Type | Value |
+|---|---|---|
+| `@` | TXT | `v=spf1 include:_spf.mail.hostinger.com ~all` |
+| `_dmarc` | TXT | `v=DMARC1; p=none; rua=mailto:dmarc@gopi.blog` |
+| `hostingermail-a._domainkey` | CNAME | `hostingermail-a.dkim.mail.hostinger.com` |
+| `hostingermail-b._domainkey` | CNAME | `hostingermail-b.dkim.mail.hostinger.com` |
+| `hostingermail-c._domainkey` | CNAME | `hostingermail-c.dkim.mail.hostinger.com` |
+
+---
+
 ### Step 4 — Generate App Encryption Key & Public Symlink
 Generate a unique application key for cookie and session encryption, and create the public storage link to enable file uploads (e.g., job resumes, blog images):
 ```bash
