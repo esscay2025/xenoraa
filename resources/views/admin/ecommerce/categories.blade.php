@@ -56,7 +56,7 @@
                                     <i class="fas fa-level-up-alt fa-rotate-90" style="color:#6366f1;font-size:0.65rem;"></i>
                                     <span style="color:#9ca3af;font-size:0.8rem;">{{ $sub->name }}</span>
                                     <span style="background:#1e3a5f;color:#60a5fa;padding:0.1rem 0.4rem;border-radius:10px;font-size:0.7rem;">{{ $sub->products_count ?? 0 }}</span>
-                                    <form method="POST" action="{{ route('admin.ecommerce.category.destroy', $sub) }}" onsubmit="return confirm('Delete subcategory?')" style="margin-left:auto;">
+                                    <form method="POST" action="{{ route('admin.ecommerce.categories.destroy', $sub) }}" onsubmit="return confirm('Delete subcategory?')" style="margin-left:auto;">
                                         @csrf @method('DELETE')
                                         <button type="submit" style="background:transparent;color:#ef4444;border:none;cursor:pointer;font-size:0.7rem;padding:0;"><i class="fas fa-times"></i></button>
                                     </form>
@@ -73,7 +73,7 @@
                             </span>
                         </td>
                         <td style="padding:0.875rem 1rem;text-align:center;">
-                            <form method="POST" action="{{ route('admin.ecommerce.category.destroy', $cat) }}" onsubmit="return confirm('Delete this category?')">
+                            <form method="POST" action="{{ route('admin.ecommerce.categories.destroy', $cat) }}" onsubmit="return confirm('Delete this category?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" style="background:#450a0a;color:#ef4444;border:none;padding:0.35rem 0.65rem;border-radius:6px;cursor:pointer;font-size:0.75rem;"><i class="fas fa-trash"></i></button>
                             </form>
@@ -90,7 +90,7 @@
         <div style="position:sticky;top:1.5rem;">
             <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.5rem;">
                 <h3 style="color:#fff;font-size:1rem;font-weight:600;margin:0 0 1.25rem;"><i class="fas fa-plus-circle" style="color:#6366f1;margin-right:0.5rem;"></i>Add Category</h3>
-                <form method="POST" action="{{ route('admin.ecommerce.category.store') }}">
+                <form method="POST" action="{{ route('admin.ecommerce.categories.store') }}">
                     @csrf
                     <div style="margin-bottom:1rem;">
                         <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Category Name *</label>

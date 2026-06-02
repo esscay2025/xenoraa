@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\NewsletterSubscriber;
 use App\Models\Role;
 use App\Models\User;
 use App\Providers\RouteServiceProvider;
@@ -11,6 +12,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -26,7 +28,8 @@ class RegisteredUserController extends Controller
 
     /**
      * Handle an incoming registration request.
-     * New users are automatically assigned the 'visitor' role.
+     * New users are automatically assigned the 'visitor' role
+     * and added to the newsletter subscriber list.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -48,6 +51,17 @@ class RegisteredUserController extends Controller
             'role_id' => $visitorRole?->id,
             'status' => 'active',
         ]);
+
+        // Auto-subscribe new user to newsletter (if not already subscribed)
+        NewsletterSubscriber::firstOrCreate(
+            ['email' => $request->email],
+            [
+                'name'          => $request->name,
+                'status'        => 'active',
+                'token'         => Str::random(40),
+                'subscribed_at' => now(),
+            ]
+        );
 
         event(new Registered($user));
 

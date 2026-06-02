@@ -18,7 +18,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ isset($product) ? route('admin.ecommerce.product.update', $product) : route('admin.ecommerce.product.store') }}">
+    <form method="POST" action="{{ isset($product) ? route('admin.ecommerce.products.update', $product) : route('admin.ecommerce.products.store') }}">
         @csrf
         @if(isset($product)) @method('PUT') @endif
 

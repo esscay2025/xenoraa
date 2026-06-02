@@ -288,8 +288,9 @@
     <div id="chatbot-contact-form" style="display:none;">
         <h5><i class="fas fa-user-circle" style="color:#6366f1;margin-right:6px;"></i>Let's get started</h5>
         <input type="text"   id="cb-name"   placeholder="Your full name *" required>
-        <input type="tel"    id="cb-mobile" placeholder="Mobile number *" required>
-        <input type="email"  id="cb-email"  placeholder="Email address (optional)">
+        <input type="email"  id="cb-email"  placeholder="Email address *" required>
+        <input type="tel"    id="cb-mobile" placeholder="Mobile number (optional)">
+        <div id="cb-form-error" style="color:#f87171;font-size:0.75rem;margin-bottom:0.4rem;display:none;"></div>
         <button onclick="submitContactForm()">Start Conversation →</button>
     </div>
 
@@ -363,11 +364,13 @@
 
     window.submitContactForm = async function() {
         const name   = document.getElementById('cb-name').value.trim();
-        const mobile = document.getElementById('cb-mobile').value.trim();
         const email  = document.getElementById('cb-email').value.trim();
+        const mobile = document.getElementById('cb-mobile').value.trim();
+        const errEl  = document.getElementById('cb-form-error');
 
-        if (!name) { alert('Please enter your name.'); return; }
-        if (!mobile) { alert('Please enter your mobile number.'); return; }
+        errEl.style.display = 'none';
+        if (!name) { errEl.textContent = 'Please enter your full name.'; errEl.style.display = 'block'; return; }
+        if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) { errEl.textContent = 'Please enter a valid email address.'; errEl.style.display = 'block'; return; }
 
         try {
             const res = await fetch('/chatbot/contact', {
@@ -385,11 +388,29 @@
                 contactSaved = true;
                 document.getElementById('chatbot-contact-form').style.display = 'none';
                 showInputArea();
-                appendMessage('user', `${name} — ${mobile}`);
-                appendMessage('bot', `Great to meet you, ${name}! 🎉 Now tell me — what are you looking to build or automate? What's the biggest challenge your business is facing right now?`);
+                appendMessage('user', `${name} (${email})`);
+                // Trigger AI greeting with context
+                showTyping();
+                const chatRes = await fetch('/chatbot/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ message: `Hi, my name is ${name} and my email is ${email}. I'm here to discuss my business needs.`, session_id: sessionId, lead_id: leadId }),
+                });
+                const chatData = await chatRes.json();
+                removeTyping();
+                if (chatData.lead_id) leadId = chatData.lead_id;
+                appendMessage('bot', chatData.reply);
+            } else {
+                errEl.textContent = data.message || 'Something went wrong. Please try again.';
+                errEl.style.display = 'block';
             }
         } catch(e) {
-            alert('Something went wrong. Please try again.');
+            errEl.textContent = 'Something went wrong. Please try again.';
+            errEl.style.display = 'block';
         }
     };
 
