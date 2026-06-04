@@ -53,14 +53,13 @@ class TenantProfileController extends Controller
             ->take(6)
             ->get();
 
-        $portfolioItems = DB::table('portfolio_items')
+        $portfolioItems = DB::table('portfolio_experiences')
             ->where('user_id', $tenant->id)
             ->latest()
             ->take(6)
             ->get();
 
         $siteSettings = DB::table('site_settings')
-            ->where('user_id', $tenant->id)
             ->pluck('value', 'key')
             ->toArray();
 
