@@ -145,9 +145,14 @@
             </button>
         </form>
 
-        @if(Route::has('register'))
+        @php $isXenoraaMain = request()->getHost() === config('xenoraa.main_domain', 'xenoraa.com') || request()->getHost() === 'www.' . config('xenoraa.main_domain', 'xenoraa.com'); @endphp
+        @if($isXenoraaMain)
         <p style="text-align: center; margin-top: 1.5rem; font-size: 0.875rem; color: var(--text-muted);">
             Don't have an account? <a href="{{ route('register') }}" style="color: var(--text-primary); text-decoration: none; font-weight: 600;">Sign Up</a>
+        </p>
+        @else
+        <p style="text-align: center; margin-top: 1.5rem; font-size: 0.875rem; color: var(--text-muted);">
+            Need an account? Visit <a href="https://xenoraa.com/register" style="color: var(--text-primary); text-decoration: none; font-weight: 600;">xenoraa.com</a>
         </p>
         @endif
 

@@ -145,8 +145,21 @@
                     <input type="email" name="email" class="xn-form-input" placeholder="gopi@example.com" required value="{{ old('email') }}">
                 </div>
                 <div class="xn-form-group">
-                    <label class="xn-form-label">Your Profession / Role</label>
-                    <input type="text" name="profession" class="xn-form-input" placeholder="e.g. Business Owner, Consultant, Doctor..." value="{{ old('profession') }}">
+                    <label class="xn-form-label">Your Profession / Role *</label>
+                    <select name="profession" class="xn-form-input" required style="cursor:pointer;">
+                        <option value="" disabled {{ old('profession') ? '' : 'selected' }}>— Select your profession —</option>
+                        <option value="doctor" {{ old('profession')=='doctor' ? 'selected' : '' }}>🩺 Doctor / Medical Professional</option>
+                        <option value="advocate" {{ old('profession')=='advocate' ? 'selected' : '' }}>⚖️ Advocate / Lawyer</option>
+                        <option value="politician" {{ old('profession')=='politician' ? 'selected' : '' }}>🏛️ Politician / Public Leader</option>
+                        <option value="consultant" {{ old('profession')=='consultant' ? 'selected' : '' }}>📊 Consultant / Business Advisor</option>
+                        <option value="entrepreneur" {{ old('profession')=='entrepreneur' ? 'selected' : '' }}>🚀 Entrepreneur / Startup Founder</option>
+                        <option value="influencer" {{ old('profession')=='influencer' ? 'selected' : '' }}>⭐ Influencer / Content Creator</option>
+                        <option value="software_developer" {{ old('profession')=='software_developer' ? 'selected' : '' }}>💻 Software Developer / Engineer</option>
+                        <option value="designer" {{ old('profession')=='designer' ? 'selected' : '' }}>🎨 Designer / Creative Professional</option>
+                        <option value="educator" {{ old('profession')=='educator' ? 'selected' : '' }}>📚 Educator / Trainer / Coach</option>
+                        <option value="freelancer" {{ old('profession')=='freelancer' ? 'selected' : '' }}>🧑‍💻 Freelancer / Independent Professional</option>
+                        <option value="other" {{ old('profession')=='other' ? 'selected' : '' }}>✨ Other</option>
+                    </select>
                 </div>
                 <div class="xn-form-group">
                     <label class="xn-form-label">Choose Your Plan</label>

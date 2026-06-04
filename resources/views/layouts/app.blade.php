@@ -204,7 +204,10 @@
                     </li>
                 @else
                     <li><a href="{{ route('login') }}">Sign In</a></li>
+                    @php $isMainDomain = request()->getHost() === config('xenoraa.main_domain', 'xenoraa.com') || request()->getHost() === 'www.' . config('xenoraa.main_domain', 'xenoraa.com'); @endphp
+                    @if($isMainDomain)
                     <li><a href="{{ route('register') }}" class="btn btn-primary btn-sm">Sign Up</a></li>
+                    @endif
                 @endauth
             </ul>
 
@@ -323,9 +326,12 @@
                 <a href="{{ route('login') }}" class="mob-link btn-mobile-outline">
                     <i class="fas fa-sign-in-alt" style="width:20px;"></i> Sign In
                 </a>
+                @php $isMainDomainMob = request()->getHost() === config('xenoraa.main_domain', 'xenoraa.com') || request()->getHost() === 'www.' . config('xenoraa.main_domain', 'xenoraa.com'); @endphp
+                @if($isMainDomainMob)
                 <a href="{{ route('register') }}" class="mob-link btn-mobile-primary">
                     <i class="fas fa-user-plus" style="width:20px;"></i> Sign Up
                 </a>
+                @endif
             </div>
         @endauth
     </div>

@@ -12,10 +12,25 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
-                ->name('register');
+    // Register is ONLY available on xenoraa.com (main domain)
+    // On tenant/custom domains, redirect to login page
+    Route::get('register', function () {
+        $host = request()->getHost();
+        $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
+        if ($host !== $mainDomain && $host !== 'www.' . $mainDomain) {
+            return redirect()->route('login')->with('info', 'New accounts can only be created at xenoraa.com');
+        }
+        return app(RegisteredUserController::class)->create(request());
+    })->name('register');
 
-    Route::post('register', [RegisteredUserController::class, 'store']);
+    Route::post('register', function () {
+        $host = request()->getHost();
+        $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
+        if ($host !== $mainDomain && $host !== 'www.' . $mainDomain) {
+            return redirect()->route('login');
+        }
+        return app(RegisteredUserController::class)->store(request());
+    });
 
     Route::get('login', [AuthenticatedSessionController::class, 'create'])
                 ->name('login');
