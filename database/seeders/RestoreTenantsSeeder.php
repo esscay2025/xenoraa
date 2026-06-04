@@ -186,14 +186,14 @@ class RestoreTenantsSeeder extends Seeder
         // ── Chatbot Training ───────────────────────────────────────────────
         if (DB::table('chatbot_training')->where('user_id', $tid)->count() === 0) {
             $training = [
-                ['user_id' => $tid, 'question' => 'What services do you offer?', 'answer' => 'I offer Cloud Architecture, AI Integration, DevOps & CI/CD, Full Stack Development, Security Audits, and Tech Consulting (CTO-as-a-Service). Each service is tailored to your business needs.', 'created_at' => now(), 'updated_at' => now()],
-                ['user_id' => $tid, 'question' => 'How can I book a consultation?', 'answer' => 'You can book a free 30-minute strategy call via my Calendly link at calendly.com/gopik. I typically respond within 24 hours.', 'created_at' => now(), 'updated_at' => now()],
-                ['user_id' => $tid, 'question' => 'What is your experience?', 'answer' => 'I have 10+ years of IT experience, having worked with 50+ clients across 120+ projects. I\'ve worked at Infosys, TechCorp India, and now run Xenoraa Technologies as Founder & CTO.', 'created_at' => now(), 'updated_at' => now()],
-                ['user_id' => $tid, 'question' => 'What is Xenoraa?', 'answer' => 'Xenoraa is a multi-tenant SaaS platform I built that allows professionals (IT, legal, healthcare, influencers) to create their own branded website with AI chatbot, CRM, blog, jobs, and e-commerce modules.', 'created_at' => now(), 'updated_at' => now()],
-                ['user_id' => $tid, 'question' => 'Do you work with startups?', 'answer' => 'Yes! I love working with early-stage startups. I offer CTO-as-a-Service packages where I help you build your MVP, choose the right tech stack, and scale your infrastructure as you grow.', 'created_at' => now(), 'updated_at' => now()],
-                ['user_id' => $tid, 'question' => 'What cloud platforms do you work with?', 'answer' => 'I work with all three major cloud providers: AWS (my primary), Microsoft Azure, and Google Cloud Platform. I\'m AWS certified and have delivered 30+ cloud migration projects.', 'created_at' => now(), 'updated_at' => now()],
-                ['user_id' => $tid, 'question' => 'What is your pricing?', 'answer' => 'Pricing varies by project scope. Consulting starts at ₹5,000/hour. Fixed-price projects start at ₹50,000. CTO-as-a-Service retainers start at ₹75,000/month. Book a call to discuss your specific needs.', 'created_at' => now(), 'updated_at' => now()],
-                ['user_id' => $tid, 'question' => 'Can you help with AI integration?', 'answer' => 'Absolutely! AI integration is one of my core specialties. I can integrate OpenAI GPT, Google Gemini, or custom LLMs into your existing applications, build AI chatbots, and implement intelligent automation workflows.', 'created_at' => now(), 'updated_at' => now()],
+                ['user_id' => $tid, 'category' => 'Services', 'question' => 'What services do you offer?', 'answer' => 'I offer Cloud Architecture, AI Integration, DevOps & CI/CD, Full Stack Development, Security Audits, and Tech Consulting (CTO-as-a-Service). Each service is tailored to your business needs.', 'is_active' => 1, 'sort_order' => 0, 'created_at' => now(), 'updated_at' => now()],
+                ['user_id' => $tid, 'category' => 'Booking', 'question' => 'How can I book a consultation?', 'answer' => 'You can book a free 30-minute strategy call via my Calendly link at calendly.com/gopik. I typically respond within 24 hours.', 'is_active' => 1, 'sort_order' => 1, 'created_at' => now(), 'updated_at' => now()],
+                ['user_id' => $tid, 'category' => 'About', 'question' => 'What is your experience?', 'answer' => 'I have 10+ years of IT experience, having worked with 50+ clients across 120+ projects. I\'ve worked at Infosys, TechCorp India, and now run Xenoraa Technologies as Founder & CTO.', 'is_active' => 1, 'sort_order' => 2, 'created_at' => now(), 'updated_at' => now()],
+                ['user_id' => $tid, 'category' => 'About', 'question' => 'What is Xenoraa?', 'answer' => 'Xenoraa is a multi-tenant SaaS platform I built that allows professionals (IT, legal, healthcare, influencers) to create their own branded website with AI chatbot, CRM, blog, jobs, and e-commerce modules.', 'is_active' => 1, 'sort_order' => 3, 'created_at' => now(), 'updated_at' => now()],
+                ['user_id' => $tid, 'category' => 'Startups', 'question' => 'Do you work with startups?', 'answer' => 'Yes! I love working with early-stage startups. I offer CTO-as-a-Service packages where I help you build your MVP, choose the right tech stack, and scale your infrastructure as you grow.', 'is_active' => 1, 'sort_order' => 4, 'created_at' => now(), 'updated_at' => now()],
+                ['user_id' => $tid, 'category' => 'Cloud', 'question' => 'What cloud platforms do you work with?', 'answer' => 'I work with all three major cloud providers: AWS (my primary), Microsoft Azure, and Google Cloud Platform. I\'m AWS certified and have delivered 30+ cloud migration projects.', 'is_active' => 1, 'sort_order' => 5, 'created_at' => now(), 'updated_at' => now()],
+                ['user_id' => $tid, 'category' => 'Pricing', 'question' => 'What is your pricing?', 'answer' => 'Pricing varies by project scope. Consulting starts at ₹5,000/hour. Fixed-price projects start at ₹50,000. CTO-as-a-Service retainers start at ₹75,000/month. Book a call to discuss your specific needs.', 'is_active' => 1, 'sort_order' => 6, 'created_at' => now(), 'updated_at' => now()],
+                ['user_id' => $tid, 'category' => 'AI', 'question' => 'Can you help with AI integration?', 'answer' => 'Absolutely! AI integration is one of my core specialties. I can integrate OpenAI GPT, Google Gemini, or custom LLMs into your existing applications, build AI chatbots, and implement intelligent automation workflows.', 'is_active' => 1, 'sort_order' => 7, 'created_at' => now(), 'updated_at' => now()],
             ];
             DB::table('chatbot_training')->insert($training);
         }
@@ -426,11 +426,14 @@ class RestoreTenantsSeeder extends Seeder
             ['q' => 'Can you help register a trademark?',     'a' => "Yes, trademark registration is one of my core services. I handle the entire process from trademark search to filing and prosecution. Contact me for a trademark audit."],
             ['q' => 'Do you work with startups?',             'a' => "Absolutely. I offer startup legal packages covering company formation, founder agreements, IP assignment, and investor documentation. Early-stage startups get special rates."],
         ];
-        foreach ($trainingData as $t) {
+        foreach ($trainingData as $i => $t) {
             DB::table('chatbot_training')->insert([
                 'user_id'    => $tid,
+                'category'   => $t['cat'] ?? 'General',
                 'question'   => $t['q'],
                 'answer'     => $t['a'],
+                'is_active'  => 1,
+                'sort_order' => $i,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
