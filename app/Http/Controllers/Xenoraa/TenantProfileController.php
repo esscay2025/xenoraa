@@ -54,7 +54,6 @@ class TenantProfileController extends Controller
             ->get();
 
         $portfolioItems = DB::table('portfolio_experiences')
-            ->where('user_id', $tenant->id)
             ->latest()
             ->take(6)
             ->get();
