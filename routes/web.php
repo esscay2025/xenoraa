@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\Admin\SiteController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
 use App\Http\Controllers\Xenoraa\XenoraaController;
 use App\Http\Controllers\Xenoraa\TenantProfileController;
@@ -180,10 +181,39 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('/expenses/{expense}/approve', [ExpenseController::class, 'approve'])->name('expenses.approve');
     Route::patch('/expenses/{expense}/reject', [ExpenseController::class, 'reject'])->name('expenses.reject');
 
-    // Site Settings
+    // Site Settings (legacy)
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::put('/settings/social/{social}', [SettingsController::class, 'updateSocial'])->name('settings.social.update');
+
+    // ─── Site Builder Module ──────────────────────────────────────
+    Route::prefix('site')->name('site.')->group(function () {
+        // Hub
+        Route::get('/', [SiteController::class, 'index'])->name('index');
+
+        // Theme Store
+        Route::get('/themes', [SiteController::class, 'themes'])->name('themes');
+        Route::post('/themes/activate', [SiteController::class, 'activateTheme'])->name('themes.activate');
+
+        // Page Manager
+        Route::get('/pages', [SiteController::class, 'pages'])->name('pages');
+        Route::get('/pages/create', [SiteController::class, 'createPage'])->name('pages.create');
+        Route::post('/pages', [SiteController::class, 'storePage'])->name('pages.store');
+        Route::get('/pages/{page}/edit', [SiteController::class, 'editPage'])->name('pages.edit');
+        Route::put('/pages/{page}', [SiteController::class, 'updatePage'])->name('pages.update');
+        Route::delete('/pages/{page}', [SiteController::class, 'destroyPage'])->name('pages.destroy');
+
+        // Menu Builder
+        Route::get('/menu', [SiteController::class, 'menu'])->name('menu');
+        Route::post('/menu', [SiteController::class, 'saveMenu'])->name('menu.save');
+
+        // Branding
+        Route::get('/branding', [SiteController::class, 'branding'])->name('branding');
+        Route::post('/branding', [SiteController::class, 'saveBranding'])->name('branding.save');
+
+        // Dashboard Mode (light/dark) — AJAX
+        Route::post('/mode', [SiteController::class, 'saveDashboardMode'])->name('mode');
+    });
 
     // Community: Forum Admin
     Route::get('/forum', [\App\Http\Controllers\Admin\ForumAdminController::class, 'index'])->name('forum.index');
@@ -392,6 +422,10 @@ Route::post('/{username}/jobs/{slug}/apply', [PortfolioController::class, 'apply
     ->where('username', $reservedUsernames);
 
 Route::get('/{username}/shop', [ShopController::class, 'tenantIndex'])->name('tenant.shop')
+    ->where('username', $reservedUsernames);
+
+// Tenant custom pages: xenoraa.com/priya/page/my-page-slug
+Route::get('/{username}/page/{slug}', [PortfolioController::class, 'customPage'])->name('tenant.page')
     ->where('username', $reservedUsernames);
 
 // Tenant homepage: xenoraa.com/priya

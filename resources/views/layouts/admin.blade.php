@@ -15,13 +15,49 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
-        :root {
+        /* ── Dark mode (default) ─────────────────── */
+        :root, [data-theme="dark"] {
             --bg-primary: #0a0a0a; --bg-secondary: #111111; --bg-card: #1a1a1a; --bg-hover: #222222;
             --text-primary: #ffffff; --text-secondary: #a0a0a0; --text-muted: #666666;
             --border: #2a2a2a; --border-light: #333333;
             --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; --info: #3b82f6;
             --sidebar-width: 260px;
+            --accent: #6366f1;
+            --topbar-bg: #111111;
         }
+        /* ── Light mode ──────────────────────────── */
+        [data-theme="light"] {
+            --bg-primary: #f1f5f9; --bg-secondary: #ffffff; --bg-card: #ffffff; --bg-hover: #f8fafc;
+            --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #94a3b8;
+            --border: #e2e8f0; --border-light: #cbd5e1;
+            --success: #16a34a; --danger: #dc2626; --warning: #d97706; --info: #2563eb;
+            --sidebar-width: 260px;
+            --accent: #6366f1;
+            --topbar-bg: #ffffff;
+        }
+        [data-theme="light"] body { background-color: var(--bg-primary); color: var(--text-primary); }
+        [data-theme="light"] .sidebar { background-color: #fff; border-right-color: var(--border); }
+        [data-theme="light"] .sidebar-link { color: var(--text-secondary); }
+        [data-theme="light"] .sidebar-link:hover, [data-theme="light"] .sidebar-link.active { color: var(--text-primary); background-color: var(--bg-hover); }
+        [data-theme="light"] .sidebar-group-btn { color: var(--text-secondary); }
+        [data-theme="light"] .sidebar-group-btn:hover { color: var(--text-primary); background-color: var(--bg-hover); }
+        [data-theme="light"] .sidebar-sub-link { color: var(--text-secondary); }
+        [data-theme="light"] .sidebar-sub-link:hover, [data-theme="light"] .sidebar-sub-link.active { color: var(--text-primary); background-color: var(--bg-hover); }
+        [data-theme="light"] .topbar { background-color: var(--topbar-bg); border-bottom-color: var(--border); }
+        [data-theme="light"] .card { background-color: var(--bg-card); border-color: var(--border); }
+        [data-theme="light"] .form-control { background-color: var(--bg-primary); border-color: var(--border); color: var(--text-primary); }
+        [data-theme="light"] .btn-outline { border-color: var(--border); color: var(--text-secondary); }
+        [data-theme="light"] .btn-outline:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+        /* Mode toggle button */
+        .mode-toggle {
+            display: flex; align-items: center; gap: 0.4rem;
+            background: var(--bg-hover); border: 1px solid var(--border);
+            border-radius: 20px; padding: 0.3rem 0.75rem;
+            cursor: pointer; font-size: 0.78rem; font-weight: 600;
+            color: var(--text-secondary); transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .mode-toggle:hover { color: var(--text-primary); border-color: var(--text-secondary); }
         * { box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); margin: 0; padding: 0; display: flex; min-height: 100vh; }
 
@@ -346,15 +382,19 @@
                 <a href="{{ route('admin.ecommerce.reviews') }}" class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.reviews*') ? 'active' : '' }}"><i class="fas fa-star"></i> Reviews</a>
             </div>
 
-            {{-- Site Group --}}
-            @php $siteActive = request()->routeIs('admin.settings*'); @endphp
+            {{-- Site Builder Group --}}
+            @php $siteActive = request()->routeIs('admin.site*') || request()->routeIs('admin.settings*'); @endphp
             <button class="sidebar-group-btn {{ $siteActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgSite', this)">
-                <i class="fas fa-cog group-icon"></i> Site
+                <i class="fas fa-paint-brush group-icon"></i> Site Builder
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
             <div class="sidebar-group-panel {{ $siteActive ? 'open' : '' }}" id="sgSite">
+                <a href="{{ route('admin.site.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.index') ? 'active' : '' }}"><i class="fas fa-th-large"></i> Site Builder Hub</a>
+                <a href="{{ route('admin.site.themes') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.themes*') ? 'active' : '' }}"><i class="fas fa-palette"></i> Theme Store</a>
+                <a href="{{ route('admin.site.pages') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.pages*') ? 'active' : '' }}"><i class="fas fa-file-alt"></i> Page Manager</a>
+                <a href="{{ route('admin.site.menu') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.menu*') ? 'active' : '' }}"><i class="fas fa-bars"></i> Menu Builder</a>
+                <a href="{{ route('admin.site.branding') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.branding*') ? 'active' : '' }}"><i class="fas fa-image"></i> Branding</a>
                 <a href="{{ route('admin.settings.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}"><i class="fas fa-sliders-h"></i> Site Settings</a>
-                <a href="{{ route('home') }}" class="sidebar-sub-link" target="_blank"><i class="fas fa-external-link-alt"></i> View Website</a>
             </div>
         </nav>
 
@@ -397,6 +437,10 @@
                         ? 'https://' . $tenantUser->custom_domain
                         : url('/' . $tenantUser->username);
                 @endphp
+                <button class="mode-toggle" id="modeToggleBtn" onclick="toggleDashboardMode()" title="Toggle light/dark mode">
+                    <i id="modeIcon" class="fas fa-sun"></i>
+                    <span id="modeLabel">Light</span>
+                </button>
                 <a href="{{ $viewSiteUrl }}" class="btn btn-outline btn-sm" target="_blank">
                     <i class="fas fa-external-link-alt"></i> View Site
                 </a>
@@ -419,6 +463,47 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleAdminSidebar()"></div>
 
     <script>
+        // ── Dashboard Mode (Light / Dark) ─────────────────────────
+        (function() {
+            const saved = localStorage.getItem('xenoraa_dashboard_mode') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+        })();
+
+        function toggleDashboardMode() {
+            const current = document.documentElement.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', next);
+            localStorage.setItem('xenoraa_dashboard_mode', next);
+            updateModeBtn(next);
+
+            // Persist to server (non-blocking)
+            fetch('{{ route("admin.site.mode") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+                body: JSON.stringify({ mode: next })
+            }).catch(() => {});
+        }
+
+        function updateModeBtn(mode) {
+            const icon = document.getElementById('modeIcon');
+            const label = document.getElementById('modeLabel');
+            if (!icon || !label) return;
+            if (mode === 'light') {
+                icon.className = 'fas fa-moon';
+                label.textContent = 'Dark';
+            } else {
+                icon.className = 'fas fa-sun';
+                label.textContent = 'Light';
+            }
+        }
+
+        // Init button state
+        document.addEventListener('DOMContentLoaded', function() {
+            const mode = localStorage.getItem('xenoraa_dashboard_mode') || 'dark';
+            document.documentElement.setAttribute('data-theme', mode);
+            updateModeBtn(mode);
+        });
+
         function toggleSidebarGroup(panelId, btn) {
             const panel = document.getElementById(panelId);
             const isOpen = panel.classList.contains('open');

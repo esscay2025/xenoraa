@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\BlogCategory;
 use App\Models\BlogComment;
 use App\Models\BlogPost;
+use App\Models\CustomPage;
 use App\Models\Job;
 use App\Models\JobApplication;
 use App\Models\PortfolioExperience;
 use App\Models\SocialLink;
+use App\Models\SiteSetting;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -340,5 +342,27 @@ class PortfolioController extends Controller
         ]);
 
         return back()->with('success', 'Your application has been submitted successfully! We will get back to you soon.');
+    }
+
+    /**
+     * Display a custom page for a tenant.
+     */
+    public function customPage(Request $request, string $username, string $slug)
+    {
+        $tenant = $this->resolveTenant($request, $username);
+        if (!$tenant) abort(404);
+
+        $page = CustomPage::where('user_id', $tenant->id)
+            ->where('slug', $slug)
+            ->where('status', 'published')
+            ->firstOrFail();
+
+        $template  = SiteSetting::getValueForTenant($tenant->id, 'profile_template', 'consultant');
+        $siteName  = SiteSetting::getValueForTenant($tenant->id, 'site_name', $tenant->name);
+        $logo      = SiteSetting::getValueForTenant($tenant->id, 'logo_path');
+        $favicon   = SiteSetting::getValueForTenant($tenant->id, 'favicon_path');
+        $accent    = SiteSetting::getValueForTenant($tenant->id, 'color_accent', '#6366f1');
+
+        return view('tenant.custom-page', compact('tenant', 'page', 'template', 'siteName', 'logo', 'favicon', 'accent'));
     }
 }
