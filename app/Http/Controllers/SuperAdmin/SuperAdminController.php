@@ -45,7 +45,15 @@ class SuperAdminController extends Controller
      */
     public function users(Request $request)
     {
-        $query = User::withCount(['blogPosts', 'crmLeads']);
+        // Super admin only sees Xenoraa PLATFORM SUBSCRIBERS:
+        // - Users with role=admin (tenant owners / Xenoraa subscribers)
+        // - Users with role=superadmin (platform admins)
+        // Sub-users (staff, visitor) created by tenant admins are NOT shown here.
+        $adminRoleId = DB::table('roles')->where('name', 'admin')->value('id');
+        $superAdminRoleId = DB::table('roles')->where('name', 'superadmin')->value('id');
+
+        $query = User::withCount(['blogPosts', 'crmLeads'])
+            ->whereIn('role_id', array_filter([$adminRoleId, $superAdminRoleId]));
 
         if ($request->plan && $request->plan !== 'all') {
             if ($request->plan === 'suspended') {

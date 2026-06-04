@@ -332,13 +332,28 @@ Route::get('/{username}/shop', [TenantProfileController::class, 'shop'])->name('
 // =============================================
 // REDIRECT AFTER LOGIN
 // =============================================
-Route::get('/dashboard', function () {
+Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
     $user = auth()->user();
+    $host = $request->getHost();
+    $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
+    $isMainDomain = ($host === $mainDomain || $host === 'www.' . $mainDomain);
+
+    // Super admin ONLY gets superadmin dashboard when on xenoraa.com
+    // On gopi.blog or any tenant domain, super admin is treated as a regular admin
+    if ($user->isSuperAdmin() && $isMainDomain) {
+        return redirect()->route('superadmin.dashboard');
+    }
+
+    // Tenant admin (Xenoraa subscriber) → admin dashboard
     if ($user->isAdmin()) {
         return redirect()->route('admin.dashboard');
-    } elseif ($user->isStaff()) {
-        return redirect()->route('staff.dashboard');
-    } else {
-        return redirect()->route('user.dashboard');
     }
+
+    // Staff sub-user → staff dashboard
+    if ($user->isStaff()) {
+        return redirect()->route('staff.dashboard');
+    }
+
+    // Regular visitor/sub-user → user dashboard
+    return redirect()->route('user.dashboard');
 })->middleware('auth')->name('dashboard');

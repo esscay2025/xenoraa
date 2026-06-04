@@ -30,7 +30,14 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Handle login — after login redirect based on role and domain.
+     * Handle login — after login redirect based on role AND domain.
+     *
+     * Role Hierarchy:
+     * - superadmin (support@xenoraa.com): ONLY gets superadmin dashboard on xenoraa.com
+     *   On tenant domains (gopi.blog), treated as regular admin of that tenant
+     * - admin (gopi@outlook.in): Xenoraa subscriber / tenant owner → admin dashboard
+     * - staff: Sub-user created by tenant admin → staff dashboard
+     * - visitor: Regular registered visitor → user dashboard
      */
     public function store(LoginRequest $request): RedirectResponse
     {
@@ -40,24 +47,26 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
         $host = $request->getHost();
         $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
+        $isMainDomain = ($host === $mainDomain || $host === 'www.' . $mainDomain);
 
-        // Super admin → superadmin dashboard
-        if ($user->isSuperAdmin()) {
-            return redirect()->intended(route('superadmin.dashboard'));
+        // Super admin ONLY redirects to superadmin dashboard when logging in on xenoraa.com
+        // If they log in on gopi.blog or any tenant domain, treat as tenant admin
+        if ($user->isSuperAdmin() && $isMainDomain) {
+            return redirect()->route('superadmin.dashboard');
         }
 
-        // Admin → admin dashboard
+        // Tenant admin (Xenoraa subscriber) → admin dashboard
         if ($user->isAdmin()) {
-            return redirect()->intended(route('admin.dashboard'));
+            return redirect()->route('admin.dashboard');
         }
 
-        // Staff → staff dashboard
+        // Staff sub-user → staff dashboard
         if ($user->isStaff()) {
-            return redirect()->intended(route('staff.dashboard'));
+            return redirect()->route('staff.dashboard');
         }
 
-        // Regular user → user dashboard
-        return redirect()->intended(route('user.dashboard'));
+        // Regular visitor/sub-user → user dashboard
+        return redirect()->route('user.dashboard');
     }
 
     /**
@@ -69,15 +78,7 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        $host = $request->getHost();
-        $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
-
-        // If on xenoraa.com, redirect to xenoraa home
-        if ($host === $mainDomain || $host === 'www.' . $mainDomain) {
-            return redirect('/');
-        }
-
-        // Custom domain → redirect to that domain's home
+        // Always redirect to current domain's home
         return redirect('/');
     }
 }
