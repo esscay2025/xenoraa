@@ -70,7 +70,7 @@
             <div class="xn-doc-card">
                 <div class="xn-doc-card-icon">{{ $svc['icon'] }}</div>
                 <div class="xn-doc-card-title">{{ $svc['title'] }}</div>
-                <div class="xn-doc-card-text">{{ $svc['desc'] }}</div>
+                <div class="xn-doc-card-text">{{ $svc['desc'] ?? $svc['description'] ?? '' }}</div>
             </div>
             @endforeach
         </div>

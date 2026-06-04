@@ -75,7 +75,7 @@
             <div class="xn-ent-venture">
                 <div class="xn-ent-venture-logo">{{ $v['logo'] ?? '🚀' }}</div>
                 <div class="xn-ent-venture-name">{{ $v['name'] }}</div>
-                <div class="xn-ent-venture-desc">{{ $v['desc'] }}</div>
+                <div class="xn-ent-venture-desc">{{ $v['desc'] ?? $v['description'] ?? '' }}</div>
                 @if(!empty($v['url']))<a href="{{ $v['url'] }}" class="xn-ent-venture-link" target="_blank">Visit →</a>@endif
             </div>
             @endforeach

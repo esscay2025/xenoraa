@@ -85,7 +85,7 @@
             <div class="xn-adv-card">
                 <div class="xn-adv-card-icon">{{ $svc['icon'] }}</div>
                 <div class="xn-adv-card-title">{{ $svc['title'] }}</div>
-                <div class="xn-adv-card-text">{{ $svc['desc'] }}</div>
+                <div class="xn-adv-card-text">{{ $svc['desc'] ?? $svc['description'] ?? '' }}</div>
             </div>
             @endforeach
         </div>
