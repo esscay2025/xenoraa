@@ -75,15 +75,19 @@ class RegisteredUserController extends Controller
 
         $validated = $request->validate($rules);
 
-        // Assign visitor role
-        $visitorRole = Role::where('name', 'visitor')->first();
+        // Assign role: Xenoraa signups get 'admin' (tenant owner); others get 'visitor'
+        if ($isXenoraa) {
+            $role = Role::where('name', 'admin')->first();
+        } else {
+            $role = Role::where('name', 'visitor')->first();
+        }
 
         // Build user data
         $userData = [
             'name'     => $request->name,
             'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role_id'  => $visitorRole?->id,
+            'role_id'  => $role?->id,
             'status'   => 'active',
         ];
 
@@ -91,6 +95,7 @@ class RegisteredUserController extends Controller
         if ($isXenoraa) {
             $userData['username']      = strtolower($request->username);
             $userData['plan']          = $request->plan ?? 'starter';
+            $userData['profession']    = $request->profession ?? null;
             $userData['trial_ends_at'] = now()->addDays(config('xenoraa.trial_days', 14));
         }
 

@@ -40,6 +40,7 @@
     border-radius: 8px; color: #fff;
     font-size: 0.875rem; font-family: 'Inter', sans-serif;
     transition: all 0.2s; outline: none;
+    box-sizing: border-box;
 }
 .xn-form-input:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
 .xn-form-input::placeholder { color: #3f3f46; }
@@ -54,6 +55,7 @@
     margin-top: 0.5rem;
 }
 .xn-form-submit:hover { background: #6d28d9; transform: translateY(-1px); }
+.xn-form-submit:disabled { background: #3f3f46; cursor: not-allowed; transform: none; }
 .xn-form-divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; }
 .xn-form-divider::before, .xn-form-divider::after { content: ''; flex: 1; height: 1px; background: #1a1a1a; }
 .xn-form-divider span { font-size: 0.75rem; color: #3f3f46; }
@@ -67,6 +69,14 @@
 .xn-benefit-icon { width: 32px; height: 32px; background: rgba(124,58,237,0.15); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #a855f7; font-size: 0.875rem; flex-shrink: 0; }
 .xn-benefit-title { font-weight: 600; color: #fff; font-size: 0.875rem; margin-bottom: 0.15rem; }
 .xn-benefit-desc { font-size: 0.775rem; color: #71717a; line-height: 1.5; }
+/* Username field */
+.xn-username-wrap { position: relative; display: flex; align-items: center; }
+.xn-username-prefix { position: absolute; left: 1rem; color: #52525b; font-size: 0.8rem; pointer-events: none; white-space: nowrap; z-index: 1; }
+.xn-username-input { padding-left: 7.75rem !important; }
+.xn-username-status { font-size: 0.75rem; margin-top: 0.35rem; min-height: 1.1rem; }
+.xn-username-ok { color: #22c55e; }
+.xn-username-err { color: #f87171; }
+.xn-username-checking { color: #71717a; }
 @media(max-width:1024px){.xn-auth-container{grid-template-columns:1fr;padding:2rem;max-width:520px;}}
 @media(max-width:768px){.xn-auth-card{padding:2rem;}.xn-form-row{grid-template-columns:1fr;}.xn-plan-select{grid-template-columns:1fr;}}
 </style>
@@ -126,24 +136,46 @@
 
             <form method="POST" action="{{ route('register') }}">
                 @csrf
+
+                {{-- Name row --}}
                 <div class="xn-form-row">
                     <div class="xn-form-group">
                         <label class="xn-form-label">First Name *</label>
-                        <input type="text" name="first_name" class="xn-form-input" placeholder="Gopi" required value="{{ old('first_name') }}">
+                        <input type="text" name="first_name" id="firstName" class="xn-form-input" placeholder="Gopi" required value="{{ old('first_name') }}" oninput="suggestUsername()">
                     </div>
                     <div class="xn-form-group">
                         <label class="xn-form-label">Last Name</label>
-                        <input type="text" name="last_name" class="xn-form-input" placeholder="K" value="{{ old('last_name') }}">
+                        <input type="text" name="last_name" id="lastName" class="xn-form-input" placeholder="K" value="{{ old('last_name') }}" oninput="suggestUsername()">
                     </div>
                 </div>
+
+                {{-- Display name --}}
                 <div class="xn-form-group">
                     <label class="xn-form-label">Full Name (Display) *</label>
                     <input type="text" name="name" class="xn-form-input" placeholder="Gopi K." required value="{{ old('name') }}">
                 </div>
+
+                {{-- Username --}}
+                <div class="xn-form-group">
+                    <label class="xn-form-label">Username (Your Profile URL) *</label>
+                    <div class="xn-username-wrap">
+                        <span class="xn-username-prefix">xenoraa.com/</span>
+                        <input type="text" name="username" id="username" class="xn-form-input xn-username-input"
+                            placeholder="yourname" required value="{{ old('username') }}"
+                            oninput="onUsernameInput(this.value)" autocomplete="off"
+                            pattern="[a-zA-Z0-9\-]{3,30}">
+                    </div>
+                    <div id="username-status" class="xn-username-status"></div>
+                    <div style="font-size:0.7rem;color:#3f3f46;margin-top:0.15rem;">3–30 characters. Letters, numbers, hyphens only.</div>
+                </div>
+
+                {{-- Email --}}
                 <div class="xn-form-group">
                     <label class="xn-form-label">Email Address *</label>
                     <input type="email" name="email" class="xn-form-input" placeholder="gopi@example.com" required value="{{ old('email') }}">
                 </div>
+
+                {{-- Profession --}}
                 <div class="xn-form-group">
                     <label class="xn-form-label">Your Profession / Role *</label>
                     <select name="profession" class="xn-form-input" required style="cursor:pointer;">
@@ -161,6 +193,8 @@
                         <option value="other" {{ old('profession')=='other' ? 'selected' : '' }}>✨ Other</option>
                     </select>
                 </div>
+
+                {{-- Plan --}}
                 <div class="xn-form-group">
                     <label class="xn-form-label">Choose Your Plan</label>
                     <div class="xn-plan-select">
@@ -179,6 +213,8 @@
                     </div>
                     <input type="hidden" name="plan" id="selectedPlan" value="starter">
                 </div>
+
+                {{-- Password --}}
                 <div class="xn-form-group">
                     <label class="xn-form-label">Password *</label>
                     <input type="password" name="password" class="xn-form-input" placeholder="Minimum 8 characters" required>
@@ -187,12 +223,17 @@
                     <label class="xn-form-label">Confirm Password *</label>
                     <input type="password" name="password_confirmation" class="xn-form-input" placeholder="Repeat your password" required>
                 </div>
-                <button type="submit" class="xn-form-submit">Create My Account 🚀</button>
+
+                <button type="submit" class="xn-form-submit" id="submitBtn">Create My Account 🚀</button>
             </form>
 
             <div class="xn-form-divider"><span>Already have an account?</span></div>
             <a href="{{ route('login') }}" style="display:block;text-align:center;color:#a855f7;text-decoration:none;font-size:0.875rem;font-weight:600;">Sign In →</a>
-            <p style="text-align:center;font-size:0.75rem;color:#3f3f46;margin-top:1.5rem;">By signing up, you agree to our <a href="#" style="color:#52525b;">Terms of Service</a> and <a href="#" style="color:#52525b;">Privacy Policy</a>.</p>
+            <p style="text-align:center;font-size:0.75rem;color:#3f3f46;margin-top:1.5rem;">
+                By signing up, you agree to our
+                <a href="{{ route('legal.terms') }}" style="color:#52525b;">Terms of Service</a> and
+                <a href="{{ route('legal.privacy') }}" style="color:#52525b;">Privacy Policy</a>.
+            </p>
         </div>
     </div>
 </section>
@@ -200,10 +241,97 @@
 
 @section('scripts')
 <script>
+// Plan selection
 function selectPlan(el, plan) {
     document.querySelectorAll('.xn-plan-option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
     document.getElementById('selectedPlan').value = plan;
 }
+
+// Auto-suggest username from first + last name
+let userEditedUsername = false;
+function suggestUsername() {
+    if (userEditedUsername) return;
+    const first = (document.getElementById('firstName').value || '').trim();
+    const last  = (document.getElementById('lastName').value  || '').trim();
+    const raw   = (first + (last ? '-' + last : ''))
+        .toLowerCase()
+        .replace(/[^a-z0-9\-]/g, '')
+        .replace(/-+/g, '-')
+        .substring(0, 30);
+    if (raw.length >= 3) {
+        document.getElementById('username').value = raw;
+        checkUsername(raw);
+    }
+}
+
+function onUsernameInput(value) {
+    userEditedUsername = true;
+    checkUsername(value);
+}
+
+// Reserved usernames
+const RESERVED = ['admin','superadmin','api','xenoraa','support','www','mail','ftp','blog',
+    'shop','app','dashboard','login','register','logout','password','help','about',
+    'pricing','features','showcase','terms','privacy','contact','onboarding'];
+
+let usernameTimer = null;
+function checkUsername(value) {
+    clearTimeout(usernameTimer);
+    const status = document.getElementById('username-status');
+    const btn    = document.getElementById('submitBtn');
+
+    if (!value || value.length < 3) {
+        status.className = 'xn-username-status';
+        status.textContent = '';
+        btn.disabled = false;
+        return;
+    }
+
+    if (RESERVED.includes(value.toLowerCase())) {
+        status.className = 'xn-username-status xn-username-err';
+        status.textContent = '✗ This username is reserved.';
+        btn.disabled = true;
+        return;
+    }
+
+    if (!/^[a-zA-Z0-9\-]{3,30}$/.test(value)) {
+        status.className = 'xn-username-status xn-username-err';
+        status.textContent = '✗ Only letters, numbers, hyphens (3–30 chars).';
+        btn.disabled = true;
+        return;
+    }
+
+    status.className = 'xn-username-status xn-username-checking';
+    status.textContent = 'Checking availability…';
+    btn.disabled = true;
+
+    usernameTimer = setTimeout(() => {
+        fetch('/xenoraa/check-username?username=' + encodeURIComponent(value))
+            .then(r => r.json())
+            .then(data => {
+                if (data.available) {
+                    status.className = 'xn-username-status xn-username-ok';
+                    status.textContent = '✓ xenoraa.com/' + value + ' is available!';
+                    btn.disabled = false;
+                } else {
+                    status.className = 'xn-username-status xn-username-err';
+                    status.textContent = '✗ This username is already taken. Try another.';
+                    btn.disabled = true;
+                }
+            })
+            .catch(() => {
+                status.className = 'xn-username-status';
+                status.textContent = '';
+                btn.disabled = false;
+            });
+    }, 500);
+}
+
+// On page load: check existing value (e.g. after validation error)
+window.addEventListener('DOMContentLoaded', () => {
+    const u = document.getElementById('username').value;
+    if (u) { userEditedUsername = true; checkUsername(u); }
+});
 </script>
 @endsection

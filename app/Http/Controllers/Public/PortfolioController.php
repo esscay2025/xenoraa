@@ -10,23 +10,74 @@ use App\Models\Job;
 use App\Models\JobApplication;
 use App\Models\PortfolioExperience;
 use App\Models\SocialLink;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class PortfolioController extends Controller
 {
     /**
+     * Resolve the current tenant from domain or username.
+     */
+    protected function resolveTenant(Request $request, ?string $username = null): ?User
+    {
+        $host = $request->getHost();
+        $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
+
+        // Custom domain (e.g. gopi.blog)
+        if ($host !== $mainDomain && $host !== 'www.' . $mainDomain) {
+            $tenant = User::where('custom_domain', $host)
+                ->orWhere('custom_domain', 'www.' . $host)
+                ->first();
+            if ($tenant) return $tenant;
+        }
+
+        // Username-based route (xenoraa.com/priya)
+        if ($username) {
+            return User::where('username', $username)->first();
+        }
+
+        // Logged-in admin viewing their own portfolio
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            return Auth::user();
+        }
+
+        return null;
+    }
+
+    /**
      * Display the public portfolio homepage.
      */
-    public function home()
+    public function home(Request $request, ?string $username = null)
     {
-        $experiences = PortfolioExperience::orderBy('start_date', 'desc')->get();
-        $socialLinks = SocialLink::where('is_active', true)->get();
-        $activeJobs = Job::where('status', 'active')->orderBy('created_at', 'desc')->take(3)->get();
+        $tenant = $this->resolveTenant($request, $username);
+        $tenantId = $tenant?->id;
 
-        // Category-grouped blog posts for homepage
-        $blogCategories = BlogCategory::withCount(['posts' => fn($q) => $q->where('status', 'published')])
-            ->having('posts_count', '>', 0)
-            ->get();
+        $experiences = $tenantId
+            ? PortfolioExperience::where('user_id', $tenantId)->orderBy('start_date', 'desc')->get()
+            : PortfolioExperience::orderBy('start_date', 'desc')->get();
+
+        // Fallback to unscoped for gopi (legacy data has no user_id)
+        if ($experiences->isEmpty()) {
+            $experiences = PortfolioExperience::orderBy('start_date', 'desc')->get();
+        }
+
+        $socialLinks = $tenantId
+            ? SocialLink::where('user_id', $tenantId)->where('is_active', true)->get()
+            : SocialLink::where('is_active', true)->get();
+
+        if ($socialLinks->isEmpty()) {
+            $socialLinks = SocialLink::where('is_active', true)->get();
+        }
+
+        $activeJobs = $tenantId
+            ? Job::where('user_id', $tenantId)->where('status', 'active')->orderBy('created_at', 'desc')->take(3)->get()
+            : Job::where('status', 'active')->orderBy('created_at', 'desc')->take(3)->get();
+
+        $blogCategories = BlogCategory::withCount([
+            'posts' => fn($q) => $q->where('status', 'published')
+                ->when($tenantId, fn($q2) => $q2->where('user_id', $tenantId))
+        ])->having('posts_count', '>', 0)->get();
 
         $categoryPosts = [];
         foreach ($blogCategories as $cat) {
@@ -35,19 +86,32 @@ class PortfolioController extends Controller
                 'posts'    => BlogPost::with('category')
                     ->where('status', 'published')
                     ->where('category_id', $cat->id)
+                    ->when($tenantId, fn($q) => $q->where('user_id', $tenantId))
                     ->orderBy('published_at', 'desc')
                     ->take(3)
                     ->get(),
             ];
         }
 
-        // Featured post (most viewed)
         $featuredPost = BlogPost::where('status', 'published')
+            ->when($tenantId, fn($q) => $q->where('user_id', $tenantId))
             ->orderBy('views_count', 'desc')
             ->first();
 
-        return view('portfolio.home', compact(
-            'experiences', 'socialLinks', 'activeJobs',
+        // Apply profession-based template if tenant has one
+        $template = $tenant?->getProfileTemplate() ?? 'default';
+        $templateViews = [
+            'doctor'       => 'tenant.templates.doctor',
+            'advocate'     => 'tenant.templates.advocate',
+            'politician'   => 'tenant.templates.politician',
+            'consultant'   => 'tenant.templates.consultant',
+            'entrepreneur' => 'tenant.templates.entrepreneur',
+            'influencer'   => 'tenant.templates.influencer',
+        ];
+        $view = $templateViews[$template] ?? 'portfolio.home';
+
+        return view($view, compact(
+            'tenant', 'experiences', 'socialLinks', 'activeJobs',
             'blogCategories', 'categoryPosts', 'featuredPost'
         ));
     }
@@ -55,10 +119,28 @@ class PortfolioController extends Controller
     /**
      * Display the About page.
      */
-    public function about()
+    public function about(Request $request, ?string $username = null)
     {
-        $socialLinks = SocialLink::where('is_active', true)->get();
-        return view('portfolio.about', compact('socialLinks'));
+        $tenant = $this->resolveTenant($request, $username);
+        $tenantId = $tenant?->id;
+
+        $socialLinks = $tenantId
+            ? SocialLink::where('user_id', $tenantId)->where('is_active', true)->get()
+            : SocialLink::where('is_active', true)->get();
+
+        if ($socialLinks->isEmpty()) {
+            $socialLinks = SocialLink::where('is_active', true)->get();
+        }
+
+        $experiences = $tenantId
+            ? PortfolioExperience::where('user_id', $tenantId)->orderBy('start_date', 'desc')->get()
+            : PortfolioExperience::orderBy('start_date', 'desc')->get();
+
+        if ($experiences->isEmpty()) {
+            $experiences = PortfolioExperience::orderBy('start_date', 'desc')->get();
+        }
+
+        return view('portfolio.about', compact('tenant', 'socialLinks', 'experiences'));
     }
 
     /**

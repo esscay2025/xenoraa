@@ -345,8 +345,8 @@
                 <ul class="xn-footer-links">
                     <li><a href="#">About Us</a></li>
                     <li><a href="#">Careers</a></li>
-                    <li><a href="#">Privacy Policy</a></li>
-                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="{{ route('legal.privacy') }}">Privacy Policy</a></li>
+                    <li><a href="{{ route('legal.terms') }}">Terms of Service</a></li>
                 </ul>
             </div>
         </div>

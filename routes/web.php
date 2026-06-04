@@ -270,6 +270,17 @@ Route::prefix('')->name('xenoraa.')->group(function () {
 });
 
 // =============================================
+// LEGAL PAGES (Privacy Policy & Terms)
+// =============================================
+Route::get('/privacy', function () {
+    return view('xenoraa.privacy');
+})->name('legal.privacy');
+
+Route::get('/terms', function () {
+    return view('xenoraa.terms');
+})->name('legal.terms');
+
+// =============================================
 // PAYMENT ROUTES (Razorpay)
 // =============================================
 Route::get('/xenoraa/pricing', [PaymentController::class, 'pricing'])->name('xenoraa.pricing');
@@ -305,6 +316,7 @@ Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmi
 // USERNAME AVAILABILITY CHECK (public API)
 // =============================================
 Route::get('/api/check-username', [OnboardingController::class, 'checkUsername'])->name('api.check-username');
+Route::get('/xenoraa/check-username', [OnboardingController::class, 'checkUsername'])->name('xenoraa.check-username');
 
 // =============================================
 // ONBOARDING ROUTES (post-registration)

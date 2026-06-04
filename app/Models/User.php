@@ -16,6 +16,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
+        'tenant_owner_id',
         'status',
         'username',
         'plan',
@@ -26,6 +27,11 @@ class User extends Authenticatable
         'avatar',
         'trial_ends_at',
         'plan_expires_at',
+        'profile_template',
+        'onboarding_completed',
+        'phone',
+        'city',
+        'website',
     ];
 
     protected $hidden = [
@@ -38,7 +44,45 @@ class User extends Authenticatable
         'password'          => 'hashed',
         'trial_ends_at'     => 'datetime',
         'plan_expires_at'   => 'datetime',
+        'onboarding_completed' => 'boolean',
     ];
+
+    // =============================================
+    // TENANT RELATIONSHIPS
+    // =============================================
+
+    /**
+     * The admin/tenant owner who created this sub-user.
+     */
+    public function tenantOwner()
+    {
+        return $this->belongsTo(User::class, 'tenant_owner_id');
+    }
+
+    /**
+     * Sub-users (staff, visitors) belonging to this tenant admin.
+     */
+    public function subUsers()
+    {
+        return $this->hasMany(User::class, 'tenant_owner_id');
+    }
+
+    /**
+     * Returns the tenant owner ID for scoping queries.
+     * Admin = their own ID. Staff/visitor = their tenant_owner_id.
+     */
+    public function getTenantId(): int
+    {
+        if ($this->isAdmin() || $this->isSuperAdmin()) {
+            return $this->id;
+        }
+        return $this->tenant_owner_id ?? $this->id;
+    }
+
+    public function getProfileTemplate(): string
+    {
+        return $this->profile_template ?? 'default';
+    }
 
     // =============================================
     // ROLE HELPERS
