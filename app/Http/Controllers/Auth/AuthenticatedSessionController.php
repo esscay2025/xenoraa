@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -25,7 +26,16 @@ class AuthenticatedSessionController extends Controller
             return view('auth.xenoraa-login');
         }
 
-        // Custom domain or gopi.blog — show portfolio login
+        // Custom domain or tenant domain — resolve tenant and show branded login
+        $tenant = User::where('custom_domain', $host)
+            ->orWhere('custom_domain', 'www.' . $host)
+            ->first();
+
+        if ($tenant) {
+            return view('auth.tenant-login', compact('tenant'));
+        }
+
+        // Fallback
         return view('auth.login');
     }
 
@@ -33,11 +43,13 @@ class AuthenticatedSessionController extends Controller
      * Handle login — after login redirect based on role AND domain.
      *
      * Role Hierarchy:
-     * - superadmin (support@xenoraa.com): ONLY gets superadmin dashboard on xenoraa.com
-     *   On tenant domains (gopi.blog), treated as regular admin of that tenant
-     * - admin (gopi@outlook.in): Xenoraa subscriber / tenant owner → admin dashboard
-     * - staff: Sub-user created by tenant admin → staff dashboard
+     * - superadmin: ONLY gets superadmin dashboard on xenoraa.com
+     * - admin (tenant owner): → admin dashboard
+     * - staff: Sub-user → staff dashboard
      * - visitor: Regular registered visitor → user dashboard
+     *
+     * If login came from a tenant-specific login page (tenant_username in form),
+     * verify the user belongs to that tenant before redirecting.
      */
     public function store(LoginRequest $request): RedirectResponse
     {
@@ -49,8 +61,26 @@ class AuthenticatedSessionController extends Controller
         $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
         $isMainDomain = ($host === $mainDomain || $host === 'www.' . $mainDomain);
 
+        // Check if login came from a tenant-specific login page
+        $tenantUsername = $request->input('tenant_username');
+        if ($tenantUsername) {
+            $tenant = User::where('username', $tenantUsername)->first();
+            if ($tenant) {
+                // Verify: user must be the tenant admin OR a sub-user of this tenant
+                $isOwner = ($user->id === $tenant->id);
+                $isSubUser = ($user->tenant_owner_id === $tenant->id);
+
+                if (!$isOwner && !$isSubUser && !$user->isSuperAdmin()) {
+                    // Wrong tenant — log out and redirect back with error
+                    Auth::guard('web')->logout();
+                    $request->session()->invalidate();
+                    return redirect()->route('tenant.login', $tenantUsername)
+                        ->withErrors(['email' => 'These credentials do not belong to ' . $tenant->name . '\'s account.']);
+                }
+            }
+        }
+
         // Super admin ONLY redirects to superadmin dashboard when logging in on xenoraa.com
-        // If they log in on gopi.blog or any tenant domain, treat as tenant admin
         if ($user->isSuperAdmin() && $isMainDomain) {
             return redirect()->route('superadmin.dashboard');
         }
@@ -78,7 +108,6 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // Always redirect to current domain's home
         return redirect('/');
     }
 }

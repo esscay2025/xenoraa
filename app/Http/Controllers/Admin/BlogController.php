@@ -12,11 +12,20 @@ use Illuminate\Support\Str;
 class BlogController extends Controller
 {
     /**
-     * Display a listing of blog posts.
+     * Return the current tenant ID (always the logged-in admin's own ID).
+     */
+    private function tenantId(): int
+    {
+        return auth()->user()->getTenantId();
+    }
+
+    /**
+     * Display a listing of blog posts — scoped to current tenant.
      */
     public function index(Request $request)
     {
-        $query = BlogPost::with(['author', 'category']);
+        $query = BlogPost::with(['author', 'category'])
+            ->where('user_id', $this->tenantId());
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -41,10 +50,10 @@ class BlogController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'content' => ['required'],
-            'category_id' => ['nullable', 'exists:blog_categories,id'],
-            'status' => ['required', 'in:draft,published,archived'],
+            'title'          => ['required', 'string', 'max:255'],
+            'content'        => ['required'],
+            'category_id'    => ['nullable', 'exists:blog_categories,id'],
+            'status'         => ['required', 'in:draft,published,archived'],
             'featured_image' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -54,14 +63,14 @@ class BlogController extends Controller
         }
 
         BlogPost::create([
-            'user_id' => auth()->id(),
-            'category_id' => $request->category_id,
-            'title' => $request->title,
-            'slug' => Str::slug($request->title),
-            'summary' => $request->summary,
-            'content' => $request->content,
+            'user_id'      => auth()->id(),
+            'category_id'  => $request->category_id,
+            'title'        => $request->title,
+            'slug'         => Str::slug($request->title) . '-' . Str::random(4),
+            'summary'      => $request->summary,
+            'content'      => $request->content,
             'featured_image' => $imagePath,
-            'status' => $request->status,
+            'status'       => $request->status,
             'published_at' => $request->status === 'published' ? now() : null,
         ]);
 
@@ -69,10 +78,11 @@ class BlogController extends Controller
     }
 
     /**
-     * Show the form for editing the specified post.
+     * Show the form for editing the specified post — only if owned by tenant.
      */
     public function edit(BlogPost $blog)
     {
+        abort_if($blog->user_id !== $this->tenantId(), 403);
         $categories = BlogCategory::all();
         return view('admin.blog.edit', compact('blog', 'categories'));
     }
@@ -82,11 +92,13 @@ class BlogController extends Controller
      */
     public function update(Request $request, BlogPost $blog)
     {
+        abort_if($blog->user_id !== $this->tenantId(), 403);
+
         $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'content' => ['required'],
-            'category_id' => ['nullable', 'exists:blog_categories,id'],
-            'status' => ['required', 'in:draft,published,archived'],
+            'title'          => ['required', 'string', 'max:255'],
+            'content'        => ['required'],
+            'category_id'    => ['nullable', 'exists:blog_categories,id'],
+            'status'         => ['required', 'in:draft,published,archived'],
             'featured_image' => ['nullable', 'image', 'max:2048'],
         ]);
 
@@ -96,13 +108,13 @@ class BlogController extends Controller
         }
 
         $blog->update([
-            'category_id' => $request->category_id,
-            'title' => $request->title,
-            'slug' => Str::slug($request->title),
-            'summary' => $request->summary,
-            'content' => $request->content,
+            'category_id'  => $request->category_id,
+            'title'        => $request->title,
+            'slug'         => Str::slug($request->title) . '-' . Str::random(4),
+            'summary'      => $request->summary,
+            'content'      => $request->content,
             'featured_image' => $imagePath,
-            'status' => $request->status,
+            'status'       => $request->status,
             'published_at' => $request->status === 'published' ? ($blog->published_at ?? now()) : null,
         ]);
 
@@ -114,16 +126,21 @@ class BlogController extends Controller
      */
     public function destroy(BlogPost $blog)
     {
+        abort_if($blog->user_id !== $this->tenantId(), 403);
         $blog->delete();
         return redirect()->route('admin.blog.index')->with('success', 'Blog post deleted successfully.');
     }
 
     /**
-     * Manage comments.
+     * Manage comments — only for this tenant's posts.
      */
     public function comments(Request $request)
     {
-        $comments = BlogComment::with(['post', 'user'])->orderBy('created_at', 'desc')->paginate(20);
+        $tenantPostIds = BlogPost::where('user_id', $this->tenantId())->pluck('id');
+        $comments = BlogComment::with(['post', 'user'])
+            ->whereIn('blog_post_id', $tenantPostIds)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
         return view('admin.blog.comments', compact('comments'));
     }
 

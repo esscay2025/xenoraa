@@ -130,8 +130,12 @@ class SuperAdminController extends Controller
      */
     public function subscriptions()
     {
+        // Only show tenant admin subscribers — exclude super admin and sub-users
+        $adminRoleId = DB::table('roles')->where('name', 'admin')->value('id');
+
         $subscriptions = User::whereNotNull('plan')
-            ->select('id', 'name', 'email', 'plan', 'status', 'created_at', 'custom_domain')
+            ->where('role_id', $adminRoleId)
+            ->select('id', 'name', 'email', 'plan', 'status', 'created_at', 'custom_domain', 'username')
             ->latest()
             ->paginate(25);
         return view('superadmin.subscriptions', compact('subscriptions'));

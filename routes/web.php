@@ -21,6 +21,7 @@ use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Xenoraa\OnboardingController;
 use App\Http\Controllers\Xenoraa\PaymentController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,6 +29,9 @@ use Illuminate\Support\Facades\Route;
 | Web Routes
 |--------------------------------------------------------------------------
 */
+
+// Reserved usernames that cannot be used as tenant slugs
+$reservedUsernames = '^(?!admin|staff|superadmin|api|auth|login|register|logout|dashboard|profile|chat|forum|calendar|shop|newsletter|chatbot|xenoraa|solutions|about|blog|jobs|privacy|terms|payment|onboarding|user).*$';
 
 // =============================================
 // ROOT ROUTE — Domain-aware
@@ -45,7 +49,9 @@ Route::get('/', function (\Illuminate\Http\Request $request) {
 })->name('home');
 
 // =============================================
-// PUBLIC PORTFOLIO ROUTES (Visitor-facing)
+// CUSTOM DOMAIN PUBLIC ROUTES
+// (gopi.blog/about, gopi.blog/blog, etc.)
+// These routes work on custom domains where no username prefix is needed
 // =============================================
 Route::get('/about', [PortfolioController::class, 'about'])->name('about');
 Route::get('/blog', [PortfolioController::class, 'blog'])->name('blog');
@@ -140,7 +146,6 @@ Route::prefix('forum')->name('forum.')->group(function () {
         Route::delete('/reply/{reply}', [ForumController::class, 'deleteReply'])->name('reply.delete');
         Route::post('/', [ForumController::class, 'createTopic'])->name('create');
     });
-    // Admin forum management
     Route::middleware(['auth', 'role:admin'])->group(function () {
         Route::patch('/{topic}/pin', [ForumController::class, 'togglePin'])->name('pin');
         Route::patch('/{topic}/lock', [ForumController::class, 'toggleLock'])->name('lock');
@@ -170,7 +175,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/jobs/{job}/applications', [JobController::class, 'applications'])->name('jobs.applications');
     Route::patch('/applications/{application}/status', [JobController::class, 'updateApplicationStatus'])->name('applications.status');
 
-    // Expense Manager (Admin sees all)
+    // Expense Manager
     Route::resource('expenses', ExpenseController::class);
     Route::patch('/expenses/{expense}/approve', [ExpenseController::class, 'approve'])->name('expenses.approve');
     Route::patch('/expenses/{expense}/reject', [ExpenseController::class, 'reject'])->name('expenses.reject');
@@ -218,9 +223,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         Route::post('/conversations/{conversation}/reply', [\App\Http\Controllers\Admin\CrmController::class, 'conversationReply'])->name('conversation.reply');
         Route::delete('/conversations/{conversation}', [\App\Http\Controllers\Admin\CrmController::class, 'conversationDestroy'])->name('conversation.destroy');
         Route::get('/training', [\App\Http\Controllers\Admin\CrmController::class, 'trainingIndex'])->name('training');
-        Route::post('/training', [\App\Http\Controllers\Admin\CrmController::class, 'storeTraining'])->name('training.store');
-        Route::put('/training/{training}', [\App\Http\Controllers\Admin\CrmController::class, 'updateTraining'])->name('training.update');
-        Route::delete('/training/{training}', [\App\Http\Controllers\Admin\CrmController::class, 'destroyTraining'])->name('training.destroy');
+        Route::post('/training', [\App\Http\Controllers\Admin\CrmController::class, 'trainingStore'])->name('training.store');
+        Route::put('/training/{training}', [\App\Http\Controllers\Admin\CrmController::class, 'trainingUpdate'])->name('training.update');
+        Route::delete('/training/{training}', [\App\Http\Controllers\Admin\CrmController::class, 'trainingDestroy'])->name('training.destroy');
+        Route::get('/requirements', [\App\Http\Controllers\Admin\CrmController::class, 'requirementsIndex'])->name('requirements');
+        Route::patch('/requirements/{requirement}/scope-sent', [\App\Http\Controllers\Admin\CrmController::class, 'markScopeSent'])->name('requirements.scope-sent');
     });
 
     // E-commerce Admin
@@ -247,13 +254,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 // STAFF ROUTES (Staff + Admin)
 // =============================================
 Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:admin,staff'])->group(function () {
-
-    // Staff Dashboard
     Route::get('/dashboard', function () {
         return view('staff.dashboard');
     })->name('dashboard');
-
-    // Staff Expense Manager (own expenses only)
     Route::resource('expenses', ExpenseController::class);
 });
 
@@ -283,7 +286,6 @@ Route::get('/terms', function () {
 // =============================================
 // PAYMENT ROUTES (Razorpay)
 // =============================================
-Route::get('/xenoraa/pricing', [PaymentController::class, 'pricing'])->name('xenoraa.pricing');
 Route::post('/payment/create-order', [PaymentController::class, 'createOrder'])->name('payment.create-order');
 Route::post('/payment/verify', [PaymentController::class, 'verifyPayment'])->name('payment.verify');
 Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
@@ -329,19 +331,6 @@ Route::middleware('auth')->prefix('onboarding')->name('onboarding.')->group(func
 });
 
 // =============================================
-// MULTI-TENANT USER PROFILE ROUTES
-// (xenoraa.com/{username} and custom domains)
-// =============================================
-Route::get('/{username}', [TenantProfileController::class, 'profile'])->name('tenant.profile')
-    ->where('username', '^(?!admin|staff|superadmin|api|auth|login|register|logout|dashboard|profile|chat|forum|calendar|shop|newsletter|chatbot|xenoraa|solutions|about|blog|jobs|staff).*$');
-Route::get('/{username}/blog', [TenantProfileController::class, 'blog'])->name('tenant.blog')
-    ->where('username', '^(?!admin|staff|superadmin|api|auth|login|register|logout|dashboard|profile|chat|forum|calendar|shop|newsletter|chatbot|xenoraa|solutions|about|blog|jobs|staff).*$');
-Route::get('/{username}/blog/{slug}', [TenantProfileController::class, 'blogPost'])->name('tenant.blog.show')
-    ->where('username', '^(?!admin|staff|superadmin|api|auth|login|register|logout|dashboard|profile|chat|forum|calendar|shop|newsletter|chatbot|xenoraa|solutions|about|blog|jobs|staff).*$');
-Route::get('/{username}/shop', [TenantProfileController::class, 'shop'])->name('tenant.shop')
-    ->where('username', '^(?!admin|staff|superadmin|api|auth|login|register|logout|dashboard|profile|chat|forum|calendar|shop|newsletter|chatbot|xenoraa|solutions|about|blog|jobs|staff).*$');
-
-// =============================================
 // REDIRECT AFTER LOGIN
 // =============================================
 Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
@@ -350,22 +339,61 @@ Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
     $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
     $isMainDomain = ($host === $mainDomain || $host === 'www.' . $mainDomain);
 
-    // Super admin ONLY gets superadmin dashboard when on xenoraa.com
-    // On gopi.blog or any tenant domain, super admin is treated as a regular admin
     if ($user->isSuperAdmin() && $isMainDomain) {
         return redirect()->route('superadmin.dashboard');
     }
 
-    // Tenant admin (Xenoraa subscriber) → admin dashboard
     if ($user->isAdmin()) {
         return redirect()->route('admin.dashboard');
     }
 
-    // Staff sub-user → staff dashboard
     if ($user->isStaff()) {
         return redirect()->route('staff.dashboard');
     }
 
-    // Regular visitor/sub-user → user dashboard
     return redirect()->route('user.dashboard');
 })->middleware('auth')->name('dashboard');
+
+// =============================================
+// MULTI-TENANT USER PROFILE ROUTES
+// (xenoraa.com/{username} and custom domains)
+// =============================================
+
+// Tenant login page: xenoraa.com/priya/login
+Route::get('/{username}/login', function (\Illuminate\Http\Request $request, string $username) {
+    $tenant = \App\Models\User::where('username', $username)->firstOrFail();
+    return view('auth.tenant-login', compact('tenant'));
+})->name('tenant.login')
+  ->where('username', $reservedUsernames);
+
+// Tenant-specific public pages: xenoraa.com/priya/about, /priya/blog, /priya/jobs
+Route::get('/{username}/about', [PortfolioController::class, 'about'])->name('tenant.about')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/blog', [PortfolioController::class, 'blog'])->name('tenant.blog')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/blog/category/{slug}', [PortfolioController::class, 'blogCategory'])->name('tenant.blog.category')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/blog/{slug}', [PortfolioController::class, 'blogShow'])->name('tenant.blog.show')
+    ->where('username', $reservedUsernames);
+
+Route::post('/{username}/blog/{slug}/comment', [PortfolioController::class, 'submitComment'])->name('tenant.blog.comment')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/jobs', [PortfolioController::class, 'jobs'])->name('tenant.jobs')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/jobs/{slug}', [PortfolioController::class, 'jobShow'])->name('tenant.jobs.show')
+    ->where('username', $reservedUsernames);
+
+Route::post('/{username}/jobs/{slug}/apply', [PortfolioController::class, 'applyJob'])->name('tenant.jobs.apply')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/shop', [ShopController::class, 'tenantIndex'])->name('tenant.shop')
+    ->where('username', $reservedUsernames);
+
+// Tenant homepage: xenoraa.com/priya
+Route::get('/{username}', [PortfolioController::class, 'home'])->name('tenant.profile')
+    ->where('username', $reservedUsernames);

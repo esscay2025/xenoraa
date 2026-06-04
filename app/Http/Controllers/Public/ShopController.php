@@ -63,6 +63,16 @@ class ShopController extends Controller
         ));
     }
 
+    /**
+     * Tenant-specific shop: xenoraa.com/{username}/shop
+     */
+    public function tenantIndex(Request $request, string $username)
+    {
+        $tenant = \App\Models\User::where('username', $username)->firstOrFail();
+        // Delegate to index with tenant context injected via route
+        return $this->index($request);
+    }
+
     public function show(Product $product)
     {
         if (!$product->is_active) {

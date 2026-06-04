@@ -53,30 +53,26 @@ class PortfolioController extends Controller
         $tenant = $this->resolveTenant($request, $username);
         $tenantId = $tenant?->id;
 
-        $experiences = $tenantId
-            ? PortfolioExperience::where('user_id', $tenantId)->orderBy('start_date', 'desc')->get()
-            : PortfolioExperience::orderBy('start_date', 'desc')->get();
-
-        // Fallback to unscoped for gopi (legacy data has no user_id)
-        if ($experiences->isEmpty()) {
-            $experiences = PortfolioExperience::orderBy('start_date', 'desc')->get();
+        if (!$tenant) {
+            abort(404);
         }
 
-        $socialLinks = $tenantId
-            ? SocialLink::where('user_id', $tenantId)->where('is_active', true)->get()
-            : SocialLink::where('is_active', true)->get();
+        $experiences = PortfolioExperience::where('user_id', $tenantId)
+            ->orderBy('start_date', 'desc')
+            ->get();
 
-        if ($socialLinks->isEmpty()) {
-            $socialLinks = SocialLink::where('is_active', true)->get();
-        }
+        $socialLinks = SocialLink::where('user_id', $tenantId)
+            ->where('is_active', true)
+            ->get();
 
-        $activeJobs = $tenantId
-            ? Job::where('user_id', $tenantId)->where('status', 'active')->orderBy('created_at', 'desc')->take(3)->get()
-            : Job::where('status', 'active')->orderBy('created_at', 'desc')->take(3)->get();
+        $activeJobs = Job::where('user_id', $tenantId)
+            ->where('status', 'active')
+            ->orderBy('created_at', 'desc')
+            ->take(3)
+            ->get();
 
         $blogCategories = BlogCategory::withCount([
-            'posts' => fn($q) => $q->where('status', 'published')
-                ->when($tenantId, fn($q2) => $q2->where('user_id', $tenantId))
+            'posts' => fn($q) => $q->where('status', 'published')->where('user_id', $tenantId)
         ])->having('posts_count', '>', 0)->get();
 
         $categoryPosts = [];
@@ -86,7 +82,7 @@ class PortfolioController extends Controller
                 'posts'    => BlogPost::with('category')
                     ->where('status', 'published')
                     ->where('category_id', $cat->id)
-                    ->when($tenantId, fn($q) => $q->where('user_id', $tenantId))
+                    ->where('user_id', $tenantId)
                     ->orderBy('published_at', 'desc')
                     ->take(3)
                     ->get(),
@@ -94,12 +90,12 @@ class PortfolioController extends Controller
         }
 
         $featuredPost = BlogPost::where('status', 'published')
-            ->when($tenantId, fn($q) => $q->where('user_id', $tenantId))
+            ->where('user_id', $tenantId)
             ->orderBy('views_count', 'desc')
             ->first();
 
-        // Apply profession-based template if tenant has one
-        $template = $tenant?->getProfileTemplate() ?? 'default';
+        // Apply profession-based template
+        $template = $tenant->getProfileTemplate() ?? 'default';
         $templateViews = [
             'doctor'       => 'tenant.templates.doctor',
             'advocate'     => 'tenant.templates.advocate',
@@ -124,31 +120,36 @@ class PortfolioController extends Controller
         $tenant = $this->resolveTenant($request, $username);
         $tenantId = $tenant?->id;
 
-        $socialLinks = $tenantId
-            ? SocialLink::where('user_id', $tenantId)->where('is_active', true)->get()
-            : SocialLink::where('is_active', true)->get();
-
-        if ($socialLinks->isEmpty()) {
-            $socialLinks = SocialLink::where('is_active', true)->get();
+        if (!$tenant) {
+            abort(404);
         }
 
-        $experiences = $tenantId
-            ? PortfolioExperience::where('user_id', $tenantId)->orderBy('start_date', 'desc')->get()
-            : PortfolioExperience::orderBy('start_date', 'desc')->get();
+        $socialLinks = SocialLink::where('user_id', $tenantId)
+            ->where('is_active', true)
+            ->get();
 
-        if ($experiences->isEmpty()) {
-            $experiences = PortfolioExperience::orderBy('start_date', 'desc')->get();
-        }
+        $experiences = PortfolioExperience::where('user_id', $tenantId)
+            ->orderBy('start_date', 'desc')
+            ->get();
 
         return view('portfolio.about', compact('tenant', 'socialLinks', 'experiences'));
     }
 
     /**
-     * Display the blog listing page.
+     * Display the blog listing page — scoped to tenant.
      */
-    public function blog(Request $request)
+    public function blog(Request $request, ?string $username = null)
     {
-        $query = BlogPost::with(['author', 'category'])->where('status', 'published');
+        $tenant = $this->resolveTenant($request, $username);
+        $tenantId = $tenant?->id;
+
+        if (!$tenant) {
+            abort(404);
+        }
+
+        $query = BlogPost::with(['author', 'category'])
+            ->where('status', 'published')
+            ->where('user_id', $tenantId);
 
         if ($request->filled('category')) {
             $query->whereHas('category', fn($q) => $q->where('slug', $request->category));
@@ -162,59 +163,73 @@ class PortfolioController extends Controller
         }
 
         $posts = $query->orderBy('published_at', 'desc')->paginate(9);
-        $socialLinks = SocialLink::where('is_active', true)->get();
+        $socialLinks = SocialLink::where('user_id', $tenantId)->where('is_active', true)->get();
 
-        return view('portfolio.blog', compact('posts', 'socialLinks'));
+        return view('portfolio.blog', compact('posts', 'socialLinks', 'tenant'));
     }
 
     /**
-     * Display blog posts filtered by category.
+     * Display blog posts filtered by category — scoped to tenant.
      */
-    public function blogCategory(Request $request, string $slug)
+    public function blogCategory(Request $request, string $slug, ?string $username = null)
     {
+        $tenant = $this->resolveTenant($request, $username);
+        $tenantId = $tenant?->id;
+
+        if (!$tenant) {
+            abort(404);
+        }
+
         $category = BlogCategory::where('slug', $slug)->firstOrFail();
 
         $posts = BlogPost::with(['author', 'category'])
             ->where('status', 'published')
             ->where('category_id', $category->id)
+            ->where('user_id', $tenantId)
             ->orderBy('published_at', 'desc')
             ->paginate(9);
 
-        $allCategories = BlogCategory::withCount(['posts' => fn($q) => $q->where('status', 'published')])
-            ->having('posts_count', '>', 0)
-            ->get();
+        $allCategories = BlogCategory::withCount([
+            'posts' => fn($q) => $q->where('status', 'published')->where('user_id', $tenantId)
+        ])->having('posts_count', '>', 0)->get();
 
-        $socialLinks = SocialLink::where('is_active', true)->get();
+        $socialLinks = SocialLink::where('user_id', $tenantId)->where('is_active', true)->get();
 
-        return view('portfolio.blog', compact('posts', 'socialLinks', 'category', 'allCategories'));
+        return view('portfolio.blog', compact('posts', 'socialLinks', 'category', 'allCategories', 'tenant'));
     }
 
     /**
-     * Display a single blog post.
+     * Display a single blog post — verify it belongs to the tenant.
      */
-    public function blogShow(string $slug)
+    public function blogShow(Request $request, string $slug, ?string $username = null)
     {
-        $post = BlogPost::with(['author', 'category', 'comments.user'])
-            ->where('slug', $slug)
-            ->where('status', 'published')
-            ->firstOrFail();
+        $tenant = $this->resolveTenant($request, $username);
+        $tenantId = $tenant?->id;
 
-        // Increment view count
+        $query = BlogPost::with(['author', 'category', 'comments.user'])
+            ->where('slug', $slug)
+            ->where('status', 'published');
+
+        if ($tenantId) {
+            $query->where('user_id', $tenantId);
+        }
+
+        $post = $query->firstOrFail();
         $post->increment('views_count');
 
         $comments = $post->comments()->where('is_approved', true)->orderBy('created_at', 'desc')->get();
-        $socialLinks = SocialLink::where('is_active', true)->get();
+        $socialLinks = SocialLink::where('user_id', $tenantId)->where('is_active', true)->get();
 
-        // Related posts: same category, exclude current
         $relatedPosts = BlogPost::with(['category'])
             ->where('status', 'published')
             ->where('id', '!=', $post->id)
+            ->where('user_id', $tenantId)
             ->when($post->category_id, fn($q) => $q->where('category_id', $post->category_id))
             ->orderByDesc('views_count')
             ->limit(4)
             ->get();
 
-        return view('portfolio.blog-show', compact('post', 'comments', 'socialLinks', 'relatedPosts'));
+        return view('portfolio.blog-show', compact('post', 'comments', 'socialLinks', 'relatedPosts', 'tenant'));
     }
 
     /**
@@ -225,29 +240,36 @@ class PortfolioController extends Controller
         $post = BlogPost::where('slug', $slug)->where('status', 'published')->firstOrFail();
 
         $request->validate([
-            'comment' => ['required', 'string', 'max:1000'],
-            'visitor_name' => ['nullable', 'string', 'max:100'],
+            'comment'       => ['required', 'string', 'max:1000'],
+            'visitor_name'  => ['nullable', 'string', 'max:100'],
             'visitor_email' => ['nullable', 'email', 'max:255'],
         ]);
 
         BlogComment::create([
-            'blog_post_id' => $post->id,
-            'user_id' => auth()->id(),
-            'visitor_name' => auth()->check() ? null : $request->visitor_name,
+            'blog_post_id'  => $post->id,
+            'user_id'       => auth()->id(),
+            'visitor_name'  => auth()->check() ? null : $request->visitor_name,
             'visitor_email' => auth()->check() ? null : $request->visitor_email,
-            'comment' => $request->comment,
-            'is_approved' => true,
+            'comment'       => $request->comment,
+            'is_approved'   => true,
         ]);
 
         return back()->with('success', 'Your comment has been submitted!');
     }
 
     /**
-     * Display the jobs listing page.
+     * Display the jobs listing page — scoped to tenant.
      */
-    public function jobs(Request $request)
+    public function jobs(Request $request, ?string $username = null)
     {
-        $query = Job::where('status', 'active');
+        $tenant = $this->resolveTenant($request, $username);
+        $tenantId = $tenant?->id;
+
+        if (!$tenant) {
+            abort(404);
+        }
+
+        $query = Job::where('status', 'active')->where('user_id', $tenantId);
 
         if ($request->filled('type')) {
             $query->where('type', $request->type);
@@ -265,20 +287,28 @@ class PortfolioController extends Controller
         }
 
         $jobs = $query->orderBy('created_at', 'desc')->paginate(10);
-        $socialLinks = SocialLink::where('is_active', true)->get();
+        $socialLinks = SocialLink::where('user_id', $tenantId)->where('is_active', true)->get();
 
-        return view('portfolio.jobs', compact('jobs', 'socialLinks'));
+        return view('portfolio.jobs', compact('jobs', 'socialLinks', 'tenant'));
     }
 
     /**
-     * Display a single job listing.
+     * Display a single job listing — scoped to tenant.
      */
-    public function jobShow(string $slug)
+    public function jobShow(Request $request, string $slug, ?string $username = null)
     {
-        $job = Job::where('slug', $slug)->where('status', 'active')->firstOrFail();
-        $socialLinks = SocialLink::where('is_active', true)->get();
+        $tenant = $this->resolveTenant($request, $username);
+        $tenantId = $tenant?->id;
 
-        return view('portfolio.job-show', compact('job', 'socialLinks'));
+        $query = Job::where('slug', $slug)->where('status', 'active');
+        if ($tenantId) {
+            $query->where('user_id', $tenantId);
+        }
+
+        $job = $query->firstOrFail();
+        $socialLinks = SocialLink::where('user_id', $tenantId)->where('is_active', true)->get();
+
+        return view('portfolio.job-show', compact('job', 'socialLinks', 'tenant'));
     }
 
     /**
@@ -289,24 +319,24 @@ class PortfolioController extends Controller
         $job = Job::where('slug', $slug)->where('status', 'active')->firstOrFail();
 
         $request->validate([
-            'applicant_name' => ['required', 'string', 'max:255'],
+            'applicant_name'  => ['required', 'string', 'max:255'],
             'applicant_email' => ['required', 'email', 'max:255'],
             'applicant_phone' => ['nullable', 'string', 'max:20'],
-            'resume' => ['required', 'file', 'mimes:pdf,doc,docx', 'max:5120'],
-            'cover_letter' => ['nullable', 'string', 'max:2000'],
+            'resume'          => ['required', 'file', 'mimes:pdf,doc,docx', 'max:5120'],
+            'cover_letter'    => ['nullable', 'string', 'max:2000'],
         ]);
 
         $resumePath = $request->file('resume')->store('resumes', 'public');
 
         JobApplication::create([
-            'job_id' => $job->id,
-            'user_id' => auth()->id(),
-            'applicant_name' => $request->applicant_name,
+            'job_id'          => $job->id,
+            'user_id'         => auth()->id(),
+            'applicant_name'  => $request->applicant_name,
             'applicant_email' => $request->applicant_email,
             'applicant_phone' => $request->applicant_phone,
-            'resume_path' => $resumePath,
-            'cover_letter' => $request->cover_letter,
-            'status' => 'applied',
+            'resume_path'     => $resumePath,
+            'cover_letter'    => $request->cover_letter,
+            'status'          => 'applied',
         ]);
 
         return back()->with('success', 'Your application has been submitted successfully! We will get back to you soon.');

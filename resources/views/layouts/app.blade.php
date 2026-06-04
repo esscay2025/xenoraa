@@ -4,8 +4,77 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Gopi K | Portfolio')</title>
-    <meta name="description" content="@yield('description', 'Founder of Go Esscay Solutions | IT, Automation & Open-Source Expert | Greater Chennai Area')">
+    @php
+        // ── Resolve current tenant from domain or route parameter ──────────────
+        $layoutTenant = null;
+        $host = request()->getHost();
+        $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
+        $isMainDomain = ($host === $mainDomain || $host === 'www.' . $mainDomain);
+
+        if (!$isMainDomain) {
+            // Custom domain (e.g. gopi.blog)
+            $layoutTenant = \App\Models\User::where('custom_domain', $host)
+                ->orWhere('custom_domain', 'www.' . $host)
+                ->first();
+        }
+
+        if (!$layoutTenant) {
+            // Username-based route: xenoraa.com/priya/...
+            $routeUsername = request()->route('username');
+            if ($routeUsername) {
+                $layoutTenant = \App\Models\User::where('username', $routeUsername)->first();
+            }
+        }
+
+        if (!$layoutTenant && auth()->check() && auth()->user()->isAdmin()) {
+            $layoutTenant = auth()->user();
+        }
+
+        // ── Tenant-aware URL helpers ───────────────────────────────────────────
+        $tenantBase = '';
+        $tenantLoginUrl = route('login');
+        $tenantRegisterUrl = route('register');
+
+        if ($layoutTenant) {
+            if ($layoutTenant->custom_domain && !$isMainDomain) {
+                // On gopi.blog — no prefix needed
+                $tenantBase = '';
+                $tenantLoginUrl = url('/login');
+            } else {
+                // On xenoraa.com/{username}/...
+                $tenantBase = '/' . $layoutTenant->username;
+                $tenantLoginUrl = url('/' . $layoutTenant->username . '/login');
+            }
+        }
+
+        $tenantHomeUrl   = $tenantBase ? url($tenantBase) : route('home');
+        $tenantAboutUrl  = $tenantBase ? url($tenantBase . '/about') : route('about');
+        $tenantBlogUrl   = $tenantBase ? url($tenantBase . '/blog') : route('blog');
+        $tenantJobsUrl   = $tenantBase ? url($tenantBase . '/jobs') : route('jobs');
+        $tenantShopUrl   = $tenantBase ? url($tenantBase . '/shop') : route('shop');
+
+        // ── Tenant site settings ───────────────────────────────────────────────
+        $tenantSettings = [];
+        if ($layoutTenant) {
+            $tenantSettings = \App\Models\SiteSetting::where('user_id', $layoutTenant->id)
+                ->pluck('value', 'key')
+                ->toArray();
+        }
+
+        $siteName    = $tenantSettings['site_name']    ?? ($layoutTenant?->name ?? 'Xenoraa');
+        $siteTagline = $tenantSettings['site_tagline'] ?? ($layoutTenant?->profile_tagline ?? '');
+        $footerTagline = $tenantSettings['site_description'] ?? $tenantSettings['footer_tagline'] ?? $siteTagline;
+
+        // ── Tenant social links ────────────────────────────────────────────────
+        $footerSocials = $layoutTenant
+            ? \App\Models\SocialLink::where('user_id', $layoutTenant->id)->where('is_active', true)->get()
+            : collect();
+
+        // ── Tenant profile template for nav customisation ──────────────────────
+        $tenantTemplate = $layoutTenant?->getProfileTemplate() ?? 'default';
+    @endphp
+    <title>@yield('title', $siteName . ' | Portfolio')</title>
+    <meta name="description" content="@yield('description', $footerTagline)">
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
@@ -28,7 +97,7 @@
         /* ── NAVBAR ── */
         .navbar { background-color: rgba(10,10,10,0.97); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; padding: 0 2rem; }
         .navbar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
-        .navbar-brand { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; }
+        .navbar-brand { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; gap: 0.5rem; }
         .navbar-brand img { height: 36px; width: auto; display: block; }
         .navbar-nav { display: flex; align-items: center; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
         .navbar-nav > li { position: relative; }
@@ -57,12 +126,10 @@
         .mobile-menu.open { display: flex; }
         .mobile-menu a.mob-link { color: var(--text-primary); text-decoration: none; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; gap: 0.75rem; transition: background 0.2s; }
         .mobile-menu a.mob-link:hover { background-color: var(--bg-card); }
-        /* Accordion toggle button */
         .mob-accordion-btn { color: var(--text-primary); padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; font-weight: 500; border: none; background: none; cursor: pointer; text-align: left; width: 100%; display: flex; align-items: center; gap: 0.75rem; transition: background 0.2s; }
         .mob-accordion-btn:hover { background-color: var(--bg-card); }
         .mob-accordion-btn .mob-chevron { margin-left: auto; font-size: 0.75rem; transition: transform 0.25s; color: var(--text-muted); }
         .mob-accordion-btn.open .mob-chevron { transform: rotate(180deg); }
-        /* Accordion panel */
         .mob-accordion-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
         .mob-accordion-panel.open { max-height: 600px; }
         .mob-sub-link { color: var(--text-secondary) !important; text-decoration: none; padding: 0.6rem 1rem 0.6rem 2.75rem; border-radius: 8px; font-size: 0.875rem; font-weight: 500; display: flex; align-items: center; gap: 0.65rem; transition: background 0.2s; }
@@ -143,16 +210,25 @@
 <body>
     <nav class="navbar">
         <div class="navbar-inner">
-            <a href="{{ route('home') }}" class="navbar-brand" title="Gopi K | Home">
-                <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K Logo" loading="eager" style="height:40px;width:auto;">
+            {{-- Brand / Logo — tenant-aware --}}
+            <a href="{{ $tenantHomeUrl }}" class="navbar-brand" title="{{ $siteName }}">
+                @if($layoutTenant && $layoutTenant->profile_photo)
+                    <img src="{{ asset('storage/' . $layoutTenant->profile_photo) }}" alt="{{ $siteName }}" style="height:36px;width:36px;border-radius:50%;object-fit:cover;">
+                @elseif(!$layoutTenant || $isMainDomain)
+                    <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K Logo" loading="eager" style="height:40px;width:auto;">
+                @else
+                    <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:#fff;flex-shrink:0;">{{ strtoupper(substr($siteName,0,1)) }}</span>
+                @endif
+                <span style="font-size:0.95rem;font-weight:700;color:var(--text-primary);">{{ $siteName }}</span>
             </a>
 
             {{-- Desktop Nav --}}
             <ul class="navbar-nav">
-                <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">Home</a></li>
-                <li><a href="{{ route('about') }}" class="{{ request()->routeIs('about') ? 'active' : '' }}">About</a></li>
+                <li><a href="{{ $tenantHomeUrl }}" class="{{ request()->routeIs('home') || request()->routeIs('tenant.profile') ? 'active' : '' }}">Home</a></li>
+                <li><a href="{{ $tenantAboutUrl }}" class="{{ request()->routeIs('about') || request()->routeIs('tenant.about') ? 'active' : '' }}">About</a></li>
 
-                {{-- Solutions Dropdown --}}
+                {{-- Solutions — only for Gopi (IT Professional) --}}
+                @if(!$layoutTenant || $layoutTenant->email === 'gopi@outlook.in' || $tenantTemplate === 'entrepreneur' || $tenantTemplate === 'consultant')
                 <li>
                     <button class="{{ request()->routeIs('solutions.*') ? 'active' : '' }}" type="button">
                         Solutions <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
@@ -166,28 +242,54 @@
                         <a href="{{ route('solutions.branding-digital') }}"><i class="fas fa-palette"></i> Branding & Digital Presence</a>
                     </div>
                 </li>
+                @endif
 
-                {{-- Blog Mega Menu --}}
+                {{-- Services — for Advocate --}}
+                @if($tenantTemplate === 'advocate')
+                <li><a href="{{ $tenantAboutUrl }}#services">Services</a></li>
+                @endif
+
+                {{-- Collaborations — for Influencer --}}
+                @if($tenantTemplate === 'influencer')
+                <li><a href="{{ $tenantAboutUrl }}#collaborations">Collaborations</a></li>
+                @endif
+
+                {{-- Blog --}}
                 <li>
-                    <a href="{{ route('blog') }}" class="{{ request()->routeIs('blog*') ? 'active' : '' }}">
+                    <a href="{{ $tenantBlogUrl }}" class="{{ request()->routeIs('blog*') || request()->routeIs('tenant.blog*') ? 'active' : '' }}">
                         Blog <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
                     </a>
                     <div class="nav-dropdown nav-mega">
                         <div style="grid-column: 1/-1;"><div class="nav-dropdown-label">Browse by Category</div></div>
-                        <a href="{{ route('blog.category', 'ai-automation') }}"><i class="fas fa-robot"></i> AI & Automation</a>
-                        <a href="{{ route('blog.category', 'hacking-security') }}"><i class="fas fa-shield-alt"></i> Hacking & Security</a>
-                        <a href="{{ route('blog.category', 'startup-product') }}"><i class="fas fa-rocket"></i> Startup & Product Dev</a>
-                        <a href="{{ route('blog.category', 'software-technology') }}"><i class="fas fa-code"></i> Software & Technology</a>
-                        <a href="{{ route('blog.category', 'digital-transformation') }}"><i class="fas fa-chart-line"></i> Digital Transformation</a>
-                        <a href="{{ route('blog.category', 'personal-branding') }}"><i class="fas fa-user-tie"></i> Personal Branding</a>
+                        @if($tenantTemplate === 'influencer')
+                            <a href="{{ $tenantBlogUrl }}?category=fashion"><i class="fas fa-tshirt"></i> Fashion & Style</a>
+                            <a href="{{ $tenantBlogUrl }}?category=beauty"><i class="fas fa-spa"></i> Beauty & Skincare</a>
+                            <a href="{{ $tenantBlogUrl }}?category=travel"><i class="fas fa-plane"></i> Travel</a>
+                            <a href="{{ $tenantBlogUrl }}?category=lifestyle"><i class="fas fa-heart"></i> Lifestyle</a>
+                        @elseif($tenantTemplate === 'advocate')
+                            <a href="{{ $tenantBlogUrl }}?category=corporate-law"><i class="fas fa-building"></i> Corporate Law</a>
+                            <a href="{{ $tenantBlogUrl }}?category=consumer-rights"><i class="fas fa-shield-alt"></i> Consumer Rights</a>
+                            <a href="{{ $tenantBlogUrl }}?category=startup-legal"><i class="fas fa-rocket"></i> Startup Legal</a>
+                            <a href="{{ $tenantBlogUrl }}?category=ip-rights"><i class="fas fa-copyright"></i> IP Rights</a>
+                        @else
+                            <a href="{{ $tenantBlogUrl }}?category=ai-automation"><i class="fas fa-robot"></i> AI & Automation</a>
+                            <a href="{{ $tenantBlogUrl }}?category=hacking-security"><i class="fas fa-shield-alt"></i> Hacking & Security</a>
+                            <a href="{{ $tenantBlogUrl }}?category=startup-product"><i class="fas fa-rocket"></i> Startup & Product Dev</a>
+                            <a href="{{ $tenantBlogUrl }}?category=software-technology"><i class="fas fa-code"></i> Software & Technology</a>
+                            <a href="{{ $tenantBlogUrl }}?category=digital-transformation"><i class="fas fa-chart-line"></i> Digital Transformation</a>
+                            <a href="{{ $tenantBlogUrl }}?category=personal-branding"><i class="fas fa-user-tie"></i> Personal Branding</a>
+                        @endif
                         <div style="grid-column: 1/-1;"><hr class="nav-dropdown-divider"></div>
-                        <div style="grid-column: 1/-1;"><a href="{{ route('blog') }}" style="font-weight:600;"><i class="fas fa-th-large"></i> View All Posts</a></div>
+                        <div style="grid-column: 1/-1;"><a href="{{ $tenantBlogUrl }}" style="font-weight:600;"><i class="fas fa-th-large"></i> View All Posts</a></div>
                     </div>
                 </li>
 
-                <li><a href="{{ route('jobs') }}" class="{{ request()->routeIs('jobs*') ? 'active' : '' }}">Jobs</a></li>
+                <li><a href="{{ $tenantJobsUrl }}" class="{{ request()->routeIs('jobs*') || request()->routeIs('tenant.jobs*') ? 'active' : '' }}">
+                    {{ $tenantTemplate === 'advocate' ? 'Vacancies' : 'Jobs' }}
+                </a></li>
                 <li><a href="{{ route('forum.index') }}" class="{{ request()->routeIs('forum*') ? 'active' : '' }}">Forum</a></li>
-                <li><a href="{{ route('shop') }}" class="{{ request()->routeIs('shop*') ? 'active' : '' }}">Shop</a></li>
+                <li><a href="{{ $tenantShopUrl }}" class="{{ request()->routeIs('shop*') || request()->routeIs('tenant.shop*') ? 'active' : '' }}">Shop</a></li>
+
                 @auth
                     @if(auth()->user()->isAdmin())
                         <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.*') ? 'active' : '' }}">Dashboard</a></li>
@@ -203,8 +305,7 @@
                         </form>
                     </li>
                 @else
-                    <li><a href="{{ route('login') }}">Sign In</a></li>
-                    @php $isMainDomain = request()->getHost() === config('xenoraa.main_domain', 'xenoraa.com') || request()->getHost() === 'www.' . config('xenoraa.main_domain', 'xenoraa.com'); @endphp
+                    <li><a href="{{ $tenantLoginUrl }}">Sign In</a></li>
                     @if($isMainDomain)
                     <li><a href="{{ route('register') }}" class="btn btn-primary btn-sm">Sign Up</a></li>
                     @endif
@@ -221,15 +322,15 @@
     {{-- Mobile Slide-down Menu --}}
     <div class="mobile-menu" id="mobileMenu">
 
-        {{-- Home & About --}}
-        <a href="{{ route('home') }}" class="mob-link {{ request()->routeIs('home') ? 'active' : '' }}">
+        <a href="{{ $tenantHomeUrl }}" class="mob-link">
             <i class="fas fa-home" style="width:20px;color:var(--text-muted);"></i> Home
         </a>
-        <a href="{{ route('about') }}" class="mob-link {{ request()->routeIs('about') ? 'active' : '' }}">
+        <a href="{{ $tenantAboutUrl }}" class="mob-link">
             <i class="fas fa-user" style="width:20px;color:var(--text-muted);"></i> About
         </a>
 
-        {{-- Solutions Accordion --}}
+        {{-- Solutions accordion — only for IT/Entrepreneur --}}
+        @if(!$layoutTenant || $layoutTenant->email === 'gopi@outlook.in' || $tenantTemplate === 'entrepreneur' || $tenantTemplate === 'consultant')
         <button class="mob-accordion-btn" onclick="toggleAccordion('mobSolutions', this)">
             <i class="fas fa-lightbulb" style="width:20px;color:var(--text-muted);"></i>
             Solutions
@@ -242,38 +343,46 @@
             <a href="{{ route('solutions.startup-product') }}" class="mob-sub-link"><i class="fas fa-rocket" style="width:16px;"></i> Startup Product Dev</a>
             <a href="{{ route('solutions.branding-digital') }}" class="mob-sub-link"><i class="fas fa-palette" style="width:16px;"></i> Branding & Digital Presence</a>
         </div>
+        @endif
 
-        {{-- Blog Accordion --}}
+        {{-- Blog accordion --}}
         <button class="mob-accordion-btn" onclick="toggleAccordion('mobBlog', this)">
             <i class="fas fa-pen-nib" style="width:20px;color:var(--text-muted);"></i>
             Blog
             <i class="fas fa-chevron-down mob-chevron"></i>
         </button>
         <div class="mob-accordion-panel" id="mobBlog">
-            <a href="{{ route('blog') }}" class="mob-sub-link"><i class="fas fa-th-large" style="width:16px;"></i> All Posts</a>
-            <a href="{{ route('blog.category', 'ai-automation') }}" class="mob-sub-link"><i class="fas fa-robot" style="width:16px;"></i> AI & Automation</a>
-            <a href="{{ route('blog.category', 'hacking-security') }}" class="mob-sub-link"><i class="fas fa-shield-alt" style="width:16px;"></i> Hacking & Security</a>
-            <a href="{{ route('blog.category', 'startup-product') }}" class="mob-sub-link"><i class="fas fa-rocket" style="width:16px;"></i> Startup & Product Dev</a>
-            <a href="{{ route('blog.category', 'software-technology') }}" class="mob-sub-link"><i class="fas fa-code" style="width:16px;"></i> Software & Technology</a>
-            <a href="{{ route('blog.category', 'digital-transformation') }}" class="mob-sub-link"><i class="fas fa-chart-line" style="width:16px;"></i> Digital Transformation</a>
-            <a href="{{ route('blog.category', 'personal-branding') }}" class="mob-sub-link"><i class="fas fa-user-tie" style="width:16px;"></i> Personal Branding</a>
+            <a href="{{ $tenantBlogUrl }}" class="mob-sub-link"><i class="fas fa-th-large" style="width:16px;"></i> All Posts</a>
+            @if($tenantTemplate === 'influencer')
+                <a href="{{ $tenantBlogUrl }}?category=fashion" class="mob-sub-link"><i class="fas fa-tshirt" style="width:16px;"></i> Fashion & Style</a>
+                <a href="{{ $tenantBlogUrl }}?category=beauty" class="mob-sub-link"><i class="fas fa-spa" style="width:16px;"></i> Beauty & Skincare</a>
+                <a href="{{ $tenantBlogUrl }}?category=travel" class="mob-sub-link"><i class="fas fa-plane" style="width:16px;"></i> Travel</a>
+            @elseif($tenantTemplate === 'advocate')
+                <a href="{{ $tenantBlogUrl }}?category=corporate-law" class="mob-sub-link"><i class="fas fa-building" style="width:16px;"></i> Corporate Law</a>
+                <a href="{{ $tenantBlogUrl }}?category=consumer-rights" class="mob-sub-link"><i class="fas fa-shield-alt" style="width:16px;"></i> Consumer Rights</a>
+                <a href="{{ $tenantBlogUrl }}?category=startup-legal" class="mob-sub-link"><i class="fas fa-rocket" style="width:16px;"></i> Startup Legal</a>
+            @else
+                <a href="{{ $tenantBlogUrl }}?category=ai-automation" class="mob-sub-link"><i class="fas fa-robot" style="width:16px;"></i> AI & Automation</a>
+                <a href="{{ $tenantBlogUrl }}?category=hacking-security" class="mob-sub-link"><i class="fas fa-shield-alt" style="width:16px;"></i> Hacking & Security</a>
+                <a href="{{ $tenantBlogUrl }}?category=startup-product" class="mob-sub-link"><i class="fas fa-rocket" style="width:16px;"></i> Startup & Product Dev</a>
+            @endif
         </div>
 
         <hr class="mobile-divider">
-        <a href="{{ route('jobs') }}" class="mob-link {{ request()->routeIs('jobs*') ? 'active' : '' }}">
-            <i class="fas fa-briefcase" style="width:20px;color:var(--text-muted);"></i> Jobs
+        <a href="{{ $tenantJobsUrl }}" class="mob-link">
+            <i class="fas fa-briefcase" style="width:20px;color:var(--text-muted);"></i>
+            {{ $tenantTemplate === 'advocate' ? 'Vacancies' : 'Jobs' }}
         </a>
-        <a href="{{ route('forum.index') }}" class="mob-link {{ request()->routeIs('forum*') ? 'active' : '' }}">
+        <a href="{{ route('forum.index') }}" class="mob-link">
             <i class="fas fa-comments" style="width:20px;color:var(--text-muted);"></i> Forum
         </a>
-        <a href="{{ route('shop') }}" class="mob-link {{ request()->routeIs('shop*') ? 'active' : '' }}">
+        <a href="{{ $tenantShopUrl }}" class="mob-link">
             <i class="fas fa-shopping-bag" style="width:20px;color:var(--text-muted);"></i> Shop
         </a>
 
         @auth
             <hr class="mobile-divider">
             @if(auth()->user()->isAdmin())
-                {{-- Admin Dashboard Accordion --}}
                 <button class="mob-accordion-btn" onclick="toggleAccordion('mobAdminDash', this)">
                     <i class="fas fa-tachometer-alt" style="width:20px;color:var(--text-muted);"></i>
                     Admin Dashboard
@@ -285,12 +394,8 @@
                     <a href="{{ route('admin.jobs.index') }}" class="mob-sub-link"><i class="fas fa-briefcase" style="width:16px;"></i> Job Listings</a>
                     <a href="{{ route('admin.expenses.index') }}" class="mob-sub-link"><i class="fas fa-wallet" style="width:16px;"></i> Expenses</a>
                     <a href="{{ route('admin.users.index') }}" class="mob-sub-link"><i class="fas fa-users" style="width:16px;"></i> Users</a>
-                    <a href="{{ route('admin.forum.index') }}" class="mob-sub-link"><i class="fas fa-comments" style="width:16px;"></i> Forum Control</a>
-                    <a href="{{ route('admin.chat.index') }}" class="mob-sub-link"><i class="fas fa-comment-dots" style="width:16px;"></i> Chat Monitor</a>
-                    <a href="{{ route('admin.calendar.index') }}" class="mob-sub-link"><i class="fas fa-calendar-alt" style="width:16px;"></i> Calendar Events</a>
-                    <a href="{{ route('admin.newsletter.index') }}" class="mob-sub-link"><i class="fas fa-envelope" style="width:16px;"></i> Newsletter</a>
                     <a href="{{ route('admin.crm.leads') }}" class="mob-sub-link"><i class="fas fa-handshake" style="width:16px;"></i> CRM Leads</a>
-                    <a href="{{ route('admin.crm.conversations') }}" class="mob-sub-link"><i class="fas fa-robot" style="width:16px;"></i> Chatbot Conversations</a>
+                    <a href="{{ route('admin.crm.training') }}" class="mob-sub-link"><i class="fas fa-robot" style="width:16px;"></i> AI Training</a>
                     <a href="{{ route('admin.ecommerce.dashboard') }}" class="mob-sub-link"><i class="fas fa-store" style="width:16px;"></i> E-commerce</a>
                     <a href="{{ route('admin.settings.index') }}" class="mob-sub-link"><i class="fas fa-cog" style="width:16px;"></i> Site Settings</a>
                 </div>
@@ -299,7 +404,6 @@
                     <i class="fas fa-user-tie" style="width:20px;color:var(--text-muted);"></i> Staff Panel
                 </a>
             @else
-                {{-- User Dashboard Accordion --}}
                 <button class="mob-accordion-btn" onclick="toggleAccordion('mobUserDash', this)">
                     <i class="fas fa-th-large" style="width:20px;color:var(--text-muted);"></i>
                     My Dashboard
@@ -323,11 +427,10 @@
         @else
             <hr class="mobile-divider">
             <div class="mobile-auth">
-                <a href="{{ route('login') }}" class="mob-link btn-mobile-outline">
+                <a href="{{ $tenantLoginUrl }}" class="mob-link btn-mobile-outline">
                     <i class="fas fa-sign-in-alt" style="width:20px;"></i> Sign In
                 </a>
-                @php $isMainDomainMob = request()->getHost() === config('xenoraa.main_domain', 'xenoraa.com') || request()->getHost() === 'www.' . config('xenoraa.main_domain', 'xenoraa.com'); @endphp
-                @if($isMainDomainMob)
+                @if($isMainDomain)
                 <a href="{{ route('register') }}" class="mob-link btn-mobile-primary">
                     <i class="fas fa-user-plus" style="width:20px;"></i> Sign Up
                 </a>
@@ -348,27 +451,32 @@
 
     <main>@yield('content')</main>
 
+    {{-- ── FOOTER ── --}}
     <footer class="footer">
         <div class="footer-inner">
             <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1.6fr; gap: 2rem; margin-bottom: 2rem;">
                 <div>
-                    <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K" style="height: 44px; width: auto; margin-bottom: 0.75rem; display: block;">
-                    @php $siteSettings = \App\Models\SiteSetting::getSettings(); @endphp
-                    <p class="text-secondary text-sm">{{ $siteSettings['footer_tagline'] ?? 'Founder of Go Esscay Solutions. Passionate about creating impact through technology, automation, and open-source solutions.' }}</p>
+                    @if($layoutTenant && $layoutTenant->profile_photo)
+                        <img src="{{ asset('storage/' . $layoutTenant->profile_photo) }}" alt="{{ $siteName }}" style="height: 44px; width: 44px; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; display: block;">
+                    @elseif(!$layoutTenant || $isMainDomain)
+                        <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K" style="height: 44px; width: auto; margin-bottom: 0.75rem; display: block;">
+                    @else
+                        <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.2rem;color:#fff;margin-bottom:0.75rem;">{{ strtoupper(substr($siteName,0,1)) }}</div>
+                    @endif
+                    <p class="text-secondary text-sm">{{ $footerTagline ?: 'Professional portfolio powered by Xenoraa.' }}</p>
                 </div>
                 <div>
                     <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Quick Links</h4>
                     <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                        <a href="{{ route('home') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">Home</a>
-                        <a href="{{ route('about') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">About</a>
-                        <a href="{{ route('blog') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">Blog</a>
-                        <a href="{{ route('jobs') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">Jobs</a>
+                        <a href="{{ $tenantHomeUrl }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">Home</a>
+                        <a href="{{ $tenantAboutUrl }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">About</a>
+                        <a href="{{ $tenantBlogUrl }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">Blog</a>
+                        <a href="{{ $tenantJobsUrl }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">{{ $tenantTemplate === 'advocate' ? 'Vacancies' : 'Jobs' }}</a>
                     </div>
                 </div>
                 <div>
                     <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Connect</h4>
                     <div class="social-links">
-                        @php $footerSocials = \App\Models\SocialLink::where('is_active', true)->get(); @endphp
                         @foreach($footerSocials as $social)
                         <a href="{{ $social->url }}" class="social-link" target="_blank" rel="noopener" title="{{ ucfirst($social->platform) }}">
                             <i class="{{ $social->icon_class }}"></i>
@@ -376,8 +484,8 @@
                         @endforeach
                     </div>
                     <p class="text-sm text-muted" style="margin-top: 1rem;">
-                        @if(!empty($siteSettings['contact_phone']))<i class="fas fa-phone" style="margin-right: 0.4rem;"></i>{{ $siteSettings['contact_phone'] }}<br>@endif
-                        @if(!empty($siteSettings['contact_website']))<i class="fas fa-globe" style="margin-right: 0.4rem;"></i>{{ $siteSettings['contact_website'] }}@endif
+                        @if(!empty($tenantSettings['contact_phone']))<i class="fas fa-phone" style="margin-right: 0.4rem;"></i>{{ $tenantSettings['contact_phone'] }}<br>@endif
+                        @if(!empty($tenantSettings['contact_email']))<i class="fas fa-envelope" style="margin-right: 0.4rem;"></i>{{ $tenantSettings['contact_email'] }}@endif
                     </p>
                 </div>
                 <div>
@@ -385,8 +493,11 @@
                 </div>
             </div>
             <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-                <p class="text-muted text-sm">&copy; {{ date('Y') }} {{ $siteSettings['owner_name'] ?? 'Gopi K' }} &mdash; {{ $siteSettings['company_name'] ?? 'Go Esscay Solutions' }}. All rights reserved.</p>
-                <p class="text-muted text-sm">{{ $siteSettings['location'] ?? 'Greater Chennai Area, India' }}</p>
+                <p class="text-muted text-sm">&copy; {{ date('Y') }} {{ $siteName }}. All rights reserved. &mdash; Powered by <a href="https://xenoraa.com" style="color:var(--text-muted);">Xenoraa</a></p>
+                <div style="display:flex;gap:1rem;">
+                    <a href="{{ route('legal.privacy') }}" style="color:var(--text-muted);text-decoration:none;font-size:0.875rem;">Privacy Policy</a>
+                    <a href="{{ route('legal.terms') }}" style="color:var(--text-muted);text-decoration:none;font-size:0.875rem;">Terms of Service</a>
+                </div>
             </div>
         </div>
     </footer>
@@ -396,7 +507,6 @@
 
     @stack('scripts')
     <script>
-        // Mobile menu toggle
         const toggler = document.getElementById('navToggler');
         const mobileMenu = document.getElementById('mobileMenu');
         const navIcon = document.getElementById('navIcon');
@@ -408,7 +518,6 @@
             document.body.style.overflow = isOpen ? 'hidden' : '';
         });
 
-        // Close mobile menu when a non-accordion link is clicked
         mobileMenu.querySelectorAll('a.mob-link, a.mob-sub-link').forEach(link => {
             link.addEventListener('click', () => {
                 mobileMenu.classList.remove('open');
@@ -417,7 +526,6 @@
             });
         });
 
-        // Close on resize to desktop
         window.addEventListener('resize', () => {
             if (window.innerWidth > 1024) {
                 mobileMenu.classList.remove('open');
@@ -426,14 +534,11 @@
             }
         });
 
-        // Accordion toggle function
         function toggleAccordion(panelId, btn) {
             const panel = document.getElementById(panelId);
             const isOpen = panel.classList.contains('open');
-            // Close all panels first
             document.querySelectorAll('.mob-accordion-panel').forEach(p => p.classList.remove('open'));
             document.querySelectorAll('.mob-accordion-btn').forEach(b => b.classList.remove('open'));
-            // Open clicked if it was closed
             if (!isOpen) {
                 panel.classList.add('open');
                 btn.classList.add('open');

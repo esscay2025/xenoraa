@@ -238,8 +238,19 @@
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
-            <a href="{{ route('home') }}" class="sidebar-brand" title="View Website" target="_blank">
-                <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K" style="height:36px;width:auto;">
+            @php
+                $tenantUser = auth()->user();
+                $tenantSiteUrl = $tenantUser->custom_domain
+                    ? 'https://' . $tenantUser->custom_domain
+                    : url('/' . $tenantUser->username);
+            @endphp
+            <a href="{{ $tenantSiteUrl }}" class="sidebar-brand" title="View Your Site" target="_blank">
+                @if($tenantUser->profile_photo)
+                    <img src="{{ asset('storage/' . $tenantUser->profile_photo) }}" alt="{{ $tenantUser->name }}" style="height:36px;width:36px;border-radius:50%;object-fit:cover;">
+                @else
+                    <span style="font-size:1.2rem;font-weight:700;color:#a78bfa;">{{ strtoupper(substr($tenantUser->name,0,1)) }}</span>
+                @endif
+                <span style="font-size:0.85rem;color:#a78bfa;font-weight:600;margin-left:0.5rem;">{{ $tenantUser->name }}</span>
             </a>
             <p class="sidebar-role">Admin Panel</p>
         </div>
@@ -380,7 +391,13 @@
                 <h1 class="topbar-title">@yield('page-title', 'Dashboard')</h1>
             </div>
             <div style="display: flex; align-items: center; gap: 1rem;">
-                <a href="{{ route('home') }}" class="btn btn-outline btn-sm" target="_blank">
+                @php
+                    $tenantUser = auth()->user();
+                    $viewSiteUrl = $tenantUser->custom_domain
+                        ? 'https://' . $tenantUser->custom_domain
+                        : url('/' . $tenantUser->username);
+                @endphp
+                <a href="{{ $viewSiteUrl }}" class="btn btn-outline btn-sm" target="_blank">
                     <i class="fas fa-external-link-alt"></i> View Site
                 </a>
             </div>
