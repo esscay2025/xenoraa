@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Admin\BlogController;
+use App\Http\Controllers\SuperAdmin\SuperAdminController;
+use App\Http\Controllers\Xenoraa\XenoraaController;
+use App\Http\Controllers\Xenoraa\TenantProfileController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\JobController;
@@ -238,6 +241,54 @@ Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:admin,staff'])
     // Staff Expense Manager (own expenses only)
     Route::resource('expenses', ExpenseController::class);
 });
+
+// =============================================
+// XENORAA MARKETING SITE ROUTES
+// =============================================
+Route::prefix('')->name('xenoraa.')->group(function () {
+    Route::get('/xenoraa', [XenoraaController::class, 'home'])->name('home');
+    Route::get('/xenoraa/features', [XenoraaController::class, 'features'])->name('features');
+    Route::get('/xenoraa/pricing', [XenoraaController::class, 'pricing'])->name('pricing');
+    Route::get('/xenoraa/showcase', [XenoraaController::class, 'showcase'])->name('showcase');
+    Route::get('/xenoraa/blog', [XenoraaController::class, 'blog'])->name('blog');
+    Route::get('/xenoraa/get-started', [XenoraaController::class, 'getStarted'])->name('get-started');
+});
+
+// =============================================
+// SUPER ADMIN ROUTES
+// =============================================
+Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmin'])->group(function () {
+    Route::get('/dashboard', [SuperAdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/analytics', [SuperAdminController::class, 'analytics'])->name('analytics');
+    Route::get('/users', [SuperAdminController::class, 'users'])->name('users');
+    Route::get('/users/{id}', [SuperAdminController::class, 'showUser'])->name('users.show');
+    Route::get('/users/{id}/impersonate', [SuperAdminController::class, 'impersonateUser'])->name('users.impersonate');
+    Route::get('/exit-impersonation', [SuperAdminController::class, 'exitImpersonation'])->name('exit-impersonation');
+    Route::patch('/users/{id}/toggle-status', [SuperAdminController::class, 'toggleUserStatus'])->name('users.toggle-status');
+    Route::get('/subscriptions', [SuperAdminController::class, 'subscriptions'])->name('subscriptions');
+    Route::get('/revenue', [SuperAdminController::class, 'revenue'])->name('revenue');
+    Route::get('/domains', [SuperAdminController::class, 'domains'])->name('domains');
+    Route::patch('/domains/{id}', [SuperAdminController::class, 'updateDomain'])->name('domains.update');
+    Route::get('/blog', [SuperAdminController::class, 'blog'])->name('blog');
+    Route::get('/showcase', [SuperAdminController::class, 'showcase'])->name('showcase');
+    Route::get('/settings', [SuperAdminController::class, 'settings'])->name('settings');
+    Route::post('/settings', [SuperAdminController::class, 'updateSettings'])->name('settings.update');
+    Route::get('/emails', [SuperAdminController::class, 'emails'])->name('emails');
+    Route::get('/logs', [SuperAdminController::class, 'logs'])->name('logs');
+});
+
+// =============================================
+// MULTI-TENANT USER PROFILE ROUTES
+// (xenoraa.com/{username} and custom domains)
+// =============================================
+Route::get('/{username}', [TenantProfileController::class, 'profile'])->name('tenant.profile')
+    ->where('username', '^(?!admin|staff|superadmin|api|auth|login|register|logout|dashboard|profile|chat|forum|calendar|shop|newsletter|chatbot|xenoraa|solutions|about|blog|jobs|staff).*$');
+Route::get('/{username}/blog', [TenantProfileController::class, 'blog'])->name('tenant.blog')
+    ->where('username', '^(?!admin|staff|superadmin|api|auth|login|register|logout|dashboard|profile|chat|forum|calendar|shop|newsletter|chatbot|xenoraa|solutions|about|blog|jobs|staff).*$');
+Route::get('/{username}/blog/{slug}', [TenantProfileController::class, 'blogPost'])->name('tenant.blog.show')
+    ->where('username', '^(?!admin|staff|superadmin|api|auth|login|register|logout|dashboard|profile|chat|forum|calendar|shop|newsletter|chatbot|xenoraa|solutions|about|blog|jobs|staff).*$');
+Route::get('/{username}/shop', [TenantProfileController::class, 'shop'])->name('tenant.shop')
+    ->where('username', '^(?!admin|staff|superadmin|api|auth|login|register|logout|dashboard|profile|chat|forum|calendar|shop|newsletter|chatbot|xenoraa|solutions|about|blog|jobs|staff).*$');
 
 // =============================================
 // REDIRECT AFTER LOGIN
