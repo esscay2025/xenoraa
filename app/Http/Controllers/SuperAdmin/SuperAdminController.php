@@ -35,7 +35,7 @@ class SuperAdminController extends Controller
         ];
 
         $recentUsers = User::latest()->take(8)->get();
-        $domains = User::whereNotNull('custom_domain')->with('nothing')->take(10)->get();
+        $domains = User::whereNotNull('custom_domain')->take(10)->get();
 
         return view('superadmin.dashboard', compact('stats', 'recentUsers', 'domains'));
     }
@@ -224,12 +224,15 @@ class SuperAdminController extends Controller
      */
     public function logs()
     {
-        $logs = DB::table('activity_logs')
-            ->join('users', 'activity_logs.user_id', '=', 'users.id')
-            ->select('activity_logs.*', 'users.name as user_name')
-            ->latest('activity_logs.created_at')
-            ->paginate(30)
-            ?? collect();
+        try {
+            $logs = DB::table('activity_logs')
+                ->join('users', 'activity_logs.user_id', '=', 'users.id')
+                ->select('activity_logs.*', 'users.name as user_name')
+                ->latest('activity_logs.created_at')
+                ->paginate(30);
+        } catch (\Exception $e) {
+            $logs = new \Illuminate\Pagination\LengthAwarePaginator([], 0, 30);
+        }
         return view('superadmin.logs', compact('logs'));
     }
 

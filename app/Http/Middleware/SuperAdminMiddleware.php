@@ -14,10 +14,9 @@ class SuperAdminMiddleware
         }
 
         $user = auth()->user();
-        $superAdminEmails = config('xenoraa.superadmin_emails', []);
 
-        // Check if user is superadmin by email or role
-        if (!in_array($user->email, $superAdminEmails) && $user->role !== 'superadmin') {
+        // Use isSuperAdmin() which checks both email list and role relationship
+        if (!$user->isSuperAdmin()) {
             abort(403, 'Super Admin access required.');
         }
 

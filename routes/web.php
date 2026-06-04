@@ -20,6 +20,7 @@ use App\Http\Controllers\Public\ChatbotController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Xenoraa\OnboardingController;
+use App\Http\Controllers\Xenoraa\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -267,6 +268,15 @@ Route::prefix('')->name('xenoraa.')->group(function () {
     Route::get('/xenoraa/blog', [XenoraaController::class, 'blog'])->name('blog');
     Route::get('/xenoraa/get-started', [XenoraaController::class, 'getStarted'])->name('get-started');
 });
+
+// =============================================
+// PAYMENT ROUTES (Razorpay)
+// =============================================
+Route::get('/xenoraa/pricing', [PaymentController::class, 'pricing'])->name('xenoraa.pricing');
+Route::post('/payment/create-order', [PaymentController::class, 'createOrder'])->name('payment.create-order');
+Route::post('/payment/verify', [PaymentController::class, 'verifyPayment'])->name('payment.verify');
+Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+Route::get('/payment/failed', [PaymentController::class, 'failed'])->name('payment.failed');
 
 // =============================================
 // SUPER ADMIN ROUTES

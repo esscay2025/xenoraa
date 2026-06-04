@@ -96,7 +96,7 @@
                     <li class="disabled"><i class="fas fa-times"></i> AI Assistant</li>
                     <li class="disabled"><i class="fas fa-times"></i> E-Commerce Store</li>
                 </ul>
-                <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-ghost" style="width:100%;text-align:center;display:block;padding:0.875rem;font-size:0.9rem;">Get Started Free</a>
+                <button onclick="startCheckout('starter','Starter')" class="xn-btn-ghost" style="width:100%;text-align:center;display:block;padding:0.875rem;font-size:0.9rem;cursor:pointer;font-family:'Inter',sans-serif;">Get Started Free</button>
             </div>
 
             {{-- Professional --}}
@@ -122,7 +122,7 @@
                     <li class="disabled"><i class="fas fa-times"></i> E-Commerce Store</li>
                     <li class="disabled"><i class="fas fa-times"></i> Team Members</li>
                 </ul>
-                <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-primary" style="width:100%;text-align:center;display:block;padding:0.875rem;font-size:0.9rem;">Get Started</a>
+                <button onclick="startCheckout('professional','Professional')" class="xn-btn-primary" style="width:100%;text-align:center;display:block;padding:0.875rem;font-size:0.9rem;cursor:pointer;font-family:'Inter',sans-serif;">Get Started</button>
             </div>
 
             {{-- Business Pro --}}
@@ -147,7 +147,7 @@
                     <li><i class="fas fa-check"></i> SLA Guarantee</li>
                     <li><i class="fas fa-check"></i> Onboarding Assistance</li>
                 </ul>
-                <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-ghost" style="width:100%;text-align:center;display:block;padding:0.875rem;font-size:0.9rem;">Get Started</a>
+                <button onclick="startCheckout('business','Business Pro')" class="xn-btn-ghost" style="width:100%;text-align:center;display:block;padding:0.875rem;font-size:0.9rem;cursor:pointer;font-family:'Inter',sans-serif;">Get Started</button>
             </div>
         </div>
 
@@ -227,13 +227,69 @@
 @endsection
 
 @section('scripts')
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
+let currentBilling = 'monthly';
+
 function toggleBilling() {
     const yearly = document.getElementById('billingToggle').checked;
+    currentBilling = yearly ? 'yearly' : 'monthly';
     document.querySelectorAll('.price-monthly').forEach(el => el.style.display = yearly ? 'none' : 'inline');
     document.querySelectorAll('.price-yearly').forEach(el => el.style.display = yearly ? 'inline' : 'none');
     document.querySelectorAll('.yearly-note').forEach(el => el.style.display = yearly ? 'inline' : 'none');
     document.querySelectorAll('.monthly-note').forEach(el => el.style.display = yearly ? 'none' : 'inline');
+}
+
+async function startCheckout(plan, planName) {
+    try {
+        const res = await fetch('/payment/create-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+            },
+            body: JSON.stringify({ plan: plan, billing: currentBilling })
+        });
+        const data = await res.json();
+        if (!data.success) { alert(data.message || 'Failed to initiate payment. Please try again.'); return; }
+
+        const options = {
+            key: data.key_id,
+            amount: data.amount,
+            currency: data.currency,
+            name: 'Xenoraa',
+            description: planName + ' Plan — ' + (currentBilling === 'yearly' ? 'Annual' : 'Monthly'),
+            order_id: data.order_id,
+            prefill: { name: data.user_name, email: data.user_email },
+            theme: { color: '#7c3aed' },
+            handler: async function(response) {
+                const verifyRes = await fetch('/payment/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_signature: response.razorpay_signature,
+                        plan: plan,
+                        billing: currentBilling
+                    })
+                });
+                const verifyData = await verifyRes.json();
+                if (verifyData.success) {
+                    window.location.href = '/payment/success?plan=' + plan + '&payment_id=' + response.razorpay_payment_id;
+                } else {
+                    window.location.href = '/payment/failed';
+                }
+            },
+            modal: { ondismiss: function() { console.log('Payment cancelled'); } }
+        };
+        const rzp = new Razorpay(options);
+        rzp.on('payment.failed', function() { window.location.href = '/payment/failed'; });
+        rzp.open();
+    } catch (err) {
+        console.error('Checkout error:', err);
+        alert('Something went wrong. Please try again.');
+    }
 }
 </script>
 @endsection
