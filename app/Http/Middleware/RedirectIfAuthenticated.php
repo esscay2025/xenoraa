@@ -13,7 +13,9 @@ class RedirectIfAuthenticated
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * If the user is already authenticated, redirect them to the correct dashboard
+     * based on their role. This prevents the "auto-redirect after logout+login" bug
+     * where stale session state sends users to the wrong dashboard.
      */
     public function handle(Request $request, Closure $next, string ...$guards): Response
     {
@@ -21,7 +23,15 @@ class RedirectIfAuthenticated
 
         foreach ($guards as $guard) {
             if (Auth::guard($guard)->check()) {
-                return redirect(RouteServiceProvider::HOME);
+                $user = Auth::guard($guard)->user();
+                $target = RouteServiceProvider::homeForUser($user);
+
+                // If target is an absolute URL (custom domain), redirect directly
+                if (str_starts_with($target, 'http')) {
+                    return redirect()->away($target);
+                }
+
+                return redirect($target);
             }
         }
 

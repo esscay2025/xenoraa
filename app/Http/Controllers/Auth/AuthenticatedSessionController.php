@@ -106,14 +106,49 @@ class AuthenticatedSessionController extends Controller
     }
 
     /**
-     * Logout and redirect to appropriate home.
+     * Logout and redirect to the correct login page.
+     * Clears session, remember token, and all auth cookies.
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+        $host = $request->getHost();
+        $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
+        $isMainDomain = ($host === $mainDomain || $host === 'www.' . $mainDomain);
+
+        // Determine redirect URL before logging out
+        $redirectUrl = '/';
+        if ($user) {
+            if ($user->isSuperAdmin()) {
+                $redirectUrl = route('login');
+            } elseif ($user->isAdmin()) {
+                // If on custom domain, redirect to custom domain login
+                if (!$isMainDomain && ($user->custom_domain || ($user->tenant_owner_id && ($owner = User::find($user->tenant_owner_id)) && $owner->custom_domain))) {
+                    $domain = $user->custom_domain ?? ($owner->custom_domain ?? null);
+                    if ($domain) {
+                        $redirectUrl = 'https://' . $domain . '/login';
+                    } else {
+                        $redirectUrl = route('login');
+                    }
+                } else {
+                    // On xenoraa.com — redirect to tenant login page
+                    $username = $user->username;
+                    $redirectUrl = $username ? route('tenant.login', $username) : route('login');
+                }
+            } else {
+                $redirectUrl = route('login');
+            }
+        }
+
+        // Clear remember token
+        if ($user && method_exists($user, 'forceFill')) {
+            $user->forceFill(['remember_token' => null])->save();
+        }
+
         Auth::guard('web')->logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect($redirectUrl);
     }
 }

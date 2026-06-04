@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\SiteSetting;
 use App\Models\CustomPage;
 use App\Models\SiteMenu;
+use App\Services\TenantBootstrapService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
@@ -63,6 +64,14 @@ class SiteController extends Controller
     {
         $request->validate(['theme' => 'required|string|in:consultant,influencer,advocate,entrepreneur,doctor,politician']);
         $this->setSetting('profile_template', $request->theme);
+
+        // Bootstrap theme-specific pages, menus, and chatbot training
+        try {
+            $bootstrap = new TenantBootstrapService();
+            $bootstrap->activateTheme(auth()->user(), $request->theme);
+        } catch (\Throwable $e) {
+            \Log::warning('TenantBootstrap activateTheme failed: ' . $e->getMessage());
+        }
 
         return response()->json(['success' => true, 'theme' => $request->theme]);
     }
@@ -261,6 +270,20 @@ class SiteController extends Controller
         $this->authorisePage($page);
         $page->delete();
         return redirect()->route('admin.site.pages')->with('success', 'Page deleted.');
+    }
+
+    public function resetPages()
+    {
+        $user = auth()->user();
+        $theme = $this->setting('profile_template', 'consultant');
+        try {
+            $bootstrap = new TenantBootstrapService();
+            $bootstrap->resetToDefault($user);
+        } catch (\Throwable $e) {
+            \Log::error('resetPages failed: ' . $e->getMessage());
+            return redirect()->route('admin.site.pages')->with('error', 'Could not reset pages: ' . $e->getMessage());
+        }
+        return redirect()->route('admin.site.pages')->with('success', 'Pages reset to default for the "' . $theme . '" theme.');
     }
 
     protected function authorisePage(CustomPage $page): void

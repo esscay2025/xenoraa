@@ -1,3 +1,5 @@
+@extends('layouts.app')
+@section('content')
 {{-- Doctor / Medical Professional Template --}}
 <style>
 .xn-doctor { font-family: 'Inter', sans-serif; background: #0a0f1e; color: #e2e8f0; min-height: 100vh; }
@@ -96,3 +98,4 @@
         </div>
     </div>
 </div>
+@endsection

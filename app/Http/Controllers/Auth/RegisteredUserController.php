@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Services\TenantBootstrapService;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
@@ -115,8 +116,14 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
         Auth::login($user);
 
-        // Redirect to onboarding if Xenoraa registration
+        // Bootstrap default tenant site for Xenoraa registrations
         if ($isXenoraa) {
+            try {
+                $bootstrap = new TenantBootstrapService();
+                $bootstrap->bootstrapNewTenant($user);
+            } catch (\Throwable $e) {
+                \Log::warning('TenantBootstrap failed for user ' . $user->id . ': ' . $e->getMessage());
+            }
             return redirect()->route('onboarding.welcome');
         }
 

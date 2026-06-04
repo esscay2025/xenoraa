@@ -1,3 +1,5 @@
+@extends('layouts.app')
+@section('content')
 {{-- Advocate / Lawyer Template --}}
 <style>
 .xn-adv { font-family: 'Inter', sans-serif; background: #0c0c0e; color: #e2e8f0; min-height: 100vh; }
@@ -108,3 +110,4 @@
         </div>
     </div>
 </div>
+@endsection

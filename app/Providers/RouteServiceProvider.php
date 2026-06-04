@@ -12,12 +12,44 @@ class RouteServiceProvider extends ServiceProvider
 {
     /**
      * The path to your application's "home" route.
-     *
-     * Typically, users are redirected here after authentication.
+     * Used as a fallback by some Breeze auth controllers.
+     * The AuthenticatedSessionController and RedirectIfAuthenticated
+     * middleware override this with role-aware logic.
      *
      * @var string
      */
-    public const HOME = '/dashboard';
+    public const HOME = '/admin/dashboard';
+
+    /**
+     * Return the correct post-login URL for the given user.
+     * This is the single source of truth for all auth redirects.
+     */
+    public static function homeForUser(?\App\Models\User $user): string
+    {
+        if (!$user) return '/login';
+
+        // Super admin
+        if ($user->isSuperAdmin()) {
+            return '/xenoraa/dashboard';
+        }
+
+        // Tenant admin — use custom domain if set
+        if ($user->isAdmin()) {
+            $customDomain = $user->custom_domain ?? null;
+            if ($customDomain) {
+                return 'https://' . $customDomain . '/admin/dashboard';
+            }
+            return '/admin/dashboard';
+        }
+
+        // Staff
+        if (method_exists($user, 'isStaff') && $user->isStaff()) {
+            return '/staff/dashboard';
+        }
+
+        // Regular visitor / sub-user
+        return '/dashboard';
+    }
 
     /**
      * Define your route model bindings, pattern filters, and other route configuration.

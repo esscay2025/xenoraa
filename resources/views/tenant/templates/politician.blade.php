@@ -1,3 +1,5 @@
+@extends('layouts.app')
+@section('content')
 {{-- Politician / Public Leader Template --}}
 <style>
 .xn-pol { font-family: 'Inter', sans-serif; background: #080d16; color: #e2e8f0; min-height: 100vh; }
@@ -91,3 +93,4 @@
         </div>
     </div>
 </div>
+@endsection

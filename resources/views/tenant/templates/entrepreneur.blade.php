@@ -1,3 +1,5 @@
+@extends('layouts.app')
+@section('content')
 {{-- Entrepreneur / Startup Founder Template --}}
 <style>
 .xn-ent { font-family: 'Inter', sans-serif; background: #080808; color: #e2e8f0; min-height: 100vh; }
@@ -98,3 +100,4 @@
         </div>
     </div>
 </div>
+@endsection

@@ -202,6 +202,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         Route::get('/pages/{page}/edit', [SiteController::class, 'editPage'])->name('pages.edit');
         Route::put('/pages/{page}', [SiteController::class, 'updatePage'])->name('pages.update');
         Route::delete('/pages/{page}', [SiteController::class, 'destroyPage'])->name('pages.destroy');
+        Route::post('/pages/reset', [SiteController::class, 'resetPages'])->name('pages.reset');
 
         // Menu Builder
         Route::get('/menu', [SiteController::class, 'menu'])->name('menu');

@@ -323,6 +323,10 @@
     let isOpen = false;
     let initialized = false;
 
+    // Tenant username — injected from PHP so every API call resolves the correct tenant
+    // even when the chatbot is on xenoraa.com/priya or xenoraa.com/arjun pages.
+    const cbTenantUsername = '{{ $cbLayoutTenant?->username ?? '' }}';
+
     // Show badge after 3 seconds to attract attention
     setTimeout(() => {
         const badge = document.getElementById('chatbot-badge');
@@ -350,7 +354,10 @@
 
     async function initChat() {
         try {
-            const res = await fetch('/chatbot/init', {
+            const initUrl = cbTenantUsername
+                ? '/chatbot/init?tenant_username=' + encodeURIComponent(cbTenantUsername)
+                : '/chatbot/init';
+            const res = await fetch(initUrl, {
                 headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
             });
             const data = await res.json();
@@ -388,7 +395,7 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     'Accept': 'application/json',
                 },
-                body: JSON.stringify({ session_id: sessionId, name, mobile, email }),
+                body: JSON.stringify({ session_id: sessionId, name, mobile, email, tenant_username: cbTenantUsername }),
             });
             const data = await res.json();
             if (data.success) {
@@ -406,7 +413,7 @@
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                         'Accept': 'application/json',
                     },
-                    body: JSON.stringify({ message: `Hi, my name is ${name} and my email is ${email}. I'm here to discuss my business needs.`, session_id: sessionId, lead_id: leadId }),
+                    body: JSON.stringify({ message: `Hi, my name is ${name} and my email is ${email}. I'm here to discuss my business needs.`, session_id: sessionId, lead_id: leadId, tenant_username: cbTenantUsername }),
                 });
                 const chatData = await chatRes.json();
                 removeTyping();
@@ -440,7 +447,7 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     'Accept': 'application/json',
                 },
-                body: JSON.stringify({ message: msg, session_id: sessionId, lead_id: leadId }),
+                body: JSON.stringify({ message: msg, session_id: sessionId, lead_id: leadId, tenant_username: cbTenantUsername }),
             });
             const data = await res.json();
             removeTyping();
@@ -458,7 +465,7 @@
         div.className = `cb-msg ${role}`;
         const formattedText = text.replace(/\n/g, '<br>');
         if (role === 'bot') {
-            div.innerHTML = `<div class="cb-msg-avatar">G</div><div class="cb-msg-bubble">${formattedText}</div>`;
+            div.innerHTML = `<div class="cb-msg-avatar">{{ $cbInitial }}</div><div class="cb-msg-bubble">${formattedText}</div>`;
         } else {
             div.innerHTML = `<div class="cb-msg-bubble">${formattedText}</div>`;
         }
@@ -471,7 +478,7 @@
         const div = document.createElement('div');
         div.className = 'cb-msg bot';
         div.id = 'cb-typing-indicator';
-        div.innerHTML = `<div class="cb-msg-avatar">G</div><div class="cb-typing"><span></span><span></span><span></span></div>`;
+        div.innerHTML = `<div class="cb-msg-avatar">{{ $cbInitial }}</div><div class="cb-typing"><span></span><span></span><span></span></div>`;
         container.appendChild(div);
         container.scrollTop = container.scrollHeight;
     }

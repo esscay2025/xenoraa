@@ -1,3 +1,5 @@
+@extends('layouts.app')
+@section('content')
 {{-- Influencer / Content Creator Template --}}
 <style>
 .xn-inf { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e2e8f0; min-height: 100vh; }
@@ -92,3 +94,4 @@
         </div>
     </div>
 </div>
+@endsection
