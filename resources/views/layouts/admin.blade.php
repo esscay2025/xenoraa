@@ -576,7 +576,7 @@
                 btn.style.color = '#ef4444'; btn.style.borderColor = '#ef4444';
                 label.textContent = 'AI Off';
             }
-            fetch('{{ route("admin.crm.ai.save") }}', {
+            fetch('{{ route("admin.crm.ai.toggle.save") }}', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
                 body: JSON.stringify({ chatbot_enabled: _aiEnabled ? '1' : '0' })
