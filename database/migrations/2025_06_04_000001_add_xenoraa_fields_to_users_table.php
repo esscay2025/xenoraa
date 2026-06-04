@@ -36,6 +36,12 @@ return new class extends Migration
             if (!Schema::hasColumn('users', 'plan_expires_at')) {
                 $table->timestamp('plan_expires_at')->nullable()->after('trial_ends_at');
             }
+            if (!Schema::hasColumn('users', 'profile_template')) {
+                $table->string('profile_template', 50)->nullable()->after('profession');
+            }
+            if (!Schema::hasColumn('users', 'onboarding_completed')) {
+                $table->boolean('onboarding_completed')->default(false)->after('profile_template');
+            }
         });
     }
 
