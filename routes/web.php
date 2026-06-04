@@ -19,6 +19,7 @@ use App\Http\Controllers\Public\ShopController;
 use App\Http\Controllers\Public\ChatbotController;
 use App\Http\Controllers\Auth\SocialAuthController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Xenoraa\OnboardingController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,10 +29,23 @@ use Illuminate\Support\Facades\Route;
 */
 
 // =============================================
-// PUBLIC PORTFOLIO ROUTES (Visitor-facing)
+// ROOT ROUTE — Domain-aware
+// xenoraa.com → Xenoraa marketing homepage
+// gopi.blog or any custom domain → Portfolio
 // =============================================
 
-Route::get('/', [PortfolioController::class, 'home'])->name('home');
+Route::get('/', function (\Illuminate\Http\Request $request) {
+    $host = $request->getHost();
+    $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
+    if ($host === $mainDomain || $host === 'www.' . $mainDomain) {
+        return app(\App\Http\Controllers\Xenoraa\XenoraaController::class)->home();
+    }
+    return app(\App\Http\Controllers\Public\PortfolioController::class)->home($request);
+})->name('home');
+
+// =============================================
+// PUBLIC PORTFOLIO ROUTES (Visitor-facing)
+// =============================================
 Route::get('/about', [PortfolioController::class, 'about'])->name('about');
 Route::get('/blog', [PortfolioController::class, 'blog'])->name('blog');
 Route::get('/blog/category/{slug}', [PortfolioController::class, 'blogCategory'])->name('blog.category');
@@ -275,6 +289,21 @@ Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmi
     Route::post('/settings', [SuperAdminController::class, 'updateSettings'])->name('settings.update');
     Route::get('/emails', [SuperAdminController::class, 'emails'])->name('emails');
     Route::get('/logs', [SuperAdminController::class, 'logs'])->name('logs');
+});
+
+// =============================================
+// USERNAME AVAILABILITY CHECK (public API)
+// =============================================
+Route::get('/api/check-username', [OnboardingController::class, 'checkUsername'])->name('api.check-username');
+
+// =============================================
+// ONBOARDING ROUTES (post-registration)
+// =============================================
+Route::middleware('auth')->prefix('onboarding')->name('onboarding.')->group(function () {
+    Route::get('/welcome', [OnboardingController::class, 'welcome'])->name('welcome');
+    Route::get('/profile', [OnboardingController::class, 'profile'])->name('profile');
+    Route::post('/profile', [OnboardingController::class, 'saveProfile'])->name('profile.save');
+    Route::get('/complete', [OnboardingController::class, 'complete'])->name('complete');
 });
 
 // =============================================

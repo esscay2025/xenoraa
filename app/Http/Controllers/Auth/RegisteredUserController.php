@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\NewsletterSubscriber;
 use App\Models\Role;
 use App\Models\User;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -19,40 +18,85 @@ use Illuminate\View\View;
 class RegisteredUserController extends Controller
 {
     /**
-     * Display the registration view.
+     * Show registration view — domain-aware:
+     * - xenoraa.com → Xenoraa branded register page
+     * - custom domain → portfolio register page
      */
-    public function create(): View
+    public function create(Request $request): View
     {
+        $host = $request->getHost();
+        $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
+
+        if ($host === $mainDomain || $host === 'www.' . $mainDomain) {
+            return view('auth.xenoraa-register');
+        }
+
         return view('auth.register');
     }
 
     /**
-     * Handle an incoming registration request.
-     * New users are automatically assigned the 'visitor' role
-     * and added to the newsletter subscriber list.
-     *
-     * @throws \Illuminate\Validation\ValidationException
+     * Handle registration with username, plan selection, and 14-day trial.
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        $host = $request->getHost();
+        $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
+        $isXenoraa = ($host === $mainDomain || $host === 'www.' . $mainDomain);
 
-        // Assign visitor role by default
+        // Validation rules
+        $rules = [
+            'name'     => ['required', 'string', 'max:255'],
+            'email'    => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ];
+
+        // Extra fields for Xenoraa registration
+        if ($isXenoraa) {
+            $rules['username'] = [
+                'required',
+                'string',
+                'min:3',
+                'max:30',
+                'regex:/^[a-z0-9_-]+$/',
+                'unique:users,username',
+                // Reserved words
+                function ($attribute, $value, $fail) {
+                    $reserved = ['admin', 'staff', 'superadmin', 'api', 'auth', 'login', 'register',
+                                 'logout', 'dashboard', 'profile', 'chat', 'forum', 'calendar',
+                                 'shop', 'newsletter', 'chatbot', 'xenoraa', 'solutions', 'about',
+                                 'blog', 'jobs', 'support', 'help', 'www', 'mail', 'ftp', 'root'];
+                    if (in_array(strtolower($value), $reserved)) {
+                        $fail('This username is reserved. Please choose another.');
+                    }
+                },
+            ];
+            $rules['plan'] = ['required', 'in:starter,professional,business'];
+        }
+
+        $validated = $request->validate($rules);
+
+        // Assign visitor role
         $visitorRole = Role::where('name', 'visitor')->first();
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+        // Build user data
+        $userData = [
+            'name'     => $request->name,
+            'email'    => $request->email,
             'password' => Hash::make($request->password),
-            'role_id' => $visitorRole?->id,
-            'status' => 'active',
-        ]);
+            'role_id'  => $visitorRole?->id,
+            'status'   => 'active',
+        ];
 
-        // Auto-subscribe new user to newsletter (if not already subscribed)
+        // Xenoraa-specific fields
+        if ($isXenoraa) {
+            $userData['username']      = strtolower($request->username);
+            $userData['plan']          = $request->plan ?? 'starter';
+            $userData['trial_ends_at'] = now()->addDays(config('xenoraa.trial_days', 14));
+        }
+
+        $user = User::create($userData);
+
+        // Auto-subscribe to newsletter
         NewsletterSubscriber::firstOrCreate(
             ['email' => $request->email],
             [
@@ -64,8 +108,12 @@ class RegisteredUserController extends Controller
         );
 
         event(new Registered($user));
-
         Auth::login($user);
+
+        // Redirect to onboarding if Xenoraa registration
+        if ($isXenoraa) {
+            return redirect()->route('onboarding.welcome');
+        }
 
         return redirect()->route('home');
     }
