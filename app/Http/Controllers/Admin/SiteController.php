@@ -341,10 +341,11 @@ class SiteController extends Controller
         $favicon  = $this->setting('favicon_path');
         $siteName = $this->setting('site_name', auth()->user()->name);
         $tagline  = $this->setting('site_tagline', '');
-        $colorAccent = $this->setting('color_accent', '#6366f1');
-        $colorBg     = $this->setting('color_bg', '#0a0a0a');
+        $colorAccent    = $this->setting('color_accent', '#6366f1');
+        $colorBg        = $this->setting('color_bg', '#0a0a0a');
+        $chatbotEnabled = $this->setting('chatbot_enabled', '1');
 
-        return view('admin.site.branding', compact('logo', 'favicon', 'siteName', 'tagline', 'colorAccent', 'colorBg'));
+        return view('admin.site.branding', compact('logo', 'favicon', 'siteName', 'tagline', 'colorAccent', 'colorBg', 'chatbotEnabled'));
     }
 
     public function saveBranding(Request $request)
@@ -365,6 +366,7 @@ class SiteController extends Controller
         $this->setSetting('site_tagline', $request->site_tagline ?? '');
         $this->setSetting('color_accent', $request->color_accent ?? '#6366f1');
         $this->setSetting('color_bg', $request->color_bg ?? '#0a0a0a');
+        $this->setSetting('chatbot_enabled', $request->boolean('chatbot_enabled') ? '1' : '0');
 
         // Handle logo upload
         if ($request->hasFile('logo')) {
@@ -384,6 +386,37 @@ class SiteController extends Controller
         }
 
         return redirect()->route('admin.site.branding')->with('success', 'Branding updated successfully.');
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Domain Configuration
+    // ─────────────────────────────────────────────────────────────
+    public function domain()
+    {
+        return view('admin.site.domain');
+    }
+
+    public function saveDomain(Request $request)
+    {
+        $request->validate([
+            'custom_domain' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9][a-zA-Z0-9\-\.]{1,253}[a-zA-Z0-9]$/',
+        ]);
+
+        $user = auth()->user();
+        $domain = $request->input('custom_domain');
+
+        // Strip protocol if accidentally included
+        $domain = preg_replace('#^https?://#', '', $domain ?? '');
+        $domain = rtrim($domain, '/');
+        $domain = $domain ?: null;
+
+        $user->update(['custom_domain' => $domain]);
+
+        $msg = $domain
+            ? 'Custom domain saved. Follow the DNS instructions below to complete setup.'
+            : 'Custom domain removed. Your site is accessible via the default URL.';
+
+        return redirect()->route('admin.site.domain')->with('success', $msg);
     }
 
     // ─────────────────────────────────────────────────────────────

@@ -211,6 +211,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         Route::get('/branding', [SiteController::class, 'branding'])->name('branding');
         Route::post('/branding', [SiteController::class, 'saveBranding'])->name('branding.save');
 
+        // Domain Configuration
+        Route::get('/domain', [SiteController::class, 'domain'])->name('domain');
+        Route::post('/domain', [SiteController::class, 'saveDomain'])->name('domain.save');
+
         // Dashboard Mode (light/dark) — AJAX
         Route::post('/mode', [SiteController::class, 'saveDashboardMode'])->name('mode');
     });
@@ -240,7 +244,49 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::delete('/newsletter/{subscriber}', [\App\Http\Controllers\Admin\NewsletterAdminController::class, 'destroy'])->name('newsletter.destroy');
     Route::get('/newsletter/export', [\App\Http\Controllers\Admin\NewsletterAdminController::class, 'export'])->name('newsletter.export');
 
-    // CRM Module
+    // ─── New Full CRM Module ──────────────────────────────────────────────
+    Route::prefix('newcrm')->name('newcrm.')->group(function () {
+        Route::get('/dashboard', [\App\Http\Controllers\Admin\NewCrmController::class, 'dashboard'])->name('dashboard');
+        // Accounts
+        Route::get('/accounts', [\App\Http\Controllers\Admin\NewCrmController::class, 'accountsIndex'])->name('accounts');
+        Route::get('/accounts/create', [\App\Http\Controllers\Admin\NewCrmController::class, 'accountCreate'])->name('accounts.create');
+        Route::post('/accounts', [\App\Http\Controllers\Admin\NewCrmController::class, 'accountStore'])->name('accounts.store');
+        Route::get('/accounts/{account}', [\App\Http\Controllers\Admin\NewCrmController::class, 'accountShow'])->name('accounts.show');
+        Route::get('/accounts/{account}/edit', [\App\Http\Controllers\Admin\NewCrmController::class, 'accountEdit'])->name('accounts.edit');
+        Route::put('/accounts/{account}', [\App\Http\Controllers\Admin\NewCrmController::class, 'accountUpdate'])->name('accounts.update');
+        Route::delete('/accounts/{account}', [\App\Http\Controllers\Admin\NewCrmController::class, 'accountDestroy'])->name('accounts.destroy');
+        // Contacts
+        Route::get('/contacts', [\App\Http\Controllers\Admin\NewCrmController::class, 'contactsIndex'])->name('contacts');
+        Route::get('/contacts/create', [\App\Http\Controllers\Admin\NewCrmController::class, 'contactCreate'])->name('contacts.create');
+        Route::post('/contacts', [\App\Http\Controllers\Admin\NewCrmController::class, 'contactStore'])->name('contacts.store');
+        Route::get('/contacts/{contact}/edit', [\App\Http\Controllers\Admin\NewCrmController::class, 'contactEdit'])->name('contacts.edit');
+        Route::put('/contacts/{contact}', [\App\Http\Controllers\Admin\NewCrmController::class, 'contactUpdate'])->name('contacts.update');
+        Route::delete('/contacts/{contact}', [\App\Http\Controllers\Admin\NewCrmController::class, 'contactDestroy'])->name('contacts.destroy');
+        // Leads (unified)
+        Route::get('/leads', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadsIndex'])->name('leads');
+        Route::get('/leads/create', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadCreate'])->name('leads.create');
+        Route::post('/leads', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadStore'])->name('leads.store');
+        Route::get('/leads/{lead}', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadShow'])->name('leads.show');
+        Route::get('/leads/{lead}/edit', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadEdit'])->name('leads.edit');
+        Route::put('/leads/{lead}', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadUpdate'])->name('leads.update');
+        Route::delete('/leads/{lead}', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadDestroy'])->name('leads.destroy');
+        Route::post('/leads/{lead}/convert', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadConvert'])->name('leads.convert');
+        // Deals & Pipeline
+        Route::get('/deals', [\App\Http\Controllers\Admin\NewCrmController::class, 'dealsIndex'])->name('deals');
+        Route::get('/deals/create', [\App\Http\Controllers\Admin\NewCrmController::class, 'dealCreate'])->name('deals.create');
+        Route::post('/deals', [\App\Http\Controllers\Admin\NewCrmController::class, 'dealStore'])->name('deals.store');
+        Route::get('/deals/{deal}/edit', [\App\Http\Controllers\Admin\NewCrmController::class, 'dealEdit'])->name('deals.edit');
+        Route::put('/deals/{deal}', [\App\Http\Controllers\Admin\NewCrmController::class, 'dealUpdate'])->name('deals.update');
+        Route::delete('/deals/{deal}', [\App\Http\Controllers\Admin\NewCrmController::class, 'dealDestroy'])->name('deals.destroy');
+        Route::patch('/deals/{deal}/stage', [\App\Http\Controllers\Admin\NewCrmController::class, 'dealUpdateStage'])->name('deals.stage');
+        // Activities
+        Route::get('/activities', [\App\Http\Controllers\Admin\NewCrmController::class, 'activitiesIndex'])->name('activities');
+        Route::post('/activities', [\App\Http\Controllers\Admin\NewCrmController::class, 'activityStore'])->name('activities.store');
+        Route::patch('/activities/{activity}/complete', [\App\Http\Controllers\Admin\NewCrmController::class, 'activityComplete'])->name('activities.complete');
+        Route::delete('/activities/{activity}', [\App\Http\Controllers\Admin\NewCrmController::class, 'activityDestroy'])->name('activities.destroy');
+    });
+
+    // CRM Module (legacy AI Hub routes kept for backward compat)
     Route::prefix('crm')->name('crm.')->group(function () {
         Route::get('/leads', [\App\Http\Controllers\Admin\CrmController::class, 'leadsIndex'])->name('leads');
         Route::get('/leads/{lead}', [\App\Http\Controllers\Admin\CrmController::class, 'leadShow'])->name('lead.show');

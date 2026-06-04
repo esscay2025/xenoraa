@@ -128,6 +128,25 @@
                 </div>
             </div>
 
+            {{-- AI Assistant Toggle --}}
+            <div class="br-card">
+                <div class="br-section-title"><i class="fas fa-robot" style="margin-right:0.4rem;"></i> AI Assistant</div>
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:1rem;">
+                    <div>
+                        <div style="font-size:0.95rem;font-weight:600;margin-bottom:0.25rem;">Show AI Chatbot on Your Site</div>
+                        <div style="font-size:0.82rem;color:var(--text-muted);">When enabled, your AI assistant bubble appears on every page of your public site. Visitors can chat, ask questions, and leave contact details.</div>
+                    </div>
+                    <label class="toggle-switch" style="flex-shrink:0;">
+                        <input type="checkbox" name="chatbot_enabled" id="chatbotToggle" value="1" {{ ($chatbotEnabled ?? '1') == '1' ? 'checked' : '' }}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div style="margin-top:1rem;padding:0.75rem 1rem;background:rgba(99,102,241,0.08);border-radius:8px;border:1px solid rgba(99,102,241,0.2);font-size:0.8rem;color:var(--text-secondary);">
+                    <i class="fas fa-info-circle" style="color:#6366f1;margin-right:0.4rem;"></i>
+                    To train your AI assistant and customise its responses, go to <strong>AI Hub &rarr; Train AI</strong>.
+                </div>
+            </div>
+
             <button type="submit" class="btn btn-primary" style="width:100%;padding:0.875rem;">
                 <i class="fas fa-save"></i> Save Branding
             </button>

@@ -48,6 +48,21 @@
         [data-theme="light"] .form-control { background-color: var(--bg-primary); border-color: var(--border); color: var(--text-primary); }
         [data-theme="light"] .btn-outline { border-color: var(--border); color: var(--text-secondary); }
         [data-theme="light"] .btn-outline:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+        /* Toggle Switch (iOS-style) */
+        .toggle-switch { position:relative; display:inline-block; width:48px; height:26px; }
+        .toggle-switch input { opacity:0; width:0; height:0; }
+        .toggle-slider {
+            position:absolute; cursor:pointer; inset:0;
+            background:var(--border-light); border-radius:26px;
+            transition:0.3s;
+        }
+        .toggle-slider:before {
+            content:""; position:absolute;
+            width:20px; height:20px; left:3px; bottom:3px;
+            background:#fff; border-radius:50%; transition:0.3s;
+        }
+        .toggle-switch input:checked + .toggle-slider { background:#6366f1; }
+        .toggle-switch input:checked + .toggle-slider:before { transform:translateX(22px); }
         /* Mode toggle button */
         .mode-toggle {
             display: flex; align-items: center; gap: 0.4rem;
@@ -321,16 +336,7 @@
                 <a href="{{ route('admin.jobs.create') }}" class="sidebar-sub-link"><i class="fas fa-plus-circle"></i> Post a Job</a>
             </div>
 
-            {{-- Finance Group --}}
-            @php $financeActive = request()->routeIs('admin.expenses*'); @endphp
-            <button class="sidebar-group-btn {{ $financeActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgFinance', this)">
-                <i class="fas fa-wallet group-icon"></i> Finance
-                <i class="fas fa-chevron-down group-chevron"></i>
-            </button>
-            <div class="sidebar-group-panel {{ $financeActive ? 'open' : '' }}" id="sgFinance">
-                <a href="{{ route('admin.expenses.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.expenses.index') ? 'active' : '' }}"><i class="fas fa-list"></i> All Expenses</a>
-                <a href="{{ route('admin.expenses.create') }}" class="sidebar-sub-link"><i class="fas fa-plus-circle"></i> Add Expense</a>
-            </div>
+            {{-- Finance module removed per v2.8.0 --}}
 
             {{-- Administration Group --}}
             @php $usersActive = request()->routeIs('admin.users*'); @endphp
@@ -357,15 +363,29 @@
             </div>
 
             {{-- CRM Group --}}
-            @php $crmActive = request()->routeIs('admin.crm*'); @endphp
-            <button class="sidebar-group-btn {{ $crmActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgCRM', this)">
+            @php $crmActive = request()->routeIs('admin.newcrm*'); @endphp
+            <button class="sidebar-group-btn {{ $crmActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgNewCRM', this)">
                 <i class="fas fa-handshake group-icon"></i> CRM
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
-            <div class="sidebar-group-panel {{ $crmActive ? 'open' : '' }}" id="sgCRM">
-                <a href="{{ route('admin.crm.leads') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.leads*') || request()->routeIs('admin.crm.lead*') ? 'active' : '' }}"><i class="fas fa-user-tie"></i> All Leads</a>
-                <a href="{{ route('admin.crm.conversations') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.conversation*') ? 'active' : '' }}"><i class="fas fa-robot"></i> AI Conversations</a>
-                <a href="{{ route('admin.crm.training') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.training*') ? 'active' : '' }}"><i class="fas fa-brain"></i> Train Chatbot</a>
+            <div class="sidebar-group-panel {{ $crmActive ? 'open' : '' }}" id="sgNewCRM">
+                <a href="{{ route('admin.newcrm.dashboard') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.dashboard') ? 'active' : '' }}"><i class="fas fa-chart-pie"></i> CRM Dashboard</a>
+                <a href="{{ route('admin.newcrm.accounts') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.accounts*') ? 'active' : '' }}"><i class="fas fa-building"></i> Accounts</a>
+                <a href="{{ route('admin.newcrm.contacts') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.contacts*') ? 'active' : '' }}"><i class="fas fa-address-book"></i> Contacts</a>
+                <a href="{{ route('admin.newcrm.leads') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.leads*') ? 'active' : '' }}"><i class="fas fa-user-tag"></i> Leads</a>
+                <a href="{{ route('admin.newcrm.deals') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.deals*') ? 'active' : '' }}"><i class="fas fa-funnel-dollar"></i> Pipeline &amp; Deals</a>
+                <a href="{{ route('admin.newcrm.activities') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.activities*') ? 'active' : '' }}"><i class="fas fa-tasks"></i> Activities</a>
+            </div>
+
+            {{-- AI Hub Group --}}
+            @php $aiHubActive = request()->routeIs('admin.crm*'); @endphp
+            <button class="sidebar-group-btn {{ $aiHubActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgAIHub', this)">
+                <i class="fas fa-robot group-icon"></i> AI Hub
+                <i class="fas fa-chevron-down group-chevron"></i>
+            </button>
+            <div class="sidebar-group-panel {{ $aiHubActive ? 'open' : '' }}" id="sgAIHub">
+                <a href="{{ route('admin.crm.training') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.training*') ? 'active' : '' }}"><i class="fas fa-brain"></i> Train AI</a>
+                <a href="{{ route('admin.crm.conversations') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.conversation*') ? 'active' : '' }}"><i class="fas fa-comments"></i> AI Conversations</a>
             </div>
 
             {{-- E-commerce Group --}}
@@ -393,7 +413,8 @@
                 <a href="{{ route('admin.site.themes') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.themes*') ? 'active' : '' }}"><i class="fas fa-palette"></i> Theme Store</a>
                 <a href="{{ route('admin.site.pages') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.pages*') ? 'active' : '' }}"><i class="fas fa-file-alt"></i> Page Manager</a>
                 <a href="{{ route('admin.site.menu') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.menu*') ? 'active' : '' }}"><i class="fas fa-bars"></i> Menu Builder</a>
-                <a href="{{ route('admin.site.branding') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.branding*') ? 'active' : '' }}"><i class="fas fa-image"></i> Branding</a>
+                <a href="{{ route('admin.site.branding') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.branding*') ? 'active' : '' }}"><i class="fas fa-image"></i> Branding &amp; AI Toggle</a>
+                <a href="{{ route('admin.site.domain') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.domain*') ? 'active' : '' }}"><i class="fas fa-globe"></i> Domain Config</a>
                 <a href="{{ route('admin.settings.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}"><i class="fas fa-sliders-h"></i> Site Settings</a>
             </div>
         </nav>

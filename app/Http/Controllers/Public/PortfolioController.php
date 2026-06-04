@@ -96,8 +96,19 @@ class PortfolioController extends Controller
             ->orderBy('views_count', 'desc')
             ->first();
 
-        // Apply profession-based template
-        $template = $tenant->getProfileTemplate() ?? 'default';
+        // Apply profession-based template — read from site_settings first, fallback to users.profile_template
+        $template = SiteSetting::getValueForTenant($tenantId, 'profile_template')
+            ?? $tenant->getProfileTemplate()
+            ?? 'consultant';
+
+        // Load tenant branding from site_settings
+        $siteName   = SiteSetting::getValueForTenant($tenantId, 'site_name', $tenant->name);
+        $siteTagline = SiteSetting::getValueForTenant($tenantId, 'site_tagline', $tenant->profession ?? '');
+        $logoPath   = SiteSetting::getValueForTenant($tenantId, 'logo_path');
+        $faviconPath = SiteSetting::getValueForTenant($tenantId, 'favicon_path');
+        $accentColor = SiteSetting::getValueForTenant($tenantId, 'color_accent', '#6366f1');
+        $chatbotEnabled = SiteSetting::getValueForTenant($tenantId, 'chatbot_enabled', '1');
+
         $templateViews = [
             'doctor'       => 'tenant.templates.doctor',
             'advocate'     => 'tenant.templates.advocate',
@@ -106,11 +117,12 @@ class PortfolioController extends Controller
             'entrepreneur' => 'tenant.templates.entrepreneur',
             'influencer'   => 'tenant.templates.influencer',
         ];
-        $view = $templateViews[$template] ?? 'portfolio.home';
+        $view = $templateViews[$template] ?? 'tenant.templates.consultant';
 
         return view($view, compact(
             'tenant', 'experiences', 'socialLinks', 'activeJobs',
-            'blogCategories', 'categoryPosts', 'featuredPost'
+            'blogCategories', 'categoryPosts', 'featuredPost',
+            'siteName', 'siteTagline', 'logoPath', 'faviconPath', 'accentColor', 'chatbotEnabled'
         ));
     }
 

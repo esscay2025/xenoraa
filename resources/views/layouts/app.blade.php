@@ -70,16 +70,30 @@
             ? \App\Models\SocialLink::where('user_id', $layoutTenant->id)->where('is_active', true)->get()
             : collect();
 
-        // ── Tenant profile template for nav customisation ──────────────────────
-        $tenantTemplate = $layoutTenant?->getProfileTemplate() ?? 'default';
+        // ── Tenant profile template — read from site_settings first ────────────
+        $tenantTemplate = $tenantSettings['profile_template']
+            ?? $layoutTenant?->getProfileTemplate()
+            ?? 'consultant';
+
+        // ── Tenant favicon and logo ────────────────────────────────────────────
+        $tenantFavicon = $tenantSettings['favicon_path'] ?? null;
+        $tenantLogo    = $tenantSettings['logo_path'] ?? null;
+        $tenantAccent  = $tenantSettings['color_accent'] ?? '#6366f1';
+        $chatbotEnabled = $tenantSettings['chatbot_enabled'] ?? '1';
     @endphp
     <title>@yield('title', $siteName . ' | Portfolio')</title>
     <meta name="description" content="@yield('description', $footerTagline)">
+    @if($tenantFavicon)
+    <link rel="shortcut icon" href="{{ $tenantFavicon }}">
+    <link rel="icon" type="image/png" href="{{ $tenantFavicon }}">
+    <link rel="apple-touch-icon" href="{{ $tenantFavicon }}">
+    @else
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
     <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('favicon-64.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    @endif
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -502,8 +516,13 @@
         </div>
     </footer>
 
-    {{-- AI Chatbot Widget --}}
-    @include('components.chatbot-widget')
+    {{-- AI Chatbot Widget — only if enabled for this tenant --}}
+    @php
+        $chatbotEnabled = $chatbotEnabled ?? \App\Models\SiteSetting::getValueForTenant($layoutTenant?->id ?? 0, 'chatbot_enabled', '1');
+    @endphp
+    @if($chatbotEnabled == '1' || $chatbotEnabled === true)
+        @include('components.chatbot-widget')
+    @endif
 
     @stack('scripts')
     <script>
