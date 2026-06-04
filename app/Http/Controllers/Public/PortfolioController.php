@@ -128,22 +128,22 @@ class PortfolioController extends Controller
             'clients'          => $profileSettings['profile_clients'] ?? '',
             'projects'         => $profileSettings['profile_projects'] ?? '',
             'revenue'          => $profileSettings['profile_revenue'] ?? '',
-            'expertise'        => $profileSettings['profile_expertise']
+            'expertise'        => !empty($profileSettings['profile_expertise'])
                 ? json_decode($profileSettings['profile_expertise'], true)
                 : [],
-            'services'         => $profileSettings['profile_services']
+            'services'         => !empty($profileSettings['profile_services'])
                 ? json_decode($profileSettings['profile_services'], true)
                 : [],
-            'stats'            => $profileSettings['profile_stats']
+            'stats'            => !empty($profileSettings['profile_stats'])
                 ? json_decode($profileSettings['profile_stats'], true)
                 : [],
-            'platforms'        => $profileSettings['profile_platforms']
+            'platforms'        => !empty($profileSettings['profile_platforms'])
                 ? json_decode($profileSettings['profile_platforms'], true)
                 : [],
-            'specializations'  => $profileSettings['profile_specializations']
+            'specializations'  => !empty($profileSettings['profile_specializations'])
                 ? json_decode($profileSettings['profile_specializations'], true)
                 : [],
-            'practice_areas'   => $profileSettings['profile_practice_areas']
+            'practice_areas'   => !empty($profileSettings['profile_practice_areas'])
                 ? json_decode($profileSettings['profile_practice_areas'], true)
                 : [],
             'bar_number'       => $profileSettings['profile_bar_number'] ?? '',
