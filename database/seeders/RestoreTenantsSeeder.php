@@ -442,12 +442,12 @@ class RestoreTenantsSeeder extends Seeder
         // ── Social Links ───────────────────────────────────────────────────
         if (DB::table('social_links')->where('user_id', $tid)->count() === 0) {
             $socials = $template === 'influencer' ? [
-                ['platform' => 'Instagram', 'url' => 'https://instagram.com/' . $username, 'icon' => 'fab fa-instagram', 'sort_order' => 1],
-                ['platform' => 'YouTube',   'url' => 'https://youtube.com/@' . $username,  'icon' => 'fab fa-youtube',   'sort_order' => 2],
-                ['platform' => 'Pinterest', 'url' => 'https://pinterest.com/' . $username, 'icon' => 'fab fa-pinterest', 'sort_order' => 3],
+                ['platform' => 'Instagram', 'url' => 'https://instagram.com/' . $username, 'icon_class' => 'fab fa-instagram', 'sort_order' => 1],
+                ['platform' => 'YouTube',   'url' => 'https://youtube.com/@' . $username,  'icon_class' => 'fab fa-youtube',   'sort_order' => 2],
+                ['platform' => 'Pinterest', 'url' => 'https://pinterest.com/' . $username, 'icon_class' => 'fab fa-pinterest', 'sort_order' => 3],
             ] : [
-                ['platform' => 'LinkedIn',  'url' => 'https://linkedin.com/in/' . $username, 'icon' => 'fab fa-linkedin', 'sort_order' => 1],
-                ['platform' => 'Twitter',   'url' => 'https://twitter.com/' . $username,     'icon' => 'fab fa-twitter',  'sort_order' => 2],
+                ['platform' => 'LinkedIn',  'url' => 'https://linkedin.com/in/' . $username, 'icon_class' => 'fab fa-linkedin', 'sort_order' => 1],
+                ['platform' => 'Twitter',   'url' => 'https://twitter.com/' . $username,     'icon_class' => 'fab fa-twitter',  'sort_order' => 2],
             ];
             foreach ($socials as $s) {
                 DB::table('social_links')->insert(array_merge($s, [
