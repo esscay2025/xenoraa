@@ -45,9 +45,13 @@ class AppServiceProvider extends ServiceProvider
 
             // Only apply custom domain logic when NOT on the main xenoraa.com domain
             if ($host && $host !== $mainDomain && $host !== 'www.' . $mainDomain) {
-                // Check if this host belongs to a tenant
+                // Normalise: strip leading www. for DB lookup
+                $bareHost = preg_replace('/^www\./', '', $host);
+
+                // Check if this host belongs to a tenant (match bare or www variant)
                 $tenant = User::where('custom_domain', $host)
-                    ->orWhere('custom_domain', 'www.' . $host)
+                    ->orWhere('custom_domain', 'www.' . $bareHost)
+                    ->orWhere('custom_domain', $bareHost)
                     ->first();
 
                 if ($tenant) {
