@@ -86,7 +86,13 @@ class AuthenticatedSessionController extends Controller
         }
 
         // Tenant admin (Xenoraa subscriber) → admin dashboard
+        // If the tenant has a custom domain, redirect to that domain's admin dashboard
         if ($user->isAdmin()) {
+            $adminUser = $user->tenant_owner_id ? User::find($user->tenant_owner_id) : $user;
+            if ($adminUser && $adminUser->custom_domain && $isMainDomain) {
+                // Redirect to custom domain admin dashboard
+                return redirect()->away('https://' . $adminUser->custom_domain . '/admin/dashboard');
+            }
             return redirect()->route('admin.dashboard');
         }
 

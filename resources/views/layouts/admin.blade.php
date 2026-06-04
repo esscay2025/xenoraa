@@ -4,12 +4,22 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Admin') | Gopi K Portfolio</title>
+    @php
+        $adminTenant = auth()->user();
+        $adminTenantId = $adminTenant?->id ?? 0;
+        $adminSiteName = \App\Models\SiteSetting::getValueForTenant($adminTenantId, 'site_name', $adminTenant?->name ?? 'Admin');
+        $adminFavicon  = \App\Models\SiteSetting::getValueForTenant($adminTenantId, 'favicon_path');
+    @endphp
+    <title>@yield('title', 'Admin') | {{ $adminSiteName }}</title>
+    @if($adminFavicon)
+    <link rel="shortcut icon" href="{{ $adminFavicon }}">
+    @else
     <link rel="shortcut icon" href="{{ asset('favicon.ico') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32.png') }}">
     <link rel="icon" type="image/png" sizes="64x64" href="{{ asset('favicon-64.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+    @endif
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -384,6 +394,7 @@
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
             <div class="sidebar-group-panel {{ $aiHubActive ? 'open' : '' }}" id="sgAIHub">
+                <a href="{{ route('admin.crm.ai.toggle') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.ai*') ? 'active' : '' }}"><i class="fas fa-robot"></i> AI Assistant</a>
                 <a href="{{ route('admin.crm.training') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.training*') ? 'active' : '' }}"><i class="fas fa-brain"></i> Train AI</a>
                 <a href="{{ route('admin.crm.conversations') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.conversation*') ? 'active' : '' }}"><i class="fas fa-comments"></i> AI Conversations</a>
             </div>
@@ -413,7 +424,7 @@
                 <a href="{{ route('admin.site.themes') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.themes*') ? 'active' : '' }}"><i class="fas fa-palette"></i> Theme Store</a>
                 <a href="{{ route('admin.site.pages') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.pages*') ? 'active' : '' }}"><i class="fas fa-file-alt"></i> Page Manager</a>
                 <a href="{{ route('admin.site.menu') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.menu*') ? 'active' : '' }}"><i class="fas fa-bars"></i> Menu Builder</a>
-                <a href="{{ route('admin.site.branding') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.branding*') ? 'active' : '' }}"><i class="fas fa-image"></i> Branding &amp; AI Toggle</a>
+                <a href="{{ route('admin.site.branding') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.branding*') ? 'active' : '' }}"><i class="fas fa-image"></i> Branding</a>
                 <a href="{{ route('admin.site.domain') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.domain*') ? 'active' : '' }}"><i class="fas fa-globe"></i> Domain Config</a>
                 <a href="{{ route('admin.settings.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}"><i class="fas fa-sliders-h"></i> Site Settings</a>
             </div>
@@ -458,6 +469,14 @@
                         ? 'https://' . $tenantUser->custom_domain
                         : url('/' . $tenantUser->username);
                 @endphp
+                @php
+                    $topbarChatbotEnabled = \App\Models\SiteSetting::getValueForTenant(auth()->user()->id, 'chatbot_enabled', '1');
+                @endphp
+                <button class="mode-toggle" id="aiToggleBtn" onclick="quickToggleAI()" title="Toggle AI Assistant on/off"
+                    style="{{ $topbarChatbotEnabled == '1' ? 'color:#22c55e;border-color:#22c55e;' : 'color:#ef4444;border-color:#ef4444;' }}">
+                    <i class="fas fa-robot"></i>
+                    <span id="aiToggleLabel">{{ $topbarChatbotEnabled == '1' ? 'AI On' : 'AI Off' }}</span>
+                </button>
                 <button class="mode-toggle" id="modeToggleBtn" onclick="toggleDashboardMode()" title="Toggle light/dark mode">
                     <i id="modeIcon" class="fas fa-sun"></i>
                     <span id="modeLabel">Light</span>
@@ -544,6 +563,26 @@
                 icon.className = 'fas fa-bars';
             }
         }
+        // ── Quick AI Toggle ───────────────────────────────────────
+        let _aiEnabled = {{ $topbarChatbotEnabled == '1' ? 'true' : 'false' }};
+        function quickToggleAI() {
+            _aiEnabled = !_aiEnabled;
+            const btn   = document.getElementById('aiToggleBtn');
+            const label = document.getElementById('aiToggleLabel');
+            if (_aiEnabled) {
+                btn.style.color = '#22c55e'; btn.style.borderColor = '#22c55e';
+                label.textContent = 'AI On';
+            } else {
+                btn.style.color = '#ef4444'; btn.style.borderColor = '#ef4444';
+                label.textContent = 'AI Off';
+            }
+            fetch('{{ route("admin.crm.ai.save") }}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content },
+                body: JSON.stringify({ chatbot_enabled: _aiEnabled ? '1' : '0' })
+            }).catch(() => {});
+        }
+
         // Close sidebar when a link is clicked on mobile
         document.querySelectorAll('.sidebar-link').forEach(function(link) {
             link.addEventListener('click', function() {

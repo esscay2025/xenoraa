@@ -109,6 +109,47 @@ class PortfolioController extends Controller
         $accentColor = SiteSetting::getValueForTenant($tenantId, 'color_accent', '#6366f1');
         $chatbotEnabled = SiteSetting::getValueForTenant($tenantId, 'chatbot_enabled', '1');
 
+        // Build $profile array from site_settings and DB data for all templates
+        $profileSettings = SiteSetting::where('user_id', $tenantId)
+            ->whereIn('key', ['profile_title','profile_expertise','profile_about','profile_booking_link',
+                'profile_years','profile_clients','profile_projects','profile_revenue',
+                'profile_services','profile_stats','profile_platforms','profile_specializations',
+                'profile_practice_areas','profile_bar_number','profile_court'])
+            ->pluck('value', 'key')
+            ->toArray();
+
+        $profile = [
+            'name'             => $siteName,
+            'title'            => $profileSettings['profile_title'] ?? ($tenant->profession ?? 'Professional'),
+            'email'            => $tenant->email,
+            'about'            => $profileSettings['profile_about'] ?? ($tenant->bio ?? ''),
+            'booking_link'     => $profileSettings['profile_booking_link'] ?? '',
+            'years'            => $profileSettings['profile_years'] ?? '',
+            'clients'          => $profileSettings['profile_clients'] ?? '',
+            'projects'         => $profileSettings['profile_projects'] ?? '',
+            'revenue'          => $profileSettings['profile_revenue'] ?? '',
+            'expertise'        => $profileSettings['profile_expertise']
+                ? json_decode($profileSettings['profile_expertise'], true)
+                : [],
+            'services'         => $profileSettings['profile_services']
+                ? json_decode($profileSettings['profile_services'], true)
+                : [],
+            'stats'            => $profileSettings['profile_stats']
+                ? json_decode($profileSettings['profile_stats'], true)
+                : [],
+            'platforms'        => $profileSettings['profile_platforms']
+                ? json_decode($profileSettings['profile_platforms'], true)
+                : [],
+            'specializations'  => $profileSettings['profile_specializations']
+                ? json_decode($profileSettings['profile_specializations'], true)
+                : [],
+            'practice_areas'   => $profileSettings['profile_practice_areas']
+                ? json_decode($profileSettings['profile_practice_areas'], true)
+                : [],
+            'bar_number'       => $profileSettings['profile_bar_number'] ?? '',
+            'court'            => $profileSettings['profile_court'] ?? '',
+        ];
+
         $templateViews = [
             'doctor'       => 'tenant.templates.doctor',
             'advocate'     => 'tenant.templates.advocate',
@@ -122,7 +163,8 @@ class PortfolioController extends Controller
         return view($view, compact(
             'tenant', 'experiences', 'socialLinks', 'activeJobs',
             'blogCategories', 'categoryPosts', 'featuredPost',
-            'siteName', 'siteTagline', 'logoPath', 'faviconPath', 'accentColor', 'chatbotEnabled'
+            'siteName', 'siteTagline', 'logoPath', 'faviconPath', 'accentColor', 'chatbotEnabled',
+            'profile', 'template'
         ));
     }
 

@@ -255,7 +255,15 @@
 </style>
 
 {{-- Toggle Button --}}
-<button id="chatbot-btn" onclick="toggleChatbot()" title="Chat with Gopi AI">
+@php
+    $cbLayoutTenant = $layoutTenant ?? null;
+    $cbTenantId = $cbLayoutTenant?->id ?? 0;
+    $cbAiName    = \App\Models\SiteSetting::getValueForTenant($cbTenantId, 'ai_assistant_name', ($cbLayoutTenant?->name ?? 'AI') . ' Assistant');
+    $cbAiTagline = \App\Models\SiteSetting::getValueForTenant($cbTenantId, 'ai_assistant_tagline', 'Ask me anything • I\'m here to help');
+    $cbSiteName  = $cbLayoutTenant?->custom_domain ?? ($cbLayoutTenant?->username ? 'xenoraa.com/' . $cbLayoutTenant->username : 'xenoraa.com');
+    $cbInitial   = strtoupper(substr($cbAiName, 0, 1));
+@endphp
+<button id="chatbot-btn" onclick="toggleChatbot()" title="Chat with {{ $cbAiName }}">
     <div id="chatbot-badge">1</div>
     <span class="cb-icon-open">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -274,10 +282,10 @@
 <div id="chatbot-window">
     {{-- Header --}}
     <div id="chatbot-header">
-        <div class="cb-avatar">G</div>
+        <div class="cb-avatar">{{ $cbInitial }}</div>
         <div class="cb-info">
-            <h4>Gopi AI Assistant</h4>
-            <p>Ask me anything • I'm here to help</p>
+            <h4>{{ $cbAiName }}</h4>
+            <p>{{ $cbAiTagline }}</p>
         </div>
     </div>
 
@@ -304,7 +312,7 @@
         </button>
     </div>
 
-    <div id="chatbot-powered">Powered by Gopi AI · gopi.blog</div>
+    <div id="chatbot-powered">Powered by {{ $cbAiName }} · {{ $cbSiteName }}</div>
 </div>
 
 <script>
@@ -358,7 +366,7 @@
             document.getElementById('chatbot-contact-form').style.display = 'block';
             @endauth
         } catch(e) {
-            appendMessage('bot', "Hi! I'm Gopi's AI assistant. I'm having a small connection issue — please refresh and try again.");
+            appendMessage('bot', "Hi! I'm {{ $cbAiName }}. I'm having a small connection issue — please refresh and try again.");
         }
     }
 

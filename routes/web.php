@@ -298,6 +298,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         Route::get('/conversations/{conversation}', [\App\Http\Controllers\Admin\CrmController::class, 'conversationShow'])->name('conversation.show');
         Route::post('/conversations/{conversation}/reply', [\App\Http\Controllers\Admin\CrmController::class, 'conversationReply'])->name('conversation.reply');
         Route::delete('/conversations/{conversation}', [\App\Http\Controllers\Admin\CrmController::class, 'conversationDestroy'])->name('conversation.destroy');
+        // AI Assistant Toggle
+        Route::get('/ai-toggle', [\App\Http\Controllers\Admin\CrmController::class, 'aiToggle'])->name('ai.toggle');
+        Route::post('/ai-toggle', [\App\Http\Controllers\Admin\CrmController::class, 'saveAiToggle'])->name('ai.toggle.save');
+
         Route::get('/training', [\App\Http\Controllers\Admin\CrmController::class, 'trainingIndex'])->name('training');
         Route::post('/training', [\App\Http\Controllers\Admin\CrmController::class, 'trainingStore'])->name('training.store');
         Route::put('/training/{training}', [\App\Http\Controllers\Admin\CrmController::class, 'trainingUpdate'])->name('training.update');

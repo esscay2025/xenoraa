@@ -345,4 +345,39 @@ HTML;
             return null;
         }
     }
+
+    // ─── AI Assistant Toggle ──────────────────────────────────────────────────
+
+    public function aiToggle()
+    {
+        $tid = $this->tenantId();
+        $chatbotEnabled = \App\Models\SiteSetting::getValueForTenant($tid, 'chatbot_enabled', '1');
+        $aiName         = \App\Models\SiteSetting::getValueForTenant($tid, 'ai_assistant_name', auth()->user()->name . ' AI');
+        $aiTagline      = \App\Models\SiteSetting::getValueForTenant($tid, 'ai_assistant_tagline', 'Ask me anything about my services');
+        $trainingCount  = \App\Models\ChatbotTraining::where('user_id', $tid)->count();
+        $leadCount      = CrmLead::where('user_id', $tid)->count();
+        return view('admin.crm.ai-toggle', compact('chatbotEnabled', 'aiName', 'aiTagline', 'trainingCount', 'leadCount'));
+    }
+
+    public function saveAiToggle(Request $request)
+    {
+        $tid = $this->tenantId();
+
+        // Handle quick JSON toggle from topbar button
+        if ($request->expectsJson() || $request->isJson()) {
+            $enabled = $request->input('chatbot_enabled', '1');
+            \App\Models\SiteSetting::setValueForTenant($tid, 'chatbot_enabled', $enabled === '1' || $enabled === true || $enabled === 1 ? '1' : '0');
+            return response()->json(['success' => true, 'chatbot_enabled' => $enabled]);
+        }
+
+        // Handle full form POST from AI Hub page
+        $request->validate([
+            'ai_assistant_name'    => 'nullable|string|max:80',
+            'ai_assistant_tagline' => 'nullable|string|max:150',
+        ]);
+        \App\Models\SiteSetting::setValueForTenant($tid, 'chatbot_enabled', $request->boolean('chatbot_enabled') ? '1' : '0');
+        \App\Models\SiteSetting::setValueForTenant($tid, 'ai_assistant_name', $request->input('ai_assistant_name', auth()->user()->name . ' AI'));
+        \App\Models\SiteSetting::setValueForTenant($tid, 'ai_assistant_tagline', $request->input('ai_assistant_tagline', 'Ask me anything about my services'));
+        return redirect()->route('admin.crm.ai.toggle')->with('success', 'AI Assistant settings saved.');
+    }
 }

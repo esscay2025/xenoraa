@@ -161,8 +161,14 @@ class ChatbotController extends Controller
         $tagline    = $tenant->profile_tagline ?? '';
         $username   = $tenant->username ?? '';
 
-        // Determine persona based on profession/template
-        $template = $tenant->profile_template ?? 'default';
+        // Use AI assistant name from site_settings if set
+        $aiName = \App\Models\SiteSetting::getValueForTenant($tenant->id, 'ai_assistant_name', $name . ' AI');
+        $name   = $aiName; // Override name with AI identity
+
+        // Determine persona based on profession/template — read from site_settings first
+        $template = \App\Models\SiteSetting::getValueForTenant($tenant->id, 'profile_template')
+            ?? $tenant->profile_template
+            ?? 'consultant';
 
         switch ($template) {
             case 'influencer':
@@ -271,8 +277,14 @@ PROMPT;
         $sessionId = 'cb_' . uniqid() . '_' . time();
         $user = $request->user();
 
-        $tenantName = $tenant?->name ?? 'our team';
-        $template   = $tenant?->profile_template ?? 'default';
+        // Use AI assistant name from site_settings if set
+        $tenantName = $tenant
+            ? (\App\Models\SiteSetting::getValueForTenant($tenant->id, 'ai_assistant_name', $tenant->name . ' AI'))
+            : 'AI Assistant';
+        // Read template from site_settings first
+        $template = $tenant
+            ? (\App\Models\SiteSetting::getValueForTenant($tenant->id, 'profile_template') ?? $tenant->profile_template ?? 'consultant')
+            : 'consultant';
 
         if ($template === 'influencer') {
             $greeting = "Hi there! 👋 Welcome to {$tenantName}'s page! I'm {$tenantName}'s AI assistant. I can help with brand collaboration enquiries or any questions you have. What can I help you with today?";
@@ -314,15 +326,26 @@ PROMPT;
         $tenant = $this->resolveTenant($request);
         $tenantId = $tenant?->id;
 
-        $lead = CrmLead::updateOrCreate(
-            ['email' => $request->email ?: null, 'mobile' => $request->mobile ?: null],
-            [
+        // Scope lead lookup to this tenant to prevent cross-tenant bleed
+        $lead = CrmLead::where('user_id', $tenantId)
+            ->where(function($q) use ($request) {
+                $q->where('email', $request->email ?: null)
+                  ->orWhere('mobile', $request->mobile ?: null);
+            })
+            ->first();
+
+        if (!$lead) {
+            $lead = CrmLead::create([
                 'name'    => $request->name,
+                'email'   => $request->email ?: null,
+                'mobile'  => $request->mobile ?: null,
                 'source'  => 'chatbot',
                 'status'  => 'new',
                 'user_id' => $tenantId,
-            ]
-        );
+            ]);
+        } else {
+            $lead->update(['name' => $request->name, 'source' => 'chatbot']);
+        }
 
         ChatbotConversation::where('session_id', $request->session_id)->update([
             'lead_id' => $lead->id,
