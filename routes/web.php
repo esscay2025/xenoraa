@@ -311,6 +311,60 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         Route::patch('/requirements/{requirement}/scope-sent', [\App\Http\Controllers\Admin\CrmController::class, 'markScopeSent'])->name('requirements.scope-sent');
     });
 
+    // ─── CoreModules ──────────────────────────────────────────────────────
+
+    // Projects (Portfolio)
+    Route::resource('projects', \App\Http\Controllers\Admin\ProjectController::class);
+
+    // Testimonials
+    Route::resource('testimonials', \App\Http\Controllers\Admin\TestimonialController::class);
+    Route::patch('testimonials/{testimonial}/approve', [\App\Http\Controllers\Admin\TestimonialController::class, 'approve'])->name('testimonials.approve');
+    Route::patch('testimonials/{testimonial}/reject', [\App\Http\Controllers\Admin\TestimonialController::class, 'reject'])->name('testimonials.reject');
+
+    // Appointments
+    Route::get('appointments', [\App\Http\Controllers\Admin\AppointmentController::class, 'index'])->name('appointments.index');
+    Route::get('appointments/slots', [\App\Http\Controllers\Admin\AppointmentController::class, 'slots'])->name('appointments.slots');
+    Route::post('appointments/slots', [\App\Http\Controllers\Admin\AppointmentController::class, 'storeSlot'])->name('appointments.slots.store');
+    Route::delete('appointments/slots/{slot}', [\App\Http\Controllers\Admin\AppointmentController::class, 'destroySlot'])->name('appointments.slots.destroy');
+    Route::patch('appointments/slots/{slot}/toggle', [\App\Http\Controllers\Admin\AppointmentController::class, 'toggleSlot'])->name('appointments.slots.toggle');
+    Route::get('appointments/{appointment}', [\App\Http\Controllers\Admin\AppointmentController::class, 'show'])->name('appointments.show');
+    Route::patch('appointments/{appointment}/status', [\App\Http\Controllers\Admin\AppointmentController::class, 'updateStatus'])->name('appointments.status');
+    Route::delete('appointments/{appointment}', [\App\Http\Controllers\Admin\AppointmentController::class, 'destroy'])->name('appointments.destroy');
+
+    // Business Card
+    Route::get('business-card', [\App\Http\Controllers\Admin\BusinessCardController::class, 'index'])->name('business-card.index');
+    Route::post('business-card', [\App\Http\Controllers\Admin\BusinessCardController::class, 'store'])->name('business-card.store');
+    Route::get('business-card/vcard', [\App\Http\Controllers\Admin\BusinessCardController::class, 'vcard'])->name('business-card.vcard');
+
+    // Documents
+    Route::resource('documents', \App\Http\Controllers\Admin\DocumentController::class);
+
+    // Media Gallery
+    Route::resource('media', \App\Http\Controllers\Admin\MediaController::class);
+
+    // Notes, Todos, Reminders
+    Route::get('notes', [\App\Http\Controllers\Admin\NoteController::class, 'index'])->name('notes.index');
+    Route::post('notes', [\App\Http\Controllers\Admin\NoteController::class, 'storeNote'])->name('notes.store');
+    Route::put('notes/{note}', [\App\Http\Controllers\Admin\NoteController::class, 'updateNote'])->name('notes.update');
+    Route::delete('notes/{note}', [\App\Http\Controllers\Admin\NoteController::class, 'destroyNote'])->name('notes.destroy');
+    Route::post('todos', [\App\Http\Controllers\Admin\NoteController::class, 'storeTodo'])->name('todos.store');
+    Route::patch('todos/{todo}/toggle', [\App\Http\Controllers\Admin\NoteController::class, 'toggleTodo'])->name('todos.toggle');
+    Route::delete('todos/{todo}', [\App\Http\Controllers\Admin\NoteController::class, 'destroyTodo'])->name('todos.destroy');
+    Route::post('reminders', [\App\Http\Controllers\Admin\NoteController::class, 'storeReminder'])->name('reminders.store');
+    Route::patch('reminders/{reminder}/dismiss', [\App\Http\Controllers\Admin\NoteController::class, 'dismissReminder'])->name('reminders.dismiss');
+    Route::delete('reminders/{reminder}', [\App\Http\Controllers\Admin\NoteController::class, 'destroyReminder'])->name('reminders.destroy');
+
+    // Profile Enhancements
+    Route::get('profile-enhanced', [\App\Http\Controllers\Admin\ProfileEnhancementController::class, 'index'])->name('profile-enhanced.index');
+    Route::post('profile/skills', [\App\Http\Controllers\Admin\ProfileEnhancementController::class, 'storeSkill'])->name('profile.skills.store');
+    Route::delete('profile/skills/{skill}', [\App\Http\Controllers\Admin\ProfileEnhancementController::class, 'destroySkill'])->name('profile.skills.destroy');
+    Route::post('profile/education', [\App\Http\Controllers\Admin\ProfileEnhancementController::class, 'storeEducation'])->name('profile.education.store');
+    Route::delete('profile/education/{education}', [\App\Http\Controllers\Admin\ProfileEnhancementController::class, 'destroyEducation'])->name('profile.education.destroy');
+    Route::post('profile/certifications', [\App\Http\Controllers\Admin\ProfileEnhancementController::class, 'storeCertification'])->name('profile.certifications.store');
+    Route::delete('profile/certifications/{certification}', [\App\Http\Controllers\Admin\ProfileEnhancementController::class, 'destroyCertification'])->name('profile.certifications.destroy');
+    Route::post('profile/languages', [\App\Http\Controllers\Admin\ProfileEnhancementController::class, 'storeLanguage'])->name('profile.languages.store');
+    Route::delete('profile/languages/{language}', [\App\Http\Controllers\Admin\ProfileEnhancementController::class, 'destroyLanguage'])->name('profile.languages.destroy');
+
     // E-commerce Admin
     Route::prefix('ecommerce')->name('ecommerce.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\EcommerceController::class, 'dashboard'])->name('dashboard');
