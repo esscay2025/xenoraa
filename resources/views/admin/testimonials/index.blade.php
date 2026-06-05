@@ -1,12 +1,21 @@
 @extends('layouts.admin')
-@section('title', 'Testimonials & Reviews')
+@section('title', 'Testimonials — Site Builder')
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
+        <nav aria-label="breadcrumb" style="font-size:0.82rem;margin-bottom:0.35rem;">
+            <ol class="breadcrumb mb-0" style="background:none;padding:0;">
+                <li class="breadcrumb-item"><a href="{{ route('admin.site.index') }}" style="color:var(--accent);"><i class="fas fa-paint-brush"></i> Site Builder</a></li>
+                <li class="breadcrumb-item active">Testimonials</li>
+            </ol>
+        </nav>
         <h4 class="mb-1">Testimonials & Reviews</h4>
-        <p class="text-muted mb-0">Manage client feedback and social proof</p>
+        <p class="text-muted mb-0">Manage client feedback and social proof shown on your site</p>
     </div>
-    <a href="{{ route('admin.testimonials.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Testimonial</a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('admin.site.index') }}" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Site Builder</a>
+        <a href="{{ route('admin.testimonials.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Testimonial</a>
+    </div>
 </div>
 
 <div class="row g-3 mb-4">

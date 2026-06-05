@@ -119,9 +119,36 @@
     <a href="{{ route('admin.ecommerce.products') }}" class="sb-hub-card">
         <div class="sb-hub-icon" style="background:rgba(168,85,247,0.12);color:#c084fc;"><i class="fas fa-shopping-bag"></i></div>
         <div class="sb-hub-title">Shop</div>
-        <div class="sb-hub-desc">Manage your online store — products, categories, and orders.</div>
+        <div class="sb-hub-desc">Manage your online store &mdash; products, categories, and orders.</div>
         <div class="sb-hub-badge">E-Commerce</div>
         <div class="sb-hub-meta"><i class="fas fa-arrow-right" style="color:var(--text-muted);"></i> Go to Shop Manager</div>
+    </a>
+
+    {{-- Portfolio --}}
+    <a href="{{ route('admin.projects.index') }}" class="sb-hub-card">
+        <div class="sb-hub-icon" style="background:rgba(20,184,166,0.12);color:#2dd4bf;"><i class="fas fa-project-diagram"></i></div>
+        <div class="sb-hub-title">Portfolio</div>
+        <div class="sb-hub-desc">Showcase your projects, case studies, and work samples with rich media and tech tags.</div>
+        <div class="sb-hub-badge">Projects</div>
+        <div class="sb-hub-meta"><i class="fas fa-arrow-right" style="color:var(--text-muted);"></i> Manage Projects</div>
+    </a>
+
+    {{-- Testimonials --}}
+    <a href="{{ route('admin.testimonials.index') }}" class="sb-hub-card">
+        <div class="sb-hub-icon" style="background:rgba(234,179,8,0.12);color:#facc15;"><i class="fas fa-quote-left"></i></div>
+        <div class="sb-hub-title">Testimonials</div>
+        <div class="sb-hub-desc">Collect and display client reviews, star ratings, and social proof on your site.</div>
+        <div class="sb-hub-badge">Social Proof</div>
+        <div class="sb-hub-meta"><i class="fas fa-arrow-right" style="color:var(--text-muted);"></i> Manage Testimonials</div>
+    </a>
+
+    {{-- Profile --}}
+    <a href="{{ route('admin.profile-enhanced.index') }}" class="sb-hub-card">
+        <div class="sb-hub-icon" style="background:rgba(239,68,68,0.12);color:#f87171;"><i class="fas fa-user-graduate"></i></div>
+        <div class="sb-hub-title">Profile</div>
+        <div class="sb-hub-desc">Add your skills, education history, certifications, and languages to enrich your profile page.</div>
+        <div class="sb-hub-badge">Skills &amp; Bio</div>
+        <div class="sb-hub-meta"><i class="fas fa-arrow-right" style="color:var(--text-muted);"></i> Manage Profile</div>
     </a>
 </div>
 @endsection

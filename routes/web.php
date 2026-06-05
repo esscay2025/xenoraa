@@ -321,15 +321,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('testimonials/{testimonial}/approve', [\App\Http\Controllers\Admin\TestimonialController::class, 'approve'])->name('testimonials.approve');
     Route::patch('testimonials/{testimonial}/reject', [\App\Http\Controllers\Admin\TestimonialController::class, 'reject'])->name('testimonials.reject');
 
-    // Appointments
-    Route::get('appointments', [\App\Http\Controllers\Admin\AppointmentController::class, 'index'])->name('appointments.index');
-    Route::get('appointments/slots', [\App\Http\Controllers\Admin\AppointmentController::class, 'slots'])->name('appointments.slots');
-    Route::post('appointments/slots', [\App\Http\Controllers\Admin\AppointmentController::class, 'storeSlot'])->name('appointments.slots.store');
-    Route::delete('appointments/slots/{slot}', [\App\Http\Controllers\Admin\AppointmentController::class, 'destroySlot'])->name('appointments.slots.destroy');
-    Route::patch('appointments/slots/{slot}/toggle', [\App\Http\Controllers\Admin\AppointmentController::class, 'toggleSlot'])->name('appointments.slots.toggle');
-    Route::get('appointments/{appointment}', [\App\Http\Controllers\Admin\AppointmentController::class, 'show'])->name('appointments.show');
-    Route::patch('appointments/{appointment}/status', [\App\Http\Controllers\Admin\AppointmentController::class, 'updateStatus'])->name('appointments.status');
-    Route::delete('appointments/{appointment}', [\App\Http\Controllers\Admin\AppointmentController::class, 'destroy'])->name('appointments.destroy');
 
     // Business Card
     Route::get('business-card', [\App\Http\Controllers\Admin\BusinessCardController::class, 'index'])->name('business-card.index');
@@ -342,17 +333,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Media Gallery
     Route::resource('media', \App\Http\Controllers\Admin\MediaController::class);
 
-    // Notes, Todos, Reminders
-    Route::get('notes', [\App\Http\Controllers\Admin\NoteController::class, 'index'])->name('notes.index');
-    Route::post('notes', [\App\Http\Controllers\Admin\NoteController::class, 'storeNote'])->name('notes.store');
-    Route::put('notes/{note}', [\App\Http\Controllers\Admin\NoteController::class, 'updateNote'])->name('notes.update');
-    Route::delete('notes/{note}', [\App\Http\Controllers\Admin\NoteController::class, 'destroyNote'])->name('notes.destroy');
-    Route::post('todos', [\App\Http\Controllers\Admin\NoteController::class, 'storeTodo'])->name('todos.store');
-    Route::patch('todos/{todo}/toggle', [\App\Http\Controllers\Admin\NoteController::class, 'toggleTodo'])->name('todos.toggle');
-    Route::delete('todos/{todo}', [\App\Http\Controllers\Admin\NoteController::class, 'destroyTodo'])->name('todos.destroy');
-    Route::post('reminders', [\App\Http\Controllers\Admin\NoteController::class, 'storeReminder'])->name('reminders.store');
-    Route::patch('reminders/{reminder}/dismiss', [\App\Http\Controllers\Admin\NoteController::class, 'dismissReminder'])->name('reminders.dismiss');
-    Route::delete('reminders/{reminder}', [\App\Http\Controllers\Admin\NoteController::class, 'destroyReminder'])->name('reminders.destroy');
 
     // Profile Enhancements
     Route::get('profile-enhanced', [\App\Http\Controllers\Admin\ProfileEnhancementController::class, 'index'])->name('profile-enhanced.index');

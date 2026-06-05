@@ -1,11 +1,18 @@
 @extends('layouts.admin')
-@section('title', 'Profile Enhancements')
+@section('title', 'Profile — Site Builder')
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h4 class="mb-1">Profile Enhancements</h4>
-        <p class="text-muted mb-0">Manage your skills, education, certifications, and languages</p>
+        <nav aria-label="breadcrumb" style="font-size:0.82rem;margin-bottom:0.35rem;">
+            <ol class="breadcrumb mb-0" style="background:none;padding:0;">
+                <li class="breadcrumb-item"><a href="{{ route('admin.site.index') }}" style="color:var(--accent);"><i class="fas fa-paint-brush"></i> Site Builder</a></li>
+                <li class="breadcrumb-item active">Profile</li>
+            </ol>
+        </nav>
+        <h4 class="mb-1">Profile</h4>
+        <p class="text-muted mb-0">Manage your skills, education, certifications, and languages shown on your site</p>
     </div>
+    <a href="{{ route('admin.site.index') }}" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Back to Site Builder</a>
 </div>
 
 @if(session('success'))

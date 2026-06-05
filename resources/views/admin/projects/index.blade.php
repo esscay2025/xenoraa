@@ -1,12 +1,21 @@
 @extends('layouts.admin')
-@section('title', 'Portfolio / Projects')
+@section('title', 'Portfolio / Projects — Site Builder')
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
+        <nav aria-label="breadcrumb" style="font-size:0.82rem;margin-bottom:0.35rem;">
+            <ol class="breadcrumb mb-0" style="background:none;padding:0;">
+                <li class="breadcrumb-item"><a href="{{ route('admin.site.index') }}" style="color:var(--accent);"><i class="fas fa-paint-brush"></i> Site Builder</a></li>
+                <li class="breadcrumb-item active">Portfolio</li>
+            </ol>
+        </nav>
         <h4 class="mb-1">Portfolio / Projects</h4>
-        <p class="text-muted mb-0">Showcase your work and achievements</p>
+        <p class="text-muted mb-0">Showcase your work and achievements on your site</p>
     </div>
-    <a href="{{ route('admin.projects.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Project</a>
+    <div class="d-flex gap-2">
+        <a href="{{ route('admin.site.index') }}" class="btn btn-outline btn-sm"><i class="fas fa-arrow-left"></i> Site Builder</a>
+        <a href="{{ route('admin.projects.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Add Project</a>
+    </div>
 </div>
 
 @if(session('success'))

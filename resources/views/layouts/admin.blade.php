@@ -399,28 +399,10 @@
                 <a href="{{ route('admin.crm.conversations') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.conversation*') ? 'active' : '' }}"><i class="fas fa-comments"></i> AI Conversations</a>
             </div>
 
-            {{-- Portfolio Group --}}
-            @php $portfolioActive = request()->routeIs('admin.projects*') || request()->routeIs('admin.testimonials*'); @endphp
-            <button class="sidebar-group-btn {{ $portfolioActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgPortfolio', this)">
-                <i class="fas fa-briefcase group-icon"></i> Portfolio
-                <i class="fas fa-chevron-down group-chevron"></i>
-            </button>
-            <div class="sidebar-group-panel {{ $portfolioActive ? 'open' : '' }}" id="sgPortfolio">
-                <a href="{{ route('admin.projects.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.projects*') ? 'active' : '' }}"><i class="fas fa-project-diagram"></i> Projects</a>
-                <a href="{{ route('admin.testimonials.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.testimonials*') ? 'active' : '' }}"><i class="fas fa-quote-left"></i> Testimonials</a>
-            </div>
-
-            {{-- Bookings Group --}}
-            @php $bookingsActive = request()->routeIs('admin.appointments*') || request()->routeIs('admin.business-card*'); @endphp
-            <button class="sidebar-group-btn {{ $bookingsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgBookings', this)">
-                <i class="fas fa-calendar-check group-icon"></i> Bookings
-                <i class="fas fa-chevron-down group-chevron"></i>
-            </button>
-            <div class="sidebar-group-panel {{ $bookingsActive ? 'open' : '' }}" id="sgBookings">
-                <a href="{{ route('admin.appointments.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.appointments.index') || request()->routeIs('admin.appointments.show') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Appointments</a>
-                <a href="{{ route('admin.appointments.slots') }}" class="sidebar-sub-link {{ request()->routeIs('admin.appointments.slots*') ? 'active' : '' }}"><i class="fas fa-clock"></i> Availability Slots</a>
-                <a href="{{ route('admin.business-card.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.business-card*') ? 'active' : '' }}"><i class="fas fa-id-card"></i> Business Card</a>
-            </div>
+            {{-- Business Card (standalone link) --}}
+            <a href="{{ route('admin.business-card.index') }}" class="sidebar-link {{ request()->routeIs('admin.business-card*') ? 'active' : '' }}">
+                <i class="fas fa-id-card"></i> Business Card
+            </a>
 
             {{-- Media & Docs Group --}}
             @php $mediaDocsActive = request()->routeIs('admin.documents*') || request()->routeIs('admin.media*'); @endphp
@@ -433,30 +415,7 @@
                 <a href="{{ route('admin.documents.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.documents*') ? 'active' : '' }}"><i class="fas fa-file-alt"></i> Documents</a>
             </div>
 
-            {{-- Productivity Group --}}
-            @php $productivityActive = request()->routeIs('admin.notes*') || request()->routeIs('admin.todos*') || request()->routeIs('admin.reminders*'); @endphp
-            <button class="sidebar-group-btn {{ $productivityActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgProductivity', this)">
-                <i class="fas fa-sticky-note group-icon"></i> Productivity
-                <i class="fas fa-chevron-down group-chevron"></i>
-            </button>
-            <div class="sidebar-group-panel {{ $productivityActive ? 'open' : '' }}" id="sgProductivity">
-                <a href="{{ route('admin.notes.index', ['tab' => 'notes']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.notes*') && request('tab', 'notes') === 'notes' ? 'active' : '' }}"><i class="fas fa-sticky-note"></i> Notes</a>
-                <a href="{{ route('admin.notes.index', ['tab' => 'todos']) }}" class="sidebar-sub-link {{ request('tab') === 'todos' ? 'active' : '' }}"><i class="fas fa-check-square"></i> Tasks</a>
-                <a href="{{ route('admin.notes.index', ['tab' => 'reminders']) }}" class="sidebar-sub-link {{ request('tab') === 'reminders' ? 'active' : '' }}"><i class="fas fa-bell"></i> Reminders</a>
-            </div>
 
-            {{-- Profile Enhancement Group --}}
-            @php $profileEnhActive = request()->routeIs('admin.profile-enhanced*') || request()->routeIs('admin.profile.skills*') || request()->routeIs('admin.profile.education*') || request()->routeIs('admin.profile.certifications*') || request()->routeIs('admin.profile.languages*'); @endphp
-            <button class="sidebar-group-btn {{ $profileEnhActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgProfileEnh', this)">
-                <i class="fas fa-user-graduate group-icon"></i> Profile
-                <i class="fas fa-chevron-down group-chevron"></i>
-            </button>
-            <div class="sidebar-group-panel {{ $profileEnhActive ? 'open' : '' }}" id="sgProfileEnh">
-                <a href="{{ route('admin.profile-enhanced.index', ['tab' => 'skills']) }}" class="sidebar-sub-link {{ request('tab') === 'skills' || (request()->routeIs('admin.profile-enhanced*') && !request('tab')) ? 'active' : '' }}"><i class="fas fa-bolt"></i> Skills</a>
-                <a href="{{ route('admin.profile-enhanced.index', ['tab' => 'education']) }}" class="sidebar-sub-link {{ request('tab') === 'education' ? 'active' : '' }}"><i class="fas fa-graduation-cap"></i> Education</a>
-                <a href="{{ route('admin.profile-enhanced.index', ['tab' => 'certifications']) }}" class="sidebar-sub-link {{ request('tab') === 'certifications' ? 'active' : '' }}"><i class="fas fa-certificate"></i> Certifications</a>
-                <a href="{{ route('admin.profile-enhanced.index', ['tab' => 'languages']) }}" class="sidebar-sub-link {{ request('tab') === 'languages' ? 'active' : '' }}"><i class="fas fa-language"></i> Languages</a>
-            </div>
 
             {{-- E-commerce Group --}}
             @php $ecommerceActive = request()->routeIs('admin.ecommerce*'); @endphp
@@ -473,7 +432,7 @@
             </div>
 
             {{-- Site Builder Group --}}
-            @php $siteActive = request()->routeIs('admin.site*') || request()->routeIs('admin.settings*'); @endphp
+            @php $siteActive = request()->routeIs('admin.site*') || request()->routeIs('admin.settings*') || request()->routeIs('admin.projects*') || request()->routeIs('admin.testimonials*') || request()->routeIs('admin.profile-enhanced*') || request()->routeIs('admin.profile.skills*') || request()->routeIs('admin.profile.education*') || request()->routeIs('admin.profile.certifications*') || request()->routeIs('admin.profile.languages*'); @endphp
             <button class="sidebar-group-btn {{ $siteActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgSite', this)">
                 <i class="fas fa-paint-brush group-icon"></i> Site Builder
                 <i class="fas fa-chevron-down group-chevron"></i>
@@ -486,6 +445,14 @@
                 <a href="{{ route('admin.site.branding') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.branding*') ? 'active' : '' }}"><i class="fas fa-image"></i> Branding</a>
                 <a href="{{ route('admin.site.domain') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.domain*') ? 'active' : '' }}"><i class="fas fa-globe"></i> Domain Config</a>
                 <a href="{{ route('admin.settings.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}"><i class="fas fa-sliders-h"></i> Site Settings</a>
+                {{-- Portfolio section inside Site Builder --}}
+                <a href="{{ route('admin.projects.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.projects*') ? 'active' : '' }}"><i class="fas fa-project-diagram"></i> Projects</a>
+                <a href="{{ route('admin.testimonials.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.testimonials*') ? 'active' : '' }}"><i class="fas fa-quote-left"></i> Testimonials</a>
+                {{-- Profile section inside Site Builder --}}
+                <a href="{{ route('admin.profile-enhanced.index', ['tab' => 'skills']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.profile-enhanced*') && (!request('tab') || request('tab') === 'skills') ? 'active' : '' }}"><i class="fas fa-bolt"></i> Skills</a>
+                <a href="{{ route('admin.profile-enhanced.index', ['tab' => 'education']) }}" class="sidebar-sub-link {{ request('tab') === 'education' ? 'active' : '' }}"><i class="fas fa-graduation-cap"></i> Education</a>
+                <a href="{{ route('admin.profile-enhanced.index', ['tab' => 'certifications']) }}" class="sidebar-sub-link {{ request('tab') === 'certifications' ? 'active' : '' }}"><i class="fas fa-certificate"></i> Certifications</a>
+                <a href="{{ route('admin.profile-enhanced.index', ['tab' => 'languages']) }}" class="sidebar-sub-link {{ request('tab') === 'languages' ? 'active' : '' }}"><i class="fas fa-language"></i> Languages</a>
             </div>
         </nav>
 
