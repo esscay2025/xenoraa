@@ -64,20 +64,109 @@ class CustomPage extends Model
     {
         return match ($pageType) {
             'home' => [
-                ['key' => 'hero',         'label' => 'Hero / Banner',       'icon' => 'fas fa-image',          'enabled' => true,  'data' => ['heading' => '', 'subheading' => '', 'cta_text' => 'Get Started', 'cta_url' => '', 'image' => '', 'bg_color' => '']],
-                ['key' => 'about',        'label' => 'About Snippet',       'icon' => 'fas fa-user',           'enabled' => true,  'data' => ['heading' => 'About Me', 'text' => '', 'image' => '']],
-                ['key' => 'services',     'label' => 'Services / Features', 'icon' => 'fas fa-cogs',           'enabled' => true,  'data' => ['heading' => 'What I Do', 'subheading' => '']],
-                ['key' => 'blog',         'label' => 'Latest Blog Posts',   'icon' => 'fas fa-newspaper',      'enabled' => true,  'data' => ['heading' => 'Latest Articles', 'count' => 3]],
-                ['key' => 'portfolio',    'label' => 'Portfolio Preview',   'icon' => 'fas fa-briefcase',      'enabled' => false, 'data' => ['heading' => 'My Work', 'count' => 6]],
-                ['key' => 'shop',         'label' => 'Shop / Products',     'icon' => 'fas fa-shopping-bag',   'enabled' => false, 'data' => ['heading' => 'Shop', 'count' => 4]],
-                ['key' => 'forum',        'label' => 'Community Forum',     'icon' => 'fas fa-comments',       'enabled' => false, 'data' => ['heading' => 'Community']],
-                ['key' => 'testimonials', 'label' => 'Testimonials',        'icon' => 'fas fa-quote-left',     'enabled' => false, 'data' => ['heading' => 'What People Say']],
-                ['key' => 'jobs',         'label' => 'Job Openings',        'icon' => 'fas fa-briefcase',      'enabled' => false, 'data' => ['heading' => 'Open Positions', 'count' => 3]],
-                ['key' => 'contact',      'label' => 'Contact / CTA',       'icon' => 'fas fa-envelope',       'enabled' => true,  'data' => ['heading' => "Let's Connect", 'text' => '']],
+                ['key' => 'hero',         'label' => 'Hero / Banner',         'icon' => 'fas fa-image',        'enabled' => true,  'data' => [
+                    'heading'    => '',
+                    'subheading' => '',
+                    'cta_text'   => 'Get Started',
+                    'cta_url'    => '',
+                    'image'      => '',
+                    'bg_color'   => '',
+                    'badge'      => '',
+                ]],
+                ['key' => 'stats',        'label' => 'Stats / Numbers',       'icon' => 'fas fa-chart-bar',    'enabled' => true,  'data' => [
+                    'heading' => '',
+                    'items'   => [
+                        ['value' => '', 'label' => 'Years Experience', 'icon' => '🏆'],
+                        ['value' => '', 'label' => 'Happy Clients',    'icon' => '😊'],
+                        ['value' => '', 'label' => 'Projects Done',    'icon' => '✅'],
+                    ],
+                ]],
+                ['key' => 'about',        'label' => 'About Snippet',         'icon' => 'fas fa-user',         'enabled' => true,  'data' => [
+                    'heading'  => 'About Me',
+                    'text'     => '',
+                    'image'    => '',
+                    'cta_text' => 'Learn More',
+                    'cta_url'  => '/about',
+                ]],
+                ['key' => 'services',     'label' => 'Services / Features',   'icon' => 'fas fa-cogs',         'enabled' => true,  'data' => [
+                    'heading'    => 'What I Do',
+                    'subheading' => '',
+                    'items'      => [
+                        ['icon' => '💡', 'title' => '', 'text' => ''],
+                        ['icon' => '🚀', 'title' => '', 'text' => ''],
+                        ['icon' => '🎯', 'title' => '', 'text' => ''],
+                    ],
+                ]],
+                ['key' => 'testimonials', 'label' => 'Testimonials',          'icon' => 'fas fa-quote-left',   'enabled' => false, 'data' => [
+                    'heading' => 'What People Say',
+                    'items'   => [
+                        ['name' => '', 'role' => '', 'text' => '', 'avatar' => ''],
+                        ['name' => '', 'role' => '', 'text' => '', 'avatar' => ''],
+                    ],
+                ]],
+                ['key' => 'followers',    'label' => 'Social Followers',      'icon' => 'fas fa-users',        'enabled' => false, 'data' => [
+                    'heading'   => 'My Reach',
+                    'total'     => '',
+                    'instagram' => '',
+                    'youtube'   => '',
+                    'twitter'   => '',
+                    'tiktok'    => '',
+                ]],
+                ['key' => 'ventures',     'label' => 'Ventures / Projects',   'icon' => 'fas fa-rocket',       'enabled' => false, 'data' => [
+                    'heading' => 'My Ventures',
+                    'items'   => [
+                        ['icon' => '🚀', 'title' => '', 'text' => '', 'url' => ''],
+                        ['icon' => '💼', 'title' => '', 'text' => '', 'url' => ''],
+                    ],
+                ]],
+                ['key' => 'agenda',       'label' => 'Political Agenda',      'icon' => 'fas fa-flag',         'enabled' => false, 'data' => [
+                    'heading' => 'My Agenda',
+                    'items'   => [
+                        ['icon' => '🏥', 'title' => '', 'text' => ''],
+                        ['icon' => '📚', 'title' => '', 'text' => ''],
+                        ['icon' => '🌱', 'title' => '', 'text' => ''],
+                    ],
+                ]],
+                ['key' => 'achievements', 'label' => 'Achievements / Awards', 'icon' => 'fas fa-trophy',       'enabled' => false, 'data' => [
+                    'heading' => 'Key Achievements',
+                    'items'   => [
+                        ['icon' => '🏆', 'title' => '', 'text' => '', 'year' => ''],
+                        ['icon' => '🥇', 'title' => '', 'text' => '', 'year' => ''],
+                    ],
+                ]],
+                ['key' => 'blog',         'label' => 'Latest Blog Posts',     'icon' => 'fas fa-newspaper',    'enabled' => true,  'data' => [
+                    'heading' => 'Latest Articles',
+                    'count'   => 3,
+                ]],
+                ['key' => 'portfolio',    'label' => 'Portfolio Preview',     'icon' => 'fas fa-briefcase',    'enabled' => false, 'data' => [
+                    'heading' => 'My Work',
+                    'count'   => 6,
+                ]],
+                ['key' => 'shop',         'label' => 'Shop / Products',       'icon' => 'fas fa-shopping-bag', 'enabled' => false, 'data' => [
+                    'heading' => 'Shop',
+                    'count'   => 4,
+                ]],
+                ['key' => 'jobs',         'label' => 'Job Openings',          'icon' => 'fas fa-briefcase',    'enabled' => false, 'data' => [
+                    'heading' => 'Open Positions',
+                    'count'   => 3,
+                ]],
+                ['key' => 'contact',      'label' => 'Contact / CTA',         'icon' => 'fas fa-envelope',     'enabled' => true,  'data' => [
+                    'heading'     => "Let's Connect",
+                    'text'        => '',
+                    'button_text' => 'Get in Touch',
+                    'button_url'  => '/contact',
+                ]],
             ],
             'about' => [
                 ['key' => 'hero',           'label' => 'About Hero',           'icon' => 'fas fa-image',          'enabled' => true,  'data' => ['heading' => 'About Me', 'subheading' => '', 'image' => '']],
                 ['key' => 'bio',            'label' => 'Biography / Story',    'icon' => 'fas fa-align-left',     'enabled' => true,  'data' => ['heading' => 'My Story', 'text' => '', 'image' => '']],
+                ['key' => 'stats',          'label' => 'Stats / Numbers',      'icon' => 'fas fa-chart-bar',      'enabled' => true,  'data' => [
+                    'items' => [
+                        ['value' => '', 'label' => 'Years Experience'],
+                        ['value' => '', 'label' => 'Clients Served'],
+                        ['value' => '', 'label' => 'Projects Completed'],
+                    ],
+                ]],
                 ['key' => 'skills',         'label' => 'Skills & Expertise',   'icon' => 'fas fa-bolt',           'enabled' => true,  'data' => ['heading' => 'Skills']],
                 ['key' => 'experience',     'label' => 'Work Experience',      'icon' => 'fas fa-briefcase',      'enabled' => true,  'data' => ['heading' => 'Experience']],
                 ['key' => 'education',      'label' => 'Education',            'icon' => 'fas fa-graduation-cap', 'enabled' => true,  'data' => ['heading' => 'Education']],
@@ -99,23 +188,53 @@ class CustomPage extends Model
                 ['key' => 'newsletter', 'label' => 'Newsletter Signup',    'icon' => 'fas fa-envelope',       'enabled' => false, 'data' => ['heading' => 'Stay Updated']],
             ],
             'contact' => [
-                ['key' => 'hero',   'label' => 'Contact Hero',    'icon' => 'fas fa-image',      'enabled' => true,  'data' => ['heading' => 'Contact Me', 'subheading' => '']],
-                ['key' => 'form',   'label' => 'Contact Form',    'icon' => 'fas fa-envelope',   'enabled' => true,  'data' => ['email' => '', 'phone' => '', 'address' => '']],
+                ['key' => 'hero',   'label' => 'Contact Hero',    'icon' => 'fas fa-image',      'enabled' => true,  'data' => ['heading' => 'Contact Me', 'subheading' => 'I\'d love to hear from you']],
+                ['key' => 'form',   'label' => 'Contact Form',    'icon' => 'fas fa-envelope',   'enabled' => true,  'data' => ['email' => '', 'phone' => '', 'address' => '', 'working_hours' => '']],
                 ['key' => 'map',    'label' => 'Map / Location',  'icon' => 'fas fa-map-marker', 'enabled' => false, 'data' => ['embed_url' => '']],
                 ['key' => 'social', 'label' => 'Social Links',    'icon' => 'fas fa-share-alt',  'enabled' => true,  'data' => []],
             ],
             'services' => [
                 ['key' => 'hero',    'label' => 'Services Hero',  'icon' => 'fas fa-image',  'enabled' => true,  'data' => ['heading' => 'Services', 'subheading' => '']],
-                ['key' => 'list',    'label' => 'Services List',  'icon' => 'fas fa-list',   'enabled' => true,  'data' => ['heading' => 'What I Offer', 'layout' => 'grid']],
-                ['key' => 'process', 'label' => 'How It Works',   'icon' => 'fas fa-cogs',   'enabled' => false, 'data' => ['heading' => 'My Process']],
-                ['key' => 'pricing', 'label' => 'Pricing Table',  'icon' => 'fas fa-tag',    'enabled' => false, 'data' => ['heading' => 'Pricing']],
+                ['key' => 'list',    'label' => 'Services List',  'icon' => 'fas fa-list',   'enabled' => true,  'data' => [
+                    'heading' => 'What I Offer',
+                    'layout'  => 'grid',
+                    'items'   => [
+                        ['icon' => '💡', 'title' => '', 'text' => '', 'price' => ''],
+                        ['icon' => '🚀', 'title' => '', 'text' => '', 'price' => ''],
+                        ['icon' => '🎯', 'title' => '', 'text' => '', 'price' => ''],
+                    ],
+                ]],
+                ['key' => 'process', 'label' => 'How It Works',   'icon' => 'fas fa-cogs',   'enabled' => false, 'data' => [
+                    'heading' => 'My Process',
+                    'items'   => [
+                        ['step' => '1', 'title' => 'Discovery', 'text' => ''],
+                        ['step' => '2', 'title' => 'Strategy',  'text' => ''],
+                        ['step' => '3', 'title' => 'Execution', 'text' => ''],
+                        ['step' => '4', 'title' => 'Delivery',  'text' => ''],
+                    ],
+                ]],
+                ['key' => 'pricing', 'label' => 'Pricing Table',  'icon' => 'fas fa-tag',    'enabled' => false, 'data' => [
+                    'heading' => 'Pricing',
+                    'items'   => [
+                        ['name' => 'Basic',      'price' => '', 'period' => '/month', 'features' => [], 'cta' => 'Get Started', 'highlighted' => false],
+                        ['name' => 'Standard',   'price' => '', 'period' => '/month', 'features' => [], 'cta' => 'Get Started', 'highlighted' => true],
+                        ['name' => 'Premium',    'price' => '', 'period' => '/month', 'features' => [], 'cta' => 'Get Started', 'highlighted' => false],
+                    ],
+                ]],
                 ['key' => 'cta',     'label' => 'Call to Action', 'icon' => 'fas fa-rocket', 'enabled' => true,  'data' => ['heading' => "Let's Work Together", 'text' => '', 'button_text' => 'Contact Me', 'button_url' => '/contact']],
             ],
             'portfolio' => [
                 ['key' => 'hero',     'label' => 'Portfolio Hero',    'icon' => 'fas fa-image',      'enabled' => true,  'data' => ['heading' => 'My Work', 'subheading' => '']],
                 ['key' => 'filter',   'label' => 'Category Filter',   'icon' => 'fas fa-filter',     'enabled' => true,  'data' => []],
-                ['key' => 'projects', 'label' => 'Projects Grid',     'icon' => 'fas fa-th',         'enabled' => true,  'data' => ['columns' => 3]],
-                ['key' => 'cta',      'label' => 'Hire Me CTA',       'icon' => 'fas fa-rocket',     'enabled' => false, 'data' => ['heading' => 'Hire Me', 'text' => '', 'button_text' => 'Get in Touch']],
+                ['key' => 'projects', 'label' => 'Projects Grid',     'icon' => 'fas fa-th',         'enabled' => true,  'data' => [
+                    'columns' => 3,
+                    'items'   => [
+                        ['icon' => '🚀', 'title' => '', 'text' => '', 'category' => '', 'url' => '', 'image' => ''],
+                        ['icon' => '💼', 'title' => '', 'text' => '', 'category' => '', 'url' => '', 'image' => ''],
+                        ['icon' => '🎯', 'title' => '', 'text' => '', 'category' => '', 'url' => '', 'image' => ''],
+                    ],
+                ]],
+                ['key' => 'cta',      'label' => 'Hire Me CTA',       'icon' => 'fas fa-rocket',     'enabled' => false, 'data' => ['heading' => 'Hire Me', 'text' => '', 'button_text' => 'Get in Touch', 'button_url' => '/contact']],
             ],
             default => [
                 ['key' => 'hero',    'label' => 'Page Hero',    'icon' => 'fas fa-image',      'enabled' => true,  'data' => ['heading' => '', 'subheading' => '']],

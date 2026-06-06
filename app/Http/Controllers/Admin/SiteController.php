@@ -254,6 +254,31 @@ class SiteController extends Controller
     }
 
     /**
+     * Process raw section data from form submission:
+     * - Filter empty items
+     * - Convert features_text textarea to features array
+     */
+    private function processSectionData(array $data): array
+    {
+        if (isset($data['items']) && is_array($data['items'])) {
+            $data['items'] = array_values(array_filter($data['items'], function ($item) {
+                $vals = array_filter(array_values($item), fn($v) => $v !== '' && $v !== null);
+                return count($vals) > 0;
+            }));
+            foreach ($data['items'] as &$item) {
+                if (isset($item['features_text'])) {
+                    $item['features'] = array_values(array_filter(
+                        array_map('trim', explode("\n", $item['features_text']))
+                    ));
+                    unset($item['features_text']);
+                }
+            }
+            unset($item);
+        }
+        return $data;
+    }
+
+    /**
      * Save sections configuration (called via AJAX or form submit).
      */
     public function saveSections(Request $request, CustomPage $page)
@@ -268,7 +293,7 @@ class SiteController extends Controller
         foreach ($defaults as $def) {
             $key        = $def['key'];
             $enabled    = isset($submitted[$key]['enabled']) && $submitted[$key]['enabled'] == '1';
-            $data       = $submitted[$key]['data'] ?? [];
+            $data       = $this->processSectionData($submitted[$key]['data'] ?? []);
             $sections[] = ['key' => $key, 'enabled' => $enabled, 'data' => $data];
         }
 
@@ -308,7 +333,7 @@ class SiteController extends Controller
             foreach ($defaults as $def) {
                 $key        = $def['key'];
                 $enabled    = isset($submittedSections[$key]['enabled']) && $submittedSections[$key]['enabled'] == '1';
-                $data       = $submittedSections[$key]['data'] ?? [];
+                $data       = $this->processSectionData($submittedSections[$key]['data'] ?? []);
                 $sections[] = ['key' => $key, 'enabled' => $enabled, 'data' => $data];
             }
         } else {

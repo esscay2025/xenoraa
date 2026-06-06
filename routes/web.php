@@ -57,6 +57,17 @@ Route::get('/', function (\Illuminate\Http\Request $request) {
 // These routes work on custom domains where no username prefix is needed
 // =============================================
 Route::get('/about', [PortfolioController::class, 'about'])->name('about');
+Route::get('/contact', [PortfolioController::class, 'contact'])->name('contact');
+Route::get('/services', [PortfolioController::class, 'services'])->name('services.page');
+Route::get('/solutions', [PortfolioController::class, 'services'])->name('solutions.page');
+Route::get('/practice-areas', [PortfolioController::class, 'services'])->name('practice-areas');
+Route::get('/collaborations', [PortfolioController::class, 'services'])->name('collaborations');
+Route::get('/appointments', [PortfolioController::class, 'services'])->name('appointments');
+Route::get('/portfolio', [PortfolioController::class, 'portfolioPage'])->name('portfolio');
+Route::get('/case-studies', [PortfolioController::class, 'portfolioPage'])->name('case-studies');
+Route::get('/ventures', [PortfolioController::class, 'portfolioPage'])->name('ventures');
+Route::get('/vision', [PortfolioController::class, 'portfolioPage'])->name('vision');
+Route::get('/initiatives', [PortfolioController::class, 'portfolioPage'])->name('initiatives');
 Route::prefix('forum')->name('forum.')->group(function () {
     Route::get('/', [ForumController::class, 'index'])->name('index');
     Route::get('/{topic}', [ForumController::class, 'show'])->name('show');
@@ -512,6 +523,39 @@ Route::get('/{username}/login', function (\Illuminate\Http\Request $request, str
 
 // Tenant-specific public pages: xenoraa.com/priya/about, /priya/blog, /priya/jobs
 Route::get('/{username}/about', [PortfolioController::class, 'about'])->name('tenant.about')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/contact', [PortfolioController::class, 'contact'])->name('tenant.contact')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/services', [PortfolioController::class, 'services'])->name('tenant.services')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/solutions', [PortfolioController::class, 'services'])->name('tenant.solutions')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/practice-areas', [PortfolioController::class, 'services'])->name('tenant.practice-areas')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/collaborations', [PortfolioController::class, 'services'])->name('tenant.collaborations')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/appointments', [PortfolioController::class, 'services'])->name('tenant.appointments')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/portfolio', [PortfolioController::class, 'portfolioPage'])->name('tenant.portfolio')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/case-studies', [PortfolioController::class, 'portfolioPage'])->name('tenant.case-studies')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/ventures', [PortfolioController::class, 'portfolioPage'])->name('tenant.ventures')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/vision', [PortfolioController::class, 'portfolioPage'])->name('tenant.vision')
+    ->where('username', $reservedUsernames);
+
+Route::get('/{username}/initiatives', [PortfolioController::class, 'portfolioPage'])->name('tenant.initiatives')
     ->where('username', $reservedUsernames);
 
 Route::get('/{username}/blog', [PortfolioController::class, 'blog'])->name('tenant.blog')

@@ -50,19 +50,37 @@
 
         if ($layoutTenant) {
             // For custom domains $tenantBase is '' (empty string = falsy), use isset check
-            $tenantHomeUrl   = $tenantBase ? url($tenantBase) : url('/');
-            $tenantAboutUrl  = url($tenantBase . '/about');
-            $tenantBlogUrl   = url($tenantBase . '/blog');
-            $tenantJobsUrl   = url($tenantBase . '/jobs');
-            $tenantShopUrl   = url($tenantBase . '/shop');
-            $tenantForumUrl  = url($tenantBase . '/forum');
+            $tenantHomeUrl         = $tenantBase ? url($tenantBase) : url('/');
+            $tenantAboutUrl        = url($tenantBase . '/about');
+            $tenantBlogUrl         = url($tenantBase . '/blog');
+            $tenantJobsUrl         = url($tenantBase . '/jobs');
+            $tenantShopUrl         = url($tenantBase . '/shop');
+            $tenantForumUrl        = url($tenantBase . '/forum');
+            $tenantContactUrl      = url($tenantBase . '/contact');
+            $tenantServicesUrl     = url($tenantBase . '/services');
+            $tenantPortfolioUrl    = url($tenantBase . '/portfolio');
+            $tenantPracticeUrl     = url($tenantBase . '/practice-areas');
+            $tenantVenturesUrl     = url($tenantBase . '/ventures');
+            $tenantVisionUrl       = url($tenantBase . '/vision');
+            $tenantInitiativesUrl  = url($tenantBase . '/initiatives');
+            $tenantCollabsUrl      = url($tenantBase . '/collaborations');
+            $tenantAppointmentsUrl = url($tenantBase . '/appointments');
         } else {
-            $tenantHomeUrl   = route('home');
-            $tenantAboutUrl  = route('about');
-            $tenantBlogUrl   = route('blog');
-            $tenantJobsUrl   = route('jobs');
-            $tenantShopUrl   = route('shop');
-            $tenantForumUrl  = route('forum.index');
+            $tenantHomeUrl         = route('home');
+            $tenantAboutUrl        = route('about');
+            $tenantBlogUrl         = route('blog');
+            $tenantJobsUrl         = route('jobs');
+            $tenantShopUrl         = route('shop');
+            $tenantForumUrl        = route('forum.index');
+            $tenantContactUrl      = url('/contact');
+            $tenantServicesUrl     = url('/services');
+            $tenantPortfolioUrl    = url('/portfolio');
+            $tenantPracticeUrl     = url('/practice-areas');
+            $tenantVenturesUrl     = url('/ventures');
+            $tenantVisionUrl       = url('/vision');
+            $tenantInitiativesUrl  = url('/initiatives');
+            $tenantCollabsUrl      = url('/collaborations');
+            $tenantAppointmentsUrl = url('/appointments');
         }
 
         // ── Tenant site settings ───────────────────────────────────────────────
