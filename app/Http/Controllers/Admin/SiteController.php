@@ -229,7 +229,35 @@ class SiteController extends Controller
     public function editPage(CustomPage $page)
     {
         $this->authorisePage($page);
-        return view('admin.site.page-form', compact('page'));
+        $sections = $page->merged_sections;
+        return view('admin.site.page-form', compact('page', 'sections'));
+    }
+
+    /**
+     * Save sections configuration (called via AJAX or form submit).
+     */
+    public function saveSections(Request $request, CustomPage $page)
+    {
+        $this->authorisePage($page);
+        $request->validate(['sections' => 'present|array']);
+
+        $submitted = $request->input('sections', []);
+        $defaults  = CustomPage::defaultSections($page->page_type ?? 'custom');
+        $sections  = [];
+
+        foreach ($defaults as $def) {
+            $key        = $def['key'];
+            $enabled    = isset($submitted[$key]['enabled']) && $submitted[$key]['enabled'] == '1';
+            $data       = $submitted[$key]['data'] ?? [];
+            $sections[] = ['key' => $key, 'enabled' => $enabled, 'data' => $data];
+        }
+
+        $page->update(['sections' => $sections]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => 'Sections saved.']);
+        }
+        return redirect()->route('admin.site.pages.edit', $page)->with('success', 'Page sections updated.');
     }
 
     public function updatePage(Request $request, CustomPage $page)
@@ -252,10 +280,26 @@ class SiteController extends Controller
             $slug = $baseSlug . '-' . $i++;
         }
 
+        // Build sections from submitted data
+        $submittedSections = $request->input('sections', []);
+        if (!empty($submittedSections)) {
+            $defaults = CustomPage::defaultSections($page->page_type ?? 'custom');
+            $sections = [];
+            foreach ($defaults as $def) {
+                $key        = $def['key'];
+                $enabled    = isset($submittedSections[$key]['enabled']) && $submittedSections[$key]['enabled'] == '1';
+                $data       = $submittedSections[$key]['data'] ?? [];
+                $sections[] = ['key' => $key, 'enabled' => $enabled, 'data' => $data];
+            }
+        } else {
+            $sections = $page->sections;
+        }
+
         $page->update([
             'title'        => $request->title,
             'slug'         => $slug,
             'content'      => $request->content,
+            'sections'     => $sections,
             'meta_title'   => $request->meta_title,
             'meta_desc'    => $request->meta_desc,
             'status'       => $request->status,

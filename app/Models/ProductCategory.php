@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ProductCategory extends Model
 {
     protected $fillable = [
-        'name', 'slug', 'description', 'image', 'icon',
+        'user_id', 'name', 'slug', 'description', 'image', 'icon',
         'parent_id', 'sort_order', 'is_active',
     ];
 

@@ -5,25 +5,81 @@ namespace App\Http\Controllers\Public;
 use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class ShopController extends Controller
 {
+    /**
+     * Resolve the current tenant from the HTTP host or username.
+     */
+    protected function resolveTenant(Request $request, ?string $username = null): ?User
+    {
+        $host       = $request->getHost();
+        $mainDomain = config('xenoraa.main_domain', 'xenoraa.com');
+
+        // Custom domain (e.g. gopi.blog)
+        if ($host !== $mainDomain && $host !== 'www.' . $mainDomain) {
+            $tenant = User::where('custom_domain', $host)
+                ->orWhere('custom_domain', 'www.' . $host)
+                ->first();
+            if ($tenant) return $tenant;
+        }
+
+        // Username-based route (xenoraa.com/priya/shop)
+        if ($username) {
+            return User::where('username', $username)->first();
+        }
+
+        return null;
+    }
+
+    /**
+     * Shop for custom-domain tenants: gopi.blog/shop
+     */
     public function index(Request $request)
     {
-        $categories = ProductCategory::with('children')
+        $tenant   = $this->resolveTenant($request);
+        $tenantId = $tenant?->id;
+        return $this->renderShop($request, $tenantId, $tenant);
+    }
+
+    /**
+     * Tenant-specific shop: xenoraa.com/{username}/shop
+     */
+    public function tenantIndex(Request $request, string $username)
+    {
+        $tenant   = $this->resolveTenant($request, $username);
+        $tenantId = $tenant?->id;
+        return $this->renderShop($request, $tenantId, $tenant);
+    }
+
+    /**
+     * Shared shop rendering logic — always scoped to a tenant.
+     */
+    protected function renderShop(Request $request, ?int $tenantId, ?User $tenant)
+    {
+        $catQuery = ProductCategory::with('children')
             ->whereNull('parent_id')
-            ->where('is_active', true)
+            ->where('is_active', true);
+        if ($tenantId) {
+            $catQuery->where('user_id', $tenantId);
+        }
+        $categories = $catQuery
             ->withCount(['products' => fn($q) => $q->where('is_active', true)])
             ->orderBy('sort_order')
             ->get();
 
-        $query = Product::with('category')
-            ->where('is_active', true);
+        $query = Product::with('category')->where('is_active', true);
+        if ($tenantId) {
+            $query->where('user_id', $tenantId);
+        }
 
         // Category filter
         if ($request->category) {
-            $cat = ProductCategory::where('slug', $request->category)->first();
+            $cat = ProductCategory::where('slug', $request->category)
+                ->when($tenantId, fn($q) => $q->where('user_id', $tenantId))
+                ->first();
             if ($cat) {
                 $childIds = $cat->children->pluck('id')->push($cat->id);
                 $query->whereIn('category_id', $childIds);
@@ -51,26 +107,19 @@ class ShopController extends Controller
 
         $featuredProducts = Product::where('is_active', true)
             ->where('is_featured', true)
+            ->when($tenantId, fn($q) => $q->where('user_id', $tenantId))
             ->take(4)
             ->get();
 
         $currentCategory = $request->category
-            ? ProductCategory::where('slug', $request->category)->first()
+            ? ProductCategory::where('slug', $request->category)
+                ->when($tenantId, fn($q) => $q->where('user_id', $tenantId))
+                ->first()
             : null;
 
         return view('portfolio.shop', compact(
-            'categories', 'products', 'featuredProducts', 'currentCategory'
+            'categories', 'products', 'featuredProducts', 'currentCategory', 'tenant'
         ));
-    }
-
-    /**
-     * Tenant-specific shop: xenoraa.com/{username}/shop
-     */
-    public function tenantIndex(Request $request, string $username)
-    {
-        $tenant = \App\Models\User::where('username', $username)->firstOrFail();
-        // Delegate to index with tenant context injected via route
-        return $this->index($request);
     }
 
     public function show(Product $product)
@@ -84,6 +133,7 @@ class ShopController extends Controller
         $relatedProducts = Product::where('is_active', true)
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
+            ->when($product->user_id, fn($q) => $q->where('user_id', $product->user_id))
             ->take(4)
             ->get();
 

@@ -11,7 +11,7 @@ class ForumTopic extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'title', 'slug', 'body', 'category',
+        'tenant_owner_id', 'user_id', 'title', 'slug', 'body', 'category',
         'tags', 'is_pinned', 'is_locked', 'views',
     ];
 

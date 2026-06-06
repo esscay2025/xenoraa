@@ -317,6 +317,15 @@
         </div>
 
         <nav class="sidebar-nav">
+            @php
+                $sidebarUser = auth()->user();
+                $isOwner = $sidebarUser?->isAdmin() || $sidebarUser?->isSuperAdmin();
+                // For admin_staff users, check module access. Owners see everything.
+                $canSee = function(string $module) use ($sidebarUser, $isOwner): bool {
+                    if ($isOwner) return true;
+                    return $sidebarUser?->hasModuleAccess($module) ?? false;
+                };
+            @endphp
             {{-- Overview --}}
             <p class="sidebar-section-label">Overview</p>
             <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -324,7 +333,8 @@
             </a>
 
             {{-- Content Group --}}
-            @php $contentActive = request()->routeIs('admin.blog*'); @endphp
+            @if($canSee('content'))
+            @php $contentActive = request()->routeIs('admin.blog*') || request()->routeIs('admin.forum*'); @endphp
             <button class="sidebar-group-btn {{ $contentActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgContent', this)">
                 <i class="fas fa-pen-nib group-icon"></i> Content
                 <i class="fas fa-chevron-down group-chevron"></i>
@@ -333,9 +343,12 @@
                 <a href="{{ route('admin.blog.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.blog.index') ? 'active' : '' }}"><i class="fas fa-list"></i> All Posts</a>
                 <a href="{{ route('admin.blog.create') }}" class="sidebar-sub-link {{ request()->routeIs('admin.blog.create') ? 'active' : '' }}"><i class="fas fa-plus-circle"></i> New Post</a>
                 <a href="{{ route('admin.blog.comments') }}" class="sidebar-sub-link"><i class="fas fa-comments"></i> Comments</a>
+                <a href="{{ route('admin.forum.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.forum*') ? 'active' : '' }}"><i class="fas fa-comments"></i> Forum</a>
             </div>
+            @endif
 
             {{-- Recruitment Group --}}
+            @if($canSee('recruitment'))
             @php $jobsActive = request()->routeIs('admin.jobs*'); @endphp
             <button class="sidebar-group-btn {{ $jobsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgJobs', this)">
                 <i class="fas fa-briefcase group-icon"></i> Recruitment
@@ -345,35 +358,25 @@
                 <a href="{{ route('admin.jobs.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.jobs.index') ? 'active' : '' }}"><i class="fas fa-list"></i> Job Listings</a>
                 <a href="{{ route('admin.jobs.create') }}" class="sidebar-sub-link"><i class="fas fa-plus-circle"></i> Post a Job</a>
             </div>
+            @endif
 
-            {{-- Finance module removed per v2.8.0 --}}
-
-            {{-- Administration Group --}}
-            @php $usersActive = request()->routeIs('admin.users*'); @endphp
+            {{-- Administration Group (owner only) --}}
+            @if($isOwner)
+            @php $usersActive = request()->routeIs('admin.users*') || request()->routeIs('admin.roles*'); @endphp
             <button class="sidebar-group-btn {{ $usersActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgUsers', this)">
                 <i class="fas fa-users group-icon"></i> Administration
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
             <div class="sidebar-group-panel {{ $usersActive ? 'open' : '' }}" id="sgUsers">
-                <a href="{{ route('admin.users.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}"><i class="fas fa-list"></i> All Users</a>
-                <a href="{{ route('admin.users.create') }}" class="sidebar-sub-link"><i class="fas fa-user-plus"></i> Add User</a>
+                <a href="{{ route('admin.users.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.users.index') ? 'active' : '' }}"><i class="fas fa-list"></i> Staff Users</a>
+                <a href="{{ route('admin.users.create') }}" class="sidebar-sub-link"><i class="fas fa-user-plus"></i> Add Staff User</a>
+                <a href="{{ route('admin.roles.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.roles*') ? 'active' : '' }}"><i class="fas fa-user-tag"></i> Roles &amp; Permissions</a>
             </div>
-
-            {{-- Community Group --}}
-            @php $communityActive = request()->routeIs('admin.forum*') || request()->routeIs('admin.chat*') || request()->routeIs('admin.calendar*') || request()->routeIs('admin.newsletter*'); @endphp
-            <button class="sidebar-group-btn {{ $communityActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgCommunity', this)">
-                <i class="fas fa-users-cog group-icon"></i> Community
-                <i class="fas fa-chevron-down group-chevron"></i>
-            </button>
-            <div class="sidebar-group-panel {{ $communityActive ? 'open' : '' }}" id="sgCommunity">
-                <a href="{{ route('admin.forum.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.forum*') ? 'active' : '' }}"><i class="fas fa-comments"></i> Forum Control</a>
-                <a href="{{ route('admin.chat.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.chat*') ? 'active' : '' }}"><i class="fas fa-comment-dots"></i> Chat Monitor</a>
-                <a href="{{ route('admin.calendar.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.calendar*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Calendar &amp; Notes</a>
-                <a href="{{ route('admin.newsletter.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Newsletter</a>
-            </div>
+            @endif
 
             {{-- CRM Group --}}
-            @php $crmActive = request()->routeIs('admin.newcrm*'); @endphp
+            @if($canSee('crm'))
+            @php $crmActive = request()->routeIs('admin.newcrm*') || request()->routeIs('admin.newsletter*') || request()->routeIs('admin.calendar*'); @endphp
             <button class="sidebar-group-btn {{ $crmActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgNewCRM', this)">
                 <i class="fas fa-handshake group-icon"></i> CRM
                 <i class="fas fa-chevron-down group-chevron"></i>
@@ -385,9 +388,13 @@
                 <a href="{{ route('admin.newcrm.leads') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.leads*') ? 'active' : '' }}"><i class="fas fa-user-tag"></i> Leads</a>
                 <a href="{{ route('admin.newcrm.deals') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.deals*') ? 'active' : '' }}"><i class="fas fa-funnel-dollar"></i> Pipeline &amp; Deals</a>
                 <a href="{{ route('admin.newcrm.activities') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.activities*') ? 'active' : '' }}"><i class="fas fa-tasks"></i> Activities</a>
+                <a href="{{ route('admin.newsletter.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Newsletter</a>
+                <a href="{{ route('admin.calendar.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.calendar*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Calendar &amp; Notes</a>
             </div>
+            @endif
 
             {{-- AI Hub Group --}}
+            @if($canSee('ai'))
             @php $aiHubActive = request()->routeIs('admin.crm*'); @endphp
             <button class="sidebar-group-btn {{ $aiHubActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgAIHub', this)">
                 <i class="fas fa-robot group-icon"></i> AI Hub
@@ -398,26 +405,10 @@
                 <a href="{{ route('admin.crm.training') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.training*') ? 'active' : '' }}"><i class="fas fa-brain"></i> Train AI</a>
                 <a href="{{ route('admin.crm.conversations') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm.conversation*') ? 'active' : '' }}"><i class="fas fa-comments"></i> AI Conversations</a>
             </div>
-
-            {{-- Business Card (standalone link) --}}
-            <a href="{{ route('admin.business-card.index') }}" class="sidebar-link {{ request()->routeIs('admin.business-card*') ? 'active' : '' }}">
-                <i class="fas fa-id-card"></i> Business Card
-            </a>
-
-            {{-- Media & Docs Group --}}
-            @php $mediaDocsActive = request()->routeIs('admin.documents*') || request()->routeIs('admin.media*'); @endphp
-            <button class="sidebar-group-btn {{ $mediaDocsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgMediaDocs', this)">
-                <i class="fas fa-photo-video group-icon"></i> Media & Docs
-                <i class="fas fa-chevron-down group-chevron"></i>
-            </button>
-            <div class="sidebar-group-panel {{ $mediaDocsActive ? 'open' : '' }}" id="sgMediaDocs">
-                <a href="{{ route('admin.media.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.media*') ? 'active' : '' }}"><i class="fas fa-images"></i> Media Gallery</a>
-                <a href="{{ route('admin.documents.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.documents*') ? 'active' : '' }}"><i class="fas fa-file-alt"></i> Documents</a>
-            </div>
-
-
+            @endif
 
             {{-- E-commerce Group --}}
+            @if($canSee('ecommerce'))
             @php $ecommerceActive = request()->routeIs('admin.ecommerce*'); @endphp
             <button class="sidebar-group-btn {{ $ecommerceActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgEcommerce', this)">
                 <i class="fas fa-store group-icon"></i> E-commerce
@@ -430,9 +421,11 @@
                 <a href="{{ route('admin.ecommerce.products.create') }}" class="sidebar-sub-link"><i class="fas fa-plus-circle"></i> Add Product</a>
                 <a href="{{ route('admin.ecommerce.reviews') }}" class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.reviews*') ? 'active' : '' }}"><i class="fas fa-star"></i> Reviews</a>
             </div>
+            @endif
 
             {{-- Site Builder Group --}}
-            @php $siteActive = request()->routeIs('admin.site*') || request()->routeIs('admin.settings*') || request()->routeIs('admin.projects*') || request()->routeIs('admin.testimonials*') || request()->routeIs('admin.profile-enhanced*') || request()->routeIs('admin.profile.skills*') || request()->routeIs('admin.profile.education*') || request()->routeIs('admin.profile.certifications*') || request()->routeIs('admin.profile.languages*'); @endphp
+            @if($canSee('site_builder'))
+            @php $siteActive = request()->routeIs('admin.site*') || request()->routeIs('admin.settings*'); @endphp
             <button class="sidebar-group-btn {{ $siteActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgSite', this)">
                 <i class="fas fa-paint-brush group-icon"></i> Site Builder
                 <i class="fas fa-chevron-down group-chevron"></i>
@@ -445,15 +438,8 @@
                 <a href="{{ route('admin.site.branding') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.branding*') ? 'active' : '' }}"><i class="fas fa-image"></i> Branding</a>
                 <a href="{{ route('admin.site.domain') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.domain*') ? 'active' : '' }}"><i class="fas fa-globe"></i> Domain Config</a>
                 <a href="{{ route('admin.settings.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}"><i class="fas fa-sliders-h"></i> Site Settings</a>
-                {{-- Portfolio section inside Site Builder --}}
-                <a href="{{ route('admin.projects.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.projects*') ? 'active' : '' }}"><i class="fas fa-project-diagram"></i> Projects</a>
-                <a href="{{ route('admin.testimonials.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.testimonials*') ? 'active' : '' }}"><i class="fas fa-quote-left"></i> Testimonials</a>
-                {{-- Profile section inside Site Builder --}}
-                <a href="{{ route('admin.profile-enhanced.index', ['tab' => 'skills']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.profile-enhanced*') && (!request('tab') || request('tab') === 'skills') ? 'active' : '' }}"><i class="fas fa-bolt"></i> Skills</a>
-                <a href="{{ route('admin.profile-enhanced.index', ['tab' => 'education']) }}" class="sidebar-sub-link {{ request('tab') === 'education' ? 'active' : '' }}"><i class="fas fa-graduation-cap"></i> Education</a>
-                <a href="{{ route('admin.profile-enhanced.index', ['tab' => 'certifications']) }}" class="sidebar-sub-link {{ request('tab') === 'certifications' ? 'active' : '' }}"><i class="fas fa-certificate"></i> Certifications</a>
-                <a href="{{ route('admin.profile-enhanced.index', ['tab' => 'languages']) }}" class="sidebar-sub-link {{ request('tab') === 'languages' ? 'active' : '' }}"><i class="fas fa-language"></i> Languages</a>
             </div>
+            @endif
         </nav>
 
         <div class="sidebar-footer">

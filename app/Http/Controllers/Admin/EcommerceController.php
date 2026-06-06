@@ -11,21 +11,31 @@ use Illuminate\Support\Str;
 
 class EcommerceController extends Controller
 {
+    // ─── Tenant Helper ────────────────────────────────────────────────────────
+
+    private function tenantId(): int
+    {
+        return auth()->id();
+    }
+
     // ─── Dashboard ────────────────────────────────────────────────────────────
 
     public function dashboard()
     {
+        $tid = $this->tenantId();
+
         $stats = [
-            'total_products'    => Product::count(),
-            'active_products'   => Product::where('is_active', true)->count(),
-            'featured_products' => Product::where('is_featured', true)->count(),
-            'total_categories'  => ProductCategory::count(),
-            'out_of_stock'      => Product::where('stock_status', 'out_of_stock')->count(),
-            'pending_reviews'   => ProductReview::where('is_approved', false)->count(),
+            'total_products'    => Product::where('user_id', $tid)->count(),
+            'active_products'   => Product::where('user_id', $tid)->where('is_active', true)->count(),
+            'featured_products' => Product::where('user_id', $tid)->where('is_featured', true)->count(),
+            'total_categories'  => ProductCategory::where('user_id', $tid)->count(),
+            'out_of_stock'      => Product::where('user_id', $tid)->where('stock_status', 'out_of_stock')->count(),
+            'pending_reviews'   => ProductReview::whereHas('product', fn($q) => $q->where('user_id', $tid))
+                                    ->where('is_approved', false)->count(),
         ];
 
-        $recentProducts = Product::with('category')->latest()->take(5)->get();
-        $categories     = ProductCategory::withCount('products')->whereNull('parent_id')->get();
+        $recentProducts = Product::with('category')->where('user_id', $tid)->latest()->take(5)->get();
+        $categories     = ProductCategory::withCount('products')->where('user_id', $tid)->whereNull('parent_id')->get();
 
         return view('admin.ecommerce.dashboard', compact('stats', 'recentProducts', 'categories'));
     }
@@ -34,8 +44,10 @@ class EcommerceController extends Controller
 
     public function categoriesIndex()
     {
+        $tid = $this->tenantId();
         $categories = ProductCategory::with(['parent', 'children'])
             ->withCount('products')
+            ->where('user_id', $tid)
             ->whereNull('parent_id')
             ->orderBy('sort_order')
             ->get();
@@ -52,11 +64,13 @@ class EcommerceController extends Controller
             'sort_order'  => 'nullable|integer',
         ]);
 
-        $validated['slug'] = Str::slug($validated['name']);
-        // Ensure unique slug
+        $validated['slug']    = Str::slug($validated['name']);
+        $validated['user_id'] = $this->tenantId();
+
+        // Ensure unique slug per tenant
         $base = $validated['slug'];
-        $i = 1;
-        while (ProductCategory::where('slug', $validated['slug'])->exists()) {
+        $i    = 1;
+        while (ProductCategory::where('slug', $validated['slug'])->where('user_id', $validated['user_id'])->exists()) {
             $validated['slug'] = $base . '-' . $i++;
         }
 
@@ -66,6 +80,8 @@ class EcommerceController extends Controller
 
     public function categoryUpdate(Request $request, ProductCategory $category)
     {
+        abort_if($category->user_id !== $this->tenantId(), 403);
+
         $validated = $request->validate([
             'name'        => 'required|string|max:100',
             'description' => 'nullable|string',
@@ -82,6 +98,8 @@ class EcommerceController extends Controller
 
     public function categoryDestroy(ProductCategory $category)
     {
+        abort_if($category->user_id !== $this->tenantId(), 403);
+
         if ($category->products()->count() > 0) {
             return back()->with('error', 'Cannot delete category with products. Move products first.');
         }
@@ -93,7 +111,8 @@ class EcommerceController extends Controller
 
     public function productsIndex(Request $request)
     {
-        $query = Product::with('category')->latest();
+        $tid   = $this->tenantId();
+        $query = Product::with('category')->where('user_id', $tid)->latest();
 
         if ($request->category) {
             $query->where('category_id', $request->category);
@@ -109,24 +128,25 @@ class EcommerceController extends Controller
         }
 
         $products   = $query->paginate(20);
-        $categories = ProductCategory::orderBy('name')->get();
+        $categories = ProductCategory::where('user_id', $tid)->orderBy('name')->get();
 
         return view('admin.ecommerce.products', compact('products', 'categories'));
     }
 
     public function productCreate()
     {
-        $categories = ProductCategory::orderBy('name')->get();
+        $categories = ProductCategory::where('user_id', $this->tenantId())->orderBy('name')->get();
         return view('admin.ecommerce.product-form', compact('categories'));
     }
 
     public function productStore(Request $request)
     {
         $validated = $this->validateProduct($request);
-        $validated['slug'] = $this->uniqueSlug($validated['name']);
-        $validated['is_featured'] = $request->boolean('is_featured');
-        $validated['is_active']   = $request->boolean('is_active', true);
+        $validated['slug']         = $this->uniqueSlug($validated['name']);
+        $validated['is_featured']  = $request->boolean('is_featured');
+        $validated['is_active']    = $request->boolean('is_active', true);
         $validated['manage_stock'] = $request->boolean('manage_stock');
+        $validated['user_id']      = $this->tenantId();
 
         Product::create($validated);
         return redirect()->route('admin.ecommerce.products')->with('success', 'Product created successfully.');
@@ -134,12 +154,15 @@ class EcommerceController extends Controller
 
     public function productEdit(Product $product)
     {
-        $categories = ProductCategory::orderBy('name')->get();
+        abort_if($product->user_id !== $this->tenantId(), 403);
+        $categories = ProductCategory::where('user_id', $this->tenantId())->orderBy('name')->get();
         return view('admin.ecommerce.product-form', compact('product', 'categories'));
     }
 
     public function productUpdate(Request $request, Product $product)
     {
+        abort_if($product->user_id !== $this->tenantId(), 403);
+
         $validated = $this->validateProduct($request, $product->id);
         $validated['is_featured']  = $request->boolean('is_featured');
         $validated['is_active']    = $request->boolean('is_active', true);
@@ -151,12 +174,14 @@ class EcommerceController extends Controller
 
     public function productDestroy(Product $product)
     {
+        abort_if($product->user_id !== $this->tenantId(), 403);
         $product->delete();
         return back()->with('success', 'Product deleted.');
     }
 
     public function productToggleFeatured(Product $product)
     {
+        abort_if($product->user_id !== $this->tenantId(), 403);
         $product->update(['is_featured' => !$product->is_featured]);
         return back()->with('success', 'Product featured status updated.');
     }
@@ -165,7 +190,11 @@ class EcommerceController extends Controller
 
     public function reviewsIndex()
     {
-        $reviews = ProductReview::with('product')->latest()->paginate(20);
+        $tid     = $this->tenantId();
+        $reviews = ProductReview::with(['product', 'user'])
+            ->whereHas('product', fn($q) => $q->where('user_id', $tid))
+            ->latest()
+            ->paginate(20);
         return view('admin.ecommerce.reviews', compact('reviews'));
     }
 
@@ -210,7 +239,7 @@ class EcommerceController extends Controller
     {
         $base = Str::slug($name);
         $slug = $base;
-        $i = 1;
+        $i    = 1;
         while (Product::where('slug', $slug)->exists()) {
             $slug = $base . '-' . $i++;
         }

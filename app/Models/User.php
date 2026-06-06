@@ -32,6 +32,7 @@ class User extends Authenticatable
         'phone',
         'city',
         'website',
+        'module_permissions',
     ];
 
     protected $hidden = [
@@ -45,6 +46,7 @@ class User extends Authenticatable
         'trial_ends_at'     => 'datetime',
         'plan_expires_at'   => 'datetime',
         'onboarding_completed' => 'boolean',
+        'module_permissions'   => 'array',
     ];
 
     // =============================================
@@ -111,6 +113,53 @@ class User extends Authenticatable
     public function isVisitor(): bool
     {
         return $this->hasRole('visitor');
+    }
+
+    public function isAdminStaff(): bool
+    {
+        return $this->hasRole('admin_staff');
+    }
+
+    /**
+     * Check if this user has access to a specific module.
+     * Admin/SuperAdmin = always yes.
+     * Staff with '*' role modules = yes.
+     * Admin staff = check module_permissions (user override) then role modules.
+     */
+    public function hasModuleAccess(string $module): bool
+    {
+        // Admins and superadmins have access to everything
+        if ($this->isAdmin() || $this->isSuperAdmin()) {
+            return true;
+        }
+
+        // Check user-level overrides first
+        $userModules = $this->module_permissions ?? null;
+        if ($userModules !== null) {
+            return in_array('*', $userModules) || in_array($module, $userModules);
+        }
+
+        // Fall back to role-level modules
+        if ($this->role) {
+            return $this->role->hasModule($module);
+        }
+
+        return false;
+    }
+
+    /**
+     * Get the list of modules this user can access.
+     */
+    public function accessibleModules(): array
+    {
+        if ($this->isAdmin() || $this->isSuperAdmin()) {
+            return ['*'];
+        }
+        $userModules = $this->module_permissions ?? null;
+        if ($userModules !== null) {
+            return $userModules;
+        }
+        return $this->role?->modules ?? [];
     }
 
     public function isSuperAdmin(): bool

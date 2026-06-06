@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\JobController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Public\PortfolioController;
 use App\Http\Controllers\Public\NewsletterController;
@@ -164,6 +165,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     // User Management
     Route::resource('users', UserController::class);
+    // Role Management
+    Route::get('roles', [RoleController::class, 'index'])->name('roles.index');
+    Route::post('roles', [RoleController::class, 'store'])->name('roles.store');
+    Route::put('roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+    Route::delete('roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+    Route::put('roles/{role}/system', [RoleController::class, 'updateSystemRole'])->name('roles.update-system');
 
     // Blog Management
     Route::resource('blog', BlogController::class);
@@ -201,6 +208,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         Route::post('/pages', [SiteController::class, 'storePage'])->name('pages.store');
         Route::get('/pages/{page}/edit', [SiteController::class, 'editPage'])->name('pages.edit');
         Route::put('/pages/{page}', [SiteController::class, 'updatePage'])->name('pages.update');
+        Route::post('/pages/{page}/sections', [SiteController::class, 'saveSections'])->name('pages.sections.save');
         Route::delete('/pages/{page}', [SiteController::class, 'destroyPage'])->name('pages.destroy');
         Route::post('/pages/reset', [SiteController::class, 'resetPages'])->name('pages.reset');
 
