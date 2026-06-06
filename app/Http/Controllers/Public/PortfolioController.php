@@ -138,7 +138,12 @@ class PortfolioController extends Controller
         $tenantId = $tenant?->id;
         if (!$tenant) abort(404);
 
-        $blogCategories = BlogCategory::where('user_id', $tenantId)->get();
+        // Handle blog_categories that may not have user_id column yet
+        try {
+            $blogCategories = BlogCategory::where('user_id', $tenantId)->get();
+        } catch (\Exception $e) {
+            $blogCategories = collect();
+        }
         $categoryPosts  = [];
         foreach ($blogCategories as $cat) {
             $categoryPosts[$cat->slug] = [
@@ -339,11 +344,17 @@ class PortfolioController extends Controller
             });
         }
         if ($request->filled('category')) {
-            $cat = BlogCategory::where('slug', $request->category)->where('user_id', $tenantId)->first();
-            if ($cat) $query->where('category_id', $cat->id);
+            try {
+                $cat = BlogCategory::where('slug', $request->category)->where('user_id', $tenantId)->first();
+                if ($cat) $query->where('category_id', $cat->id);
+            } catch (\Exception $e) {}
         }
         $posts       = $query->orderBy('published_at', 'desc')->paginate(9);
-        $categories  = BlogCategory::where('user_id', $tenantId)->get();
+        try {
+            $categories  = BlogCategory::where('user_id', $tenantId)->get();
+        } catch (\Exception $e) {
+            $categories = collect();
+        }
         $socialLinks = SocialLink::where('user_id', $tenantId)->where('is_active', true)->get();
         $settings    = SiteSetting::where('user_id', $tenantId)->pluck('value', 'key')->toArray();
         $siteName    = $settings['site_name']    ?? $tenant->name;
@@ -364,11 +375,19 @@ class PortfolioController extends Controller
         $tenantId = $tenant?->id;
         if (!$tenant) abort(404);
 
-        $category    = BlogCategory::where('slug', $slug)->where('user_id', $tenantId)->firstOrFail();
+        try {
+            $category = BlogCategory::where('slug', $slug)->where('user_id', $tenantId)->firstOrFail();
+        } catch (\Exception $e) {
+            abort(404);
+        }
         $posts       = BlogPost::where('status', 'published')
             ->where('category_id', $category->id)->where('user_id', $tenantId)
             ->orderBy('published_at', 'desc')->paginate(9);
-        $categories  = BlogCategory::where('user_id', $tenantId)->get();
+        try {
+            $categories  = BlogCategory::where('user_id', $tenantId)->get();
+        } catch (\Exception $e) {
+            $categories = collect();
+        }
         $socialLinks = SocialLink::where('user_id', $tenantId)->where('is_active', true)->get();
         $settings    = SiteSetting::where('user_id', $tenantId)->pluck('value', 'key')->toArray();
         $siteName    = $settings['site_name']    ?? $tenant->name;
