@@ -48,12 +48,22 @@
             }
         }
 
-        $tenantHomeUrl   = $tenantBase ? url($tenantBase) : route('home');
-        $tenantAboutUrl  = $tenantBase ? url($tenantBase . '/about') : route('about');
-        $tenantBlogUrl   = $tenantBase ? url($tenantBase . '/blog') : route('blog');
-        $tenantJobsUrl   = $tenantBase ? url($tenantBase . '/jobs') : route('jobs');
-        $tenantShopUrl   = $tenantBase ? url($tenantBase . '/shop') : route('shop');
-        $tenantForumUrl  = $tenantBase ? url($tenantBase . '/forum') : route('forum.index');
+        if ($layoutTenant) {
+            // For custom domains $tenantBase is '' (empty string = falsy), use isset check
+            $tenantHomeUrl   = $tenantBase ? url($tenantBase) : url('/');
+            $tenantAboutUrl  = url($tenantBase . '/about');
+            $tenantBlogUrl   = url($tenantBase . '/blog');
+            $tenantJobsUrl   = url($tenantBase . '/jobs');
+            $tenantShopUrl   = url($tenantBase . '/shop');
+            $tenantForumUrl  = url($tenantBase . '/forum');
+        } else {
+            $tenantHomeUrl   = route('home');
+            $tenantAboutUrl  = route('about');
+            $tenantBlogUrl   = route('blog');
+            $tenantJobsUrl   = route('jobs');
+            $tenantShopUrl   = route('shop');
+            $tenantForumUrl  = route('forum.index');
+        }
 
         // ── Tenant site settings ───────────────────────────────────────────────
         $tenantSettings = [];

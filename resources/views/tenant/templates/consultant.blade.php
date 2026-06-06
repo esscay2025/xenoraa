@@ -112,7 +112,7 @@ $_show = fn(string $k) => !$_sec || $_sec->isSectionEnabled($k);
             @foreach(($categoryPosts[array_key_first($categoryPosts ?? [])] ?? [])['posts'] ?? collect([$featuredPost])->filter() as $post)
             <div class="xn-con-service">
                 <div class="xn-con-service-icon">📝</div>
-                <div class="xn-con-service-title"><a href="{{ route('portfolio.blog.show', ['slug' => $post->slug, 'username' => $tenant->username]) }}" style="color:inherit;text-decoration:none;">{{ $post->title }}</a></div>
+                <div class="xn-con-service-title"><a href="{{ ($tenant->custom_domain ? route('blog.show', ['slug' => $post->slug]) : route('tenant.blog.show', ['username' => $tenant->username, 'slug' => $post->slug])) }}" style="color:inherit;text-decoration:none;">{{ $post->title }}</a></div>
                 <div class="xn-con-service-text">{{ Str::limit(strip_tags($post->content ?? ''), 80) }}</div>
             </div>
             @endforeach
