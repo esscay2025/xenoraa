@@ -51,7 +51,7 @@ return new class extends Migration
                 ->where('page_type', 'home')
                 ->first();
             if ($homePage && !empty($data['home_sections'])) {
-                $merged = $homePage->getMergedSections();
+                $merged = $homePage->merged_sections ?? CustomPage::defaultSections($homePage->page_type ?? 'home');
                 foreach ($data['home_sections'] as $sectionKey => $sectionData) {
                     if (isset($merged[$sectionKey])) {
                         $merged[$sectionKey] = array_merge($merged[$sectionKey], $sectionData);
