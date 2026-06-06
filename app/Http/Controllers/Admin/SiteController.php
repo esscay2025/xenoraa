@@ -55,14 +55,34 @@ class SiteController extends Controller
     public function themes()
     {
         $activeTheme = $this->setting('profile_template', 'consultant');
-        $themes      = $this->getThemeDefinitions();
+        $user        = auth()->user();
+        $profession  = $user->profession ?? '';
 
-        return view('admin.site.themes', compact('activeTheme', 'themes'));
+        // Try DB themes first (profession-filtered), fall back to hardcoded definitions
+        $dbThemes = collect();
+        try {
+            $dbThemes = \App\Models\Theme::forProfession($profession);
+        } catch (\Throwable $e) {
+            // DB themes table not yet migrated — fall back to hardcoded
+        }
+
+        if ($dbThemes->isNotEmpty()) {
+            $themes = $dbThemes->keyBy('slug')->toArray();
+        } else {
+            $themes = $this->getThemeDefinitions();
+        }
+
+        return view('admin.site.themes', compact('activeTheme', 'themes', 'profession'));
     }
 
     public function activateTheme(Request $request)
     {
-        $request->validate(['theme' => 'required|string|in:consultant,influencer,advocate,entrepreneur,doctor,politician']);
+        // Accept any valid theme slug from DB or the hardcoded list
+        $validSlugs = array_merge(
+            ['consultant','influencer','advocate','entrepreneur','doctor','politician'],
+            \App\Models\Theme::where('is_active', true)->pluck('slug')->toArray()
+        );
+        $request->validate(['theme' => 'required|string|in:' . implode(',', array_unique($validSlugs))]);
         $this->setSetting('profile_template', $request->theme);
 
         // Bootstrap theme-specific pages, menus, and chatbot training

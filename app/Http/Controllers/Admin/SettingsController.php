@@ -1,126 +1,112 @@
 <?php
-
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SiteSetting;
 use App\Models\SocialLink;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class SettingsController extends Controller
 {
+    private function tenantId(): int
+    {
+        return auth()->id();
+    }
+
     public function index()
     {
-        $settings = SiteSetting::getSettings();
-        $socialLinks = SocialLink::orderBy('sort_order')->get();
+        $tenantId = $this->tenantId();
+        $settings = SiteSetting::where('user_id', $tenantId)->pluck('value', 'key')->toArray();
+        $socialLinks = SocialLink::where('user_id', $tenantId)->orderBy('sort_order')->get();
         return view('admin.settings.index', compact('settings', 'socialLinks'));
     }
 
     public function update(Request $request)
     {
+        $tenantId = $this->tenantId();
+
         $keys = [
-            'owner_name',
-            'company_name',
-            'tagline',
-            'location',
-            'founded_year',
-            'contact_phone',
-            'contact_email',
-            'contact_website',
-            'hero_title',
-            'hero_subtitle',
-            'hero_description',
-            'about_title',
-            'about_text_1',
-            'about_text_2',
-            'footer_tagline',
-            'skills',
+            'site_name', 'site_tagline', 'site_description',
+            'contact_phone', 'contact_email', 'contact_website',
+            'color_accent', 'color_bg',
+            'footer_tagline', 'footer_copyright',
+            'chatbot_enabled',
+            'profile_title', 'profile_about', 'profile_booking_link',
+            'profile_years', 'profile_clients', 'profile_projects', 'profile_revenue',
         ];
 
         foreach ($keys as $key) {
             if ($request->has($key)) {
-                SiteSetting::setValue($key, $request->input($key));
+                SiteSetting::setValueForTenant($tenantId, $key, $request->input($key));
             }
         }
 
-        // Handle logo upload using PIL (no Intervention Image needed)
         if ($request->hasFile('logo')) {
-            $request->validate([
-                'logo' => 'image|mimes:jpeg,png,jpg,gif,svg|max:4096',
-            ]);
-
-            $file = $request->file('logo');
-            $tmpPath = $file->getPathname();
-            $destPath = public_path('images/gopi-logo-nav.png');
-
-            // Use Python PIL to process the logo
-            $pythonScript = <<<PYTHON
-import sys
-from PIL import Image
-
-src = sys.argv[1]
-dest_nav = sys.argv[2]
-pub_dir = sys.argv[3]
-
-img = Image.open(src).convert('RGBA')
-img.save(dest_nav)
-
-# Create square version (pad to square with transparent bg)
-w, h = img.size
-size = max(w, h)
-sq = Image.new('RGBA', (size, size), (0, 0, 0, 0))
-sq.paste(img, ((size - w) // 2, (size - h) // 2), img)
-sq.save(pub_dir + '/images/gopi-logo-square.png')
-
-# Favicon sizes
-for px in [32, 64, 180]:
-    fav = sq.resize((px, px), Image.LANCZOS)
-    if px == 180:
-        fav.save(pub_dir + '/apple-touch-icon.png')
-    else:
-        fav.save(pub_dir + '/favicon-' + str(px) + '.png')
-
-print('OK')
-PYTHON;
-
-            $scriptFile = storage_path('app/process_logo.py');
-            file_put_contents($scriptFile, $pythonScript);
-
-            $result = shell_exec("python3.11 " . escapeshellarg($scriptFile) . " " .
-                escapeshellarg($tmpPath) . " " .
-                escapeshellarg($destPath) . " " .
-                escapeshellarg(public_path()) . " 2>&1");
-
-            if (trim($result) !== 'OK') {
-                // Fallback: just copy the file as-is
-                copy($tmpPath, $destPath);
-            }
+            $request->validate(['logo' => 'image|mimes:jpeg,png,jpg,gif,svg,webp|max:4096']);
+            $path = $request->file('logo')->store('logos', 'public');
+            SiteSetting::setValueForTenant($tenantId, 'logo_path', Storage::url($path));
         }
 
-        // Handle profile photo upload
+        if ($request->hasFile('favicon')) {
+            $request->validate(['favicon' => 'image|mimes:jpeg,png,jpg,gif,ico|max:1024']);
+            $path = $request->file('favicon')->store('favicons', 'public');
+            SiteSetting::setValueForTenant($tenantId, 'favicon_path', Storage::url($path));
+        }
+
         if ($request->hasFile('profile_photo')) {
-            $request->validate([
-                'profile_photo' => 'image|mimes:jpeg,png,jpg,gif|max:4096',
-            ]);
-            $file = $request->file('profile_photo');
-            $file->move(public_path('images'), 'gopi-profile.png');
+            $request->validate(['profile_photo' => 'image|mimes:jpeg,png,jpg,gif|max:4096']);
+            $path = $request->file('profile_photo')->store('avatars', 'public');
+            auth()->user()->update(['avatar' => $path]);
         }
+
+        SiteSetting::clearTenantCache($tenantId);
 
         return redirect()->route('admin.settings.index')->with('success', 'Site settings updated successfully.');
     }
 
     public function updateSocial(Request $request, SocialLink $social)
     {
+        if ($social->user_id !== $this->tenantId()) {
+            abort(403);
+        }
         $request->validate([
-            'url' => 'nullable|url',
-            'is_active' => 'boolean',
+            'url'       => 'nullable|url|max:500',
+            'is_active' => 'nullable|boolean',
         ]);
-
         $social->update([
             'url'       => $request->input('url'),
             'is_active' => $request->has('is_active') ? true : false,
         ]);
+        return redirect()->route('admin.settings.index')->with('success', 'Social link updated.');
+    }
 
-        return redirect()->route('admin.settings.index')->with('success', 'Social link updated successfully.');
+    public function storeSocial(Request $request)
+    {
+        $tenantId = $this->tenantId();
+        $request->validate([
+            'platform'   => 'required|string|max:100',
+            'url'        => 'nullable|url|max:500',
+            'icon_class' => 'nullable|string|max:100',
+        ]);
+        $maxOrder = SocialLink::where('user_id', $tenantId)->max('sort_order') ?? 0;
+        SocialLink::create([
+            'user_id'    => $tenantId,
+            'platform'   => $request->platform,
+            'url'        => $request->url ?? '',
+            'icon_class' => $request->icon_class ?? 'fas fa-link',
+            'is_active'  => true,
+            'sort_order' => $maxOrder + 1,
+        ]);
+        return redirect()->route('admin.settings.index')->with('success', 'Social link added.');
+    }
+
+    public function destroySocial(SocialLink $social)
+    {
+        if ($social->user_id !== $this->tenantId()) {
+            abort(403);
+        }
+        $social->delete();
+        return redirect()->route('admin.settings.index')->with('success', 'Social link removed.');
     }
 }

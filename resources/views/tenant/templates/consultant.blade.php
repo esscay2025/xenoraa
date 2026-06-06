@@ -1,6 +1,10 @@
 @extends('layouts.app')
 @section('content')
 {{-- Consultant / Business Advisor Template --}}
+@php
+$_sec  = isset($homePage) && $homePage ? $homePage : null;
+$_show = fn(string $k) => !$_sec || $_sec->isSectionEnabled($k);
+@endphp
 <style>
 .xn-con { font-family: 'Inter', sans-serif; background: #09090b; color: #e2e8f0; min-height: 100vh; }
 .xn-con-hero { background: linear-gradient(135deg, #09090b 0%, #120a1e 50%, #09090b 100%); padding: 5rem 2rem 4rem; text-align: center; border-bottom: 1px solid rgba(124,58,237,0.2); position: relative; overflow: hidden; }
@@ -37,28 +41,35 @@
 </style>
 
 <div class="xn-con">
+
+    {{-- HERO SECTION --}}
+    @if($_show('hero'))
     <div class="xn-con-hero">
         <div class="xn-con-avatar">
-            @if($tenant->profile_photo)
-                <img src="{{ asset('storage/'.$tenant->profile_photo) }}" alt="{{ $tenant->name }}" style="width:100%;height:100%;object-fit:cover;">
+            @if($tenant->avatar)
+                <img src="{{ asset('storage/'.$tenant->avatar) }}" alt="{{ $tenant->name }}" style="width:100%;height:100%;object-fit:cover;">
+            @elseif(!empty($logoPath))
+                <img src="{{ asset('storage/'.$logoPath) }}" alt="{{ $siteName }}" style="width:100%;height:100%;object-fit:contain;padding:0.5rem;">
             @else
                 <i class="fas fa-chart-line"></i>
             @endif
         </div>
         <div class="xn-con-name">{{ $profile['name'] ?? $tenant->name }}</div>
-        <div class="xn-con-title">{{ $profile['title'] ?? 'Business Consultant & Advisor' }}</div>
+        <div class="xn-con-title">{{ $profile['title'] ?? ($profile['tagline'] ?? 'Business Consultant & Advisor') }}</div>
         <div class="xn-con-tags">
             @foreach($profile['expertise'] ?? ['Strategy','Operations','Growth','Leadership'] as $e)
             <span class="xn-con-tag">{{ $e }}</span>
             @endforeach
         </div>
         <div class="xn-con-actions">
-            @if(!empty($profile['booking_link']))<a href="{{ $profile['booking_link'] }}" class="xn-con-btn xn-con-btn-primary"><i class="fas fa-calendar-check"></i> Book a Call</a>@endif
+            @if(!empty($profile['booking_link']))<a href="{{ $profile['booking_link'] }}" class="xn-con-btn xn-con-btn-primary"><i class="fas fa-calendar-check"></i> {{ $profile['cta_text'] ?? 'Book a Call' }}</a>@endif
             @if(!empty($profile['email']))<a href="mailto:{{ $profile['email'] }}" class="xn-con-btn xn-con-btn-outline"><i class="fas fa-envelope"></i> Email Me</a>@endif
         </div>
     </div>
+    @endif {{-- /hero --}}
 
-    @if(!empty($profile['clients']) || !empty($profile['projects']) || !empty($profile['years']) || !empty($profile['revenue']))
+    {{-- STATS SECTION --}}
+    @if($_show('stats') && (!empty($profile['clients']) || !empty($profile['projects']) || !empty($profile['years']) || !empty($profile['revenue'])))
     <div class="xn-con-section">
         <div class="xn-con-stats">
             @if(!empty($profile['years']))<div class="xn-con-stat"><div class="xn-con-stat-num">{{ $profile['years'] }}+</div><div class="xn-con-stat-label">Years Experience</div></div>@endif
@@ -67,28 +78,66 @@
             @if(!empty($profile['revenue']))<div class="xn-con-stat"><div class="xn-con-stat-num">{{ $profile['revenue'] }}</div><div class="xn-con-stat-label">Revenue Generated</div></div>@endif
         </div>
     </div>
-    @endif
+    @endif {{-- /stats --}}
 
+    {{-- SERVICES SECTION --}}
+    @if($_show('services'))
     <div class="xn-con-section" style="padding-top:0;">
         <div class="xn-con-section-title"><i class="fas fa-cogs"></i> Services</div>
         <div class="xn-con-services">
             @foreach($profile['services'] ?? [['icon'=>'📊','title'=>'Business Strategy','text'=>'Market analysis and growth planning'],['icon'=>'🔄','title'=>'Process Optimization','text'=>'Streamline operations and reduce costs'],['icon'=>'💡','title'=>'Innovation Consulting','text'=>'Digital transformation and new ventures'],['icon'=>'🎯','title'=>'Executive Coaching','text'=>'Leadership and performance coaching']] as $svc)
             <div class="xn-con-service">
-                <div class="xn-con-service-icon">{{ $svc['icon'] }}</div>
-                <div class="xn-con-service-title">{{ $svc['title'] }}</div>
-                <div class="xn-con-service-text">{{ $svc['text'] }}</div>
+                <div class="xn-con-service-icon">{{ $svc['icon'] ?? '💼' }}</div>
+                <div class="xn-con-service-title">{{ $svc['title'] ?? '' }}</div>
+                <div class="xn-con-service-text">{{ $svc['text'] ?? $svc['description'] ?? '' }}</div>
             </div>
             @endforeach
         </div>
     </div>
+    @endif {{-- /services --}}
 
-    @if(!empty($profile['about']))
+    {{-- ABOUT SECTION --}}
+    @if($_show('about') && !empty($profile['about']))
     <div class="xn-con-section" style="padding-top:0;">
         <div class="xn-con-section-title"><i class="fas fa-user"></i> About</div>
         <div class="xn-con-about">{{ $profile['about'] }}</div>
     </div>
-    @endif
+    @endif {{-- /about --}}
 
+    {{-- BLOG SECTION --}}
+    @if($_show('blog') && isset($featuredPost) && $featuredPost)
+    <div class="xn-con-section" style="padding-top:0;">
+        <div class="xn-con-section-title"><i class="fas fa-rss"></i> Latest Insights</div>
+        <div class="xn-con-services">
+            @foreach(($categoryPosts[array_key_first($categoryPosts ?? [])] ?? [])['posts'] ?? collect([$featuredPost])->filter() as $post)
+            <div class="xn-con-service">
+                <div class="xn-con-service-icon">📝</div>
+                <div class="xn-con-service-title"><a href="{{ route('portfolio.blog.show', ['slug' => $post->slug, 'username' => $tenant->username]) }}" style="color:inherit;text-decoration:none;">{{ $post->title }}</a></div>
+                <div class="xn-con-service-text">{{ Str::limit(strip_tags($post->content ?? ''), 80) }}</div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif {{-- /blog --}}
+
+    {{-- JOBS SECTION --}}
+    @if($_show('jobs') && isset($activeJobs) && $activeJobs->count())
+    <div class="xn-con-section" style="padding-top:0;">
+        <div class="xn-con-section-title"><i class="fas fa-briefcase"></i> Open Positions</div>
+        <div class="xn-con-services">
+            @foreach($activeJobs->take(3) as $job)
+            <div class="xn-con-service">
+                <div class="xn-con-service-icon">💼</div>
+                <div class="xn-con-service-title">{{ $job->title }}</div>
+                <div class="xn-con-service-text">{{ $job->location }} &bull; {{ ucfirst($job->type) }}</div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+    @endif {{-- /jobs --}}
+
+    {{-- CONTACT / CTA SECTION --}}
+    @if($_show('contact'))
     <div class="xn-con-section" style="padding-top:0;">
         <div class="xn-con-cta">
             <h3>Ready to Transform Your Business?</h3>
@@ -96,5 +145,7 @@
             @if(!empty($profile['booking_link']))<a href="{{ $profile['booking_link'] }}" class="xn-con-btn xn-con-btn-primary" style="font-size:1rem;padding:1rem 2.5rem;">Schedule Free Strategy Call</a>@endif
         </div>
     </div>
+    @endif {{-- /contact --}}
+
 </div>
 @endsection

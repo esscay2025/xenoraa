@@ -160,11 +160,35 @@ class PortfolioController extends Controller
         ];
         $view = $templateViews[$template] ?? 'tenant.templates.consultant';
 
+        // Load home page sections from Page Manager
+        $homePage = CustomPage::where('user_id', $tenantId)
+            ->where('page_type', 'home')
+            ->first();
+        $homePageSections = $homePage ? $homePage->getMergedSections() : [];
+
+        // Override profile data with section data if available
+        if ($homePage) {
+            $heroData = $homePage->getSectionData('hero');
+            if (!empty($heroData['title']))    $profile['title']        = $heroData['title'];
+            if (!empty($heroData['subtitle'])) $profile['tagline']      = $heroData['subtitle'];
+            if (!empty($heroData['cta_text'])) $profile['cta_text']     = $heroData['cta_text'];
+            if (!empty($heroData['cta_url']))  $profile['booking_link'] = $heroData['cta_url'];
+
+            $aboutData = $homePage->getSectionData('about');
+            if (!empty($aboutData['text'])) $profile['about'] = $aboutData['text'];
+
+            $statsData = $homePage->getSectionData('stats');
+            if (!empty($statsData['items'])) $profile['stats'] = $statsData['items'];
+
+            $servicesData = $homePage->getSectionData('services');
+            if (!empty($servicesData['items'])) $profile['services'] = $servicesData['items'];
+        }
+
         return view($view, compact(
             'tenant', 'experiences', 'socialLinks', 'activeJobs',
             'blogCategories', 'categoryPosts', 'featuredPost',
             'siteName', 'siteTagline', 'logoPath', 'faviconPath', 'accentColor', 'chatbotEnabled',
-            'profile', 'template'
+            'profile', 'template', 'homePage', 'homePageSections'
         ));
     }
 
@@ -188,7 +212,24 @@ class PortfolioController extends Controller
             ->orderBy('start_date', 'desc')
             ->get();
 
-        return view('portfolio.about', compact('tenant', 'socialLinks', 'experiences'));
+        $settings = SiteSetting::where('user_id', $tenantId)->pluck('value', 'key')->toArray();
+        $siteName = $settings['site_name'] ?? $tenant->name;
+        $logoPath = $settings['logo_path'] ?? null;
+        $faviconPath = $settings['favicon_path'] ?? null;
+        $accentColor = $settings['color_accent'] ?? '#6366f1';
+        $template = $settings['profile_template'] ?? $tenant->getProfileTemplate() ?? 'consultant';
+
+        // Skills, Education, Certifications, Languages for about page
+        $skills = \App\Models\ProfileSkill::where('user_id', $tenantId)->orderBy('proficiency', 'desc')->get();
+        $education = \App\Models\ProfileEducation::where('user_id', $tenantId)->orderBy('start_date', 'desc')->get();
+        $certifications = \App\Models\ProfileCertification::where('user_id', $tenantId)->orderBy('issue_date', 'desc')->get();
+        $languages = \App\Models\ProfileLanguage::where('user_id', $tenantId)->get();
+
+        return view('portfolio.about', compact(
+            'tenant', 'socialLinks', 'experiences', 'settings',
+            'siteName', 'logoPath', 'faviconPath', 'accentColor', 'template',
+            'skills', 'education', 'certifications', 'languages'
+        ));
     }
 
     /**
@@ -401,9 +442,15 @@ class PortfolioController extends Controller
     /**
      * Display a custom page for a tenant.
      */
-    public function customPage(Request $request, string $username, string $slug)
+    public function customPage(Request $request, string $slugOrUsername, ?string $slug = null)
     {
-        $tenant = $this->resolveTenant($request, $username);
+        // Handle both /page/{slug} (custom domain) and /{username}/page/{slug} (xenoraa.com)
+        if ($slug === null) {
+            $slug = $slugOrUsername;
+            $tenant = $this->resolveTenant($request, null);
+        } else {
+            $tenant = $this->resolveTenant($request, $slugOrUsername);
+        }
         if (!$tenant) abort(404);
 
         $page = CustomPage::where('user_id', $tenant->id)
@@ -411,12 +458,14 @@ class PortfolioController extends Controller
             ->where('status', 'published')
             ->firstOrFail();
 
-        $template  = SiteSetting::getValueForTenant($tenant->id, 'profile_template', 'consultant');
-        $siteName  = SiteSetting::getValueForTenant($tenant->id, 'site_name', $tenant->name);
-        $logo      = SiteSetting::getValueForTenant($tenant->id, 'logo_path');
-        $favicon   = SiteSetting::getValueForTenant($tenant->id, 'favicon_path');
-        $accent    = SiteSetting::getValueForTenant($tenant->id, 'color_accent', '#6366f1');
+        $template    = SiteSetting::getValueForTenant($tenant->id, 'profile_template', 'consultant');
+        $siteName    = SiteSetting::getValueForTenant($tenant->id, 'site_name', $tenant->name);
+        $logo        = SiteSetting::getValueForTenant($tenant->id, 'logo_path');
+        $favicon     = SiteSetting::getValueForTenant($tenant->id, 'favicon_path');
+        $accent      = SiteSetting::getValueForTenant($tenant->id, 'color_accent', '#6366f1');
+        $socialLinks = SocialLink::where('user_id', $tenant->id)->where('is_active', true)->get();
+        $settings    = SiteSetting::where('user_id', $tenant->id)->pluck('value', 'key')->toArray();
 
-        return view('tenant.custom-page', compact('tenant', 'page', 'template', 'siteName', 'logo', 'favicon', 'accent'));
+        return view('tenant.custom-page', compact('tenant', 'page', 'template', 'siteName', 'logo', 'favicon', 'accent', 'socialLinks', 'settings'));
     }
 }

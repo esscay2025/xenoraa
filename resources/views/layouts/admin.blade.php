@@ -306,8 +306,8 @@
                     : url('/' . $tenantUser->username);
             @endphp
             <a href="{{ $tenantSiteUrl }}" class="sidebar-brand" title="View Your Site" target="_blank">
-                @if($tenantUser->profile_photo)
-                    <img src="{{ asset('storage/' . $tenantUser->profile_photo) }}" alt="{{ $tenantUser->name }}" style="height:36px;width:36px;border-radius:50%;object-fit:cover;">
+                @if($tenantUser->avatar)
+                    <img src="{{ asset('storage/' . $tenantUser->avatar) }}" alt="{{ $tenantUser->name }}" style="height:36px;width:36px;border-radius:50%;object-fit:cover;">
                 @else
                     <span style="font-size:1.2rem;font-weight:700;color:#a78bfa;">{{ strtoupper(substr($tenantUser->name,0,1)) }}</span>
                 @endif
@@ -432,7 +432,6 @@
             </button>
             <div class="sidebar-group-panel {{ $siteActive ? 'open' : '' }}" id="sgSite">
                 <a href="{{ route('admin.site.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.index') ? 'active' : '' }}"><i class="fas fa-th-large"></i> Site Builder Hub</a>
-                <a href="{{ route('admin.site.themes') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.themes*') ? 'active' : '' }}"><i class="fas fa-palette"></i> Theme Store</a>
                 <a href="{{ route('admin.site.pages') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.pages*') ? 'active' : '' }}"><i class="fas fa-file-alt"></i> Page Manager</a>
                 <a href="{{ route('admin.site.menu') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.menu*') ? 'active' : '' }}"><i class="fas fa-bars"></i> Menu Builder</a>
                 <a href="{{ route('admin.site.branding') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.branding*') ? 'active' : '' }}"><i class="fas fa-image"></i> Branding</a>
@@ -445,8 +444,8 @@
         <div class="sidebar-footer">
             <div class="sidebar-user">
                 <div class="sidebar-avatar">
-                    @if(auth()->user()->email === 'gopi@outlook.in')
-                        <img src="{{ asset('images/gopi-profile.png') }}" alt="{{ auth()->user()->name }}">
+                    @if(auth()->user()->avatar)
+                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}">
                     @else
                         <i class="fas fa-user"></i>
                     @endif

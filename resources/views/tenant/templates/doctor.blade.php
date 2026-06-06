@@ -1,5 +1,9 @@
 @extends('layouts.app')
 @section('content')
+@php
+$_sec  = isset($homePage) && $homePage ? $homePage : null;
+$_show = fn(string $k) => !$_sec || $_sec->isSectionEnabled($k);
+@endphp
 {{-- Doctor / Medical Professional Template --}}
 <style>
 .xn-doctor { font-family: 'Inter', sans-serif; background: #0a0f1e; color: #e2e8f0; min-height: 100vh; }
@@ -39,8 +43,8 @@
 <div class="xn-doctor">
     <div class="xn-doc-hero">
         <div class="xn-doc-avatar">
-            @if($tenant->profile_photo)
-                <img src="{{ asset('storage/'.$tenant->profile_photo) }}" alt="{{ $tenant->name }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+            @if($tenant->avatar)
+                <img src="{{ asset('storage/'.$tenant->avatar) }}" alt="{{ $tenant->name }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
             @else
                 <i class="fas fa-user-md"></i>
             @endif

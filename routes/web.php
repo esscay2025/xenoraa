@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\BlogController;
 use App\Http\Controllers\Admin\SiteController;
 use App\Http\Controllers\SuperAdmin\SuperAdminController;
+use App\Http\Controllers\SuperAdmin\ThemeController as SuperAdminThemeController;
 use App\Http\Controllers\Xenoraa\XenoraaController;
 use App\Http\Controllers\Xenoraa\TenantProfileController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -56,6 +57,16 @@ Route::get('/', function (\Illuminate\Http\Request $request) {
 // These routes work on custom domains where no username prefix is needed
 // =============================================
 Route::get('/about', [PortfolioController::class, 'about'])->name('about');
+Route::prefix('forum')->name('forum.')->group(function () {
+    Route::get('/', [ForumController::class, 'index'])->name('index');
+    Route::get('/{topic}', [ForumController::class, 'show'])->name('show');
+    Route::middleware('auth')->group(function () {
+        Route::post('/{topic}/reply', [ForumController::class, 'reply'])->name('reply');
+        Route::delete('/reply/{reply}', [ForumController::class, 'deleteReply'])->name('reply.delete');
+        Route::post('/', [ForumController::class, 'createTopic'])->name('create');
+    });
+});
+Route::get('/page/{slug}', [PortfolioController::class, 'customPage'])->name('page');
 Route::get('/blog', [PortfolioController::class, 'blog'])->name('blog');
 Route::get('/blog/category/{slug}', [PortfolioController::class, 'blogCategory'])->name('blog.category');
 Route::get('/blog/{slug}', [PortfolioController::class, 'blogShow'])->name('blog.show');
@@ -191,7 +202,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Site Settings (legacy)
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
-    Route::put('/settings/social/{social}', [SettingsController::class, 'updateSocial'])->name('settings.social.update');
+    Route::patch('/settings/social/{social}', [SettingsController::class, 'updateSocial'])->name('settings.social.update');
+    Route::post('/settings/social', [SettingsController::class, 'storeSocial'])->name('settings.social.store');
+    Route::get('/settings/social/{social}/destroy', [SettingsController::class, 'destroySocial'])->name('settings.social.destroy');
 
     // ─── Site Builder Module ──────────────────────────────────────
     Route::prefix('site')->name('site.')->group(function () {
@@ -435,6 +448,14 @@ Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmi
     Route::post('/settings', [SuperAdminController::class, 'updateSettings'])->name('settings.update');
     Route::get('/emails', [SuperAdminController::class, 'emails'])->name('emails');
     Route::get('/logs', [SuperAdminController::class, 'logs'])->name('logs');
+    // Theme Store
+    Route::get('/themes', [SuperAdminThemeController::class, 'index'])->name('themes.index');
+    Route::get('/themes/create', [SuperAdminThemeController::class, 'create'])->name('themes.create');
+    Route::post('/themes', [SuperAdminThemeController::class, 'store'])->name('themes.store');
+    Route::get('/themes/{theme}/edit', [SuperAdminThemeController::class, 'edit'])->name('themes.edit');
+    Route::put('/themes/{theme}', [SuperAdminThemeController::class, 'update'])->name('themes.update');
+    Route::delete('/themes/{theme}', [SuperAdminThemeController::class, 'destroy'])->name('themes.destroy');
+    Route::patch('/themes/{theme}/toggle', [SuperAdminThemeController::class, 'toggleActive'])->name('themes.toggle');
 });
 
 // =============================================

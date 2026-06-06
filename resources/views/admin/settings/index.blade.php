@@ -1,152 +1,327 @@
 @extends('layouts.admin')
-
 @section('title', 'Site Settings')
-
 @section('content')
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;">
     <div>
-        <h1 style="font-size: 1.75rem; font-weight: 800; margin: 0;">Site Settings</h1>
-        <p style="color: var(--text-secondary); margin: 0.25rem 0 0;">Manage your portfolio details, contact info, logo, and social media links.</p>
+        <h1 style="font-size:1.75rem;font-weight:800;margin:0;">Site Settings</h1>
+        <p style="color:var(--text-secondary);margin:0.25rem 0 0;">Configure your site identity, branding, footer, and social channels.</p>
     </div>
 </div>
 
-<div class="grid-2" style="align-items: start;">
-    {{-- Left Side: Main Settings Form --}}
-    <div class="card">
-        <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0 0 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">General & Content Settings</h2>
-        
-        <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
-            @csrf
-            
-            <div class="grid-2">
+{{-- Tab Navigation --}}
+<div style="display:flex;gap:0.5rem;border-bottom:1px solid var(--border);margin-bottom:2rem;overflow-x:auto;">
+    <button class="settings-tab active" data-tab="branding">
+        <i class="fas fa-palette"></i> Branding
+    </button>
+    <button class="settings-tab" data-tab="footer">
+        <i class="fas fa-shoe-prints"></i> Footer
+    </button>
+    <button class="settings-tab" data-tab="social">
+        <i class="fas fa-share-alt"></i> Social Media & Channels
+    </button>
+    <button class="settings-tab" data-tab="contact">
+        <i class="fas fa-address-card"></i> Contact Info
+    </button>
+    <button class="settings-tab" data-tab="advanced">
+        <i class="fas fa-sliders-h"></i> Advanced
+    </button>
+</div>
+
+{{-- ── BRANDING TAB ── --}}
+<div class="settings-panel active" id="tab-branding">
+    <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
+        @csrf
+        <div class="grid-2" style="align-items:start;gap:2rem;">
+            <div class="card">
+                <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem;">Site Identity</h3>
                 <div class="form-group">
-                    <label class="form-label">Owner Name</label>
-                    <input type="text" name="owner_name" class="form-control" value="{{ $settings['owner_name'] ?? '' }}" required>
+                    <label class="form-label">Site Name <span style="color:var(--danger)">*</span></label>
+                    <input type="text" name="site_name" class="form-control" value="{{ $settings['site_name'] ?? auth()->user()->name }}" required placeholder="e.g. Gopi K | Portfolio">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Company Name</label>
-                    <input type="text" name="company_name" class="form-control" value="{{ $settings['company_name'] ?? '' }}" required>
+                    <label class="form-label">Tagline</label>
+                    <input type="text" name="site_tagline" class="form-control" value="{{ $settings['site_tagline'] ?? '' }}" placeholder="e.g. Consultant & Entrepreneur">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Site Description (for SEO)</label>
+                    <textarea name="site_description" class="form-control" rows="3" placeholder="Brief description of your site for search engines...">{{ $settings['site_description'] ?? '' }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Accent Color</label>
+                    <div style="display:flex;gap:0.75rem;align-items:center;">
+                        <input type="color" name="color_accent" value="{{ $settings['color_accent'] ?? '#6366f1' }}" style="width:48px;height:36px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;padding:2px;">
+                        <input type="text" name="color_accent_text" class="form-control" value="{{ $settings['color_accent'] ?? '#6366f1' }}" placeholder="#6366f1" style="flex:1;" oninput="document.querySelector('[name=color_accent]').value=this.value">
+                    </div>
                 </div>
             </div>
-
-            <div class="grid-3">
+            <div class="card">
+                <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem;">Logo & Favicon</h3>
                 <div class="form-group">
-                    <label class="form-label">Location</label>
-                    <input type="text" name="location" class="form-control" value="{{ $settings['location'] ?? '' }}" required>
+                    <label class="form-label">Current Logo</label>
+                    @if(!empty($settings['logo_path']))
+                        <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:0.75rem;display:flex;align-items:center;justify-content:center;">
+                            <img src="{{ $settings['logo_path'] }}" alt="Logo" style="max-height:60px;max-width:200px;">
+                        </div>
+                    @else
+                        <p class="text-muted text-sm" style="margin-bottom:0.75rem;">No custom logo uploaded. Using default.</p>
+                    @endif
+                    <input type="file" name="logo" class="form-control" accept="image/*">
+                    <p class="text-muted text-xs" style="margin-top:0.3rem;">PNG with transparent background recommended. Max 4MB.</p>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Founded Year</label>
-                    <input type="text" name="founded_year" class="form-control" value="{{ $settings['founded_year'] ?? '' }}" required>
+                    <label class="form-label">Favicon</label>
+                    @if(!empty($settings['favicon_path']))
+                        <div style="margin-bottom:0.75rem;">
+                            <img src="{{ $settings['favicon_path'] }}" alt="Favicon" style="width:32px;height:32px;border:1px solid var(--border);border-radius:4px;">
+                        </div>
+                    @endif
+                    <input type="file" name="favicon" class="form-control" accept="image/*,.ico">
+                    <p class="text-muted text-xs" style="margin-top:0.3rem;">ICO or PNG, 32x32 or 64x64 px. Max 1MB.</p>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Profile Photo</label>
+                    @if(auth()->user()->avatar)
+                        <div style="margin-bottom:0.75rem;">
+                            <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="Profile" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--border);">
+                        </div>
+                    @endif
+                    <input type="file" name="profile_photo" class="form-control" accept="image/*">
+                </div>
+            </div>
+        </div>
+        <div style="margin-top:1.5rem;">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Branding Settings</button>
+        </div>
+    </form>
+</div>
+
+{{-- ── FOOTER TAB ── --}}
+<div class="settings-panel" id="tab-footer">
+    <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
+        @csrf
+        <div class="grid-2" style="align-items:start;gap:2rem;">
+            <div class="card">
+                <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem;">Footer Content</h3>
+                <div class="form-group">
+                    <label class="form-label">Footer Tagline</label>
+                    <textarea name="footer_tagline" class="form-control" rows="3" placeholder="A short description shown in the footer...">{{ $settings['footer_tagline'] ?? '' }}</textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Copyright Text</label>
+                    <input type="text" name="footer_copyright" class="form-control" value="{{ $settings['footer_copyright'] ?? '' }}" placeholder="e.g. © 2025 Gopi K. All rights reserved.">
+                    <p class="text-muted text-xs" style="margin-top:0.3rem;">Leave blank to use the auto-generated copyright with your site name.</p>
+                </div>
+            </div>
+            <div class="card">
+                <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem;">Contact Details (Footer)</h3>
+                <div class="form-group">
+                    <label class="form-label">Contact Email</label>
+                    <input type="email" name="contact_email" class="form-control" value="{{ $settings['contact_email'] ?? '' }}" placeholder="hello@example.com">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Contact Phone</label>
-                    <input type="text" name="contact_phone" class="form-control" value="{{ $settings['contact_phone'] ?? '' }}">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Contact Website</label>
-                <input type="text" name="contact_website" class="form-control" value="{{ $settings['contact_website'] ?? '' }}">
-            </div>
-
-            <h3 style="font-size: 1rem; font-weight: 600; margin: 2rem 0 1rem; color: var(--text-secondary);">Hero Section</h3>
-            
-            <div class="form-group">
-                <label class="form-label">Hero Title (Use \n for new line)</label>
-                <input type="text" name="hero_title" class="form-control" value="{{ $settings['hero_title'] ?? '' }}" required>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Hero Subtitle</label>
-                <input type="text" name="hero_subtitle" class="form-control" value="{{ $settings['hero_subtitle'] ?? '' }}" required>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">Hero Description</label>
-                <textarea name="hero_description" class="form-control" rows="3" required>{{ $settings['hero_description'] ?? '' }}</textarea>
-            </div>
-
-            <h3 style="font-size: 1rem; font-weight: 600; margin: 2rem 0 1rem; color: var(--text-secondary);">About Section</h3>
-
-            <div class="form-group">
-                <label class="form-label">About Title</label>
-                <input type="text" name="about_title" class="form-control" value="{{ $settings['about_title'] ?? '' }}" required>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">About Paragraph 1</label>
-                <textarea name="about_text_1" class="form-control" rows="4" required>{{ $settings['about_text_1'] ?? '' }}</textarea>
-            </div>
-
-            <div class="form-group">
-                <label class="form-label">About Paragraph 2</label>
-                <textarea name="about_text_2" class="form-control" rows="4" required>{{ $settings['about_text_2'] ?? '' }}</textarea>
-            </div>
-
-            <h3 style="font-size: 1rem; font-weight: 600; margin: 2rem 0 1rem; color: var(--text-secondary);">Footer Section</h3>
-
-            <div class="form-group">
-                <label class="form-label">Footer Tagline</label>
-                <textarea name="footer_tagline" class="form-control" rows="2" required>{{ $settings['footer_tagline'] ?? '' }}</textarea>
-            </div>
-
-            <h3 style="font-size: 1rem; font-weight: 600; margin: 2rem 0 1rem; color: var(--text-secondary);">Media Assets</h3>
-
-            <div class="grid-2">
-                <div class="form-group">
-                    <label class="form-label">Upload New Logo (White PNG with transparent bg recommended)</label>
-                    <input type="file" name="logo" class="form-control" accept="image/*">
-                    <div style="margin-top: 0.5rem; background: #000; padding: 0.5rem; border-radius: 6px; display: inline-block;">
-                        <span class="text-xs text-muted">Current Logo:</span><br>
-                        <img src="{{ asset('images/gopi-logo-nav.png') }}?v={{ time() }}" alt="Current Logo" style="height: 30px; margin-top: 0.25rem;">
-                    </div>
+                    <input type="text" name="contact_phone" class="form-control" value="{{ $settings['contact_phone'] ?? '' }}" placeholder="+91 98765 43210">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Upload New Profile Photo</label>
-                    <input type="file" name="profile_photo" class="form-control" accept="image/*">
-                    <div style="margin-top: 0.5rem; display: inline-block;">
-                        <span class="text-xs text-muted">Current Photo:</span><br>
-                        <img src="{{ asset('images/gopi-profile.png') }}?v={{ time() }}" alt="Current Profile" style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover; margin-top: 0.25rem;">
-                    </div>
+                    <label class="form-label">Website URL</label>
+                    <input type="url" name="contact_website" class="form-control" value="{{ $settings['contact_website'] ?? '' }}" placeholder="https://yoursite.com">
                 </div>
             </div>
+        </div>
+        <div style="margin-top:1.5rem;">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Footer Settings</button>
+        </div>
+    </form>
+</div>
 
-            <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
-                <button type="submit" class="btn btn-primary">Save All Settings</button>
+{{-- ── SOCIAL MEDIA TAB ── --}}
+<div class="settings-panel" id="tab-social">
+    <div class="card" style="margin-bottom:1.5rem;">
+        <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem;">Social Media & Channels</h3>
+        <p class="text-secondary text-sm" style="margin-bottom:1.5rem;">These links appear in your site footer and profile. Make sure to include the full URL.</p>
+
+        @if($socialLinks->isEmpty())
+            <div style="text-align:center;padding:2rem;color:var(--text-muted);">
+                <i class="fas fa-share-alt" style="font-size:2rem;margin-bottom:0.75rem;display:block;"></i>
+                <p>No social links configured yet. Add your first one below.</p>
             </div>
-        </form>
-    </div>
+        @else
+        <div style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.5rem;">
+            @foreach($socialLinks as $social)
+            <form method="POST" action="{{ route('admin.settings.social.update', $social) }}" style="display:flex;gap:0.75rem;align-items:center;">
+                @csrf @method('PATCH')
+                <div style="width:40px;height:40px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="{{ $social->icon_class }}" style="color:var(--text-secondary);"></i>
+                </div>
+                <div style="flex:0 0 130px;">
+                    <span style="font-size:0.875rem;font-weight:600;color:var(--text-primary);">{{ ucfirst($social->platform) }}</span>
+                </div>
+                <input type="url" name="url" class="form-control" value="{{ $social->url }}" placeholder="https://..." style="flex:1;">
+                <label style="display:flex;align-items:center;gap:0.4rem;white-space:nowrap;cursor:pointer;font-size:0.875rem;color:var(--text-secondary);">
+                    <input type="checkbox" name="is_active" {{ $social->is_active ? 'checked' : '' }} style="width:16px;height:16px;"> Active
+                </label>
+                <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                <a href="{{ route('admin.settings.social.destroy', $social) }}"
+                   onclick="return confirm('Remove this social link?')"
+                   class="btn btn-sm" style="background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </form>
+            @endforeach
+        </div>
+        @endif
 
-    {{-- Right Side: Social Media Links --}}
-    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-        <div class="card">
-            <h2 style="font-size: 1.2rem; font-weight: 700; margin: 0 0 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.75rem;">Social Media & Channels</h2>
-            
-            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
-                @foreach($socialLinks as $social)
-                <form method="POST" action="{{ route('admin.settings.social.update', $social->id) }}" style="border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; margin-bottom: 1rem;">
-                    @csrf
-                    @method('PUT')
-                    
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                        <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
-                            <i class="{{ $social->icon_class }}" style="font-size: 1.1rem; width: 20px;"></i>
-                            {{ ucfirst($social->platform) }}
-                        </div>
-                        <label class="flex items-center gap-2" style="cursor: pointer; font-size: 0.85rem;">
-                            <input type="checkbox" name="is_active" value="1" {{ $social->is_active ? 'checked' : '' }} onchange="this.form.submit()">
-                            Active
-                        </label>
+        {{-- Add new social link --}}
+        <div style="border-top:1px solid var(--border);padding-top:1.25rem;">
+            <h4 style="font-size:0.875rem;font-weight:600;margin:0 0 1rem;color:var(--text-secondary);">Add New Social Channel</h4>
+            <form method="POST" action="{{ route('admin.settings.social.store') }}" style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:0.75rem;align-items:end;">
+                @csrf
+                <div class="form-group" style="margin:0;">
+                    <label class="form-label">Platform</label>
+                    <select name="platform" class="form-control" onchange="updateIcon(this)">
+                        <option value="linkedin">LinkedIn</option>
+                        <option value="twitter">Twitter / X</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="facebook">Facebook</option>
+                        <option value="youtube">YouTube</option>
+                        <option value="github">GitHub</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="whatsapp">WhatsApp</option>
+                        <option value="telegram">Telegram</option>
+                        <option value="website">Website</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin:0;">
+                    <label class="form-label">URL</label>
+                    <input type="url" name="url" class="form-control" placeholder="https://...">
+                </div>
+                <input type="hidden" name="icon_class" id="iconClassInput" value="fab fa-linkedin">
+                <div class="form-group" style="margin:0;">
+                    <label class="form-label">Icon Preview</label>
+                    <div style="height:40px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;padding:0 0.75rem;gap:0.5rem;font-size:0.875rem;color:var(--text-secondary);">
+                        <i id="iconPreview" class="fab fa-linkedin"></i> <span id="iconLabel">LinkedIn</span>
                     </div>
-
-                    <div style="display: flex; gap: 0.5rem;">
-                        <input type="url" name="url" class="form-control" value="{{ $social->url }}" required placeholder="https://...">
-                        <button type="submit" class="btn btn-outline btn-sm" style="flex-shrink: 0;">Update</button>
-                    </div>
-                </form>
-                @endforeach
-            </div>
+                </div>
+                <button type="submit" class="btn btn-primary" style="height:40px;"><i class="fas fa-plus"></i> Add</button>
+            </form>
         </div>
     </div>
 </div>
+
+{{-- ── CONTACT TAB ── --}}
+<div class="settings-panel" id="tab-contact">
+    <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
+        @csrf
+        <div class="card">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem;">Contact & Profile Details</h3>
+            <div class="grid-2">
+                <div class="form-group">
+                    <label class="form-label">Contact Email</label>
+                    <input type="email" name="contact_email" class="form-control" value="{{ $settings['contact_email'] ?? '' }}" placeholder="hello@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Contact Phone</label>
+                    <input type="text" name="contact_phone" class="form-control" value="{{ $settings['contact_phone'] ?? '' }}" placeholder="+91 98765 43210">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Website</label>
+                    <input type="url" name="contact_website" class="form-control" value="{{ $settings['contact_website'] ?? '' }}" placeholder="https://yoursite.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Booking / Calendar Link</label>
+                    <input type="url" name="profile_booking_link" class="form-control" value="{{ $settings['profile_booking_link'] ?? '' }}" placeholder="https://calendly.com/...">
+                </div>
+            </div>
+            <h4 style="font-size:0.875rem;font-weight:600;margin:1.5rem 0 1rem;color:var(--text-secondary);">Profile Stats (shown on homepage)</h4>
+            <div class="grid-4">
+                <div class="form-group">
+                    <label class="form-label">Years Experience</label>
+                    <input type="text" name="profile_years" class="form-control" value="{{ $settings['profile_years'] ?? '' }}" placeholder="10+">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Clients Served</label>
+                    <input type="text" name="profile_clients" class="form-control" value="{{ $settings['profile_clients'] ?? '' }}" placeholder="500+">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Projects Completed</label>
+                    <input type="text" name="profile_projects" class="form-control" value="{{ $settings['profile_projects'] ?? '' }}" placeholder="200+">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Revenue Generated</label>
+                    <input type="text" name="profile_revenue" class="form-control" value="{{ $settings['profile_revenue'] ?? '' }}" placeholder="₹10Cr+">
+                </div>
+            </div>
+        </div>
+        <div style="margin-top:1.5rem;">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Contact Settings</button>
+        </div>
+    </form>
+</div>
+
+{{-- ── ADVANCED TAB ── --}}
+<div class="settings-panel" id="tab-advanced">
+    <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data">
+        @csrf
+        <div class="card">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem;">Advanced Settings</h3>
+            <div class="form-group">
+                <label class="form-label">AI Chatbot</label>
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                    <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+                        <input type="checkbox" name="chatbot_enabled" value="1" {{ ($settings['chatbot_enabled'] ?? '1') == '1' ? 'checked' : '' }} style="width:18px;height:18px;">
+                        <span class="text-sm">Enable AI Chatbot on your site</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div style="margin-top:1.5rem;">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Advanced Settings</button>
+        </div>
+    </form>
+</div>
+
+<style>
+.settings-tab { background:none; border:none; border-bottom:2px solid transparent; padding:0.75rem 1.25rem; font-size:0.875rem; font-weight:600; color:var(--text-secondary); cursor:pointer; white-space:nowrap; display:inline-flex;align-items:center;gap:0.4rem;transition:all 0.2s; }
+.settings-tab:hover { color:var(--text-primary); }
+.settings-tab.active { color:var(--text-primary); border-bottom-color:var(--text-primary); }
+.settings-panel { display:none; }
+.settings-panel.active { display:block; }
+</style>
+<script>
+document.querySelectorAll('.settings-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.settings-panel').forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+        document.getElementById('tab-' + this.dataset.tab).classList.add('active');
+    });
+});
+
+const platformIcons = {
+    linkedin: { icon: 'fab fa-linkedin', label: 'LinkedIn' },
+    twitter: { icon: 'fab fa-x-twitter', label: 'Twitter / X' },
+    instagram: { icon: 'fab fa-instagram', label: 'Instagram' },
+    facebook: { icon: 'fab fa-facebook', label: 'Facebook' },
+    youtube: { icon: 'fab fa-youtube', label: 'YouTube' },
+    github: { icon: 'fab fa-github', label: 'GitHub' },
+    tiktok: { icon: 'fab fa-tiktok', label: 'TikTok' },
+    whatsapp: { icon: 'fab fa-whatsapp', label: 'WhatsApp' },
+    telegram: { icon: 'fab fa-telegram', label: 'Telegram' },
+    website: { icon: 'fas fa-globe', label: 'Website' },
+    other: { icon: 'fas fa-link', label: 'Other' },
+};
+function updateIcon(select) {
+    const data = platformIcons[select.value] || platformIcons.other;
+    document.getElementById('iconClassInput').value = data.icon;
+    document.getElementById('iconPreview').className = data.icon;
+    document.getElementById('iconLabel').textContent = data.label;
+}
+
+// Hash-based tab switching
+const hash = window.location.hash.replace('#', '');
+if (hash && document.querySelector('[data-tab="' + hash + '"]')) {
+    document.querySelector('[data-tab="' + hash + '"]').click();
+}
+</script>
 @endsection

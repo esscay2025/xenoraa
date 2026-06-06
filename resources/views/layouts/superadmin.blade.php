@@ -242,6 +242,21 @@
         </div>
     </div>
 
+    {{-- Theme Store --}}
+    <div class="sa-nav-group {{ request()->routeIs('superadmin.themes*') ? 'open' : '' }}" id="grp-themes">
+        <div class="sa-nav-group-header" onclick="toggleGroup('grp-themes')">
+            <span class="sa-nav-group-label">Theme Store</span>
+            <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
+        </div>
+        <div class="sa-nav-group-body">
+            <a href="{{ route('superadmin.themes.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.themes.index') ? 'active' : '' }}">
+                <i class="fas fa-palette"></i> All Themes
+            </a>
+            <a href="{{ route('superadmin.themes.create') }}" class="sa-nav-item {{ request()->routeIs('superadmin.themes.create') ? 'active' : '' }}">
+                <i class="fas fa-plus-circle"></i> Add Theme
+            </a>
+        </div>
+    </div>
     {{-- System --}}
     <div class="sa-nav-group {{ request()->routeIs('superadmin.settings') || request()->routeIs('superadmin.emails') || request()->routeIs('superadmin.logs') ? 'open' : '' }}" id="grp-system">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-system')">

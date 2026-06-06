@@ -12,9 +12,10 @@
         $isMainDomain = ($host === $mainDomain || $host === 'www.' . $mainDomain);
 
         if (!$isMainDomain) {
-            // Custom domain (e.g. gopi.blog)
+            // Custom domain (e.g. gopi.blog or www.gopi.blog)
             $layoutTenant = \App\Models\User::where('custom_domain', $host)
                 ->orWhere('custom_domain', 'www.' . $host)
+                ->orWhere('custom_domain', str_replace('www.', '', $host))
                 ->first();
         }
 
@@ -52,6 +53,7 @@
         $tenantBlogUrl   = $tenantBase ? url($tenantBase . '/blog') : route('blog');
         $tenantJobsUrl   = $tenantBase ? url($tenantBase . '/jobs') : route('jobs');
         $tenantShopUrl   = $tenantBase ? url($tenantBase . '/shop') : route('shop');
+        $tenantForumUrl  = $tenantBase ? url($tenantBase . '/forum') : route('forum.index');
 
         // ── Tenant site settings ───────────────────────────────────────────────
         $tenantSettings = [];
@@ -61,8 +63,8 @@
                 ->toArray();
         }
 
-        $siteName    = $tenantSettings['site_name']    ?? ($layoutTenant?->name ?? 'Xenoraa');
-        $siteTagline = $tenantSettings['site_tagline'] ?? ($layoutTenant?->profile_tagline ?? '');
+        $siteName      = $tenantSettings['site_name']    ?? ($layoutTenant?->name ?? 'Xenoraa');
+        $siteTagline   = $tenantSettings['site_tagline'] ?? ($layoutTenant?->profile_tagline ?? '');
         $footerTagline = $tenantSettings['site_description'] ?? $tenantSettings['footer_tagline'] ?? $siteTagline;
 
         // ── Tenant social links ────────────────────────────────────────────────
@@ -80,6 +82,35 @@
         $tenantLogo    = $tenantSettings['logo_path'] ?? null;
         $tenantAccent  = $tenantSettings['color_accent'] ?? '#6366f1';
         $chatbotEnabled = $tenantSettings['chatbot_enabled'] ?? '1';
+
+        // ── Determine if this is Gopi's domain ────────────────────────────────
+        $isGopiBlog = $layoutTenant && (
+            $layoutTenant->email === 'gopi@outlook.in'
+            || in_array($host, ['gopi.blog', 'www.gopi.blog'])
+        );
+
+        // ── Tenant avatar (from users.avatar column) ──────────────────────────
+        $tenantAvatar = $layoutTenant?->avatar ?? null;
+
+        // ── Tenant menu items from Menu Builder ───────────────────────────────
+        $tenantMenuItems = $layoutTenant
+            ? \App\Models\SiteMenu::where('user_id', $layoutTenant->id)
+                ->whereNull('parent_id')
+                ->orderBy('sort_order')
+                ->with(['children' => fn($q) => $q->orderBy('sort_order')])
+                ->get()
+            : collect();
+
+        // ── Footer quick links from menu or defaults ──────────────────────────
+        $footerLinks = $tenantMenuItems->isNotEmpty()
+            ? $tenantMenuItems->take(6)
+            : collect([
+                (object)['label'=>'Home',  'url'=>$tenantHomeUrl],
+                (object)['label'=>'About', 'url'=>$tenantAboutUrl],
+                (object)['label'=>'Blog',  'url'=>$tenantBlogUrl],
+                (object)['label'=>'Forum', 'url'=>$tenantForumUrl],
+                (object)['label'=>'Shop',  'url'=>$tenantShopUrl],
+            ]);
     @endphp
     <title>@yield('title', $siteName . ' | Portfolio')</title>
     <meta name="description" content="@yield('description', $footerTagline)">
@@ -116,7 +147,7 @@
         .navbar-nav { display: flex; align-items: center; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
         .navbar-nav > li { position: relative; }
         .navbar-nav > li > a, .navbar-nav > li > button { color: var(--text-secondary); text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; white-space: nowrap; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; }
-        .navbar-nav > li > a:hover, .navbar-nav > li > a.active, .navbar-nav > li > button:hover { color: var(--text-primary); background-color: var(--bg-card); }
+        .navbar-nav > li > a:hover, .navbar-nav > li > a.active, .navbar-nav > li > button:hover, .navbar-nav > li > button.active { color: var(--text-primary); background-color: var(--bg-card); }
 
         /* ── DROPDOWN MEGA MENU ── */
         .nav-dropdown { position: absolute; top: calc(100% + 0.5rem); left: 50%; transform: translateX(-50%); background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; min-width: 220px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s, transform 0.2s; transform: translateX(-50%) translateY(-6px); z-index: 2000; }
@@ -191,13 +222,12 @@
         .footer { background-color: var(--bg-secondary); border-top: 1px solid var(--border); padding: 3rem 2rem; margin-top: 5rem; }
         .footer-inner { max-width: 1200px; margin: 0 auto; }
         .social-links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
-        .social-link { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; background-color: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none; font-size: 1rem; transition: all 0.2s; }
-        .social-link:hover { background-color: var(--text-primary); color: var(--bg-primary); border-color: var(--text-primary); }
+        .social-link { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; background-color: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none; transition: all 0.2s; }
+        .social-link:hover { background-color: var(--bg-hover); color: var(--text-primary); border-color: var(--border-light); }
 
         /* ── UTILITIES ── */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
-        .mt-4 { margin-top: 1rem; } .mt-6 { margin-top: 1.5rem; } .mt-8 { margin-top: 2rem; }
-        .mb-4 { margin-bottom: 1rem; } .mb-6 { margin-bottom: 1.5rem; } .mb-8 { margin-bottom: 2rem; }
+        .mt-4 { margin-top: 1rem; } .mb-4 { margin-bottom: 1rem; }
         .flex { display: flex; } .items-center { align-items: center; } .justify-between { justify-content: space-between; }
         .gap-2 { gap: 0.5rem; } .gap-4 { gap: 1rem; }
         .text-sm { font-size: 0.875rem; } .text-xs { font-size: 0.75rem; }
@@ -224,10 +254,14 @@
 <body>
     <nav class="navbar">
         <div class="navbar-inner">
-            {{-- Brand / Logo — tenant-aware --}}
+            {{-- Brand / Logo — tenant-aware with correct logo priority --}}
             <a href="{{ $tenantHomeUrl }}" class="navbar-brand" title="{{ $siteName }}">
-                @if($layoutTenant && $layoutTenant->profile_photo)
-                    <img src="{{ asset('storage/' . $layoutTenant->profile_photo) }}" alt="{{ $siteName }}" style="height:36px;width:36px;border-radius:50%;object-fit:cover;">
+                @if($tenantLogo)
+                    <img src="{{ $tenantLogo }}" alt="{{ $siteName }}" style="height:40px;width:auto;">
+                @elseif($isGopiBlog)
+                    <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K Logo" loading="eager" style="height:40px;width:auto;">
+                @elseif($tenantAvatar)
+                    <img src="{{ asset('storage/' . $tenantAvatar) }}" alt="{{ $siteName }}" style="height:36px;width:36px;border-radius:50%;object-fit:cover;">
                 @elseif(!$layoutTenant || $isMainDomain)
                     <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K Logo" loading="eager" style="height:40px;width:auto;">
                 @else
@@ -236,79 +270,44 @@
                 <span style="font-size:0.95rem;font-weight:700;color:var(--text-primary);">{{ $siteName }}</span>
             </a>
 
-            {{-- Desktop Nav --}}
+            {{-- Desktop Nav — driven by Menu Builder, fallback to defaults --}}
             <ul class="navbar-nav">
-                <li><a href="{{ $tenantHomeUrl }}" class="{{ request()->routeIs('home') || request()->routeIs('tenant.profile') ? 'active' : '' }}">Home</a></li>
-                <li><a href="{{ $tenantAboutUrl }}" class="{{ request()->routeIs('about') || request()->routeIs('tenant.about') ? 'active' : '' }}">About</a></li>
-
-                {{-- Solutions — only for Gopi (IT Professional) --}}
-                @if(!$layoutTenant || $layoutTenant->email === 'gopi@outlook.in' || $tenantTemplate === 'entrepreneur' || $tenantTemplate === 'consultant')
-                <li>
-                    <button class="{{ request()->routeIs('solutions.*') ? 'active' : '' }}" type="button">
-                        Solutions <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
-                    </button>
-                    <div class="nav-dropdown">
-                        <div class="nav-dropdown-label">What We Offer</div>
-                        <a href="{{ route('solutions.ai-automation') }}"><i class="fas fa-robot"></i> AI Solutions & Automation</a>
-                        <a href="{{ route('solutions.custom-app') }}"><i class="fas fa-laptop-code"></i> Custom Application Development</a>
-                        <a href="{{ route('solutions.digital-transformation') }}"><i class="fas fa-sync-alt"></i> Digital Transformation</a>
-                        <a href="{{ route('solutions.startup-product') }}"><i class="fas fa-rocket"></i> Startup Product Development</a>
-                        <a href="{{ route('solutions.branding-digital') }}"><i class="fas fa-palette"></i> Branding & Digital Presence</a>
-                    </div>
-                </li>
-                @endif
-
-                {{-- Services — for Advocate --}}
-                @if($tenantTemplate === 'advocate')
-                <li><a href="{{ $tenantAboutUrl }}#services">Services</a></li>
-                @endif
-
-                {{-- Collaborations — for Influencer --}}
-                @if($tenantTemplate === 'influencer')
-                <li><a href="{{ $tenantAboutUrl }}#collaborations">Collaborations</a></li>
-                @endif
-
-                {{-- Blog --}}
-                <li>
-                    <a href="{{ $tenantBlogUrl }}" class="{{ request()->routeIs('blog*') || request()->routeIs('tenant.blog*') ? 'active' : '' }}">
-                        Blog <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
-                    </a>
-                    <div class="nav-dropdown nav-mega">
-                        <div style="grid-column: 1/-1;"><div class="nav-dropdown-label">Browse by Category</div></div>
-                        @if($tenantTemplate === 'influencer')
-                            <a href="{{ $tenantBlogUrl }}?category=fashion"><i class="fas fa-tshirt"></i> Fashion & Style</a>
-                            <a href="{{ $tenantBlogUrl }}?category=beauty"><i class="fas fa-spa"></i> Beauty & Skincare</a>
-                            <a href="{{ $tenantBlogUrl }}?category=travel"><i class="fas fa-plane"></i> Travel</a>
-                            <a href="{{ $tenantBlogUrl }}?category=lifestyle"><i class="fas fa-heart"></i> Lifestyle</a>
-                        @elseif($tenantTemplate === 'advocate')
-                            <a href="{{ $tenantBlogUrl }}?category=corporate-law"><i class="fas fa-building"></i> Corporate Law</a>
-                            <a href="{{ $tenantBlogUrl }}?category=consumer-rights"><i class="fas fa-shield-alt"></i> Consumer Rights</a>
-                            <a href="{{ $tenantBlogUrl }}?category=startup-legal"><i class="fas fa-rocket"></i> Startup Legal</a>
-                            <a href="{{ $tenantBlogUrl }}?category=ip-rights"><i class="fas fa-copyright"></i> IP Rights</a>
+                @if($tenantMenuItems->isNotEmpty())
+                    {{-- Dynamic menu from Menu Builder --}}
+                    @foreach($tenantMenuItems as $menuItem)
+                    <li>
+                        @if($menuItem->children->isNotEmpty())
+                            <button type="button" class="{{ request()->is(ltrim($menuItem->url ?? '', '/') . '*') ? 'active' : '' }}">
+                                {{ $menuItem->label }} <i class="fas fa-chevron-down" style="font-size:0.7rem;"></i>
+                            </button>
+                            <div class="nav-dropdown">
+                                @foreach($menuItem->children as $child)
+                                <a href="{{ $child->url }}" @if(($child->target ?? '') === '_blank') target="_blank" rel="noopener" @endif>
+                                    @if(!empty($child->icon))<i class="{{ $child->icon }}"></i> @endif{{ $child->label }}
+                                </a>
+                                @endforeach
+                            </div>
                         @else
-                            <a href="{{ $tenantBlogUrl }}?category=ai-automation"><i class="fas fa-robot"></i> AI & Automation</a>
-                            <a href="{{ $tenantBlogUrl }}?category=hacking-security"><i class="fas fa-shield-alt"></i> Hacking & Security</a>
-                            <a href="{{ $tenantBlogUrl }}?category=startup-product"><i class="fas fa-rocket"></i> Startup & Product Dev</a>
-                            <a href="{{ $tenantBlogUrl }}?category=software-technology"><i class="fas fa-code"></i> Software & Technology</a>
-                            <a href="{{ $tenantBlogUrl }}?category=digital-transformation"><i class="fas fa-chart-line"></i> Digital Transformation</a>
-                            <a href="{{ $tenantBlogUrl }}?category=personal-branding"><i class="fas fa-user-tie"></i> Personal Branding</a>
+                            <a href="{{ $menuItem->url }}" class="{{ request()->is(ltrim($menuItem->url ?? '', '/')) ? 'active' : '' }}" @if(($menuItem->target ?? '') === '_blank') target="_blank" rel="noopener" @endif>
+                                {{ $menuItem->label }}
+                            </a>
                         @endif
-                        <div style="grid-column: 1/-1;"><hr class="nav-dropdown-divider"></div>
-                        <div style="grid-column: 1/-1;"><a href="{{ $tenantBlogUrl }}" style="font-weight:600;"><i class="fas fa-th-large"></i> View All Posts</a></div>
-                    </div>
-                </li>
-
-                <li><a href="{{ $tenantJobsUrl }}" class="{{ request()->routeIs('jobs*') || request()->routeIs('tenant.jobs*') ? 'active' : '' }}">
-                    {{ $tenantTemplate === 'advocate' ? 'Vacancies' : 'Jobs' }}
-                </a></li>
-                <li><a href="{{ route('forum.index') }}" class="{{ request()->routeIs('forum*') ? 'active' : '' }}">Forum</a></li>
-                <li><a href="{{ $tenantShopUrl }}" class="{{ request()->routeIs('shop*') || request()->routeIs('tenant.shop*') ? 'active' : '' }}">Shop</a></li>
+                    </li>
+                    @endforeach
+                @else
+                    {{-- Default nav when no menu is configured --}}
+                    <li><a href="{{ $tenantHomeUrl }}" class="{{ request()->routeIs('home') || request()->routeIs('tenant.profile') ? 'active' : '' }}">Home</a></li>
+                    <li><a href="{{ $tenantAboutUrl }}" class="{{ request()->routeIs('about') || request()->routeIs('tenant.about') ? 'active' : '' }}">About</a></li>
+                    <li><a href="{{ $tenantBlogUrl }}" class="{{ request()->routeIs('blog*') || request()->routeIs('tenant.blog*') ? 'active' : '' }}">Blog</a></li>
+                    <li><a href="{{ $tenantForumUrl }}" class="{{ request()->routeIs('forum*') ? 'active' : '' }}">Forum</a></li>
+                    <li><a href="{{ $tenantShopUrl }}" class="{{ request()->routeIs('shop*') || request()->routeIs('tenant.shop*') ? 'active' : '' }}">Shop</a></li>
+                @endif
 
                 @auth
                     @if(auth()->user()->isAdmin())
                         <li><a href="{{ route('admin.dashboard') }}" class="{{ request()->routeIs('admin.*') ? 'active' : '' }}">Dashboard</a></li>
                     @elseif(auth()->user()->isStaff())
-                        <li><a href="{{ route('staff.dashboard') }}">Staff Panel</a></li>
+                        <li><a href="{{ route('admin.dashboard') }}">Staff Panel</a></li>
                     @else
                         <li><a href="{{ route('user.dashboard') }}" class="{{ request()->routeIs('user.dashboard') ? 'active' : '' }}">Dashboard</a></li>
                     @endif
@@ -336,63 +335,47 @@
     {{-- Mobile Slide-down Menu --}}
     <div class="mobile-menu" id="mobileMenu">
 
-        <a href="{{ $tenantHomeUrl }}" class="mob-link">
-            <i class="fas fa-home" style="width:20px;color:var(--text-muted);"></i> Home
-        </a>
-        <a href="{{ $tenantAboutUrl }}" class="mob-link">
-            <i class="fas fa-user" style="width:20px;color:var(--text-muted);"></i> About
-        </a>
-
-        {{-- Solutions accordion — only for IT/Entrepreneur --}}
-        @if(!$layoutTenant || $layoutTenant->email === 'gopi@outlook.in' || $tenantTemplate === 'entrepreneur' || $tenantTemplate === 'consultant')
-        <button class="mob-accordion-btn" onclick="toggleAccordion('mobSolutions', this)">
-            <i class="fas fa-lightbulb" style="width:20px;color:var(--text-muted);"></i>
-            Solutions
-            <i class="fas fa-chevron-down mob-chevron"></i>
-        </button>
-        <div class="mob-accordion-panel" id="mobSolutions">
-            <a href="{{ route('solutions.ai-automation') }}" class="mob-sub-link"><i class="fas fa-robot" style="width:16px;"></i> AI Solutions & Automation</a>
-            <a href="{{ route('solutions.custom-app') }}" class="mob-sub-link"><i class="fas fa-laptop-code" style="width:16px;"></i> Custom App Development</a>
-            <a href="{{ route('solutions.digital-transformation') }}" class="mob-sub-link"><i class="fas fa-sync-alt" style="width:16px;"></i> Digital Transformation</a>
-            <a href="{{ route('solutions.startup-product') }}" class="mob-sub-link"><i class="fas fa-rocket" style="width:16px;"></i> Startup Product Dev</a>
-            <a href="{{ route('solutions.branding-digital') }}" class="mob-sub-link"><i class="fas fa-palette" style="width:16px;"></i> Branding & Digital Presence</a>
-        </div>
+        @if($tenantMenuItems->isNotEmpty())
+            {{-- Dynamic mobile menu from Menu Builder --}}
+            @foreach($tenantMenuItems as $menuItem)
+                @if($menuItem->children->isNotEmpty())
+                <button class="mob-accordion-btn" onclick="toggleAccordion('mobMenu{{ $menuItem->id }}', this)">
+                    @if(!empty($menuItem->icon))<i class="{{ $menuItem->icon }}" style="width:20px;color:var(--text-muted);"></i>@else<i class="fas fa-circle" style="width:20px;color:var(--text-muted);font-size:0.5rem;"></i>@endif
+                    {{ $menuItem->label }}
+                    <i class="fas fa-chevron-down mob-chevron"></i>
+                </button>
+                <div class="mob-accordion-panel" id="mobMenu{{ $menuItem->id }}">
+                    @foreach($menuItem->children as $child)
+                    <a href="{{ $child->url }}" class="mob-sub-link" @if(($child->target ?? '') === '_blank') target="_blank" rel="noopener" @endif>
+                        @if(!empty($child->icon))<i class="{{ $child->icon }}" style="width:16px;"></i>@endif {{ $child->label }}
+                    </a>
+                    @endforeach
+                </div>
+                @else
+                <a href="{{ $menuItem->url }}" class="mob-link" @if(($menuItem->target ?? '') === '_blank') target="_blank" rel="noopener" @endif>
+                    @if(!empty($menuItem->icon))<i class="{{ $menuItem->icon }}" style="width:20px;color:var(--text-muted);"></i>@else<i class="fas fa-circle" style="width:20px;color:var(--text-muted);font-size:0.5rem;"></i>@endif
+                    {{ $menuItem->label }}
+                </a>
+                @endif
+            @endforeach
+        @else
+            {{-- Default mobile nav --}}
+            <a href="{{ $tenantHomeUrl }}" class="mob-link">
+                <i class="fas fa-home" style="width:20px;color:var(--text-muted);"></i> Home
+            </a>
+            <a href="{{ $tenantAboutUrl }}" class="mob-link">
+                <i class="fas fa-user" style="width:20px;color:var(--text-muted);"></i> About
+            </a>
+            <a href="{{ $tenantBlogUrl }}" class="mob-link">
+                <i class="fas fa-pen-nib" style="width:20px;color:var(--text-muted);"></i> Blog
+            </a>
+            <a href="{{ $tenantForumUrl }}" class="mob-link">
+                <i class="fas fa-comments" style="width:20px;color:var(--text-muted);"></i> Forum
+            </a>
+            <a href="{{ $tenantShopUrl }}" class="mob-link">
+                <i class="fas fa-shopping-bag" style="width:20px;color:var(--text-muted);"></i> Shop
+            </a>
         @endif
-
-        {{-- Blog accordion --}}
-        <button class="mob-accordion-btn" onclick="toggleAccordion('mobBlog', this)">
-            <i class="fas fa-pen-nib" style="width:20px;color:var(--text-muted);"></i>
-            Blog
-            <i class="fas fa-chevron-down mob-chevron"></i>
-        </button>
-        <div class="mob-accordion-panel" id="mobBlog">
-            <a href="{{ $tenantBlogUrl }}" class="mob-sub-link"><i class="fas fa-th-large" style="width:16px;"></i> All Posts</a>
-            @if($tenantTemplate === 'influencer')
-                <a href="{{ $tenantBlogUrl }}?category=fashion" class="mob-sub-link"><i class="fas fa-tshirt" style="width:16px;"></i> Fashion & Style</a>
-                <a href="{{ $tenantBlogUrl }}?category=beauty" class="mob-sub-link"><i class="fas fa-spa" style="width:16px;"></i> Beauty & Skincare</a>
-                <a href="{{ $tenantBlogUrl }}?category=travel" class="mob-sub-link"><i class="fas fa-plane" style="width:16px;"></i> Travel</a>
-            @elseif($tenantTemplate === 'advocate')
-                <a href="{{ $tenantBlogUrl }}?category=corporate-law" class="mob-sub-link"><i class="fas fa-building" style="width:16px;"></i> Corporate Law</a>
-                <a href="{{ $tenantBlogUrl }}?category=consumer-rights" class="mob-sub-link"><i class="fas fa-shield-alt" style="width:16px;"></i> Consumer Rights</a>
-                <a href="{{ $tenantBlogUrl }}?category=startup-legal" class="mob-sub-link"><i class="fas fa-rocket" style="width:16px;"></i> Startup Legal</a>
-            @else
-                <a href="{{ $tenantBlogUrl }}?category=ai-automation" class="mob-sub-link"><i class="fas fa-robot" style="width:16px;"></i> AI & Automation</a>
-                <a href="{{ $tenantBlogUrl }}?category=hacking-security" class="mob-sub-link"><i class="fas fa-shield-alt" style="width:16px;"></i> Hacking & Security</a>
-                <a href="{{ $tenantBlogUrl }}?category=startup-product" class="mob-sub-link"><i class="fas fa-rocket" style="width:16px;"></i> Startup & Product Dev</a>
-            @endif
-        </div>
-
-        <hr class="mobile-divider">
-        <a href="{{ $tenantJobsUrl }}" class="mob-link">
-            <i class="fas fa-briefcase" style="width:20px;color:var(--text-muted);"></i>
-            {{ $tenantTemplate === 'advocate' ? 'Vacancies' : 'Jobs' }}
-        </a>
-        <a href="{{ route('forum.index') }}" class="mob-link">
-            <i class="fas fa-comments" style="width:20px;color:var(--text-muted);"></i> Forum
-        </a>
-        <a href="{{ $tenantShopUrl }}" class="mob-link">
-            <i class="fas fa-shopping-bag" style="width:20px;color:var(--text-muted);"></i> Shop
-        </a>
 
         @auth
             <hr class="mobile-divider">
@@ -406,30 +389,17 @@
                     <a href="{{ route('admin.dashboard') }}" class="mob-sub-link"><i class="fas fa-home" style="width:16px;"></i> Overview</a>
                     <a href="{{ route('admin.blog.index') }}" class="mob-sub-link"><i class="fas fa-pen-nib" style="width:16px;"></i> Blog Posts</a>
                     <a href="{{ route('admin.jobs.index') }}" class="mob-sub-link"><i class="fas fa-briefcase" style="width:16px;"></i> Job Listings</a>
-                    <a href="{{ route('admin.expenses.index') }}" class="mob-sub-link"><i class="fas fa-wallet" style="width:16px;"></i> Expenses</a>
-                    <a href="{{ route('admin.users.index') }}" class="mob-sub-link"><i class="fas fa-users" style="width:16px;"></i> Users</a>
-                    <a href="{{ route('admin.crm.leads') }}" class="mob-sub-link"><i class="fas fa-handshake" style="width:16px;"></i> CRM Leads</a>
-                    <a href="{{ route('admin.crm.training') }}" class="mob-sub-link"><i class="fas fa-robot" style="width:16px;"></i> AI Training</a>
-                    <a href="{{ route('admin.ecommerce.dashboard') }}" class="mob-sub-link"><i class="fas fa-store" style="width:16px;"></i> E-commerce</a>
+                    <a href="{{ route('admin.ecommerce.dashboard') }}" class="mob-sub-link"><i class="fas fa-shopping-cart" style="width:16px;"></i> E-Commerce</a>
                     <a href="{{ route('admin.settings.index') }}" class="mob-sub-link"><i class="fas fa-cog" style="width:16px;"></i> Site Settings</a>
                 </div>
             @elseif(auth()->user()->isStaff())
-                <a href="{{ route('staff.dashboard') }}" class="mob-link">
+                <a href="{{ route('admin.dashboard') }}" class="mob-link">
                     <i class="fas fa-user-tie" style="width:20px;color:var(--text-muted);"></i> Staff Panel
                 </a>
             @else
-                <button class="mob-accordion-btn" onclick="toggleAccordion('mobUserDash', this)">
-                    <i class="fas fa-th-large" style="width:20px;color:var(--text-muted);"></i>
-                    My Dashboard
-                    <i class="fas fa-chevron-down mob-chevron"></i>
-                </button>
-                <div class="mob-accordion-panel" id="mobUserDash">
-                    <a href="{{ route('user.dashboard') }}" class="mob-sub-link"><i class="fas fa-home" style="width:16px;"></i> Overview</a>
-                    <a href="{{ route('calendar.index') }}" class="mob-sub-link"><i class="fas fa-calendar-alt" style="width:16px;"></i> Calendar</a>
-                    <a href="{{ route('chat.index') }}" class="mob-sub-link"><i class="fas fa-comment-dots" style="width:16px;"></i> Chat</a>
-                    <a href="{{ route('forum.index') }}" class="mob-sub-link"><i class="fas fa-comments" style="width:16px;"></i> Forum</a>
-                    <a href="{{ route('profile.edit') }}" class="mob-sub-link"><i class="fas fa-user-cog" style="width:16px;"></i> Profile</a>
-                </div>
+                <a href="{{ route('user.dashboard') }}" class="mob-link">
+                    <i class="fas fa-th-large" style="width:20px;color:var(--text-muted);"></i> My Dashboard
+                </a>
             @endif
             <hr class="mobile-divider">
             <form method="POST" action="{{ route('logout') }}" style="width:100%;">
@@ -470,37 +440,46 @@
         <div class="footer-inner">
             <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1.6fr; gap: 2rem; margin-bottom: 2rem;">
                 <div>
-                    @if($layoutTenant && $layoutTenant->profile_photo)
-                        <img src="{{ asset('storage/' . $layoutTenant->profile_photo) }}" alt="{{ $siteName }}" style="height: 44px; width: 44px; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; display: block;">
+                    @if($tenantLogo)
+                        <img src="{{ $tenantLogo }}" alt="{{ $siteName }}" style="height: 44px; width: auto; margin-bottom: 0.75rem; display: block;">
+                    @elseif($isGopiBlog)
+                        <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K" style="height: 44px; width: auto; margin-bottom: 0.75rem; display: block;">
+                    @elseif($tenantAvatar)
+                        <img src="{{ asset('storage/' . $tenantAvatar) }}" alt="{{ $siteName }}" style="height: 44px; width: 44px; border-radius: 50%; object-fit: cover; margin-bottom: 0.75rem; display: block;">
                     @elseif(!$layoutTenant || $isMainDomain)
                         <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K" style="height: 44px; width: auto; margin-bottom: 0.75rem; display: block;">
                     @else
                         <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.2rem;color:#fff;margin-bottom:0.75rem;">{{ strtoupper(substr($siteName,0,1)) }}</div>
                     @endif
                     <p class="text-secondary text-sm">{{ $footerTagline ?: 'Professional portfolio powered by Xenoraa.' }}</p>
+                    @if(!empty($tenantSettings['contact_phone']) || !empty($tenantSettings['contact_email']))
+                    <p class="text-sm text-muted" style="margin-top: 0.75rem;">
+                        @if(!empty($tenantSettings['contact_phone']))<i class="fas fa-phone" style="margin-right: 0.4rem;"></i>{{ $tenantSettings['contact_phone'] }}<br>@endif
+                        @if(!empty($tenantSettings['contact_email']))<i class="fas fa-envelope" style="margin-right: 0.4rem;"></i>{{ $tenantSettings['contact_email'] }}@endif
+                    </p>
+                    @endif
                 </div>
                 <div>
                     <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Quick Links</h4>
                     <div style="display: flex; flex-direction: column; gap: 0.4rem;">
-                        <a href="{{ $tenantHomeUrl }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">Home</a>
-                        <a href="{{ $tenantAboutUrl }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">About</a>
-                        <a href="{{ $tenantBlogUrl }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">Blog</a>
-                        <a href="{{ $tenantJobsUrl }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">{{ $tenantTemplate === 'advocate' ? 'Vacancies' : 'Jobs' }}</a>
+                        @foreach($footerLinks as $fl)
+                        <a href="{{ $fl->url ?? ($fl['url'] ?? '#') }}" style="color: var(--text-muted); text-decoration: none; font-size: 0.875rem;">{{ $fl->label ?? ($fl['label'] ?? 'Link') }}</a>
+                        @endforeach
                     </div>
                 </div>
                 <div>
                     <h4 style="font-size: 0.875rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">Connect</h4>
                     <div class="social-links">
-                        @foreach($footerSocials as $social)
-                        <a href="{{ $social->url }}" class="social-link" target="_blank" rel="noopener" title="{{ ucfirst($social->platform) }}">
-                            <i class="{{ $social->icon_class }}"></i>
-                        </a>
-                        @endforeach
+                        @forelse($footerSocials as $social)
+                            @if(!empty($social->url) && $social->url !== 'https://www.linkedin.com/in/' && $social->url !== 'https://www.instagram.com/' && strlen($social->url) > 20)
+                            <a href="{{ $social->url }}" class="social-link" target="_blank" rel="noopener" title="{{ ucfirst($social->platform) }}">
+                                <i class="{{ $social->icon_class }}"></i>
+                            </a>
+                            @endif
+                        @empty
+                            <p class="text-muted text-sm">No social links configured.</p>
+                        @endforelse
                     </div>
-                    <p class="text-sm text-muted" style="margin-top: 1rem;">
-                        @if(!empty($tenantSettings['contact_phone']))<i class="fas fa-phone" style="margin-right: 0.4rem;"></i>{{ $tenantSettings['contact_phone'] }}<br>@endif
-                        @if(!empty($tenantSettings['contact_email']))<i class="fas fa-envelope" style="margin-right: 0.4rem;"></i>{{ $tenantSettings['contact_email'] }}@endif
-                    </p>
                 </div>
                 <div>
                     <x-newsletter-subscribe variant="compact" />

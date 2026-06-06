@@ -1,5 +1,9 @@
 @extends('layouts.app')
 @section('content')
+@php
+$_sec  = isset($homePage) && $homePage ? $homePage : null;
+$_show = fn(string $k) => !$_sec || $_sec->isSectionEnabled($k);
+@endphp
 {{-- Influencer / Content Creator Template --}}
 <style>
 .xn-inf { font-family: 'Inter', sans-serif; background: #0a0a0a; color: #e2e8f0; min-height: 100vh; }
@@ -41,8 +45,8 @@
 <div class="xn-inf">
     <div class="xn-inf-hero">
         <div class="xn-inf-avatar">
-            @if($tenant->profile_photo)
-                <img src="{{ asset('storage/'.$tenant->profile_photo) }}" alt="{{ $tenant->name }}" style="width:100%;height:100%;object-fit:cover;">
+            @if($tenant->avatar)
+                <img src="{{ asset('storage/'.$tenant->avatar) }}" alt="{{ $tenant->name }}" style="width:100%;height:100%;object-fit:cover;">
             @else
                 <i class="fas fa-star"></i>
             @endif
