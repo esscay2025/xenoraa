@@ -164,7 +164,7 @@ class PortfolioController extends Controller
         $homePage = CustomPage::where('user_id', $tenantId)
             ->where('page_type', 'home')
             ->first();
-        $homePageSections = $homePage ? $homePage->getMergedSections() : [];
+        $homePageSections = $homePage ? ($homePage->merged_sections ?? []) : [];
 
         // Override profile data with section data if available
         if ($homePage) {
