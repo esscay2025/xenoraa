@@ -442,9 +442,9 @@ class AgentController extends Controller
             ->latest()
             ->paginate(20);
         $stats = [
-            'pending'  => $agent->pending_commission ?? 0,
-            'earned'   => $agent->total_commission_earned ?? 0,
-            'paid'     => $agent->total_commission_paid ?? 0,
+            'total_earned'       => $agent->total_commission_earned ?? 0,
+            'pending_commission' => $agent->pending_commission ?? 0,
+            'total_paid'         => $agent->total_commission_paid ?? 0,
         ];
         return view('agent.commissions', compact('agent', 'commissions', 'stats'));
     }
@@ -456,7 +456,11 @@ class AgentController extends Controller
         $agent = $user->agentProfile;
         if (!$agent) abort(403, 'Agent profile not found.');
         $payouts = $agent->commissionPayouts()->with('processedBy')->latest()->paginate(20);
-        return view('agent.payouts', compact('agent', 'payouts'));
+        $stats = [
+            'total_paid'         => $agent->total_commission_paid ?? 0,
+            'pending_commission' => $agent->pending_commission ?? 0,
+        ];
+        return view('agent.payouts', compact('agent', 'payouts', 'stats'));
     }
 
     // ── Agent: Profile ────────────────────────────────────────────────────

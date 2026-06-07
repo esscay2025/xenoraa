@@ -8,6 +8,7 @@ use App\Models\CrmRequirement;
 use App\Models\ChatbotConversation;
 use App\Models\ChatbotTraining;
 use App\Models\User;
+use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -100,19 +101,28 @@ class ChatbotController extends Controller
             ];
         }
 
-        // ── Call OpenAI ──────────────────────────────────────────────────────
+        // ── Call OpenAI via direct HTTP (no package dependency) ─────────────
         try {
-            $client = \OpenAI::client(config('services.openai.api_key'));
-            $response = $client->chat()->create([
-                'model'       => 'gpt-4o-mini',
-                'messages'    => $messages,
-                'max_tokens'  => 400,
-                'temperature' => 0.7,
+            $apiKey  = config('services.openai.api_key') ?: env('OPENAI_API_KEY');
+            $apiBase = rtrim(config('services.openai.base_url') ?: env('OPENAI_API_BASE', 'https://api.openai.com/v1'), '/');
+            $http    = new GuzzleClient(['timeout' => 30]);
+            $res     = $http->post($apiBase . '/chat/completions', [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $apiKey,
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => [
+                    'model'       => 'gpt-4o-mini',
+                    'messages'    => $messages,
+                    'max_tokens'  => 400,
+                    'temperature' => 0.7,
+                ],
             ]);
-            $aiReply = $response->choices[0]->message->content;
+            $body    = json_decode($res->getBody()->getContents(), true);
+            $aiReply = $body['choices'][0]['message']['content'] ?? 'I could not generate a response. Please try again.';
         } catch (\Exception $e) {
             Log::error('Chatbot OpenAI error: ' . $e->getMessage());
-            $tenantName = $tenant?->name ?? 'the team';
+            $tenantName  = $tenant?->name ?? 'the team';
             $tenantEmail = $tenant?->email ?? 'support@xenoraa.com';
             $aiReply = "I'm having a small technical hiccup. Please try again in a moment, or feel free to reach out to {$tenantName} directly at {$tenantEmail}.";
         }
