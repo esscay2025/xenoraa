@@ -103,6 +103,7 @@ Route::get('/shop/{product:slug}', [ShopController::class, 'show'])->name('shop.
 Route::get('/chatbot/init', [ChatbotController::class, 'init'])->name('chatbot.init');
 Route::post('/chatbot/chat', [ChatbotController::class, 'chat'])->name('chatbot.chat');
 Route::post('/chatbot/contact', [ChatbotController::class, 'saveContact'])->name('chatbot.contact');
+Route::post('/chatbot/save-contact', [ChatbotController::class, 'saveContact'])->name('chatbot.save-contact'); // alias for widget compatibility
 
 // =============================================
 // AUTHENTICATION ROUTES (Breeze)

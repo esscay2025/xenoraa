@@ -15,11 +15,11 @@ class SuperAdminMiddleware
 
         $user = auth()->user();
 
-        // Use isSuperAdmin() which checks both email list and role relationship
-        if (!$user->isSuperAdmin()) {
-            abort(403, 'Super Admin access required.');
+        // Allow: full super admin, SA staff, and SA agents (Xenoraa internal team)
+        if ($user->isSuperAdmin() || $user->isSaStaff() || $user->isSaAgent()) {
+            return $next($request);
         }
 
-        return $next($request);
+        abort(403, 'Super Admin access required.');
     }
 }

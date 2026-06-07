@@ -80,8 +80,13 @@ class AuthenticatedSessionController extends Controller
             }
         }
 
-        // Super admin ONLY redirects to superadmin dashboard when logging in on xenoraa.com
-        if ($user->isSuperAdmin() && $isMainDomain) {
+        // Super admin, SA staff, and SA agents → superadmin dashboard (only on xenoraa.com)
+        if (($user->isSuperAdmin() || $user->isSaStaff() || $user->isSaAgent()) && $isMainDomain) {
+            return redirect()->route('superadmin.dashboard');
+        }
+
+        // If an SA user logs in from a non-main domain, still redirect to superadmin dashboard
+        if ($user->isSaStaff() || $user->isSaAgent()) {
             return redirect()->route('superadmin.dashboard');
         }
 
@@ -119,7 +124,7 @@ class AuthenticatedSessionController extends Controller
         // Determine redirect URL before logging out
         $redirectUrl = '/';
         if ($user) {
-            if ($user->isSuperAdmin()) {
+            if ($user->isSuperAdmin() || $user->isSaStaff() || $user->isSaAgent()) {
                 $redirectUrl = route('login');
             } elseif ($user->isAdmin()) {
                 // If on custom domain, redirect to custom domain login

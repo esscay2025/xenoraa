@@ -284,7 +284,17 @@
         <div class="sa-sidebar-avatar">{{ substr(auth()->user()->name ?? 'S', 0, 1) }}</div>
         <div class="sa-sidebar-profile-info">
             <div class="sa-sidebar-profile-name">{{ auth()->user()->name ?? 'Super Admin' }}</div>
-            <div class="sa-sidebar-profile-role">Super Administrator</div>
+            <div class="sa-sidebar-profile-role">
+                @if(auth()->user()->isSuperAdmin())
+                    Super Administrator
+                @elseif(auth()->user()->isSaStaff())
+                    Xenoraa Staff
+                @elseif(auth()->user()->isSaAgent())
+                    Xenoraa Agent
+                @else
+                    Xenoraa Team
+                @endif
+            </div>
         </div>
         <div class="sa-sidebar-profile-actions">
             <a href="{{ route('xenoraa.home') }}" class="sa-sidebar-profile-btn" title="View Site" target="_blank">
