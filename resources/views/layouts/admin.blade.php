@@ -440,31 +440,29 @@
             @endif
         </nav>
 
-        <div class="sidebar-footer">
-            <div class="sidebar-user">
-                <div class="sidebar-avatar">
-                    @if(auth()->user()->avatar)
-                        <img src="{{ asset('storage/' . auth()->user()->avatar) }}" alt="{{ auth()->user()->name }}">
-                    @else
-                        <i class="fas fa-user"></i>
-                    @endif
-                </div>
-                <div>
-                    <div class="sidebar-user-name">{{ auth()->user()->name }}</div>
-                    <div class="sidebar-user-role">{{ ucfirst(auth()->user()->role?->name ?? 'Admin') }}</div>
-                </div>
-            </div>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="btn btn-outline btn-sm" style="width: 100%;">
-                    <i class="fas fa-sign-out-alt"></i> Sign Out
-                </button>
-            </form>
-        </div>
     </aside>
 
     <!-- Main Content -->
     <div class="main-content">
+        @php
+            $tenantUser = auth()->user();
+            $viewSiteUrl = $tenantUser->custom_domain
+                ? 'https://' . $tenantUser->custom_domain
+                : url('/' . $tenantUser->username);
+            $topbarChatbotEnabled = \App\Models\SiteSetting::getValueForTenant($tenantUser->id, 'chatbot_enabled', '1');
+            $isImpersonating = session()->has('impersonating_customer_id');
+        @endphp
+
+        {{-- Exit Impersonation Banner (only when super admin is impersonating) --}}
+        @if($isImpersonating)
+        <div style="background:#f59e0b;color:#000;padding:0.6rem 2rem;display:flex;align-items:center;justify-content:space-between;font-size:0.875rem;font-weight:600;">
+            <span><i class="fas fa-user-secret" style="margin-right:0.5rem;"></i>You are viewing as <strong>{{ $tenantUser->name }}</strong> (@{{ $tenantUser->username }})</span>
+            <a href="{{ route('superadmin.exit-impersonation') }}" style="background:#000;color:#f59e0b;padding:0.35rem 1rem;border-radius:6px;text-decoration:none;font-size:0.8rem;">
+                <i class="fas fa-sign-out-alt"></i> Exit Impersonation
+            </a>
+        </div>
+        @endif
+
         <div class="topbar">
             <div style="display:flex;align-items:center;gap:0.75rem;">
                 <button class="mobile-menu-btn" id="adminMenuToggle" onclick="toggleAdminSidebar()">
@@ -472,16 +470,7 @@
                 </button>
                 <h1 class="topbar-title">@yield('page-title', 'Dashboard')</h1>
             </div>
-            <div style="display: flex; align-items: center; gap: 1rem;">
-                @php
-                    $tenantUser = auth()->user();
-                    $viewSiteUrl = $tenantUser->custom_domain
-                        ? 'https://' . $tenantUser->custom_domain
-                        : url('/' . $tenantUser->username);
-                @endphp
-                @php
-                    $topbarChatbotEnabled = \App\Models\SiteSetting::getValueForTenant(auth()->user()->id, 'chatbot_enabled', '1');
-                @endphp
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
                 <button class="mode-toggle" id="aiToggleBtn" onclick="quickToggleAI()" title="Toggle AI Assistant on/off"
                     style="{{ $topbarChatbotEnabled == '1' ? 'color:#22c55e;border-color:#22c55e;' : 'color:#ef4444;border-color:#ef4444;' }}">
                     <i class="fas fa-robot"></i>
@@ -494,6 +483,45 @@
                 <a href="{{ $viewSiteUrl }}" class="btn btn-outline btn-sm" target="_blank">
                     <i class="fas fa-external-link-alt"></i> View Site
                 </a>
+
+                {{-- Profile Dropdown --}}
+                <div class="topbar-profile" id="profileDropdownWrap" style="position:relative;">
+                    <button onclick="toggleProfileDropdown()" style="display:flex;align-items:center;gap:0.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:0.35rem 0.75rem;cursor:pointer;color:var(--text-primary);">
+                        @if($tenantUser->avatar)
+                            <img src="{{ asset('storage/' . $tenantUser->avatar) }}" alt="{{ $tenantUser->name }}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;">
+                        @else
+                            <span style="width:28px;height:28px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:#fff;">{{ strtoupper(substr($tenantUser->name,0,1)) }}</span>
+                        @endif
+                        <span style="font-size:0.8rem;font-weight:600;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ $tenantUser->username ?? $tenantUser->name }}</span>
+                        <i class="fas fa-chevron-down" style="font-size:0.65rem;color:var(--text-muted);"></i>
+                    </button>
+                    <div id="profileDropdownMenu" style="display:none;position:absolute;right:0;top:calc(100% + 8px);background:var(--bg-card);border:1px solid var(--border);border-radius:10px;min-width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.3);z-index:999;overflow:hidden;">
+                        <div style="padding:1rem;border-bottom:1px solid var(--border);">
+                            <div style="font-size:0.875rem;font-weight:700;">{{ $tenantUser->name }}</div>
+                            <div style="font-size:0.75rem;color:var(--text-muted);">@{{ $tenantUser->username ?? '—' }}</div>
+                            <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">{{ $tenantUser->email }}</div>
+                        </div>
+                        <div style="padding:0.5rem 0;">
+                            <a href="{{ route('admin.settings.index') }}" style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;font-size:0.8rem;color:var(--text-primary);text-decoration:none;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+                                <i class="fas fa-user-edit" style="width:16px;color:var(--text-muted);"></i> Edit Profile
+                            </a>
+                            <a href="{{ route('admin.settings.index') }}#change-password" style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;font-size:0.8rem;color:var(--text-primary);text-decoration:none;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+                                <i class="fas fa-key" style="width:16px;color:var(--text-muted);"></i> Change Password
+                            </a>
+                            <a href="{{ route('admin.settings.index') }}#subscription" style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;font-size:0.8rem;color:var(--text-primary);text-decoration:none;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+                                <i class="fas fa-credit-card" style="width:16px;color:var(--text-muted);"></i> View Subscription
+                            </a>
+                        </div>
+                        <div style="padding:0.5rem 0;border-top:1px solid var(--border);">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" style="display:flex;align-items:center;gap:0.75rem;padding:0.6rem 1rem;font-size:0.8rem;color:#ef4444;background:transparent;border:none;cursor:pointer;width:100%;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+                                    <i class="fas fa-sign-out-alt" style="width:16px;"></i> Sign Out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -605,6 +633,21 @@
                     icon.className = 'fas fa-bars';
                 }
             });
+        });
+
+        // ── Profile Dropdown ─────────────────────────────────────
+        function toggleProfileDropdown() {
+            const menu = document.getElementById('profileDropdownMenu');
+            if (!menu) return;
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+        // Close profile dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const wrap = document.getElementById('profileDropdownWrap');
+            const menu = document.getElementById('profileDropdownMenu');
+            if (wrap && menu && !wrap.contains(e.target)) {
+                menu.style.display = 'none';
+            }
         });
     </script>
     @stack('scripts')

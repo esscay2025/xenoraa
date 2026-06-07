@@ -251,6 +251,40 @@ class CustomerController extends Controller
             ->with('success', 'Customer deleted.');
     }
 
+    // ── Toggle customer status ─────────────────────────────────────────────
+    public function toggleStatus($id)
+    {
+        $this->authorize_sa('customers.edit');
+        $customer = User::whereNotNull('username')->findOrFail($id);
+        $newStatus = $customer->status === 'active' ? 'suspended' : 'active';
+        $customer->update(['status' => $newStatus]);
+        return back()->with('success', 'Customer status updated to ' . $newStatus . '.');
+    }
+
+    // ── Impersonate customer ───────────────────────────────────────────────
+    public function impersonate($id)
+    {
+        $this->authorize_sa('customers.impersonate');
+        $customer = User::whereNotNull('username')->findOrFail($id);
+        session(['impersonating_customer_id' => $customer->id, 'impersonator_id' => auth()->id()]);
+        \Illuminate\Support\Facades\Auth::login($customer);
+        return redirect()->route('admin.dashboard')
+            ->with('success', 'Now viewing as ' . $customer->name . '. Use "Exit Impersonation" to return.');
+    }
+
+    // ── Exit impersonation ─────────────────────────────────────────────────
+    public function exitImpersonation()
+    {
+        $impersonatorId = session()->pull('impersonator_id');
+        session()->forget('impersonating_customer_id');
+        if ($impersonatorId) {
+            \Illuminate\Support\Facades\Auth::loginUsingId($impersonatorId);
+            return redirect()->route('superadmin.customers.index')
+                ->with('success', 'Returned to Super Admin.');
+        }
+        return redirect()->route('superadmin.dashboard');
+    }
+
     // ── Permission gate ────────────────────────────────────────────────────
     private function authorize_sa(string $permission): void
     {

@@ -477,6 +477,9 @@ Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmi
     Route::put('/customers/{id}', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'update'])->name('customers.update');
     Route::post('/customers/{id}/assign-subscription', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'assignSubscription'])->name('customers.assign-subscription');
     Route::patch('/customers/{id}/toggle-status', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'toggleStatus'])->name('customers.toggle-status');
+    Route::delete('/customers/{id}', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'destroy'])->name('customers.destroy');
+    Route::get('/customers/{id}/impersonate', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'impersonate'])->name('customers.impersonate');
+    Route::get('/exit-impersonation', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'exitImpersonation'])->name('exit-impersonation');
 
     // ---- ADMINISTRATION: Agents ----
     Route::get('/agents', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'index'])->name('agents.index');
@@ -495,8 +498,8 @@ Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmi
     Route::get('/staff/{id}/edit', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'edit'])->name('staff.edit');
     Route::put('/staff/{id}', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'update'])->name('staff.update');
     Route::delete('/staff/{id}', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'destroy'])->name('staff.destroy');
-    Route::get('/staff/roles', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'roles'])->name('staff.roles');
-    Route::put('/staff/roles/{id}', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'updateRole'])->name('staff.roles.update');
+    Route::get('/staff/roles', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'rolesIndex'])->name('staff.roles');
+    Route::put('/staff/roles/{id}', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'updateRolePermissions'])->name('staff.roles.update');
 });
 
 // ---- AGENT PORTAL ----

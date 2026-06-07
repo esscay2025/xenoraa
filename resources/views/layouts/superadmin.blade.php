@@ -174,28 +174,7 @@
         </div>
     </div>
 
-    {{-- User Management --}}
-    <div class="sa-nav-group {{ request()->routeIs('superadmin.users*') ? 'open' : '' }}" id="grp-users">
-        <div class="sa-nav-group-header" onclick="toggleGroup('grp-users')">
-            <span class="sa-nav-group-label">User Management</span>
-            <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
-        </div>
-        <div class="sa-nav-group-body">
-            <a href="{{ route('superadmin.users') }}" class="sa-nav-item {{ request()->routeIs('superadmin.users') && !request('plan') ? 'active' : '' }}">
-                <i class="fas fa-users"></i> All Users
-                <span class="sa-nav-badge">{{ \App\Models\User::whereNotNull('username')->count() }}</span>
-            </a>
-            <a href="{{ route('superadmin.users') }}?plan=starter" class="sa-nav-item {{ request('plan')==='starter' ? 'active' : '' }}">
-                <i class="fas fa-user"></i> Starter Plan
-            </a>
-            <a href="{{ route('superadmin.users') }}?plan=professional" class="sa-nav-item {{ request('plan')==='professional' ? 'active' : '' }}">
-                <i class="fas fa-user-tie"></i> Professional
-            </a>
-            <a href="{{ route('superadmin.users') }}?plan=business" class="sa-nav-item {{ request('plan')==='business' ? 'active' : '' }}">
-                <i class="fas fa-building"></i> Business Pro
-            </a>
-        </div>
-    </div>
+    {{-- User Management removed - covered by Administration > Customers --}}
 
     {{-- Administration --}}
     <div class="sa-nav-group {{ request()->routeIs('superadmin.customers*') || request()->routeIs('superadmin.agents*') || request()->routeIs('superadmin.staff*') ? 'open' : '' }}" id="grp-admin">
