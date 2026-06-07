@@ -344,6 +344,52 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         Route::patch('/requirements/{requirement}/scope-sent', [\App\Http\Controllers\Admin\CrmController::class, 'markScopeSent'])->name('requirements.scope-sent');
     });
 
+    // ─── CRM2 Module (Complete CRM Rebuild) ─────────────────────────────────
+    Route::prefix('crm2')->name('crm2.')->group(function () {
+        $ctrl = \App\Http\Controllers\Admin\CrmModuleController::class;
+
+        // Analysis & Reports
+        Route::get('/analysis', [$ctrl, 'analysis'])->name('analysis');
+        Route::get('/reports',  [$ctrl, 'reports'])->name('reports');
+
+        // Sales (Leads, Contacts, Accounts, Deals, Forecasts)
+        Route::get('/sales',                        [$ctrl, 'sales'])->name('sales');
+        Route::post('/sales',                       [$ctrl, 'salesStore'])->name('sales.store');
+        Route::patch('/sales/{type}/{id}',          [$ctrl, 'salesUpdate'])->name('sales.update');
+        Route::delete('/sales/{type}/{id}',         [$ctrl, 'salesDestroy'])->name('sales.destroy');
+
+        // Activities (Tasks, Meetings, Calls)
+        Route::get('/activities',                   [$ctrl, 'activities'])->name('activities');
+        Route::post('/activity',                    [$ctrl, 'activityStore'])->name('activity.store');
+        Route::patch('/activity/{id}',              [$ctrl, 'activityUpdate'])->name('activity.update');
+        Route::patch('/activity/{id}/complete',     [$ctrl, 'activityComplete'])->name('activity.complete');
+        Route::delete('/activity/{id}',             [$ctrl, 'activityDestroy'])->name('activity.destroy');
+
+        // Inventory (Price Books, Quotes, Sales Orders, Purchase Orders, Invoices, Vendors)
+        Route::get('/inventory',                    [$ctrl, 'inventory'])->name('inventory');
+        Route::post('/inventory',                   [$ctrl, 'inventoryStore'])->name('inventory.store');
+        Route::delete('/inventory/{type}/{id}',     [$ctrl, 'inventoryDestroy'])->name('inventory.destroy');
+
+        // Support (Cases, Solutions)
+        Route::get('/support',                      [$ctrl, 'support'])->name('support');
+        Route::post('/support',                     [$ctrl, 'supportStore'])->name('support.store');
+        Route::patch('/support/{type}/{id}',        [$ctrl, 'supportUpdate'])->name('support.update');
+        Route::delete('/support/{type}/{id}',       [$ctrl, 'supportDestroy'])->name('support.destroy');
+
+        // Services
+        Route::get('/services',                     [$ctrl, 'services'])->name('services');
+        Route::post('/services',                    [$ctrl, 'servicesStore'])->name('services.store');
+        Route::patch('/services/{type}/{id}',       [$ctrl, 'servicesUpdate'])->name('services.update');
+        Route::delete('/services/{type}/{id}',      [$ctrl, 'servicesDestroy'])->name('services.destroy');
+
+        // Projects
+        Route::get('/projects',                     [$ctrl, 'projects'])->name('projects');
+        Route::post('/projects',                    [$ctrl, 'projectsStore'])->name('projects.store');
+        Route::patch('/projects/{type}/{id}',       [$ctrl, 'projectsUpdate'])->name('projects.update');
+        Route::patch('/projects/task/{id}/status',  [$ctrl, 'projectTaskStatus'])->name('projects.task.status');
+        Route::delete('/projects/{type}/{id}',      [$ctrl, 'projectsDestroy'])->name('projects.destroy');
+    });
+
     // ─── CoreModules ──────────────────────────────────────────────────────
 
     // Projects (Portfolio)

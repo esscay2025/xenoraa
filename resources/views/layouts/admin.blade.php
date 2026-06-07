@@ -24,6 +24,9 @@
     <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700,800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @if(request()->routeIs('admin.crm2*'))
+    <link rel="stylesheet" href="{{ asset('css/crm2.css') }}">
+    @endif
     <style>
         /* ── Dark mode (default) ─────────────────── */
         :root, [data-theme="dark"] {
@@ -376,18 +379,36 @@
 
             {{-- CRM Group --}}
             @if($canSee('crm'))
-            @php $crmActive = request()->routeIs('admin.newcrm*') || request()->routeIs('admin.newsletter*') || request()->routeIs('admin.calendar*'); @endphp
+            @php $crmActive = request()->routeIs('admin.crm2*') || request()->routeIs('admin.newcrm*') || request()->routeIs('admin.newsletter*') || request()->routeIs('admin.calendar*'); @endphp
             <button class="sidebar-group-btn {{ $crmActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgNewCRM', this)">
                 <i class="fas fa-handshake group-icon"></i> CRM
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
             <div class="sidebar-group-panel {{ $crmActive ? 'open' : '' }}" id="sgNewCRM">
-                <a href="{{ route('admin.newcrm.dashboard') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.dashboard') ? 'active' : '' }}"><i class="fas fa-chart-pie"></i> CRM Dashboard</a>
-                <a href="{{ route('admin.newcrm.accounts') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.accounts*') ? 'active' : '' }}"><i class="fas fa-building"></i> Accounts</a>
-                <a href="{{ route('admin.newcrm.contacts') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.contacts*') ? 'active' : '' }}"><i class="fas fa-address-book"></i> Contacts</a>
-                <a href="{{ route('admin.newcrm.leads') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.leads*') ? 'active' : '' }}"><i class="fas fa-user-tag"></i> Leads</a>
-                <a href="{{ route('admin.newcrm.deals') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.deals*') ? 'active' : '' }}"><i class="fas fa-funnel-dollar"></i> Pipeline &amp; Deals</a>
-                <a href="{{ route('admin.newcrm.activities') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newcrm.activities*') ? 'active' : '' }}"><i class="fas fa-tasks"></i> Activities</a>
+
+                {{-- Analysis & Reports --}}
+                <a href="{{ route('admin.crm2.analysis') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.analysis') ? 'active' : '' }}"><i class="fas fa-chart-line"></i> Analysis</a>
+                <a href="{{ route('admin.crm2.reports') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.reports') ? 'active' : '' }}"><i class="fas fa-file-chart-line"></i> Reports</a>
+
+                {{-- Sales (Leads, Contacts, Accounts, Deals, Forecasts) --}}
+                <a href="{{ route('admin.crm2.sales', ['tab'=>'leads']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.sales') && request('tab','leads')==='leads' ? 'active' : '' }}"><i class="fas fa-chart-line"></i> Sales</a>
+
+                {{-- Activities (Tasks, Meetings, Calls) --}}
+                <a href="{{ route('admin.crm2.activities', ['tab'=>'tasks']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.activities') ? 'active' : '' }}"><i class="fas fa-tasks"></i> Activities</a>
+
+                {{-- Inventory --}}
+                <a href="{{ route('admin.crm2.inventory', ['tab'=>'price_books']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.inventory') ? 'active' : '' }}"><i class="fas fa-boxes"></i> Inventory</a>
+
+                {{-- Support --}}
+                <a href="{{ route('admin.crm2.support', ['tab'=>'cases']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.support') ? 'active' : '' }}"><i class="fas fa-headset"></i> Support</a>
+
+                {{-- Services --}}
+                <a href="{{ route('admin.crm2.services', ['tab'=>'catalog']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.services') ? 'active' : '' }}"><i class="fas fa-concierge-bell"></i> Services</a>
+
+                {{-- Projects --}}
+                <a href="{{ route('admin.crm2.projects', ['tab'=>'projects']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.projects') ? 'active' : '' }}"><i class="fas fa-project-diagram"></i> Projects</a>
+
+                <div class="sidebar-divider"></div>
                 <a href="{{ route('admin.newsletter.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Newsletter</a>
                 <a href="{{ route('admin.calendar.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.calendar*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Calendar &amp; Notes</a>
             </div>
