@@ -25,6 +25,12 @@
     <button class="settings-tab" data-tab="advanced">
         <i class="fas fa-sliders-h"></i> Advanced
     </button>
+    <button class="settings-tab" data-tab="change-password">
+        <i class="fas fa-lock"></i> Change Password
+    </button>
+    <button class="settings-tab" data-tab="subscription">
+        <i class="fas fa-credit-card"></i> Subscription
+    </button>
 </div>
 
 {{-- ── BRANDING TAB ── --}}
@@ -257,6 +263,144 @@
             <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Contact Settings</button>
         </div>
     </form>
+</div>
+
+{{-- ── CHANGE PASSWORD TAB ── --}}
+<div class="settings-panel" id="tab-change-password">
+    <div class="card" style="max-width:520px;">
+        <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem;"><i class="fas fa-lock" style="margin-right:0.5rem;"></i>Change Password</h3>
+        @if(session('password_success'))
+            <div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);color:#6ee7b7;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1.25rem;font-size:0.875rem;">
+                <i class="fas fa-check-circle"></i> {{ session('password_success') }}
+            </div>
+        @endif
+        @if(session('password_error'))
+            <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1.25rem;font-size:0.875rem;">
+                <i class="fas fa-exclamation-circle"></i> {{ session('password_error') }}
+            </div>
+        @endif
+        <form method="POST" action="{{ route('admin.settings.change-password') }}">
+            @csrf
+            <div class="form-group">
+                <label class="form-label">Current Password <span style="color:var(--danger)">*</span></label>
+                <input type="password" name="current_password" class="form-control" required placeholder="Enter your current password">
+                @error('current_password') <p style="color:#fca5a5;font-size:0.8rem;margin-top:0.3rem;">{{ $message }}</p> @enderror
+            </div>
+            <div class="form-group">
+                <label class="form-label">New Password <span style="color:var(--danger)">*</span></label>
+                <input type="password" name="new_password" class="form-control" required placeholder="Minimum 8 characters" minlength="8">
+                @error('new_password') <p style="color:#fca5a5;font-size:0.8rem;margin-top:0.3rem;">{{ $message }}</p> @enderror
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm New Password <span style="color:var(--danger)">*</span></label>
+                <input type="password" name="new_password_confirmation" class="form-control" required placeholder="Repeat new password">
+            </div>
+            <div style="margin-top:1.5rem;">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-lock"></i> Update Password</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- ── SUBSCRIPTION TAB ── --}}
+<div class="settings-panel" id="tab-subscription">
+    @php
+        $user = auth()->user();
+        $planColors = ['starter'=>'#3b82f6','professional'=>'#8b5cf6','business'=>'#f59e0b'];
+        $planColor  = $planColors[$user->plan] ?? '#6366f1';
+        $planExpiry = $user->plan_expires_at ? \Carbon\Carbon::parse($user->plan_expires_at) : null;
+        $daysLeft   = $planExpiry ? now()->diffInDays($planExpiry, false) : null;
+        $planFeatures = [
+            'starter'      => ['1 Professional Site','5 Pages','AI Chatbot','Blog Module','Basic Analytics','1 GB Storage'],
+            'professional' => ['1 Professional Site','Unlimited Pages','AI Chatbot','Blog + Shop','Advanced Analytics','Custom Domain','5 GB Storage','Priority Support'],
+            'business'     => ['1 Professional Site','Unlimited Pages','AI Chatbot','All Modules','Full Analytics','Custom Domain','20 GB Storage','Dedicated Support','White-label Option'],
+        ];
+        $features = $planFeatures[$user->plan] ?? $planFeatures['starter'];
+    @endphp
+    <div style="max-width:640px;">
+        {{-- Plan Card --}}
+        <div class="card" style="border-top:3px solid {{ $planColor }};margin-bottom:1.5rem;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:1rem;">
+                <div>
+                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+                        <span style="background:{{ $planColor }};color:#fff;font-size:0.7rem;font-weight:700;padding:0.25rem 0.75rem;border-radius:20px;text-transform:uppercase;letter-spacing:0.05em;">{{ $user->plan }}</span>
+                        @if($user->status === 'active')
+                            <span style="background:rgba(16,185,129,0.1);color:#6ee7b7;border:1px solid rgba(16,185,129,0.3);font-size:0.7rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:20px;">Active</span>
+                        @else
+                            <span style="background:rgba(239,68,68,0.1);color:#fca5a5;border:1px solid rgba(239,68,68,0.3);font-size:0.7rem;font-weight:700;padding:0.2rem 0.6rem;border-radius:20px;">{{ ucfirst($user->status) }}</span>
+                        @endif
+                    </div>
+                    <h2 style="font-size:1.5rem;font-weight:800;margin:0 0 0.25rem;text-transform:capitalize;">{{ ucfirst($user->plan) }} Plan</h2>
+                    <p style="color:var(--text-secondary);font-size:0.875rem;margin:0;">Your current subscription</p>
+                </div>
+                <div style="text-align:right;">
+                    @if($planExpiry)
+                        <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.25rem;">Expires</div>
+                        <div style="font-size:1rem;font-weight:700;color:{{ $daysLeft !== null && $daysLeft < 30 ? '#f59e0b' : 'var(--text-primary)' }};">{{ $planExpiry->format('d M Y') }}</div>
+                        @if($daysLeft !== null)
+                            <div style="font-size:0.8rem;color:{{ $daysLeft < 30 ? '#f59e0b' : 'var(--text-muted)' }};margin-top:0.2rem;">
+                                @if($daysLeft > 0) {{ $daysLeft }} days remaining @elseif($daysLeft == 0) Expires today @else Expired {{ abs($daysLeft) }} days ago @endif
+                            </div>
+                        @endif
+                    @else
+                        <div style="font-size:0.875rem;color:var(--text-muted);">No expiry set</div>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Progress bar for days remaining --}}
+            @if($planExpiry && $daysLeft !== null && $daysLeft > 0)
+                @php $totalDays = 365; $pct = min(100, round($daysLeft / $totalDays * 100)); @endphp
+                <div style="margin-top:1.25rem;">
+                    <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-bottom:0.4rem;">
+                        <span>Subscription period</span><span>{{ $pct }}% remaining</span>
+                    </div>
+                    <div style="background:var(--bg-secondary);border-radius:99px;height:6px;overflow:hidden;">
+                        <div style="width:{{ $pct }}%;height:100%;background:{{ $planColor }};border-radius:99px;transition:width 0.5s;"></div>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Features --}}
+            <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem;">
+                <h4 style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin:0 0 0.75rem;">Included Features</h4>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem;">
+                    @foreach($features as $feat)
+                        <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--text-secondary);">
+                            <i class="fas fa-check-circle" style="color:{{ $planColor }};font-size:0.75rem;"></i> {{ $feat }}
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        {{-- Account Info --}}
+        <div class="card">
+            <h3 style="font-size:1rem;font-weight:700;margin:0 0 1.25rem;border-bottom:1px solid var(--border);padding-bottom:0.75rem;"><i class="fas fa-user-circle" style="margin-right:0.5rem;"></i>Account Details</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">Username</div>
+                    <div style="font-size:0.9rem;font-weight:600;">@{{ $user->username ?? '—' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">Email</div>
+                    <div style="font-size:0.9rem;font-weight:600;">{{ $user->email }}</div>
+                </div>
+                <div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">Profession</div>
+                    <div style="font-size:0.9rem;font-weight:600;text-transform:capitalize;">{{ $user->profession ?? '—' }}</div>
+                </div>
+                <div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.25rem;">Member Since</div>
+                    <div style="font-size:0.9rem;font-weight:600;">{{ $user->created_at->format('d M Y') }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top:1.5rem;padding:1rem;background:rgba(99,102,241,0.05);border:1px solid rgba(99,102,241,0.2);border-radius:10px;">
+            <p style="margin:0;font-size:0.875rem;color:var(--text-secondary);"><i class="fas fa-info-circle" style="color:#6366f1;margin-right:0.5rem;"></i>To upgrade your plan or renew your subscription, please contact your account manager or reach out to <a href="mailto:support@xenoraa.com" style="color:#6366f1;">support@xenoraa.com</a>.</p>
+        </div>
+    </div>
 </div>
 
 {{-- ── ADVANCED TAB ── --}}

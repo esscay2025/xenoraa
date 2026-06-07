@@ -11,14 +11,50 @@
         <div>
             <a href="{{ route('admin.ecommerce.dashboard') }}" style="color:#6366f1;text-decoration:none;font-size:0.875rem;display:block;margin-bottom:0.5rem;"><i class="fas fa-arrow-left"></i> E-commerce</a>
             <h1 style="font-size:1.75rem;font-weight:700;color:#fff;margin:0;">Products</h1>
+            <p style="color:#9ca3af;font-size:0.875rem;margin:0.25rem 0 0;">{{ $products->total() }} product{{ $products->total() !== 1 ? 's' : '' }} total</p>
         </div>
-        <a href="{{ route('admin.ecommerce.products.create') }}" style="background:#6366f1;color:#fff;padding:0.5rem 1.25rem;border-radius:8px;text-decoration:none;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;">
-            <i class="fas fa-plus"></i> Add Product
-        </a>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;">
+            {{-- Download Template --}}
+            <a href="{{ route('admin.ecommerce.products.template') }}"
+               style="background:#1e293b;color:#9ca3af;border:1px solid #334155;padding:0.5rem 1rem;border-radius:8px;text-decoration:none;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;"
+               title="Download Excel import template">
+                <i class="fas fa-file-excel" style="color:#10b981;"></i> Template
+            </a>
+            {{-- Import --}}
+            <button onclick="document.getElementById('importModal').style.display='flex'"
+               style="background:#1e293b;color:#9ca3af;border:1px solid #334155;padding:0.5rem 1rem;border-radius:8px;cursor:pointer;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;">
+                <i class="fas fa-upload" style="color:#60a5fa;"></i> Import
+            </button>
+            {{-- Export --}}
+            <a href="{{ route('admin.ecommerce.products.export') }}"
+               style="background:#1e293b;color:#9ca3af;border:1px solid #334155;padding:0.5rem 1rem;border-radius:8px;text-decoration:none;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;">
+                <i class="fas fa-download" style="color:#f59e0b;"></i> Export
+            </a>
+            {{-- Add Product --}}
+            <a href="{{ route('admin.ecommerce.products.create') }}"
+               style="background:#6366f1;color:#fff;padding:0.5rem 1.25rem;border-radius:8px;text-decoration:none;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;">
+                <i class="fas fa-plus"></i> Add Product
+            </a>
+        </div>
     </div>
 
     @if(session('success'))
-        <div style="background:#064e3b;border:1px solid #10b981;color:#6ee7b7;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1.5rem;">{{ session('success') }}</div>
+        <div style="background:#064e3b;border:1px solid #10b981;color:#6ee7b7;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.5rem;">
+            <i class="fas fa-check-circle"></i> {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div style="background:#450a0a;border:1px solid #ef4444;color:#fca5a5;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.5rem;">
+            <i class="fas fa-exclamation-circle"></i> {{ session('error') }}
+        </div>
+    @endif
+    @if(session('import_errors'))
+        <div style="background:#3d2a00;border:1px solid #f59e0b;color:#fcd34d;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1.5rem;">
+            <div style="font-weight:600;margin-bottom:0.5rem;"><i class="fas fa-exclamation-triangle"></i> Import completed with warnings:</div>
+            <ul style="margin:0;padding-left:1.25rem;font-size:0.8rem;">
+                @foreach(session('import_errors') as $err) <li>{{ $err }}</li> @endforeach
+            </ul>
+        </div>
     @endif
 
     {{-- Filters --}}
@@ -102,12 +138,12 @@
                     </td>
                     <td style="padding:0.875rem 1rem;text-align:center;">
                         <div style="display:flex;gap:0.5rem;justify-content:center;">
-                            <a href="{{ route('admin.ecommerce.product.edit', $product) }}" style="background:#1e3a5f;color:#60a5fa;padding:0.35rem 0.65rem;border-radius:6px;font-size:0.75rem;text-decoration:none;" title="Edit"><i class="fas fa-edit"></i></a>
-                            <form method="POST" action="{{ route('admin.ecommerce.product.toggle-featured', $product) }}">
+                            <a href="{{ route('admin.ecommerce.products.edit', $product) }}" style="background:#1e3a5f;color:#60a5fa;padding:0.35rem 0.65rem;border-radius:6px;font-size:0.75rem;text-decoration:none;" title="Edit"><i class="fas fa-edit"></i></a>
+                            <form method="POST" action="{{ route('admin.ecommerce.products.toggle', $product) }}">
                                 @csrf @method('PATCH')
                                 <button type="submit" style="background:{{ $product->is_featured?'#3d2a00':'#1e293b' }};color:{{ $product->is_featured?'#f59e0b':'#9ca3af' }};border:1px solid #334155;padding:0.35rem 0.65rem;border-radius:6px;cursor:pointer;font-size:0.75rem;" title="Toggle Featured"><i class="fas fa-star"></i></button>
                             </form>
-                            <form method="POST" action="{{ route('admin.ecommerce.product.destroy', $product) }}" onsubmit="return confirm('Delete this product?')">
+                            <form method="POST" action="{{ route('admin.ecommerce.products.destroy', $product) }}" onsubmit="return confirm('Delete this product?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" style="background:#450a0a;color:#ef4444;border:none;padding:0.35rem 0.65rem;border-radius:6px;cursor:pointer;font-size:0.75rem;" title="Delete"><i class="fas fa-trash"></i></button>
                             </form>
@@ -126,5 +162,42 @@
     @if($products->hasPages())
     <div style="margin-top:1.5rem;">{{ $products->links() }}</div>
     @endif
+</div>
+
+{{-- ── IMPORT MODAL ── --}}
+<div id="importModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#1e293b;border:1px solid #334155;border-radius:16px;padding:2rem;width:100%;max-width:480px;margin:1rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;">
+            <h3 style="margin:0;font-size:1.1rem;font-weight:700;color:#fff;"><i class="fas fa-upload" style="color:#60a5fa;margin-right:0.5rem;"></i>Import Products</h3>
+            <button onclick="document.getElementById('importModal').style.display='none'" style="background:none;border:none;color:#9ca3af;cursor:pointer;font-size:1.25rem;">&times;</button>
+        </div>
+        <div style="background:#0f172a;border:1px solid #334155;border-radius:10px;padding:1rem;margin-bottom:1.25rem;">
+            <p style="margin:0 0 0.5rem;font-size:0.8rem;color:#9ca3af;"><i class="fas fa-info-circle" style="color:#60a5fa;margin-right:0.4rem;"></i><strong style="color:#e2e8f0;">Before importing:</strong></p>
+            <ul style="margin:0;padding-left:1.25rem;font-size:0.8rem;color:#9ca3af;line-height:1.8;">
+                <li>Download the <a href="{{ route('admin.ecommerce.products.template') }}" style="color:#60a5fa;">Excel template</a> first</li>
+                <li>Fill in your product data following the column headers</li>
+                <li>Save as <strong style="color:#e2e8f0;">.xlsx</strong> or <strong style="color:#e2e8f0;">.csv</strong> format</li>
+                <li>Maximum <strong style="color:#e2e8f0;">500 products</strong> per import</li>
+            </ul>
+        </div>
+        <form method="POST" action="{{ route('admin.ecommerce.products.import') }}" enctype="multipart/form-data">
+            @csrf
+            <div style="margin-bottom:1.25rem;">
+                <label style="display:block;font-size:0.8rem;color:#9ca3af;margin-bottom:0.5rem;">Select File <span style="color:#ef4444;">*</span></label>
+                <input type="file" name="file" accept=".xlsx,.xls,.csv" required
+                    style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;box-sizing:border-box;cursor:pointer;">
+                <p style="margin:0.4rem 0 0;font-size:0.75rem;color:#6b7280;">Accepted: .xlsx, .xls, .csv — Max 10MB</p>
+            </div>
+            <div style="display:flex;gap:0.75rem;">
+                <button type="submit" style="flex:1;background:#6366f1;color:#fff;border:none;padding:0.6rem 1.25rem;border-radius:8px;cursor:pointer;font-size:0.875rem;font-weight:600;">
+                    <i class="fas fa-upload"></i> Import Products
+                </button>
+                <button type="button" onclick="document.getElementById('importModal').style.display='none'"
+                    style="background:#374151;color:#e2e8f0;border:none;padding:0.6rem 1.25rem;border-radius:8px;cursor:pointer;font-size:0.875rem;">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 @endsection

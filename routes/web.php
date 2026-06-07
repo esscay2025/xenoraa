@@ -216,6 +216,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('/settings/social/{social}', [SettingsController::class, 'updateSocial'])->name('settings.social.update');
     Route::post('/settings/social', [SettingsController::class, 'storeSocial'])->name('settings.social.store');
     Route::get('/settings/social/{social}/destroy', [SettingsController::class, 'destroySocial'])->name('settings.social.destroy');
+    Route::post('/settings/change-password', [SettingsController::class, 'changePassword'])->name('settings.change-password');
 
     // ─── Site Builder Module ──────────────────────────────────────
     Route::prefix('site')->name('site.')->group(function () {
@@ -387,6 +388,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         Route::get('/products', [\App\Http\Controllers\Admin\EcommerceController::class, 'productsIndex'])->name('products');
         Route::get('/products/create', [\App\Http\Controllers\Admin\EcommerceController::class, 'productCreate'])->name('products.create');
         Route::post('/products', [\App\Http\Controllers\Admin\EcommerceController::class, 'productStore'])->name('products.store');
+        Route::get('/products/export', [\App\Http\Controllers\Admin\EcommerceController::class, 'productExport'])->name('products.export');
+        Route::get('/products/template', [\App\Http\Controllers\Admin\EcommerceController::class, 'productTemplate'])->name('products.template');
+        Route::post('/products/import', [\App\Http\Controllers\Admin\EcommerceController::class, 'productImport'])->name('products.import');
         Route::get('/products/{product}/edit', [\App\Http\Controllers\Admin\EcommerceController::class, 'productEdit'])->name('products.edit');
         Route::put('/products/{product}', [\App\Http\Controllers\Admin\EcommerceController::class, 'productUpdate'])->name('products.update');
         Route::delete('/products/{product}', [\App\Http\Controllers\Admin\EcommerceController::class, 'productDestroy'])->name('products.destroy');

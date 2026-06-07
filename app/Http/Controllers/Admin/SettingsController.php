@@ -109,4 +109,26 @@ class SettingsController extends Controller
         $social->delete();
         return redirect()->route('admin.settings.index')->with('success', 'Social link removed.');
     }
+
+    public function changePassword(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'current_password'      => 'required|string',
+            'new_password'          => 'required|string|min:8|confirmed',
+        ]);
+
+        $user = auth()->user();
+
+        if (!\Illuminate\Support\Facades\Hash::check($request->current_password, $user->password)) {
+            return redirect()->route('admin.settings.index', ['#change-password'])
+                ->withErrors(['current_password' => 'The current password is incorrect.'])
+                ->with('password_error', 'The current password is incorrect.')
+                ->withFragment('change-password');
+        }
+
+        $user->update(['password' => \Illuminate\Support\Facades\Hash::make($request->new_password)]);
+
+        return redirect()->to(route('admin.settings.index') . '#change-password')
+            ->with('password_success', 'Password updated successfully.');
+    }
 }
