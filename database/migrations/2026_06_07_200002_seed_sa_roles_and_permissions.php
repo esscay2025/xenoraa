@@ -79,10 +79,10 @@ return new class extends Migration
         $allPermIds       = DB::table('sa_permissions')->pluck('id');
 
         foreach ($allPermIds as $permId) {
-            DB::table('sa_role_permissions')->updateOrInsert(
-                ['sa_role_id' => $superadminRoleId, 'sa_permission_id' => $permId],
-                ['created_at' => $now]
-            );
+            DB::table('sa_role_permissions')->insertOrIgnore([
+                'sa_role_id'       => $superadminRoleId,
+                'sa_permission_id' => $permId,
+            ]);
         }
 
         // ---- Staff gets most permissions except delete and settings.manage ----
@@ -97,10 +97,10 @@ return new class extends Migration
         ];
         $staffPermIds = DB::table('sa_permissions')->whereIn('key', $staffPermKeys)->pluck('id');
         foreach ($staffPermIds as $permId) {
-            DB::table('sa_role_permissions')->updateOrInsert(
-                ['sa_role_id' => $staffRoleId, 'sa_permission_id' => $permId],
-                ['created_at' => $now]
-            );
+            DB::table('sa_role_permissions')->insertOrIgnore([
+                'sa_role_id'       => $staffRoleId,
+                'sa_permission_id' => $permId,
+            ]);
         }
     }
 
