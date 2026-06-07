@@ -467,6 +467,43 @@ Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmi
     Route::put('/themes/{theme}', [SuperAdminThemeController::class, 'update'])->name('themes.update');
     Route::delete('/themes/{theme}', [SuperAdminThemeController::class, 'destroy'])->name('themes.destroy');
     Route::patch('/themes/{theme}/toggle', [SuperAdminThemeController::class, 'toggleActive'])->name('themes.toggle');
+
+    // ---- ADMINISTRATION: Customers ----
+    Route::get('/customers', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'index'])->name('customers.index');
+    Route::get('/customers/create', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'create'])->name('customers.create');
+    Route::post('/customers', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'store'])->name('customers.store');
+    Route::get('/customers/{id}', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'show'])->name('customers.show');
+    Route::get('/customers/{id}/edit', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'edit'])->name('customers.edit');
+    Route::put('/customers/{id}', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'update'])->name('customers.update');
+    Route::post('/customers/{id}/assign-subscription', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'assignSubscription'])->name('customers.assign-subscription');
+    Route::patch('/customers/{id}/toggle-status', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'toggleStatus'])->name('customers.toggle-status');
+
+    // ---- ADMINISTRATION: Agents ----
+    Route::get('/agents', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'index'])->name('agents.index');
+    Route::get('/agents/create', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'create'])->name('agents.create');
+    Route::post('/agents', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'store'])->name('agents.store');
+    Route::get('/agents/{id}', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'show'])->name('agents.show');
+    Route::get('/agents/{id}/edit', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'edit'])->name('agents.edit');
+    Route::put('/agents/{id}', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'update'])->name('agents.update');
+    Route::post('/agents/{id}/allot', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'allot'])->name('agents.allot');
+    Route::post('/agents/{id}/pay-commission', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'payCommission'])->name('agents.pay-commission');
+
+    // ---- ADMINISTRATION: Staff ----
+    Route::get('/staff', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'index'])->name('staff.index');
+    Route::get('/staff/create', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'create'])->name('staff.create');
+    Route::post('/staff', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'store'])->name('staff.store');
+    Route::get('/staff/{id}/edit', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'edit'])->name('staff.edit');
+    Route::put('/staff/{id}', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'update'])->name('staff.update');
+    Route::delete('/staff/{id}', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'destroy'])->name('staff.destroy');
+    Route::get('/staff/roles', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'roles'])->name('staff.roles');
+    Route::put('/staff/roles/{id}', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'updateRole'])->name('staff.roles.update');
+});
+
+// ---- AGENT PORTAL ----
+Route::prefix('agent')->name('agent.')->middleware(['auth', 'sa.role:agent'])->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'agentDashboard'])->name('dashboard');
+    Route::get('/create-customer', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'agentCreateCustomer'])->name('create-customer');
+    Route::post('/create-customer', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'agentStoreCustomer'])->name('store-customer');
 });
 
 // =============================================
@@ -496,6 +533,16 @@ Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
 
     if ($user->isSuperAdmin() && $isMainDomain) {
         return redirect()->route('superadmin.dashboard');
+    }
+
+    // SA Staff redirect
+    if ($user->saRole && $user->saRole->name === 'staff' && $isMainDomain) {
+        return redirect()->route('superadmin.dashboard');
+    }
+
+    // Agent redirect
+    if ($user->saRole && $user->saRole->name === 'agent' && $isMainDomain) {
+        return redirect()->route('agent.dashboard');
     }
 
     if ($user->isAdmin()) {

@@ -157,7 +157,7 @@
             <div class="xn-inf-creator-badge">Creator</div>
         </div>
         <div class="xn-inf-name">{{ $heroHeading }}</div>
-        @if(!empty($profile['handle']))<div class="xn-inf-handle">@{{ $profile['handle'] }}</div>@endif
+        @if(!empty($profile['handle']))<div class="xn-inf-handle">{{ $profile['handle'] }}</div>@endif
         <div class="xn-inf-niche">{{ $heroSubheading }}</div>
         @if(!empty($followersInstagram) || !empty($followersYoutube) || !empty($followersTwitter) || !empty($followersTiktok))
         <div class="xn-inf-hero-stats">

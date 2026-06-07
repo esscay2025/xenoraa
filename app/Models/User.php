@@ -16,6 +16,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
+        'sa_role_id',
+        'created_by_sa',
         'tenant_owner_id',
         'status',
         'username',
@@ -166,6 +168,57 @@ class User extends Authenticatable
     {
         $superAdminEmails = config('xenoraa.superadmin_emails', []);
         return in_array($this->email, $superAdminEmails) || $this->hasRole('superadmin');
+    }
+
+    // =============================================
+    // SUPER-ADMIN ROLE HELPERS
+    // =============================================
+
+    public function saRole()
+    {
+        return $this->belongsTo(\App\Models\SaRole::class, 'sa_role_id');
+    }
+
+    public function isSaStaff(): bool
+    {
+        return $this->saRole && $this->saRole->name === 'staff';
+    }
+
+    public function isSaAgent(): bool
+    {
+        return $this->saRole && $this->saRole->name === 'agent';
+    }
+
+    public function isSaUser(): bool
+    {
+        return $this->isSuperAdmin() || $this->isSaStaff() || $this->isSaAgent();
+    }
+
+    /**
+     * Check if this user has a specific super-admin permission.
+     * SuperAdmins always return true.
+     * Staff/Agents check their role permissions + user-level overrides.
+     */
+    public function hasSaPermission(string $key): bool
+    {
+        if ($this->isSuperAdmin()) return true;
+        if (!$this->saRole) return false;
+
+        // Check user-level override
+        $override = \Illuminate\Support\Facades\DB::table('sa_user_permissions')
+            ->join('sa_permissions', 'sa_permissions.id', '=', 'sa_user_permissions.sa_permission_id')
+            ->where('sa_user_permissions.user_id', $this->id)
+            ->where('sa_permissions.key', $key)
+            ->first();
+        if ($override !== null) return (bool) $override->granted;
+
+        // Check role permissions
+        return $this->saRole->hasPermission($key);
+    }
+
+    public function agentProfile()
+    {
+        return $this->hasOne(\App\Models\Agent::class, 'user_id');
     }
 
     // =============================================

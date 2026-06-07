@@ -197,6 +197,30 @@
         </div>
     </div>
 
+    {{-- Administration --}}
+    <div class="sa-nav-group {{ request()->routeIs('superadmin.customers*') || request()->routeIs('superadmin.agents*') || request()->routeIs('superadmin.staff*') ? 'open' : '' }}" id="grp-admin">
+        <div class="sa-nav-group-header" onclick="toggleGroup('grp-admin')">
+            <span class="sa-nav-group-label">Administration</span>
+            <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
+        </div>
+        <div class="sa-nav-group-body">
+            <a href="{{ route('superadmin.customers.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.customers*') ? 'active' : '' }}">
+                <i class="fas fa-user-plus"></i> Customers
+                <span class="sa-nav-badge">{{ \App\Models\User::whereNotNull('username')->count() }}</span>
+            </a>
+            <a href="{{ route('superadmin.agents.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.agents*') ? 'active' : '' }}">
+                <i class="fas fa-handshake"></i> Agents
+                <span class="sa-nav-badge">{{ \App\Models\Agent::count() }}</span>
+            </a>
+            <a href="{{ route('superadmin.staff.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.staff*') ? 'active' : '' }}">
+                <i class="fas fa-user-shield"></i> Staff Members
+            </a>
+            <a href="{{ route('superadmin.staff.roles') }}" class="sa-nav-item {{ request()->routeIs('superadmin.staff.roles*') ? 'active' : '' }}">
+                <i class="fas fa-shield-alt"></i> Roles & Permissions
+            </a>
+        </div>
+    </div>
+
     {{-- Subscriptions --}}
     <div class="sa-nav-group {{ request()->routeIs('superadmin.subscriptions*') || request()->routeIs('superadmin.revenue') ? 'open' : '' }}" id="grp-subs">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-subs')">
