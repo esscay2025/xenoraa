@@ -293,6 +293,24 @@
     </div>
     @endif
 
+    {{-- Training Hub --}}
+    @if($isSuperAdmin)
+    <div class="sa-nav-group {{ request()->routeIs('superadmin.training-hub*') ? 'open' : '' }}" id="grp-training-hub">
+        <div class="sa-nav-group-header" onclick="toggleGroup('grp-training-hub')">
+            <span class="sa-nav-group-label"><i class="fas fa-brain" style="margin-right:6px;color:#a78bfa"></i>Training Hub</span>
+            <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
+        </div>
+        <div class="sa-nav-group-body">
+            <a href="{{ route('superadmin.training-hub.training') }}" class="sa-nav-item {{ request()->routeIs('superadmin.training-hub.training') ? 'active' : '' }}">
+                <i class="fas fa-robot"></i> Xena AI Training
+            </a>
+            <a href="{{ route('superadmin.training-hub.conversations') }}" class="sa-nav-item {{ request()->routeIs('superadmin.training-hub.conversations*') ? 'active' : '' }}">
+                <i class="fas fa-comments"></i> AI Conversations
+            </a>
+        </div>
+    </div>
+    @endif
+
     {{-- System --}}
     @if($isSuperAdmin || $saNavUser->hasSaPermission('settings.view') || $saNavUser->hasSaPermission('settings.manage') || $saNavUser->hasSaPermission('logs.view'))
     <div class="sa-nav-group {{ request()->routeIs('superadmin.settings') || request()->routeIs('superadmin.emails') || request()->routeIs('superadmin.logs') ? 'open' : '' }}" id="grp-system">

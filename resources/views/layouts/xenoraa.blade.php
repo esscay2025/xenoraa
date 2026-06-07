@@ -369,5 +369,6 @@ window.addEventListener('scroll', () => {
 });
 </script>
 @yield('scripts')
+<x-xena-widget />
 </body>
 </html>

@@ -104,6 +104,7 @@ Route::get('/chatbot/init', [ChatbotController::class, 'init'])->name('chatbot.i
 Route::post('/chatbot/chat', [ChatbotController::class, 'chat'])->name('chatbot.chat');
 Route::post('/chatbot/contact', [ChatbotController::class, 'saveContact'])->name('chatbot.contact');
 Route::post('/chatbot/save-contact', [ChatbotController::class, 'saveContact'])->name('chatbot.save-contact'); // alias for widget compatibility
+Route::post('/chatbot/message', [ChatbotController::class, 'chat'])->name('chatbot.message'); // alias — widget JS calls /chatbot/message
 
 // =============================================
 // AUTHENTICATION ROUTES (Breeze)
@@ -568,6 +569,17 @@ Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmi
     Route::delete('/staff/{id}', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'destroy'])->name('staff.destroy');
     Route::get('/staff/roles', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'rolesIndex'])->name('staff.roles');
     Route::put('/staff/roles/{id}', [\App\Http\Controllers\SuperAdmin\StaffController::class, 'updateRolePermissions'])->name('staff.roles.update');
+
+    // ---- TRAINING HUB ----
+    Route::prefix('training-hub')->name('training-hub.')->group(function () {
+        Route::get('/training', [\App\Http\Controllers\SuperAdmin\TrainingHubController::class, 'training'])->name('training');
+        Route::post('/training', [\App\Http\Controllers\SuperAdmin\TrainingHubController::class, 'trainingStore'])->name('training.store');
+        Route::put('/training/{id}', [\App\Http\Controllers\SuperAdmin\TrainingHubController::class, 'trainingUpdate'])->name('training.update');
+        Route::delete('/training/{id}', [\App\Http\Controllers\SuperAdmin\TrainingHubController::class, 'trainingDestroy'])->name('training.destroy');
+        Route::get('/conversations', [\App\Http\Controllers\SuperAdmin\TrainingHubController::class, 'conversations'])->name('conversations');
+        Route::get('/conversations/{sessionId}', [\App\Http\Controllers\SuperAdmin\TrainingHubController::class, 'conversationDetail'])->name('conversations.detail');
+        Route::delete('/conversations/{sessionId}', [\App\Http\Controllers\SuperAdmin\TrainingHubController::class, 'conversationDestroy'])->name('conversations.destroy');
+    });
 });
 
 // ---- AGENT PORTAL ----
