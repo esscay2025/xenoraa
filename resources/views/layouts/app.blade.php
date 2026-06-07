@@ -161,7 +161,9 @@
         :root {
             --bg-primary: #0a0a0a; --bg-secondary: #111111; --bg-card: #1a1a1a; --bg-hover: #222222;
             --text-primary: #ffffff; --text-secondary: #a0a0a0; --text-muted: #666666;
-            --accent: #ffffff; --border: #2a2a2a; --border-light: #333333;
+            --accent: {{ $tenantAccent ?? '#6366f1' }};
+            --accent-rgb: {{ implode(',', sscanf($tenantAccent ?? '#6366f1', '#%02x%02x%02x') ?: [99,102,241]) }};
+            --border: #2a2a2a; --border-light: #333333;
             --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; --info: #3b82f6;
         }
         * { box-sizing: border-box; }
@@ -175,7 +177,8 @@
         .navbar-nav { display: flex; align-items: center; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
         .navbar-nav > li { position: relative; }
         .navbar-nav > li > a, .navbar-nav > li > button { color: var(--text-secondary); text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; white-space: nowrap; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; }
-        .navbar-nav > li > a:hover, .navbar-nav > li > a.active, .navbar-nav > li > button:hover, .navbar-nav > li > button.active { color: var(--text-primary); background-color: var(--bg-card); }
+        .navbar-nav > li > a:hover, .navbar-nav > li > a.active, .navbar-nav > li > button:hover, .navbar-nav > li > button.active { color: var(--accent); background-color: var(--bg-card); }
+        .navbar-nav > li > a.active { border-bottom: 2px solid var(--accent); }
 
         /* ── DROPDOWN MEGA MENU ── */
         .nav-dropdown { position: absolute; top: calc(100% + 0.5rem); left: 50%; transform: translateX(-50%); background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; min-width: 220px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s, transform 0.2s; transform: translateX(-50%) translateY(-6px); z-index: 2000; }
@@ -214,8 +217,8 @@
 
         /* ── BUTTONS ── */
         .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1.25rem; border-radius: 6px; font-size: 0.875rem; font-weight: 600; text-decoration: none; cursor: pointer; border: none; transition: all 0.2s; }
-        .btn-primary { background-color: var(--text-primary); color: var(--bg-primary); }
-        .btn-primary:hover { background-color: #e0e0e0; color: var(--bg-primary); }
+        .btn-primary { background-color: var(--accent); color: #fff; }
+        .btn-primary:hover { opacity: 0.88; color: #fff; }
         .btn-outline { background-color: transparent; color: var(--text-primary); border: 1px solid var(--border-light); }
         .btn-outline:hover { background-color: var(--bg-card); }
         .btn-danger { background-color: var(--danger); color: white; }
@@ -247,11 +250,14 @@
         .table tr:hover td { background-color: var(--bg-hover); }
 
         /* ── FOOTER ── */
-        .footer { background-color: var(--bg-secondary); border-top: 1px solid var(--border); padding: 3rem 2rem; margin-top: 5rem; }
+        .footer { background-color: var(--bg-secondary); border-top: 3px solid var(--accent); padding: 3rem 2rem; margin-top: 5rem; }
         .footer-inner { max-width: 1200px; margin: 0 auto; }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1.6fr; gap: 2rem; margin-bottom: 2rem; }
+        @media (max-width: 900px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 560px) { .footer-grid { grid-template-columns: 1fr; } }
         .social-links { display: flex; gap: 0.75rem; flex-wrap: wrap; }
         .social-link { display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; background-color: var(--bg-card); border: 1px solid var(--border); color: var(--text-secondary); text-decoration: none; transition: all 0.2s; }
-        .social-link:hover { background-color: var(--bg-hover); color: var(--text-primary); border-color: var(--border-light); }
+        .social-link:hover { background-color: var(--accent); color: #fff; border-color: var(--accent); }
 
         /* ── UTILITIES ── */
         .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
@@ -466,7 +472,7 @@
     {{-- ── FOOTER ── --}}
     <footer class="footer">
         <div class="footer-inner">
-            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1.6fr; gap: 2rem; margin-bottom: 2rem;">
+            <div class="footer-grid">
                 <div>
                     @if($tenantLogo)
                         <img src="{{ $tenantLogo }}" alt="{{ $siteName }}" style="height: 44px; width: auto; margin-bottom: 0.75rem; display: block;">
