@@ -50,7 +50,7 @@
                             <input type="checkbox" name="permissions[{{ $perm->key }}]" value="1" {{ $isChecked ? 'checked' : '' }}
                                    style="accent-color:#7c3aed;width:16px;height:16px;"
                                    onchange="this.closest('label').style.borderColor = this.checked ? '#7c3aed' : '#27272a'">
-                            <span style="font-size:0.8rem;color:#d4d4d8;">{{ $perm->display_name }}</span>
+                            <span style="font-size:0.8rem;color:#d4d4d8;">{{ $perm->label }}</span>
                         </label>
                         @endforeach
                     </div>

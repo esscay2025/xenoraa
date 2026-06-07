@@ -39,7 +39,7 @@
                                onmouseover="this.style.borderColor='#7c3aed'" onmouseout="this.style.borderColor='#27272a'">
                             <input type="checkbox" name="permissions[{{ $perm->key }}]" value="1" {{ old('permissions.'.$perm->key) ? 'checked' : '' }}
                                    style="accent-color:#7c3aed;width:16px;height:16px;">
-                            <span style="font-size:0.8rem;color:#d4d4d8;">{{ $perm->display_name }}</span>
+                            <span style="font-size:0.8rem;color:#d4d4d8;">{{ $perm->label }}</span>
                         </label>
                         @endforeach
                     </div>

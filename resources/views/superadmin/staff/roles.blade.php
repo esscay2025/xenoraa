@@ -39,7 +39,7 @@
                             <input type="checkbox" name="permissions[]" value="{{ $perm->id }}" {{ $checked ? 'checked' : '' }}
                                    style="accent-color:#7c3aed;width:15px;height:15px;"
                                    onchange="this.closest('label').style.borderColor = this.checked ? '#7c3aed' : '#27272a'">
-                            <span style="font-size:0.78rem;color:#d4d4d8;">{{ $perm->display_name }}</span>
+                            <span style="font-size:0.78rem;color:#d4d4d8;">{{ $perm->label }}</span>
                         </label>
                         @endforeach
                     </div>
@@ -58,7 +58,7 @@
             @foreach($perms as $perm)
             <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;border:1px solid #7c3aed44;border-radius:8px;background:#7c3aed11;">
                 <i class="fas fa-check" style="color:#7c3aed;font-size:0.7rem;"></i>
-                <span style="font-size:0.78rem;color:#a78bfa;">{{ $perm->display_name }}</span>
+                <span style="font-size:0.78rem;color:#a78bfa;">{{ $perm->label }}</span>
             </div>
             @endforeach
             @endforeach
