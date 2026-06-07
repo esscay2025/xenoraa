@@ -80,14 +80,19 @@ class AuthenticatedSessionController extends Controller
             }
         }
 
-        // Super admin, SA staff, and SA agents → superadmin dashboard (only on xenoraa.com)
-        if (($user->isSuperAdmin() || $user->isSaStaff() || $user->isSaAgent()) && $isMainDomain) {
+        // Super admin → superadmin dashboard
+        if ($user->isSuperAdmin()) {
             return redirect()->route('superadmin.dashboard');
         }
 
-        // If an SA user logs in from a non-main domain, still redirect to superadmin dashboard
-        if ($user->isSaStaff() || $user->isSaAgent()) {
+        // SA Staff → superadmin dashboard (with permission-gated sidebar)
+        if ($user->isSaStaff()) {
             return redirect()->route('superadmin.dashboard');
+        }
+
+        // SA Agent → dedicated agent dashboard
+        if ($user->isSaAgent()) {
+            return redirect()->route('agent.dashboard');
         }
 
         // Tenant admin (Xenoraa subscriber) → admin dashboard

@@ -575,6 +575,12 @@ Route::prefix('agent')->name('agent.')->middleware(['auth', 'sa.role:agent'])->g
     Route::get('/dashboard', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'agentDashboard'])->name('dashboard');
     Route::get('/create-customer', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'agentCreateCustomer'])->name('create-customer');
     Route::post('/create-customer', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'agentStoreCustomer'])->name('store-customer');
+    Route::get('/my-customers', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'agentMyCustomers'])->name('my-customers');
+    Route::get('/quota', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'agentQuota'])->name('quota');
+    Route::get('/commissions', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'agentCommissions'])->name('commissions');
+    Route::get('/payouts', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'agentPayouts'])->name('payouts');
+    Route::get('/profile', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'agentProfile'])->name('profile');
+    Route::post('/profile', [\App\Http\Controllers\SuperAdmin\AgentController::class, 'agentUpdateProfile'])->name('profile.update');
 });
 
 // =============================================

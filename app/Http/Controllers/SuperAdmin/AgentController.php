@@ -402,6 +402,86 @@ class AgentController extends Controller
         }
     }
 
+    // ── Agent: My Customers ───────────────────────────────────────────────
+    public function agentMyCustomers()
+    {
+        $user  = auth()->user();
+        $agent = $user->agentProfile;
+        if (!$agent) abort(403, 'Agent profile not found.');
+        $subscribers = $agent->assignedSubscriptions()
+            ->with('customer')
+            ->latest()
+            ->paginate(20);
+        return view('agent.my-customers', compact('agent', 'subscribers'));
+    }
+
+    // ── Agent: Quota ───────────────────────────────────────────────────────
+    public function agentQuota()
+    {
+        $user  = auth()->user();
+        $agent = $user->agentProfile;
+        if (!$agent) abort(403, 'Agent profile not found.');
+        $allotments = $agent->allotments()->with('assignedBy')->latest()->get();
+        $stats = [
+            'total_allotted' => $allotments->sum('quantity'),
+            'total_used'     => $allotments->sum('used'),
+            'available'      => $agent->available_quota,
+        ];
+        return view('agent.quota', compact('agent', 'allotments', 'stats'));
+    }
+
+    // ── Agent: Commissions ────────────────────────────────────────────────
+    public function agentCommissions()
+    {
+        $user  = auth()->user();
+        $agent = $user->agentProfile;
+        if (!$agent) abort(403, 'Agent profile not found.');
+        $commissions = $agent->assignedSubscriptions()
+            ->with('customer')
+            ->whereNotNull('commission_amount')
+            ->latest()
+            ->paginate(20);
+        $stats = [
+            'pending'  => $agent->pending_commission ?? 0,
+            'earned'   => $agent->total_commission_earned ?? 0,
+            'paid'     => $agent->total_commission_paid ?? 0,
+        ];
+        return view('agent.commissions', compact('agent', 'commissions', 'stats'));
+    }
+
+    // ── Agent: Payouts ────────────────────────────────────────────────────
+    public function agentPayouts()
+    {
+        $user  = auth()->user();
+        $agent = $user->agentProfile;
+        if (!$agent) abort(403, 'Agent profile not found.');
+        $payouts = $agent->commissionPayouts()->with('processedBy')->latest()->paginate(20);
+        return view('agent.payouts', compact('agent', 'payouts'));
+    }
+
+    // ── Agent: Profile ────────────────────────────────────────────────────
+    public function agentProfile()
+    {
+        $user  = auth()->user();
+        $agent = $user->agentProfile;
+        if (!$agent) abort(403, 'Agent profile not found.');
+        return view('agent.profile', compact('agent', 'user'));
+    }
+
+    public function agentUpdateProfile(Request $request)
+    {
+        $user  = auth()->user();
+        $agent = $user->agentProfile;
+        if (!$agent) abort(403, 'Agent profile not found.');
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'phone' => 'nullable|string|max:20',
+        ]);
+        $user->update(['name' => $request->name]);
+        $agent->update(['phone' => $request->phone]);
+        return back()->with('success', 'Profile updated successfully.');
+    }
+
     // ── Permission gate ────────────────────────────────────────────────────
     private function authorize_sa(string $permission): void
     {

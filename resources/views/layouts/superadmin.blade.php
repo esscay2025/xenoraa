@@ -158,6 +158,8 @@
         </div>
     </div>
 
+    @php $saNavUser = auth()->user(); $isSuperAdmin = $saNavUser->isSuperAdmin(); @endphp
+
     {{-- Overview --}}
     <div class="sa-nav-group open" id="grp-overview">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-overview')">
@@ -168,55 +170,74 @@
             <a href="{{ route('superadmin.dashboard') }}" class="sa-nav-item {{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
                 <i class="fas fa-th-large"></i> Dashboard
             </a>
+            @if($isSuperAdmin || $saNavUser->hasSaPermission('analytics.view'))
             <a href="{{ route('superadmin.analytics') }}" class="sa-nav-item {{ request()->routeIs('superadmin.analytics') ? 'active' : '' }}">
                 <i class="fas fa-chart-line"></i> Analytics
             </a>
+            @endif
         </div>
     </div>
 
     {{-- User Management removed - covered by Administration > Customers --}}
 
     {{-- Administration --}}
+    @if($isSuperAdmin || $saNavUser->hasSaPermission('customers.view') || $saNavUser->hasSaPermission('agents.view') || $saNavUser->hasSaPermission('staff.view'))
     <div class="sa-nav-group {{ request()->routeIs('superadmin.customers*') || request()->routeIs('superadmin.agents*') || request()->routeIs('superadmin.staff*') ? 'open' : '' }}" id="grp-admin">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-admin')">
             <span class="sa-nav-group-label">Administration</span>
             <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
         </div>
         <div class="sa-nav-group-body">
+            @if($isSuperAdmin || $saNavUser->hasSaPermission('customers.view'))
             <a href="{{ route('superadmin.customers.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.customers*') ? 'active' : '' }}">
                 <i class="fas fa-user-plus"></i> Customers
-                <span class="sa-nav-badge">{{ \App\Models\User::whereNotNull('username')->count() }}</span>
+                @if($isSuperAdmin)<span class="sa-nav-badge">{{ \App\Models\User::whereNotNull('username')->count() }}</span>@endif
             </a>
+            @endif
+            @if($isSuperAdmin || $saNavUser->hasSaPermission('agents.view'))
             <a href="{{ route('superadmin.agents.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.agents*') ? 'active' : '' }}">
                 <i class="fas fa-handshake"></i> Agents
-                <span class="sa-nav-badge">{{ \App\Models\Agent::count() }}</span>
+                @if($isSuperAdmin)<span class="sa-nav-badge">{{ \App\Models\Agent::count() }}</span>@endif
             </a>
+            @endif
+            @if($isSuperAdmin || $saNavUser->hasSaPermission('staff.view'))
             <a href="{{ route('superadmin.staff.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.staff*') ? 'active' : '' }}">
                 <i class="fas fa-user-shield"></i> Staff Members
             </a>
+            @endif
+            @if($isSuperAdmin)
             <a href="{{ route('superadmin.staff.roles') }}" class="sa-nav-item {{ request()->routeIs('superadmin.staff.roles*') ? 'active' : '' }}">
                 <i class="fas fa-shield-alt"></i> Roles & Permissions
             </a>
+            @endif
         </div>
     </div>
+    @endif
 
     {{-- Subscriptions --}}
+    @if($isSuperAdmin || $saNavUser->hasSaPermission('subscriptions.view') || $saNavUser->hasSaPermission('subscriptions.manage') || $saNavUser->hasSaPermission('revenue.view'))
     <div class="sa-nav-group {{ request()->routeIs('superadmin.subscriptions*') || request()->routeIs('superadmin.revenue') ? 'open' : '' }}" id="grp-subs">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-subs')">
             <span class="sa-nav-group-label">Subscriptions</span>
             <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
         </div>
         <div class="sa-nav-group-body">
+            @if($isSuperAdmin || $saNavUser->hasSaPermission('subscriptions.view') || $saNavUser->hasSaPermission('subscriptions.manage'))
             <a href="{{ route('superadmin.subscriptions') }}" class="sa-nav-item {{ request()->routeIs('superadmin.subscriptions*') ? 'active' : '' }}">
                 <i class="fas fa-credit-card"></i> Subscriptions
             </a>
+            @endif
+            @if($isSuperAdmin || $saNavUser->hasSaPermission('revenue.view'))
             <a href="{{ route('superadmin.revenue') }}" class="sa-nav-item {{ request()->routeIs('superadmin.revenue') ? 'active' : '' }}">
                 <i class="fas fa-rupee-sign"></i> Revenue
             </a>
+            @endif
         </div>
     </div>
+    @endif
 
     {{-- Domains --}}
+    @if($isSuperAdmin || $saNavUser->hasSaPermission('domains.view') || $saNavUser->hasSaPermission('domains.manage'))
     <div class="sa-nav-group {{ request()->routeIs('superadmin.domains') ? 'open' : '' }}" id="grp-domains">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-domains')">
             <span class="sa-nav-group-label">Domains</span>
@@ -228,24 +249,32 @@
             </a>
         </div>
     </div>
+    @endif
 
     {{-- Content --}}
+    @if($isSuperAdmin || $saNavUser->hasSaPermission('blog.view') || $saNavUser->hasSaPermission('blog.manage') || $saNavUser->hasSaPermission('showcase.view'))
     <div class="sa-nav-group {{ request()->routeIs('superadmin.blog*') || request()->routeIs('superadmin.showcase') ? 'open' : '' }}" id="grp-content">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-content')">
             <span class="sa-nav-group-label">Content</span>
             <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
         </div>
         <div class="sa-nav-group-body">
+            @if($isSuperAdmin || $saNavUser->hasSaPermission('blog.view') || $saNavUser->hasSaPermission('blog.manage'))
             <a href="{{ route('superadmin.blog') }}" class="sa-nav-item {{ request()->routeIs('superadmin.blog*') ? 'active' : '' }}">
                 <i class="fas fa-pen-nib"></i> Blog Posts
             </a>
+            @endif
+            @if($isSuperAdmin || $saNavUser->hasSaPermission('showcase.view'))
             <a href="{{ route('superadmin.showcase') }}" class="sa-nav-item {{ request()->routeIs('superadmin.showcase') ? 'active' : '' }}">
                 <i class="fas fa-star"></i> Showcase
             </a>
+            @endif
         </div>
     </div>
+    @endif
 
     {{-- Theme Store --}}
+    @if($isSuperAdmin || $saNavUser->hasSaPermission('themes.view') || $saNavUser->hasSaPermission('themes.manage'))
     <div class="sa-nav-group {{ request()->routeIs('superadmin.themes*') ? 'open' : '' }}" id="grp-themes">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-themes')">
             <span class="sa-nav-group-label">Theme Store</span>
@@ -255,29 +284,41 @@
             <a href="{{ route('superadmin.themes.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.themes.index') ? 'active' : '' }}">
                 <i class="fas fa-palette"></i> All Themes
             </a>
+            @if($isSuperAdmin || $saNavUser->hasSaPermission('themes.manage'))
             <a href="{{ route('superadmin.themes.create') }}" class="sa-nav-item {{ request()->routeIs('superadmin.themes.create') ? 'active' : '' }}">
                 <i class="fas fa-plus-circle"></i> Add Theme
             </a>
+            @endif
         </div>
     </div>
+    @endif
+
     {{-- System --}}
+    @if($isSuperAdmin || $saNavUser->hasSaPermission('settings.view') || $saNavUser->hasSaPermission('settings.manage') || $saNavUser->hasSaPermission('logs.view'))
     <div class="sa-nav-group {{ request()->routeIs('superadmin.settings') || request()->routeIs('superadmin.emails') || request()->routeIs('superadmin.logs') ? 'open' : '' }}" id="grp-system">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-system')">
             <span class="sa-nav-group-label">System</span>
             <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
         </div>
         <div class="sa-nav-group-body">
+            @if($isSuperAdmin || $saNavUser->hasSaPermission('settings.view') || $saNavUser->hasSaPermission('settings.manage'))
             <a href="{{ route('superadmin.settings') }}" class="sa-nav-item {{ request()->routeIs('superadmin.settings') ? 'active' : '' }}">
                 <i class="fas fa-cog"></i> Platform Settings
             </a>
+            @if($isSuperAdmin)
             <a href="{{ route('superadmin.emails') }}" class="sa-nav-item {{ request()->routeIs('superadmin.emails') ? 'active' : '' }}">
                 <i class="fas fa-envelope"></i> Email Templates
             </a>
+            @endif
+            @endif
+            @if($isSuperAdmin || $saNavUser->hasSaPermission('logs.view'))
             <a href="{{ route('superadmin.logs') }}" class="sa-nav-item {{ request()->routeIs('superadmin.logs') ? 'active' : '' }}">
                 <i class="fas fa-list-alt"></i> Activity Logs
             </a>
+            @endif
         </div>
     </div>
+    @endif
 
     {{-- Sidebar bottom: Profile + Logout --}}
     <div class="sa-sidebar-profile">
