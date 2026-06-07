@@ -53,6 +53,7 @@ class Role extends Model
             'chatbot'     => ['label' => 'Chatbot',          'icon' => 'fas fa-robot'],
             'settings'    => ['label' => 'Settings',         'icon' => 'fas fa-cog'],
             'users'       => ['label' => 'User Management',  'icon' => 'fas fa-user-cog'],
+            'pos'         => ['label' => 'Point of Sale (POS)', 'icon' => 'fas fa-cash-register'],
         ];
     }
 }

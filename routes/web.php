@@ -399,6 +399,23 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         Route::patch('/reviews/{review}/approve', [\App\Http\Controllers\Admin\EcommerceController::class, 'reviewApprove'])->name('review.approve');
         Route::delete('/reviews/{review}', [\App\Http\Controllers\Admin\EcommerceController::class, 'reviewDestroy'])->name('review.destroy');
     });
+
+    // ─── POS Module ───────────────────────────────────────────────────────────
+    Route::prefix('pos')->name('pos.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\PosController::class, 'terminal'])->name('terminal');
+        Route::post('/session/open', [\App\Http\Controllers\Admin\PosController::class, 'openSession'])->name('open-session');
+        Route::post('/session/{session}/close', [\App\Http\Controllers\Admin\PosController::class, 'closeSession'])->name('close-session');
+        Route::get('/products/search', [\App\Http\Controllers\Admin\PosController::class, 'searchProducts'])->name('search-products');
+        Route::post('/order', [\App\Http\Controllers\Admin\PosController::class, 'placeOrder'])->name('place-order');
+        Route::get('/order/{order}', [\App\Http\Controllers\Admin\PosController::class, 'getOrder'])->name('get-order');
+        Route::post('/order/{order}/void', [\App\Http\Controllers\Admin\PosController::class, 'voidOrder'])->name('void-order');
+        Route::get('/orders', [\App\Http\Controllers\Admin\PosController::class, 'orders'])->name('orders');
+        Route::get('/sessions', [\App\Http\Controllers\Admin\PosController::class, 'sessions'])->name('sessions');
+        Route::get('/sessions/{session}', [\App\Http\Controllers\Admin\PosController::class, 'sessionDetail'])->name('session-detail');
+        Route::get('/dashboard', [\App\Http\Controllers\Admin\PosController::class, 'dashboard'])->name('dashboard');
+        Route::get('/settings', [\App\Http\Controllers\Admin\PosController::class, 'settings'])->name('settings');
+        Route::post('/settings', [\App\Http\Controllers\Admin\PosController::class, 'saveSettings'])->name('settings.save');
+    });
 });
 
 // =============================================

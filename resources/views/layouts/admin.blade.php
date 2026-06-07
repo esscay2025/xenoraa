@@ -423,6 +423,22 @@
             </div>
             @endif
 
+            {{-- POS Group --}}
+            @if($canSee('pos'))
+            @php $posActive = request()->routeIs('admin.pos*'); @endphp
+            <button class="sidebar-group-btn {{ $posActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgPos', this)">
+                <i class="fas fa-cash-register group-icon"></i> Point of Sale
+                <i class="fas fa-chevron-down group-chevron"></i>
+            </button>
+            <div class="sidebar-group-panel {{ $posActive ? 'open' : '' }}" id="sgPos">
+                <a href="{{ route('admin.pos.terminal') }}" class="sidebar-sub-link {{ request()->routeIs('admin.pos.terminal') ? 'active' : '' }}" target="_blank"><i class="fas fa-desktop"></i> POS Terminal</a>
+                <a href="{{ route('admin.pos.orders') }}" class="sidebar-sub-link {{ request()->routeIs('admin.pos.orders') ? 'active' : '' }}"><i class="fas fa-receipt"></i> Orders</a>
+                <a href="{{ route('admin.pos.sessions') }}" class="sidebar-sub-link {{ request()->routeIs('admin.pos.sessions*') ? 'active' : '' }}"><i class="fas fa-layer-group"></i> Sessions</a>
+                <a href="{{ route('admin.pos.dashboard') }}" class="sidebar-sub-link {{ request()->routeIs('admin.pos.dashboard') ? 'active' : '' }}"><i class="fas fa-chart-line"></i> POS Reports</a>
+                <a href="{{ route('admin.pos.settings') }}" class="sidebar-sub-link {{ request()->routeIs('admin.pos.settings*') ? 'active' : '' }}"><i class="fas fa-cog"></i> POS Settings</a>
+            </div>
+            @endif
+
             {{-- Site Builder Group --}}
             @if($canSee('site_builder'))
             @php $siteActive = request()->routeIs('admin.site*') || request()->routeIs('admin.settings*'); @endphp
@@ -480,6 +496,9 @@
                     <i id="modeIcon" class="fas fa-sun"></i>
                     <span id="modeLabel">Light</span>
                 </button>
+                <a href="{{ route('admin.pos.terminal') }}" class="btn btn-sm" target="_blank" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;border:none;font-weight:600;">
+                    <i class="fas fa-cash-register"></i> View POS
+                </a>
                 <a href="{{ $viewSiteUrl }}" class="btn btn-outline btn-sm" target="_blank">
                     <i class="fas fa-external-link-alt"></i> View Site
                 </a>
