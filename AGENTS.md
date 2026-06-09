@@ -26,3 +26,16 @@
   - resources/views/layouts/app.blade.php: Added CSS variable aliases --color-bg, --color-accent, --color-text, --color-card, --color-border to :root block so about.blade.php and other pages can reference them as fallbacks
   - resources/views/admin/pos/terminal.blade.php: Fixed right panel layout — pos-right set to overflow:hidden height:100%; cart-items set to flex:1 1 0 min-height:0 overflow-y:auto (scrollable); checkout-panel set to flex-shrink:0 (pinned at bottom); checkout-panel div added to wrap all checkout sections (customer, discount, totals, payment buttons, charge button)
   - Verified: Jose Industries (green/light), Gopi K (indigo/dark) about pages show correct tenant-specific theme colors; POS cart scrollHeight(515)>clientHeight(393) confirming scroll works with 8 items
+
+- v4.4.0 (2026-06-09): Collapsible Sidebar Navigation
+  - Tenant admin layout (admin.blade.php): collapsible sidebar with 260px expanded / 64px collapsed
+  - Collapsed state: icon-only display, labels/section headers/chevrons hidden
+  - Hover flyout: floating submenu panel slides out to the right of sidebar when hovering a group button in collapsed mode
+  - Collapse toggle button at the bottom of sidebar with chevron icon that rotates on collapse
+  - State persisted in localStorage (key: xenoraa_sidebar_collapsed)
+  - main-content margin transitions smoothly with sidebar width change
+  - Super admin layout (superadmin.blade.php): same collapse/expand + flyout behavior
+  - SA sidebar: icons added to all nav group headers for collapsed icon display
+  - SA flyout: dark panel with purple active highlights matching SA theme
+  - SA state persisted in localStorage (key: xenoraa_sa_sidebar_collapsed)
+  - Both sidebars verified: expand/collapse/flyout all working in automated playwright tests

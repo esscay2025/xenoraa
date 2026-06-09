@@ -35,6 +35,7 @@
             --border: #2a2a2a; --border-light: #333333;
             --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; --info: #3b82f6;
             --sidebar-width: 260px;
+            --sidebar-collapsed-width: 64px;
             --accent: #6366f1;
             --topbar-bg: #111111;
         }
@@ -45,11 +46,13 @@
             --border: #e2e8f0; --border-light: #cbd5e1;
             --success: #16a34a; --danger: #dc2626; --warning: #d97706; --info: #2563eb;
             --sidebar-width: 260px;
+            --sidebar-collapsed-width: 64px;
             --accent: #6366f1;
             --topbar-bg: #ffffff;
         }
         [data-theme="light"] body { background-color: var(--bg-primary); color: var(--text-primary); }
         [data-theme="light"] .sidebar { background-color: #fff; border-right-color: var(--border); }
+        [data-theme="light"] .sidebar-flyout { background-color: #fff; }
         [data-theme="light"] .sidebar-link { color: var(--text-secondary); }
         [data-theme="light"] .sidebar-link:hover, [data-theme="light"] .sidebar-link.active { color: var(--text-primary); background-color: var(--bg-hover); }
         [data-theme="light"] .sidebar-group-btn { color: var(--text-secondary); }
@@ -89,28 +92,136 @@
         * { box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); margin: 0; padding: 0; display: flex; min-height: 100vh; }
 
-        /* Sidebar */
+        /* ── Sidebar ─────────────────────────────────────────────── */
         .sidebar {
             width: var(--sidebar-width);
             background-color: var(--bg-secondary);
             border-right: 1px solid var(--border);
             position: fixed;
-            top: 0;
-            left: 0;
+            top: 0; left: 0;
             height: 100vh;
             overflow-y: auto;
+            overflow-x: hidden;
             z-index: 100;
             display: flex;
             flex-direction: column;
+            transition: width 0.25s ease;
         }
+        /* ── Collapsed state ─────────────────────────────────── */
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+            overflow: visible; /* allow flyout to escape */
+        }
+        .sidebar.collapsed .sidebar-brand span,
+        .sidebar.collapsed .sidebar-role,
+        .sidebar.collapsed .sidebar-section-label,
+        .sidebar.collapsed .sidebar-link-label,
+        .sidebar.collapsed .group-label,
+        .sidebar.collapsed .group-chevron,
+        .sidebar.collapsed .sidebar-user-name,
+        .sidebar.collapsed .sidebar-user-role,
+        .sidebar.collapsed .sidebar-collapse-label {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        .sidebar.collapsed .sidebar-header { padding: 1rem 0; justify-content: center; }
+        .sidebar.collapsed .sidebar-brand { justify-content: center; }
+        .sidebar.collapsed .sidebar-nav { overflow: visible; }
+        .sidebar.collapsed .sidebar-link {
+            padding: 0.625rem 0;
+            justify-content: center;
+            border-left: none;
+            border-right: 3px solid transparent;
+            position: relative;
+        }
+        .sidebar.collapsed .sidebar-link.active { border-right-color: var(--text-primary); border-left: none; }
+        .sidebar.collapsed .sidebar-group-btn {
+            padding: 0.625rem 0;
+            justify-content: center;
+            border-left: none;
+            position: relative;
+        }
+        .sidebar.collapsed .sidebar-group-panel { max-height: 0 !important; overflow: hidden !important; }
+        .sidebar.collapsed .sidebar-footer { padding: 0.75rem 0; justify-content: center; }
+        .sidebar.collapsed .sidebar-user { justify-content: center; }
+        .sidebar.collapsed .sidebar-avatar { margin: 0 auto; }
+        .sidebar.collapsed .sidebar-collapse-btn {
+            justify-content: center;
+            padding: 0.75rem 0;
+        }
+        /* ── Flyout submenu (collapsed hover) ───────────────── */
+        .sidebar-flyout {
+            display: none;
+            position: fixed;
+            left: var(--sidebar-collapsed-width);
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 0 8px 8px 0;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+            z-index: 200;
+            min-width: 200px;
+            padding: 0.5rem 0;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateX(-8px);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+        .sidebar-flyout.visible {
+            display: block;
+            pointer-events: auto;
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .sidebar-flyout-title {
+            padding: 0.4rem 1rem 0.5rem;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 0.25rem;
+        }
+        .sidebar-flyout a {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.5rem 1rem;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.825rem;
+            font-weight: 500;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .sidebar-flyout a:hover { color: var(--text-primary); background: var(--bg-hover); }
+        .sidebar-flyout a.active { color: var(--text-primary); background: rgba(255,255,255,0.05); }
+        .sidebar-flyout a i { width: 14px; text-align: center; font-size: 0.8rem; }
+        /* ── Collapse toggle button ──────────────────────────── */
+        .sidebar-collapse-btn {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.75rem 1.5rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: none; background: none; width: 100%;
+            transition: all 0.15s;
+        }
+        .sidebar-collapse-btn:hover { color: var(--text-primary); background: var(--bg-hover); }
+        .sidebar-collapse-btn i { width: 18px; text-align: center; font-size: 0.9rem; transition: transform 0.25s; }
+        .sidebar.collapsed .sidebar-collapse-btn i { transform: rotate(180deg); }
+        /* ── Sidebar header ──────────────────────────────────── */
         .sidebar-header {
             padding: 1.5rem;
             border-bottom: 1px solid var(--border);
+            transition: padding 0.25s;
         }
         .sidebar-brand { display: flex; align-items: center; text-decoration: none; }
         .sidebar-brand img { height: 32px; width: auto; display: block; }
-        .sidebar-brand span { color: var(--text-secondary); }
-        .sidebar-role { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; }
+        .sidebar-brand span { color: var(--text-secondary); transition: opacity 0.2s, width 0.2s; }
+        .sidebar-role { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem; transition: opacity 0.2s; }
         .sidebar-nav { padding: 1rem 0; flex: 1; }
         .sidebar-section-label {
             padding: 0.5rem 1.5rem;
@@ -119,6 +230,7 @@
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.1em;
+            transition: opacity 0.2s;
         }
         .sidebar-link {
             display: flex;
@@ -134,10 +246,12 @@
         }
         .sidebar-link:hover { color: var(--text-primary); background-color: var(--bg-hover); }
         .sidebar-link.active { color: var(--text-primary); background-color: rgba(255,255,255,0.05); border-left-color: var(--text-primary); }
-        .sidebar-link i { width: 18px; text-align: center; font-size: 0.9rem; }
+        .sidebar-link i { width: 18px; text-align: center; font-size: 0.9rem; flex-shrink: 0; }
+        .sidebar-link-label { transition: opacity 0.2s, width 0.2s; }
         .sidebar-footer {
             padding: 1rem 1.5rem;
             border-top: 1px solid var(--border);
+            transition: padding 0.25s;
         }
         .sidebar-user {
             display: flex;
@@ -169,13 +283,17 @@
         .sidebar-user-name { font-size: 0.875rem; font-weight: 600; }
         .sidebar-user-role { font-size: 0.75rem; color: var(--text-muted); }
 
-        /* Main Content */
+        /* ── Main Content ────────────────────────────────────── */
         .main-content {
             margin-left: var(--sidebar-width);
             flex: 1;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            transition: margin-left 0.25s ease;
+        }
+        body.sidebar-collapsed .main-content {
+            margin-left: var(--sidebar-collapsed-width);
         }
         .topbar {
             background-color: var(--bg-secondary);
@@ -239,16 +357,18 @@
         .font-bold { font-weight: 700; } .font-semibold { font-weight: 600; }
         .mt-4 { margin-top: 1rem; } .mt-6 { margin-top: 1.5rem; } .mt-8 { margin-top: 2rem; }
         .mb-4 { margin-bottom: 1rem; } .mb-6 { margin-bottom: 1.5rem; } .mb-8 { margin-bottom: 2rem; }
-        /* Sidebar Accordion */
+        /* ── Sidebar Accordion ───────────────────────────────── */
         .sidebar-group-btn {
             display: flex; align-items: center; gap: 0.75rem;
             padding: 0.625rem 1.5rem; width: 100%; background: none; border: none;
             color: var(--text-secondary); font-size: 0.875rem; font-weight: 600;
             cursor: pointer; text-align: left; transition: all 0.15s;
             border-left: 3px solid transparent;
+            position: relative;
         }
         .sidebar-group-btn:hover { color: var(--text-primary); background-color: var(--bg-hover); }
-        .sidebar-group-btn i.group-icon { width: 18px; text-align: center; font-size: 0.9rem; }
+        .sidebar-group-btn i.group-icon { width: 18px; text-align: center; font-size: 0.9rem; flex-shrink: 0; }
+        .sidebar-group-btn .group-label { transition: opacity 0.2s, width 0.2s; }
         .sidebar-group-btn .group-chevron { margin-left: auto; font-size: 0.7rem; transition: transform 0.25s; color: var(--text-muted); }
         .sidebar-group-btn.open .group-chevron { transform: rotate(180deg); }
         .sidebar-group-panel { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
@@ -323,23 +443,33 @@
             @php
                 $sidebarUser = auth()->user();
                 $isOwner = $sidebarUser?->isAdmin() || $sidebarUser?->isSuperAdmin();
-                // For admin_staff users, check module access. Owners see everything.
+                // For tenant owners: check plan-level module access.
+                // For admin_staff sub-users: check role/user module_permissions.
+                // SuperAdmins always see everything.
                 $canSee = function(string $module) use ($sidebarUser, $isOwner): bool {
-                    if ($isOwner) return true;
+                    if ($sidebarUser?->isSuperAdmin()) return true;
+                    if ($isOwner) {
+                        // Tenant owner — gate by subscription plan
+                        return $sidebarUser?->planHasModule($module) ?? false;
+                    }
+                    // Sub-user (admin_staff) — gate by role/user module_permissions
+                    // but also respect the owner's plan
+                    $owner = $sidebarUser?->tenantOwner ?? $sidebarUser;
+                    if ($owner && !$owner->planHasModule($module)) return false;
                     return $sidebarUser?->hasModuleAccess($module) ?? false;
                 };
             @endphp
             {{-- Overview --}}
             <p class="sidebar-section-label">Overview</p>
             <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                <i class="fas fa-tachometer-alt"></i> Dashboard
+                <i class="fas fa-tachometer-alt"></i><span class="sidebar-link-label"> Dashboard</span>
             </a>
 
             {{-- Content Group --}}
             @if($canSee('content'))
             @php $contentActive = request()->routeIs('admin.blog*') || request()->routeIs('admin.forum*'); @endphp
             <button class="sidebar-group-btn {{ $contentActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgContent', this)">
-                <i class="fas fa-pen-nib group-icon"></i> Content
+                <i class="fas fa-pen-nib group-icon"></i> <span class="group-label">Content</span>
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
             <div class="sidebar-group-panel {{ $contentActive ? 'open' : '' }}" id="sgContent">
@@ -354,7 +484,7 @@
             @if($canSee('recruitment'))
             @php $jobsActive = request()->routeIs('admin.jobs*'); @endphp
             <button class="sidebar-group-btn {{ $jobsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgJobs', this)">
-                <i class="fas fa-briefcase group-icon"></i> Recruitment
+                <i class="fas fa-briefcase group-icon"></i> <span class="group-label">Recruitment</span>
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
             <div class="sidebar-group-panel {{ $jobsActive ? 'open' : '' }}" id="sgJobs">
@@ -367,7 +497,7 @@
             @if($isOwner)
             @php $usersActive = request()->routeIs('admin.users*') || request()->routeIs('admin.roles*'); @endphp
             <button class="sidebar-group-btn {{ $usersActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgUsers', this)">
-                <i class="fas fa-users group-icon"></i> Administration
+                <i class="fas fa-users group-icon"></i> <span class="group-label">Administration</span>
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
             <div class="sidebar-group-panel {{ $usersActive ? 'open' : '' }}" id="sgUsers">
@@ -381,7 +511,7 @@
             @if($canSee('crm'))
             @php $crmActive = request()->routeIs('admin.crm2*') || request()->routeIs('admin.newcrm*') || request()->routeIs('admin.newsletter*') || request()->routeIs('admin.calendar*'); @endphp
             <button class="sidebar-group-btn {{ $crmActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgNewCRM', this)">
-                <i class="fas fa-handshake group-icon"></i> CRM
+                <i class="fas fa-handshake group-icon"></i> <span class="group-label">CRM</span>
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
             <div class="sidebar-group-panel {{ $crmActive ? 'open' : '' }}" id="sgNewCRM">
@@ -418,7 +548,7 @@
             @if($canSee('ai'))
             @php $aiHubActive = request()->routeIs('admin.crm*'); @endphp
             <button class="sidebar-group-btn {{ $aiHubActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgAIHub', this)">
-                <i class="fas fa-robot group-icon"></i> AI Hub
+                <i class="fas fa-robot group-icon"></i> <span class="group-label">AI Hub</span>
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
             <div class="sidebar-group-panel {{ $aiHubActive ? 'open' : '' }}" id="sgAIHub">
@@ -432,7 +562,7 @@
             @if($canSee('ecommerce'))
             @php $ecommerceActive = request()->routeIs('admin.ecommerce*'); @endphp
             <button class="sidebar-group-btn {{ $ecommerceActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgEcommerce', this)">
-                <i class="fas fa-store group-icon"></i> E-commerce
+                <i class="fas fa-store group-icon"></i> <span class="group-label">E-commerce</span>
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
             <div class="sidebar-group-panel {{ $ecommerceActive ? 'open' : '' }}" id="sgEcommerce">
@@ -448,7 +578,7 @@
             @if($canSee('pos'))
             @php $posActive = request()->routeIs('admin.pos*'); @endphp
             <button class="sidebar-group-btn {{ $posActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgPos', this)">
-                <i class="fas fa-cash-register group-icon"></i> Point of Sale
+                <i class="fas fa-cash-register group-icon"></i> <span class="group-label">Point of Sale</span>
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
             <div class="sidebar-group-panel {{ $posActive ? 'open' : '' }}" id="sgPos">
@@ -464,7 +594,7 @@
             @if($canSee('site_builder'))
             @php $siteActive = request()->routeIs('admin.site*') || request()->routeIs('admin.settings*'); @endphp
             <button class="sidebar-group-btn {{ $siteActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgSite', this)">
-                <i class="fas fa-paint-brush group-icon"></i> Site Builder
+                <i class="fas fa-paint-brush group-icon"></i> <span class="group-label">Site Builder</span>
                 <i class="fas fa-chevron-down group-chevron"></i>
             </button>
             <div class="sidebar-group-panel {{ $siteActive ? 'open' : '' }}" id="sgSite">
@@ -476,8 +606,16 @@
             </div>
             @endif
         </nav>
-
+        {{-- Collapse Toggle --}}
+        <div style="border-top: 1px solid var(--border); padding: 0.25rem 0;">
+            <button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" title="Collapse sidebar">
+                <i class="fas fa-chevron-left" id="sidebarCollapseIcon"></i>
+                <span class="sidebar-collapse-label">Collapse</span>
+            </button>
+        </div>
     </aside>
+    {{-- Flyout container (shared, positioned dynamically by JS) --}}
+    <div id="sidebarFlyout" class="sidebar-flyout"></div>
 
     <!-- Main Content -->
     <div class="main-content">
@@ -538,7 +676,7 @@
                     <div id="profileDropdownMenu" style="display:none;position:absolute;right:0;top:calc(100% + 8px);background:var(--bg-card);border:1px solid var(--border);border-radius:10px;min-width:220px;box-shadow:0 8px 24px rgba(0,0,0,0.3);z-index:999;overflow:hidden;">
                         <div style="padding:1rem;border-bottom:1px solid var(--border);">
                             <div style="font-size:0.875rem;font-weight:700;">{{ $tenantUser->name }}</div>
-                            <div style="font-size:0.75rem;color:var(--text-muted);">@{{ $tenantUser->username ?? '—' }}</div>
+                            <div style="font-size:0.75rem;color:var(--text-muted);">{{ $tenantUser->username ? '@'.$tenantUser->username : '—' }}</div>
                             <div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">{{ $tenantUser->email }}</div>
                         </div>
                         <div style="padding:0.5rem 0;">
@@ -628,6 +766,115 @@
             panel.classList.toggle('open', !isOpen);
             btn.classList.toggle('open', !isOpen);
         }
+
+        // ── Sidebar Collapse ──────────────────────────────────────
+        function toggleSidebarCollapse() {
+            const sidebar = document.querySelector('.sidebar');
+            const isCollapsed = sidebar.classList.toggle('collapsed');
+            document.body.classList.toggle('sidebar-collapsed', isCollapsed);
+            localStorage.setItem('xenoraa_sidebar_collapsed', isCollapsed ? '1' : '0');
+        }
+
+        // Init collapse state from localStorage
+        (function() {
+            const collapsed = localStorage.getItem('xenoraa_sidebar_collapsed') === '1';
+            if (collapsed) {
+                document.querySelector('.sidebar')?.classList.add('collapsed');
+                document.body.classList.add('sidebar-collapsed');
+            }
+        })();
+
+        // ── Flyout submenu on hover (collapsed mode) ──────────────
+        (function() {
+            const flyout = document.getElementById('sidebarFlyout');
+            let flyoutTimer = null;
+            let activeTrigger = null;
+
+            function showFlyout(trigger, title, links) {
+                if (!document.querySelector('.sidebar.collapsed')) return;
+                clearTimeout(flyoutTimer);
+                activeTrigger = trigger;
+
+                const rect = trigger.getBoundingClientRect();
+                flyout.innerHTML = '';
+                if (title) {
+                    const t = document.createElement('div');
+                    t.className = 'sidebar-flyout-title';
+                    t.textContent = title;
+                    flyout.appendChild(t);
+                }
+                links.forEach(function(l) {
+                    const a = document.createElement('a');
+                    a.href = l.href;
+                    if (l.target) a.target = l.target;
+                    a.innerHTML = l.html;
+                    if (l.active) a.classList.add('active');
+                    flyout.appendChild(a);
+                });
+
+                // Position flyout
+                const top = Math.min(rect.top, window.innerHeight - flyout.offsetHeight - 8);
+                flyout.style.top = Math.max(8, top) + 'px';
+                flyout.classList.add('visible');
+            }
+
+            function hideFlyout() {
+                flyoutTimer = setTimeout(function() {
+                    flyout.classList.remove('visible');
+                    activeTrigger = null;
+                }, 120);
+            }
+
+            flyout.addEventListener('mouseenter', function() { clearTimeout(flyoutTimer); });
+            flyout.addEventListener('mouseleave', hideFlyout);
+
+            // Attach hover to all group buttons
+            document.querySelectorAll('.sidebar-group-btn').forEach(function(btn) {
+                const panelId = btn.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+                const panel = panelId ? document.getElementById(panelId) : null;
+                const titleEl = btn.querySelector('.group-label');
+                const title = titleEl ? titleEl.textContent.trim() : '';
+
+                btn.addEventListener('mouseenter', function() {
+                    if (!document.querySelector('.sidebar.collapsed')) return;
+                    const links = [];
+                    if (panel) {
+                        panel.querySelectorAll('.sidebar-sub-link').forEach(function(a) {
+                            links.push({
+                                href: a.href,
+                                target: a.target || '',
+                                html: a.innerHTML,
+                                active: a.classList.contains('active')
+                            });
+                        });
+                    }
+                    showFlyout(btn, title, links);
+                });
+                btn.addEventListener('mouseleave', hideFlyout);
+            });
+
+            // Attach hover to plain sidebar-links (non-group)
+            document.querySelectorAll('.sidebar-link').forEach(function(link) {
+                link.addEventListener('mouseenter', function() {
+                    if (!document.querySelector('.sidebar.collapsed')) return;
+                    const labelEl = link.querySelector('.sidebar-link-label');
+                    const label = labelEl ? labelEl.textContent.trim() : '';
+                    const rect = link.getBoundingClientRect();
+                    flyout.innerHTML = '';
+                    const a = document.createElement('a');
+                    a.href = link.href;
+                    if (link.target) a.target = link.target;
+                    a.textContent = label;
+                    if (link.classList.contains('active')) a.classList.add('active');
+                    flyout.appendChild(a);
+                    const top = Math.min(rect.top, window.innerHeight - 50);
+                    flyout.style.top = Math.max(8, top) + 'px';
+                    clearTimeout(flyoutTimer);
+                    flyout.classList.add('visible');
+                });
+                link.addEventListener('mouseleave', hideFlyout);
+            });
+        })();
 
         function toggleAdminSidebar() {
             const sidebar = document.querySelector('.sidebar');

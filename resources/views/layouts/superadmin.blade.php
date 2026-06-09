@@ -20,7 +20,43 @@
         body { font-family: 'Inter', sans-serif; background: var(--sa-dark); color: var(--sa-white); display: flex; min-height: 100vh; }
 
         /* SIDEBAR */
-        .sa-sidebar { width: 260px; flex-shrink: 0; background: var(--sa-sidebar); border-right: 1px solid var(--sa-border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; z-index: 100; }
+        :root { --sa-sidebar-width: 260px; --sa-sidebar-collapsed-width: 64px; }
+        .sa-sidebar { width: var(--sa-sidebar-width); flex-shrink: 0; background: var(--sa-sidebar); border-right: 1px solid var(--sa-border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; overflow-x: hidden; z-index: 100; transition: width 0.25s ease; }
+        /* Collapsed state */
+        .sa-sidebar.collapsed { width: var(--sa-sidebar-collapsed-width); overflow: visible; }
+        .sa-sidebar.collapsed .sa-logo-text,
+        .sa-sidebar.collapsed .sa-logo-badge,
+        .sa-sidebar.collapsed .sa-nav-group-label,
+        .sa-sidebar.collapsed .sa-nav-group-chevron,
+        .sa-sidebar.collapsed .sa-nav-item-label,
+        .sa-sidebar.collapsed .sa-nav-badge,
+        .sa-sidebar.collapsed .sa-sidebar-profile-info,
+        .sa-sidebar.collapsed .sa-sidebar-profile-actions,
+        .sa-sidebar.collapsed .sa-collapse-label { opacity: 0; width: 0; overflow: hidden; white-space: nowrap; pointer-events: none; }
+        .sa-sidebar.collapsed .sa-sidebar-logo { padding: 1rem 0; justify-content: center; }
+        .sa-sidebar.collapsed .sa-nav-group-header { padding: 0.7rem 0; justify-content: center; }
+        .sa-sidebar.collapsed .sa-nav-group-body { max-height: 0 !important; overflow: hidden !important; }
+        .sa-sidebar.collapsed .sa-nav-item { padding: 0.6rem 0; justify-content: center; border-left: none; border-right: 2px solid transparent; }
+        .sa-sidebar.collapsed .sa-nav-item.active { border-right-color: var(--sa-purple); border-left: none; }
+        .sa-sidebar.collapsed .sa-sidebar-profile { padding: 0.75rem 0; justify-content: center; }
+        .sa-sidebar.collapsed .sa-sidebar-avatar { margin: 0 auto; }
+        .sa-sidebar.collapsed .sa-collapse-btn { justify-content: center; padding: 0.75rem 0; }
+        /* Flyout panel */
+        .sa-flyout { display: none; position: fixed; left: var(--sa-sidebar-collapsed-width); background: #111; border: 1px solid var(--sa-border2); border-radius: 0 8px 8px 0; box-shadow: 4px 0 20px rgba(0,0,0,0.6); z-index: 200; min-width: 200px; padding: 0.5rem 0; pointer-events: none; opacity: 0; transform: translateX(-8px); transition: opacity 0.18s ease, transform 0.18s ease; }
+        .sa-flyout.visible { display: block; pointer-events: auto; opacity: 1; transform: translateX(0); }
+        .sa-flyout-title { padding: 0.4rem 1rem 0.5rem; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #52525b; border-bottom: 1px solid var(--sa-border); margin-bottom: 0.25rem; }
+        .sa-flyout a { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 1rem; color: var(--sa-gray2); text-decoration: none; font-size: 0.825rem; font-weight: 500; transition: all 0.2s; white-space: nowrap; }
+        .sa-flyout a:hover { color: var(--sa-white); background: rgba(255,255,255,0.03); }
+        .sa-flyout a.active { color: var(--sa-white); border-left: 2px solid var(--sa-purple); background: rgba(124,58,237,0.08); }
+        .sa-flyout a i { width: 16px; text-align: center; font-size: 0.8rem; flex-shrink: 0; }
+        /* Collapse button */
+        .sa-collapse-btn { display: flex; align-items: center; gap: 0.6rem; padding: 0.75rem 1.5rem; color: #52525b; cursor: pointer; font-size: 0.8rem; font-weight: 500; border: none; background: none; width: 100%; transition: all 0.2s; border-top: 1px solid var(--sa-border); }
+        .sa-collapse-btn:hover { color: var(--sa-white); background: rgba(255,255,255,0.02); }
+        .sa-collapse-btn i { width: 16px; text-align: center; font-size: 0.8rem; transition: transform 0.25s; }
+        .sa-sidebar.collapsed .sa-collapse-btn i { transform: rotate(180deg); }
+        /* Main content margin transition */
+        .sa-main { margin-left: var(--sa-sidebar-width); flex: 1; display: flex; flex-direction: column; min-height: 100vh; transition: margin-left 0.25s ease; }
+        body.sa-sidebar-collapsed .sa-main { margin-left: var(--sa-sidebar-collapsed-width); }
         .sa-sidebar-logo { padding: 1.25rem 1.5rem 1rem; border-bottom: 1px solid var(--sa-border); display: flex; align-items: center; gap: 0.75rem; }
         .sa-logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; }
         .sa-logo-badge { font-size: 0.55rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; background: rgba(124,58,237,0.2); border: 1px solid rgba(124,58,237,0.3); color: #a855f7; padding: 0.15rem 0.5rem; border-radius: 4px; }
@@ -52,8 +88,7 @@
         .sa-sidebar-profile-btn:hover { border-color: var(--sa-purple); color: var(--sa-purple-light); }
         .sa-sidebar-profile-btn.logout:hover { border-color: var(--sa-red); color: var(--sa-red); }
 
-        /* MAIN */
-        .sa-main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+        /* MAIN — see .sa-main above */
 
         /* TOPBAR */
         .sa-topbar { height: 60px; background: var(--sa-sidebar); border-bottom: 1px solid var(--sa-border); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; position: sticky; top: 0; z-index: 50; }
@@ -142,7 +177,7 @@
         .sa-search i { color: #3f3f46; font-size: 0.8rem; }
 
         @media(max-width:1024px){ .sa-sidebar{width:220px;} .sa-main{margin-left:220px;} .sa-stat-grid{grid-template-columns:repeat(2,1fr);} }
-        @media(max-width:768px){ .sa-sidebar{display:none;} .sa-main{margin-left:0;} .sa-stat-grid{grid-template-columns:1fr;} .sa-grid-2,.sa-grid-3{grid-template-columns:1fr;} }
+        @media(max-width:768px){ .sa-sidebar{transform:translateX(-100%);} .sa-main{margin-left:0;} .sa-stat-grid{grid-template-columns:1fr;} .sa-grid-2,.sa-grid-3{grid-template-columns:1fr;} .sa-sidebar.mobile-open{transform:translateX(0);} }
     </style>
     @yield('styles')
 </head>
@@ -163,16 +198,16 @@
     {{-- Overview --}}
     <div class="sa-nav-group open" id="grp-overview">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-overview')">
-            <span class="sa-nav-group-label">Overview</span>
+            <i class="fas fa-home" style="width:16px;text-align:center;font-size:0.8rem;flex-shrink:0;"></i><span class="sa-nav-group-label">Overview</span>
             <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
         </div>
         <div class="sa-nav-group-body">
             <a href="{{ route('superadmin.dashboard') }}" class="sa-nav-item {{ request()->routeIs('superadmin.dashboard') ? 'active' : '' }}">
-                <i class="fas fa-th-large"></i> Dashboard
+                <i class="fas fa-th-large"></i> <span class="sa-nav-item-label">Dashboard</span>
             </a>
             @if($isSuperAdmin || $saNavUser->hasSaPermission('analytics.view'))
             <a href="{{ route('superadmin.analytics') }}" class="sa-nav-item {{ request()->routeIs('superadmin.analytics') ? 'active' : '' }}">
-                <i class="fas fa-chart-line"></i> Analytics
+                <i class="fas fa-chart-line"></i> <span class="sa-nav-item-label">Analytics</span>
             </a>
             @endif
         </div>
@@ -184,30 +219,30 @@
     @if($isSuperAdmin || $saNavUser->hasSaPermission('customers.view') || $saNavUser->hasSaPermission('agents.view') || $saNavUser->hasSaPermission('staff.view'))
     <div class="sa-nav-group {{ request()->routeIs('superadmin.customers*') || request()->routeIs('superadmin.agents*') || request()->routeIs('superadmin.staff*') ? 'open' : '' }}" id="grp-admin">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-admin')">
-            <span class="sa-nav-group-label">Administration</span>
+            <i class="fas fa-users" style="width:16px;text-align:center;font-size:0.8rem;flex-shrink:0;"></i><span class="sa-nav-group-label">Administration</span>
             <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
         </div>
         <div class="sa-nav-group-body">
             @if($isSuperAdmin || $saNavUser->hasSaPermission('customers.view'))
             <a href="{{ route('superadmin.customers.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.customers*') ? 'active' : '' }}">
-                <i class="fas fa-user-plus"></i> Customers
+                <i class="fas fa-user-plus"></i> <span class="sa-nav-item-label">Customers</span>
                 @if($isSuperAdmin)<span class="sa-nav-badge">{{ \App\Models\User::whereNotNull('username')->count() }}</span>@endif
             </a>
             @endif
             @if($isSuperAdmin || $saNavUser->hasSaPermission('agents.view'))
             <a href="{{ route('superadmin.agents.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.agents*') ? 'active' : '' }}">
-                <i class="fas fa-handshake"></i> Agents
+                <i class="fas fa-handshake"></i> <span class="sa-nav-item-label">Agents</span>
                 @if($isSuperAdmin)<span class="sa-nav-badge">{{ \App\Models\Agent::count() }}</span>@endif
             </a>
             @endif
             @if($isSuperAdmin || $saNavUser->hasSaPermission('staff.view'))
             <a href="{{ route('superadmin.staff.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.staff*') ? 'active' : '' }}">
-                <i class="fas fa-user-shield"></i> Staff Members
+                <i class="fas fa-user-shield"></i> <span class="sa-nav-item-label">Staff Members</span>
             </a>
             @endif
             @if($isSuperAdmin)
             <a href="{{ route('superadmin.staff.roles') }}" class="sa-nav-item {{ request()->routeIs('superadmin.staff.roles*') ? 'active' : '' }}">
-                <i class="fas fa-shield-alt"></i> Roles & Permissions
+                <i class="fas fa-shield-alt"></i> <span class="sa-nav-item-label">Roles & Permissions</span>
             </a>
             @endif
         </div>
@@ -216,20 +251,25 @@
 
     {{-- Subscriptions --}}
     @if($isSuperAdmin || $saNavUser->hasSaPermission('subscriptions.view') || $saNavUser->hasSaPermission('subscriptions.manage') || $saNavUser->hasSaPermission('revenue.view'))
-    <div class="sa-nav-group {{ request()->routeIs('superadmin.subscriptions*') || request()->routeIs('superadmin.revenue') ? 'open' : '' }}" id="grp-subs">
+    <div class="sa-nav-group {{ request()->routeIs('superadmin.subscriptions*') || request()->routeIs('superadmin.revenue') || request()->routeIs('superadmin.plan-modules') ? 'open' : '' }}" id="grp-subs">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-subs')">
-            <span class="sa-nav-group-label">Subscriptions</span>
+            <i class="fas fa-credit-card" style="width:16px;text-align:center;font-size:0.8rem;flex-shrink:0;"></i><span class="sa-nav-group-label">Subscriptions</span>
             <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
         </div>
         <div class="sa-nav-group-body">
             @if($isSuperAdmin || $saNavUser->hasSaPermission('subscriptions.view') || $saNavUser->hasSaPermission('subscriptions.manage'))
             <a href="{{ route('superadmin.subscriptions') }}" class="sa-nav-item {{ request()->routeIs('superadmin.subscriptions*') ? 'active' : '' }}">
-                <i class="fas fa-credit-card"></i> Subscriptions
+                <i class="fas fa-credit-card"></i> <span class="sa-nav-item-label">Subscriptions</span>
             </a>
             @endif
             @if($isSuperAdmin || $saNavUser->hasSaPermission('revenue.view'))
             <a href="{{ route('superadmin.revenue') }}" class="sa-nav-item {{ request()->routeIs('superadmin.revenue') ? 'active' : '' }}">
-                <i class="fas fa-rupee-sign"></i> Revenue
+                <i class="fas fa-rupee-sign"></i> <span class="sa-nav-item-label">Revenue</span>
+            </a>
+            @endif
+            @if($isSuperAdmin)
+            <a href="{{ route('superadmin.plan-modules') }}" class="sa-nav-item {{ request()->routeIs('superadmin.plan-modules') ? 'active' : '' }}">
+                <i class="fas fa-puzzle-piece"></i> <span class="sa-nav-item-label">Plan Modules</span>
             </a>
             @endif
         </div>
@@ -240,12 +280,12 @@
     @if($isSuperAdmin || $saNavUser->hasSaPermission('domains.view') || $saNavUser->hasSaPermission('domains.manage'))
     <div class="sa-nav-group {{ request()->routeIs('superadmin.domains') ? 'open' : '' }}" id="grp-domains">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-domains')">
-            <span class="sa-nav-group-label">Domains</span>
+            <i class="fas fa-globe" style="width:16px;text-align:center;font-size:0.8rem;flex-shrink:0;"></i><span class="sa-nav-group-label">Domains</span>
             <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
         </div>
         <div class="sa-nav-group-body">
             <a href="{{ route('superadmin.domains') }}" class="sa-nav-item {{ request()->routeIs('superadmin.domains') ? 'active' : '' }}">
-                <i class="fas fa-globe"></i> Custom Domains
+                <i class="fas fa-globe"></i> <span class="sa-nav-item-label">Custom Domains</span>
             </a>
         </div>
     </div>
@@ -255,18 +295,18 @@
     @if($isSuperAdmin || $saNavUser->hasSaPermission('blog.view') || $saNavUser->hasSaPermission('blog.manage') || $saNavUser->hasSaPermission('showcase.view'))
     <div class="sa-nav-group {{ request()->routeIs('superadmin.blog*') || request()->routeIs('superadmin.showcase') ? 'open' : '' }}" id="grp-content">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-content')">
-            <span class="sa-nav-group-label">Content</span>
+            <i class="fas fa-pen-nib" style="width:16px;text-align:center;font-size:0.8rem;flex-shrink:0;"></i><span class="sa-nav-group-label">Content</span>
             <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
         </div>
         <div class="sa-nav-group-body">
             @if($isSuperAdmin || $saNavUser->hasSaPermission('blog.view') || $saNavUser->hasSaPermission('blog.manage'))
             <a href="{{ route('superadmin.blog') }}" class="sa-nav-item {{ request()->routeIs('superadmin.blog*') ? 'active' : '' }}">
-                <i class="fas fa-pen-nib"></i> Blog Posts
+                <i class="fas fa-pen-nib"></i> <span class="sa-nav-item-label">Blog Posts</span>
             </a>
             @endif
             @if($isSuperAdmin || $saNavUser->hasSaPermission('showcase.view'))
             <a href="{{ route('superadmin.showcase') }}" class="sa-nav-item {{ request()->routeIs('superadmin.showcase') ? 'active' : '' }}">
-                <i class="fas fa-star"></i> Showcase
+                <i class="fas fa-star"></i> <span class="sa-nav-item-label">Showcase</span>
             </a>
             @endif
         </div>
@@ -277,16 +317,16 @@
     @if($isSuperAdmin || $saNavUser->hasSaPermission('themes.view') || $saNavUser->hasSaPermission('themes.manage'))
     <div class="sa-nav-group {{ request()->routeIs('superadmin.themes*') ? 'open' : '' }}" id="grp-themes">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-themes')">
-            <span class="sa-nav-group-label">Theme Store</span>
+            <i class="fas fa-circle" style="width:16px;text-align:center;font-size:0.8rem;flex-shrink:0;"></i><span class="sa-nav-group-label">Theme Store</span>
             <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
         </div>
         <div class="sa-nav-group-body">
             <a href="{{ route('superadmin.themes.index') }}" class="sa-nav-item {{ request()->routeIs('superadmin.themes.index') ? 'active' : '' }}">
-                <i class="fas fa-palette"></i> All Themes
+                <i class="fas fa-palette"></i> <span class="sa-nav-item-label">All Themes</span>
             </a>
             @if($isSuperAdmin || $saNavUser->hasSaPermission('themes.manage'))
             <a href="{{ route('superadmin.themes.create') }}" class="sa-nav-item {{ request()->routeIs('superadmin.themes.create') ? 'active' : '' }}">
-                <i class="fas fa-plus-circle"></i> Add Theme
+                <i class="fas fa-plus-circle"></i> <span class="sa-nav-item-label">Add Theme</span>
             </a>
             @endif
         </div>
@@ -302,10 +342,10 @@
         </div>
         <div class="sa-nav-group-body">
             <a href="{{ route('superadmin.training-hub.training') }}" class="sa-nav-item {{ request()->routeIs('superadmin.training-hub.training') ? 'active' : '' }}">
-                <i class="fas fa-robot"></i> Xena AI Training
+                <i class="fas fa-robot"></i> <span class="sa-nav-item-label">Xena AI Training</span>
             </a>
             <a href="{{ route('superadmin.training-hub.conversations') }}" class="sa-nav-item {{ request()->routeIs('superadmin.training-hub.conversations*') ? 'active' : '' }}">
-                <i class="fas fa-comments"></i> AI Conversations
+                <i class="fas fa-comments"></i> <span class="sa-nav-item-label">AI Conversations</span>
             </a>
         </div>
     </div>
@@ -313,25 +353,30 @@
 
     {{-- System --}}
     @if($isSuperAdmin || $saNavUser->hasSaPermission('settings.view') || $saNavUser->hasSaPermission('settings.manage') || $saNavUser->hasSaPermission('logs.view'))
-    <div class="sa-nav-group {{ request()->routeIs('superadmin.settings') || request()->routeIs('superadmin.emails') || request()->routeIs('superadmin.logs') ? 'open' : '' }}" id="grp-system">
+    <div class="sa-nav-group {{ request()->routeIs('superadmin.settings') || request()->routeIs('superadmin.emails') || request()->routeIs('superadmin.logs') || request()->routeIs('superadmin.seo') ? 'open' : '' }}" id="grp-system">
         <div class="sa-nav-group-header" onclick="toggleGroup('grp-system')">
-            <span class="sa-nav-group-label">System</span>
+            <i class="fas fa-cog" style="width:16px;text-align:center;font-size:0.8rem;flex-shrink:0;"></i><span class="sa-nav-group-label">System</span>
             <i class="fas fa-chevron-down sa-nav-group-chevron"></i>
         </div>
         <div class="sa-nav-group-body">
             @if($isSuperAdmin || $saNavUser->hasSaPermission('settings.view') || $saNavUser->hasSaPermission('settings.manage'))
             <a href="{{ route('superadmin.settings') }}" class="sa-nav-item {{ request()->routeIs('superadmin.settings') ? 'active' : '' }}">
-                <i class="fas fa-cog"></i> Platform Settings
+                <i class="fas fa-cog"></i> <span class="sa-nav-item-label">Platform Settings</span>
             </a>
             @if($isSuperAdmin)
             <a href="{{ route('superadmin.emails') }}" class="sa-nav-item {{ request()->routeIs('superadmin.emails') ? 'active' : '' }}">
-                <i class="fas fa-envelope"></i> Email Templates
+                <i class="fas fa-envelope"></i> <span class="sa-nav-item-label">Email Templates</span>
             </a>
             @endif
             @endif
+            @if($isSuperAdmin)
+            <a href="{{ route('superadmin.seo') }}" class="sa-nav-item {{ request()->routeIs('superadmin.seo') ? 'active' : '' }}">
+                <i class="fas fa-search"></i> <span class="sa-nav-item-label">SEO Manager</span>
+            </a>
+            @endif
             @if($isSuperAdmin || $saNavUser->hasSaPermission('logs.view'))
             <a href="{{ route('superadmin.logs') }}" class="sa-nav-item {{ request()->routeIs('superadmin.logs') ? 'active' : '' }}">
-                <i class="fas fa-list-alt"></i> Activity Logs
+                <i class="fas fa-list-alt"></i> <span class="sa-nav-item-label">Activity Logs</span>
             </a>
             @endif
         </div>
@@ -367,7 +412,12 @@
             </form>
         </div>
     </div>
+    <button class="sa-collapse-btn" onclick="toggleSaCollapse()" title="Collapse sidebar">
+        <i class="fas fa-chevron-left" id="saCollapseIcon"></i>
+        <span class="sa-collapse-label">Collapse</span>
+    </button>
 </aside>
+<div id="saFlyout" class="sa-flyout"></div>
 
 {{-- MAIN --}}
 <div class="sa-main">
@@ -432,10 +482,10 @@
                         <div class="sa-profile-dd-email">{{ auth()->user()->email ?? '' }}</div>
                     </div>
                     <a href="{{ route('superadmin.dashboard') }}" class="sa-profile-dd-item">
-                        <i class="fas fa-th-large"></i> Dashboard
+                        <i class="fas fa-th-large"></i> <span class="sa-nav-item-label">Dashboard</span>
                     </a>
                     <a href="{{ route('xenoraa.home') }}" class="sa-profile-dd-item" target="_blank">
-                        <i class="fas fa-external-link-alt"></i> View Site
+                        <i class="fas fa-external-link-alt"></i> <span class="sa-nav-item-label">View Site</span>
                     </a>
                     <div class="sa-profile-dd-divider"></div>
                     <form method="POST" action="{{ route('logout') }}">
@@ -469,6 +519,80 @@
 function toggleGroup(id) {
     document.getElementById(id).classList.toggle('open');
 }
+// ── Superadmin Sidebar Collapse ───────────────────────────────
+function toggleSaCollapse() {
+    const sidebar = document.querySelector('.sa-sidebar');
+    const isCollapsed = sidebar.classList.toggle('collapsed');
+    document.body.classList.toggle('sa-sidebar-collapsed', isCollapsed);
+    localStorage.setItem('xenoraa_sa_sidebar_collapsed', isCollapsed ? '1' : '0');
+}
+// Init collapse state
+(function() {
+    const collapsed = localStorage.getItem('xenoraa_sa_sidebar_collapsed') === '1';
+    if (collapsed) {
+        document.querySelector('.sa-sidebar')?.classList.add('collapsed');
+        document.body.classList.add('sa-sidebar-collapsed');
+    }
+})();
+// ── Flyout on hover (collapsed mode) ─────────────────────────
+(function() {
+    const flyout = document.getElementById('saFlyout');
+    if (!flyout) return;
+    let flyoutTimer = null;
+
+    function showFlyout(trigger, title, links) {
+        if (!document.querySelector('.sa-sidebar.collapsed')) return;
+        clearTimeout(flyoutTimer);
+        flyout.innerHTML = '';
+        if (title) {
+            const t = document.createElement('div');
+            t.className = 'sa-flyout-title';
+            t.textContent = title;
+            flyout.appendChild(t);
+        }
+        links.forEach(function(l) {
+            const a = document.createElement('a');
+            a.href = l.href;
+            if (l.target) a.target = l.target;
+            a.innerHTML = l.html;
+            if (l.active) a.classList.add('active');
+            flyout.appendChild(a);
+        });
+        const rect = trigger.getBoundingClientRect();
+        const top = Math.min(rect.top, window.innerHeight - flyout.offsetHeight - 8);
+        flyout.style.top = Math.max(8, top) + 'px';
+        flyout.classList.add('visible');
+    }
+
+    function hideFlyout() {
+        flyoutTimer = setTimeout(function() { flyout.classList.remove('visible'); }, 120);
+    }
+
+    flyout.addEventListener('mouseenter', function() { clearTimeout(flyoutTimer); });
+    flyout.addEventListener('mouseleave', hideFlyout);
+
+    // Attach hover to all nav group headers
+    document.querySelectorAll('.sa-nav-group').forEach(function(group) {
+        const header = group.querySelector('.sa-nav-group-header');
+        const body = group.querySelector('.sa-nav-group-body');
+        const labelEl = group.querySelector('.sa-nav-group-label');
+        const title = labelEl ? labelEl.textContent.trim() : '';
+
+        if (header) {
+            header.addEventListener('mouseenter', function() {
+                if (!document.querySelector('.sa-sidebar.collapsed')) return;
+                const links = [];
+                if (body) {
+                    body.querySelectorAll('.sa-nav-item').forEach(function(a) {
+                        links.push({ href: a.href, target: a.target || '', html: a.innerHTML, active: a.classList.contains('active') });
+                    });
+                }
+                showFlyout(header, title, links);
+            });
+            header.addEventListener('mouseleave', hideFlyout);
+        }
+    });
+})();
 function togglePanel(openId, closeId) {
     const el = document.getElementById(openId);
     const cl = document.getElementById(closeId);
