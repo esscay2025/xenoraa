@@ -27,7 +27,7 @@
         /* ── Layout ── */
         .pos-wrap { display: grid; grid-template-columns: 1fr 380px; height: 100vh; gap: 0; }
         .pos-left  { display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--pos-border); }
-        .pos-right { display: flex; flex-direction: column; background: var(--pos-surface); overflow: hidden; height: 100%; }
+        .pos-right { display: flex; flex-direction: column; background: var(--pos-surface); overflow-y: auto; overflow-x: hidden; height: 100%; }
 
         /* ── Topbar ── */
         .pos-topbar {
@@ -103,10 +103,10 @@
         .cart-header h3 { font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
         .cart-header .cart-count { background: var(--pos-accent); color: #fff; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 10px; }
 
-        .cart-items { flex: 0 0 auto; max-height: 160px; overflow-y: auto; padding: 8px 12px; }
+        .cart-items { flex: 1 1 auto; overflow-y: visible; padding: 8px 12px; }
         .cart-items::-webkit-scrollbar { width: 3px; }
         .cart-items::-webkit-scrollbar-thumb { background: var(--pos-border); }
-        .checkout-panel { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; }
+        .checkout-panel { flex-shrink: 0; overflow: visible; }
         .checkout-panel::-webkit-scrollbar { width: 4px; }
         .checkout-panel::-webkit-scrollbar-thumb { background: var(--pos-border); border-radius: 2px; }
         .cart-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--pos-muted); gap: 10px; }
