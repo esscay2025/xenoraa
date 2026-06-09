@@ -75,7 +75,7 @@
         .search-input::placeholder { color: var(--pos-muted); }
 
         /* ── Product Grid ── */
-        .product-grid { flex: 1; overflow-y: auto; padding: 12px 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; align-content: start; }
+        .product-grid { flex: 1; overflow-y: auto; padding: 12px 16px; display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; align-content: start; grid-auto-rows: minmax(240px, auto); }
         .product-grid::-webkit-scrollbar { width: 4px; }
         .product-grid::-webkit-scrollbar-track { background: transparent; }
         .product-grid::-webkit-scrollbar-thumb { background: var(--pos-border); border-radius: 2px; }
@@ -83,12 +83,13 @@
         .product-card { background: var(--pos-card); border: 1px solid var(--pos-border); border-radius: 12px; padding: 12px; cursor: pointer; transition: all .15s; position: relative; overflow: hidden; }
         .product-card:hover { border-color: var(--pos-accent); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,.15); }
         .product-card.out-of-stock { opacity: .5; cursor: not-allowed; }
-        .product-card .img-wrap { width: 100%; aspect-ratio: 1; border-radius: 8px; overflow: hidden; background: var(--pos-surface); margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
+        .product-card .img-wrap { width: 100%; height: 140px; border-radius: 8px; overflow: hidden; background: var(--pos-surface); margin-bottom: 8px; display: flex; align-items: center; justify-content: center; }
         .product-card .img-wrap img { width: 100%; height: 100%; object-fit: cover; }
         .product-card .img-wrap .no-img { font-size: 28px; color: var(--pos-border); }
-        .product-card .p-name { font-size: 12px; font-weight: 600; line-height: 1.3; margin-bottom: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .product-card .p-sku  { font-size: 10px; color: var(--pos-muted); margin-bottom: 6px; }
-        .product-card .p-price { font-size: 14px; font-weight: 700; color: var(--pos-accent); }
+        .product-card .img-wrap.no-img-wrap::after { content: "466"; font-family: "Font Awesome 6 Free"; font-weight: 900; font-size: 28px; color: var(--pos-border); }
+        .product-card .p-name { font-size: 13px; font-weight: 600; line-height: 1.35; margin-bottom: 5px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 35px; }
+        .product-card .p-sku  { font-size: 11px; color: var(--pos-muted); margin-bottom: 6px; }
+        .product-card .p-price { font-size: 15px; font-weight: 800; color: var(--pos-accent); }
         .product-card .p-orig  { font-size: 11px; color: var(--pos-muted); text-decoration: line-through; }
         .product-card .p-stock { font-size: 10px; margin-top: 4px; }
         .product-card .p-stock.low { color: var(--pos-warning); }
@@ -341,7 +342,7 @@
                  onclick="addToCart(this)">
                 <div class="img-wrap">
                     @if($p->featured_image)
-                    <img src="{{ asset('storage/'.$p->featured_image) }}" alt="{{ $p->name }}" loading="lazy">
+                    <img src="{{ str_starts_with($p->featured_image, 'http') ? $p->featured_image : asset('storage/' . $p->featured_image) }}" alt="{{ $p->name }}" loading="lazy" onerror="this.onerror=null;this.style.display='none';this.parentElement.classList.add('no-img-wrap')">
                     @else
                     <i class="fas fa-box no-img"></i>
                     @endif
