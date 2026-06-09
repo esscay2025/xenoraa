@@ -4,13 +4,14 @@
 <style>
 /* ── About Page ── */
 :root {
-    --pg-bg:         var(--color-bg, #ffffff);
-    --pg-card:       color-mix(in srgb, var(--pg-bg) 95%, #000);
-    --pg-border:     color-mix(in srgb, var(--pg-bg) 80%, #000);
-    --pg-text:       color-mix(in srgb, var(--pg-bg) 5%, #000);
-    --pg-text-sec:   color-mix(in srgb, var(--pg-bg) 30%, #000);
-    --pg-text-muted: color-mix(in srgb, var(--pg-bg) 50%, #000);
-    --pg-accent:     var(--color-accent, #6366f1);
+    /* Use the layout's computed theme variables directly — works for both light and dark themes */
+    --pg-bg:         var(--bg-primary, #0a0a0a);
+    --pg-card:       var(--bg-card, #1a1a1a);
+    --pg-border:     var(--border, #2a2a2a);
+    --pg-text:       var(--text-primary, #ffffff);
+    --pg-text-sec:   var(--text-secondary, #a0a0a0);
+    --pg-text-muted: var(--text-muted, #666666);
+    --pg-accent:     var(--accent, #6366f1);
 }
 .ab-wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
 /* Hero */

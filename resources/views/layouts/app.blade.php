@@ -106,10 +106,50 @@
             ?? 'consultant';
 
         // ── Tenant favicon and logo ────────────────────────────────────────────
-        $tenantFavicon = $tenantSettings['favicon_path'] ?? null;
-        $tenantLogo    = $tenantSettings['logo_path'] ?? null;
+        $tenantFavicon   = $tenantSettings['favicon_path']    ?? null;
+        $tenantLogo      = $tenantSettings['logo_path']       ?? null;
+        $tenantLogoWhite = $tenantSettings['logo_white_path'] ?? null;
         $tenantAccent  = $tenantSettings['color_accent'] ?? '#6366f1';
         $chatbotEnabled = $tenantSettings['chatbot_enabled'] ?? '1';
+        // ── Tenant color scheme ────────────────────────────────────────────────
+        // If tenant has custom colors (light theme), use them; otherwise default dark
+        $colorBg        = $tenantSettings['color_bg']        ?? null;
+        $colorPrimary   = $tenantSettings['color_primary']   ?? null;
+        $colorSecondary = $tenantSettings['color_secondary'] ?? null;
+        $colorText      = $tenantSettings['color_text']      ?? null;
+        // Determine if this is a light theme (color_bg is set and is a light color)
+        $isLightTheme = false;
+        if ($colorBg) {
+            // Parse hex to RGB and check luminance
+            $rgb = sscanf($colorBg, '#%02x%02x%02x');
+            if ($rgb && count($rgb) === 3) {
+                $luminance = (0.299 * $rgb[0] + 0.587 * $rgb[1] + 0.114 * $rgb[2]) / 255;
+                $isLightTheme = $luminance > 0.5;
+            }
+        }
+        if ($isLightTheme) {
+            // Light theme: use tenant colors
+            $cssBgPrimary   = $colorBg;
+            $cssBgSecondary = $colorSecondary ? $colorSecondary . '22' : '#f0f0f0';
+            $cssBgCard      = '#ffffff';
+            $cssBgHover     = $colorSecondary ? $colorSecondary . '15' : '#f5f5f5';
+            $cssTextPrimary = $colorText ?? '#1a1a1a';
+            $cssTextSecondary = $colorText ? $colorText . 'cc' : '#444444';
+            $cssTextMuted   = $colorText ? $colorText . '88' : '#888888';
+            $cssBorder      = $colorSecondary ? $colorSecondary . '44' : '#e0e0e0';
+            $cssBorderLight = $colorSecondary ? $colorSecondary . '22' : '#eeeeee';
+        } else {
+            // Default dark theme
+            $cssBgPrimary   = '#0a0a0a';
+            $cssBgSecondary = '#111111';
+            $cssBgCard      = '#1a1a1a';
+            $cssBgHover     = '#222222';
+            $cssTextPrimary = '#ffffff';
+            $cssTextSecondary = '#a0a0a0';
+            $cssTextMuted   = '#666666';
+            $cssBorder      = '#2a2a2a';
+            $cssBorderLight = '#333333';
+        }
 
         // ── Determine if this is Gopi's domain ────────────────────────────────
         $isGopiBlog = $layoutTenant && (
@@ -159,26 +199,35 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
         :root {
-            --bg-primary: #0a0a0a; --bg-secondary: #111111; --bg-card: #1a1a1a; --bg-hover: #222222;
-            --text-primary: #ffffff; --text-secondary: #a0a0a0; --text-muted: #666666;
+            --bg-primary: {{ $cssBgPrimary }}; --bg-secondary: {{ $cssBgSecondary }}; --bg-card: {{ $cssBgCard }}; --bg-hover: {{ $cssBgHover }};
+            --text-primary: {{ $cssTextPrimary }}; --text-secondary: {{ $cssTextSecondary }}; --text-muted: {{ $cssTextMuted }};
             --accent: {{ $tenantAccent ?? '#6366f1' }};
             --accent-rgb: {{ implode(',', sscanf($tenantAccent ?? '#6366f1', '#%02x%02x%02x') ?: [99,102,241]) }};
-            --border: #2a2a2a; --border-light: #333333;
+            --border: {{ $cssBorder }}; --border-light: {{ $cssBorderLight }};
+            --navbar-bg: {{ $isLightTheme ? ($colorPrimary ?? '#16a34a') : 'rgba(10,10,10,0.97)' }};
+            --navbar-text: {{ $isLightTheme ? 'rgba(255,255,255,0.9)' : '#a0a0a0' }};
+            --navbar-text-hover: {{ $isLightTheme ? '#fff' : 'var(--accent)' }};
             --success: #22c55e; --danger: #ef4444; --warning: #f59e0b; --info: #3b82f6;
+            /* Aliases used by about, contact, services pages */
+            --color-bg: var(--bg-primary);
+            --color-accent: var(--accent);
+            --color-text: var(--text-primary);
+            --color-card: var(--bg-card);
+            --color-border: var(--border);
         }
         * { box-sizing: border-box; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); margin: 0; padding: 0; line-height: 1.6; }
 
         /* ── NAVBAR ── */
-        .navbar { background-color: rgba(10,10,10,0.97); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; padding: 0 2rem; }
+        .navbar { background-color: var(--navbar-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1000; padding: 0 2rem; }
         .navbar-inner { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; height: 64px; }
         .navbar-brand { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; gap: 0.5rem; }
-        .navbar-brand img { height: 36px; width: auto; display: block; }
+        .navbar-brand img { height: 44px; width: auto; display: block; max-width: 180px; object-fit: contain; }
         .navbar-nav { display: flex; align-items: center; gap: 0.25rem; list-style: none; margin: 0; padding: 0; }
         .navbar-nav > li { position: relative; }
-        .navbar-nav > li > a, .navbar-nav > li > button { color: var(--text-secondary); text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; white-space: nowrap; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; }
-        .navbar-nav > li > a:hover, .navbar-nav > li > a.active, .navbar-nav > li > button:hover, .navbar-nav > li > button.active { color: var(--accent); background-color: var(--bg-card); }
-        .navbar-nav > li > a.active { border-bottom: 2px solid var(--accent); }
+        .navbar-nav > li > a, .navbar-nav > li > button { color: var(--navbar-text); text-decoration: none; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; white-space: nowrap; background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 0.3rem; }
+        .navbar-nav > li > a:hover, .navbar-nav > li > a.active, .navbar-nav > li > button:hover, .navbar-nav > li > button.active { color: var(--navbar-text-hover); background-color: rgba(255,255,255,0.15); }
+        .navbar-nav > li > a.active { border-bottom: 2px solid var(--navbar-text-hover); }
 
         /* ── DROPDOWN MEGA MENU ── */
         .nav-dropdown { position: absolute; top: calc(100% + 0.5rem); left: 50%; transform: translateX(-50%); background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; min-width: 220px; box-shadow: 0 20px 40px rgba(0,0,0,0.6); opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s, transform 0.2s; transform: translateX(-50%) translateY(-6px); z-index: 2000; }
@@ -198,7 +247,7 @@
         .navbar-toggler:hover { background-color: var(--bg-card); }
 
         /* ── MOBILE MENU ── */
-        .mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background-color: rgba(10,10,10,0.99); z-index: 999; padding: 1rem 1.25rem 2rem; overflow-y: auto; flex-direction: column; gap: 0; }
+        .mobile-menu { display: none; position: fixed; top: 64px; left: 0; right: 0; bottom: 0; background-color: var(--navbar-bg); z-index: 999; padding: 1rem 1.25rem 2rem; overflow-y: auto; flex-direction: column; gap: 0; }
         .mobile-menu.open { display: flex; }
         .mobile-menu a.mob-link { color: var(--text-primary); text-decoration: none; padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.95rem; font-weight: 500; display: flex; align-items: center; gap: 0.75rem; transition: background 0.2s; }
         .mobile-menu a.mob-link:hover { background-color: var(--bg-card); }
@@ -291,7 +340,9 @@
             {{-- Brand / Logo — tenant-aware with correct logo priority --}}
             <a href="{{ $tenantHomeUrl }}" class="navbar-brand" title="{{ $siteName }}">
                 @if($tenantLogo)
-                    <img src="{{ $tenantLogo }}" alt="{{ $siteName }}" style="height:40px;width:auto;">
+                    {{-- On light-theme tenants the navbar is dark (primary color), so use white logo if available --}}
+                    @php $navbarLogo = ($isLightTheme && $tenantLogoWhite) ? $tenantLogoWhite : $tenantLogo; @endphp
+                    <img src="{{ $navbarLogo }}" alt="{{ $siteName }}" style="height:40px;width:auto;">
                 @elseif($isGopiBlog)
                     <img src="{{ asset('images/gopi-logo-transparent.png') }}" alt="Gopi K Logo" loading="eager" style="height:40px;width:auto;">
                 @elseif($tenantAvatar)
@@ -301,7 +352,7 @@
                 @else
                     <span style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7c3aed,#a78bfa);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1rem;color:#fff;flex-shrink:0;">{{ strtoupper(substr($siteName,0,1)) }}</span>
                 @endif
-                <span style="font-size:0.95rem;font-weight:700;color:var(--text-primary);">{{ $siteName }}</span>
+                <span style="font-size:0.95rem;font-weight:700;color:var(--navbar-text-hover);">{{ $siteName }}</span>
             </a>
 
             {{-- Desktop Nav — driven by Menu Builder, fallback to defaults --}}

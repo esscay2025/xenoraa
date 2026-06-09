@@ -1,0 +1,28 @@
+
+- v4.1.0 (2026-06-09): Theme Propagation Fix + Jose Industries Branding
+  - layouts/app.blade.php: Dynamic color scheme from tenant site_settings (color_bg, color_primary, color_secondary, color_text); auto-detects light vs dark theme via luminance calculation
+  - portfolio/shop.blade.php: Rewritten to use CSS variables (var(--accent), var(--bg-card), etc.) instead of hardcoded dark colors; shop title uses tenant site_name instead of hardcoded 'Gopi's Digital Shop'
+  - portfolio/blog.blade.php: Updated to use CSS variables for theme consistency
+  - portfolio/forum-index.blade.php: CSS override block injected after @endpush to map all hardcoded dark colors to CSS variables; forum title uses 
+  - auth/tenant-login.blade.php: Fully rewritten to load tenant site_settings (logo, colors, tagline); shows tenant logo instead of avatar if available; uses tenant accent colors for buttons and links
+  - Middleware: EnsurePaidSubscription added to gate /admin/* and /onboarding/* routes behind payment
+  - app/Http/Kernel.php: 'subscribed' middleware alias registered
+  - PaymentController.php: Fixed site_bootstrapped check to use SiteSetting::exists() instead of non-existent property
+  - joseindustries (user id=15): Logos and favicon uploaded to /storage/logos/15/; site settings configured with green theme (color_bg=#f0fdf4, color_accent=#22c55e, color_primary=#16a34a)
+
+- v4.2.0 (2026-06-09): Jose Industries Theme & E-Commerce Enhancement
+  - layouts/app.blade.php: navbar uses white logo (logo_white_path) when isLightTheme=true (dark navbar on light bg)
+  - layouts/app.blade.php: CSS :root block dynamically sets --bg-primary, --bg-secondary, --bg-card, --text-primary, --navbar-bg from tenant color_bg/color_primary/color_secondary/color_text site settings
+  - resources/views/tenant/templates/ecommerce.blade.php: Fully rebuilt with CSS variables, hero slider, product categories, features section, newsletter
+  - resources/views/portfolio/about.blade.php: Rebuilt with green theme CSS variables, rich Jose Industries content (story, certifications, manufacturing, team, factsheet)
+  - about.blade.php: Fixed generic 'About Me' heading to use 'About {siteName}' when default heading detected
+  - resources/views/admin/pos/terminal.blade.php: Fixed product image URLs (handles full http:// URLs from external sources)
+  - resources/views/staff/dashboard.blade.php: Rebuilt to use tenant-specific URLs (custom domain aware)
+  - app/Http/Controllers/Auth/AuthenticatedSessionController.php: Fixed staff redirect to always use custom domain when available
+  - app/Http/Controllers/Admin/PosController.php: Fixed featured_image URL in AJAX search response
+  - Jose Industries (user_id=15): Logos uploaded (/storage/logos/15/), site settings updated with real company data, 113 products across 17 categories imported from IndiaMart
+- v4.3.0 (2026-06-09): About Page Tenant Theme Fix + POS Cart Layout Fix
+  - resources/views/portfolio/about.blade.php: Fixed :root CSS block — replaced broken color-mix(in srgb, dark_bg, #000) calculations (which produced dark text on dark backgrounds for dark-themed tenants) with direct references to layout CSS variables (--bg-primary, --bg-card, --border, --text-primary, --text-secondary, --text-muted, --accent)
+  - resources/views/layouts/app.blade.php: Added CSS variable aliases --color-bg, --color-accent, --color-text, --color-card, --color-border to :root block so about.blade.php and other pages can reference them as fallbacks
+  - resources/views/admin/pos/terminal.blade.php: Fixed right panel layout — pos-right set to overflow:hidden height:100%; cart-items set to flex:1 1 0 min-height:0 overflow-y:auto (scrollable); checkout-panel set to flex-shrink:0 (pinned at bottom); checkout-panel div added to wrap all checkout sections (customer, discount, totals, payment buttons, charge button)
+  - Verified: Jose Industries (green/light), Gopi K (indigo/dark) about pages show correct tenant-specific theme colors; POS cart scrollHeight(515)>clientHeight(393) confirming scroll works with 8 items
