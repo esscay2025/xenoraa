@@ -89,6 +89,9 @@
                 </div>
 
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                    <a href="{{ route('superadmin.themes.preview', $theme) }}" target="_blank" class="sa-action-btn" style="color:#a855f7;border-color:#a855f733;">
+                        <i class="fas fa-eye"></i> Preview
+                    </a>
                     <a href="{{ route('superadmin.themes.edit', $theme) }}" class="sa-action-btn">
                         <i class="fas fa-edit"></i> Edit
                     </a>

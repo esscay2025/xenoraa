@@ -188,7 +188,7 @@ class PosController extends Controller
                 'stock_quantity'=> $p->stock_quantity,
                 'stock_status'  => $p->stock_status,
                 'manage_stock'  => $p->manage_stock,
-                'featured_image'=> $p->featured_image ? asset('storage/' . $p->featured_image) : null,
+                'featured_image'=> $p->featured_image ? (str_starts_with($p->featured_image, 'http') ? $p->featured_image : asset('storage/' . $p->featured_image)) : null,
                 'category'      => $p->category?->name,
             ]);
 

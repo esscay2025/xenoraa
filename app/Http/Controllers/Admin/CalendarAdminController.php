@@ -38,6 +38,45 @@ class CalendarAdminController extends Controller
         return view('admin.calendar.index', compact('events', 'notes', 'users', 'stats'));
     }
 
+    public function storeEvent(Request $request)
+    {
+        $request->validate([
+            'title'      => 'required|string|max:255',
+            'event_date' => 'required|date',
+            'user_id'    => 'nullable|exists:users,id',
+        ]);
+
+        CalendarEvent::create([
+            'user_id'     => $request->user_id ?: auth()->id(),
+            'title'       => $request->title,
+            'description' => $request->description,
+            'event_date'  => $request->event_date,
+            'event_time'  => $request->event_time,
+            'color'       => $request->color ?? '#3b82f6',
+            'is_reminder' => $request->boolean('is_reminder'),
+        ]);
+
+        return back()->with('success', 'Event added successfully.');
+    }
+
+    public function storeNote(Request $request)
+    {
+        $request->validate([
+            'content' => 'required|string',
+            'user_id' => 'nullable|exists:users,id',
+        ]);
+
+        UserNote::create([
+            'user_id'   => $request->user_id ?: auth()->id(),
+            'title'     => $request->title,
+            'content'   => $request->content,
+            'color'     => $request->color ?? '#f59e0b',
+            'is_pinned' => $request->boolean('is_pinned'),
+        ]);
+
+        return back()->with('success', 'Note added successfully.');
+    }
+
     public function destroy(CalendarEvent $event)
     {
         $event->delete();

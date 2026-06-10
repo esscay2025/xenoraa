@@ -45,7 +45,7 @@
             </tr>
         </thead>
         <tbody>
-            @forelse($subscribers as $sub)
+            @forelse($commissions as $sub)
             <tr>
                 <td>
                     <div style="font-weight:600;color:#fff;font-size:0.85rem;">{{ $sub->customer?->name ?? 'Unknown' }}</div>
@@ -72,8 +72,8 @@
             @endforelse
         </tbody>
     </table>
-    @if($subscribers->hasPages())
-    <div style="padding:1rem 1.5rem;border-top:1px solid #27272a;">{{ $subscribers->links() }}</div>
+    @if($commissions->hasPages())
+    <div style="padding:1rem 1.5rem;border-top:1px solid #27272a;">{{ $commissions->links() }}</div>
     @endif
 </div>
 

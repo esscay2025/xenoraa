@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Community Forum')
+@section('title', ($siteName ?? 'Community') . ' — Forum')
 
 @push('styles')
 <style>
@@ -283,13 +283,53 @@ select.form-control { appearance: none; cursor: pointer; }
 }
 </style>
 @endpush
+{{-- Tenant theme CSS overrides: map hardcoded dark colors to CSS variables --}}
+<style>
+.forum-hero { background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%) !important; border-bottom: 1px solid var(--border) !important; }
+.forum-hero h1 { color: var(--text-primary) !important; }
+.forum-hero p { color: var(--text-secondary) !important; }
+.forum-stat-value { color: var(--text-primary) !important; }
+.forum-stat-label { color: var(--text-muted) !important; }
+.forum-sidebar-card { background: var(--bg-card) !important; border-color: var(--border) !important; }
+.forum-sidebar-title { color: var(--text-muted) !important; border-bottom-color: var(--border) !important; }
+.forum-cat-btn { color: var(--text-secondary) !important; }
+.forum-cat-btn:hover { color: var(--text-primary) !important; background: var(--bg-hover) !important; }
+.forum-cat-btn.active { color: var(--accent) !important; background: rgba(var(--accent-rgb),0.1) !important; border-left-color: var(--accent) !important; }
+.forum-search { background: var(--bg-card) !important; border-color: var(--border) !important; color: var(--text-primary) !important; }
+.forum-search::placeholder { color: var(--text-muted) !important; }
+.forum-search:focus { border-color: var(--accent) !important; }
+.btn-new-topic { background: var(--accent) !important; color: #fff !important; }
+.btn-new-topic:hover { opacity: 0.88; }
+.topic-card { background: var(--bg-card) !important; border-color: var(--border) !important; }
+.topic-card:hover { border-color: var(--accent) !important; }
+.topic-card.pinned { border-color: rgba(var(--accent-rgb),0.3) !important; background: rgba(var(--accent-rgb),0.04) !important; }
+.topic-title { color: var(--text-primary) !important; }
+.topic-title:hover { color: var(--accent) !important; }
+.topic-meta { color: var(--text-muted) !important; }
+.topic-excerpt { color: var(--text-secondary) !important; }
+.topic-stat-box { background: var(--bg-secondary) !important; }
+.topic-stat-num { color: var(--text-primary) !important; }
+.topic-stat-lbl { color: var(--text-muted) !important; }
+.modal-box { background: var(--bg-card) !important; border-color: var(--border) !important; }
+.modal-title { color: var(--text-primary) !important; }
+.form-label { color: var(--text-secondary) !important; }
+.form-control { background: var(--bg-secondary) !important; border-color: var(--border) !important; color: var(--text-primary) !important; }
+.form-control:focus { border-color: var(--accent) !important; }
+.form-control::placeholder { color: var(--text-muted) !important; }
+.btn-cancel { border-color: var(--border) !important; color: var(--text-secondary) !important; }
+.btn-submit { background: var(--accent) !important; color: #fff !important; }
+.empty-forum { color: var(--text-muted) !important; }
+.empty-forum i { color: var(--border) !important; }
+.login-prompt { background: var(--bg-card) !important; border-color: var(--border) !important; color: var(--text-secondary) !important; }
+.login-prompt a { color: var(--accent) !important; }
+</style>
 
 @section('content')
 
 {{-- Forum Hero --}}
 <section class="forum-hero">
     <div class="forum-hero-inner">
-        <h1><i class="fas fa-comments" style="color:#555;margin-right:0.5rem;"></i>Community Forum</h1>
+        <h1><i class="fas fa-comments" style="color:var(--accent);margin-right:0.5rem;"></i>{{ $siteName ?? 'Community' }} Forum</h1>
         <p>Join the conversation. Share ideas, ask questions, and learn from the community.</p>
         <div class="forum-stats">
             <div class="forum-stat">

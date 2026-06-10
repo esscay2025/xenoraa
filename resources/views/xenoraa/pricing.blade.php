@@ -1,6 +1,6 @@
 @extends('layouts.xenoraa')
 @section('title', 'Pricing — Xenoraa')
-@section('meta_description', 'Simple, transparent pricing for Xenoraa. Start free and scale as you grow. No hidden fees.')
+@section('meta_description', 'Simple, transparent pricing for Xenoraa. Choose the plan that fits your business. No hidden fees.')
 
 @section('styles')
 <style>
@@ -59,7 +59,7 @@
     <div class="xn-container">
         <div class="xn-label">Pricing</div>
         <h1 class="xn-heading-xl">Simple, Transparent<br><span style="color:#a855f7;">Pricing</span></h1>
-        <p class="xn-body-lg" style="max-width:520px;margin:1.25rem auto 0;">Start free and scale as you grow. No hidden fees, no long-term contracts. Cancel anytime.</p>
+        <p class="xn-body-lg" style="max-width:520px;margin:1.25rem auto 0;">Choose the plan that fits your business. No hidden fees, no long-term contracts. Cancel anytime.</p>
         <div class="xn-toggle-wrap">
             <span class="xn-toggle-label">Monthly</span>
             <label class="xn-toggle">
@@ -81,22 +81,22 @@
                     <sup>₹</sup><span class="price-monthly">499</span><span class="price-yearly" style="display:none;">416</span><sub>/mo</sub>
                 </div>
                 <div class="xn-plan-yearly"><span class="yearly-note" style="display:none;">₹4,999/year — save ₹989</span><span class="monthly-note">Billed monthly</span></div>
-                <div class="xn-plan-desc">Perfect for individuals building their professional online presence for the first time.</div>
+                <div class="xn-plan-desc">Perfect for individuals and professionals building their online presence with a complete website and core business tools.</div>
                 <ul class="xn-plan-features">
-                    <li><i class="fas fa-check"></i> Personal Profile Website</li>
-                    <li><i class="fas fa-check"></i> xenoraa.com/username URL</li>
-                    <li><i class="fas fa-check"></i> Portfolio Showcase (up to 10)</li>
-                    <li><i class="fas fa-check"></i> Blog Publishing (up to 20 posts)</li>
-                    <li><i class="fas fa-check"></i> Notes & Reminders</li>
-                    <li><i class="fas fa-check"></i> Basic Calendar</li>
+                    <li><i class="fas fa-check"></i> Site Builder (full website)</li>
+                    <li><i class="fas fa-check"></i> E-Commerce / Shop</li>
+                    <li><i class="fas fa-check"></i> Blog Publishing</li>
+                    <li><i class="fas fa-check"></i> Job Board</li>
+                    <li><i class="fas fa-check"></i> Community Forum</li>
+                    <li><i class="fas fa-check"></i> Notes & Calendar</li>
                     <li><i class="fas fa-check"></i> Basic Analytics</li>
                     <li><i class="fas fa-check"></i> Email Support</li>
                     <li class="disabled"><i class="fas fa-times"></i> CRM & Lead Management</li>
-                    <li class="disabled"><i class="fas fa-times"></i> Custom Domain</li>
-                    <li class="disabled"><i class="fas fa-times"></i> AI Assistant</li>
-                    <li class="disabled"><i class="fas fa-times"></i> E-Commerce Store</li>
+                    <li class="disabled"><i class="fas fa-times"></i> AI Hub & AI Assistance</li>
+                    <li class="disabled"><i class="fas fa-times"></i> Point of Sale (POS)</li>
+                    <li class="disabled"><i class="fas fa-times"></i> Newsletter</li>
                 </ul>
-                <button onclick="startCheckout('starter','Starter')" class="xn-btn-ghost" style="width:100%;text-align:center;display:block;padding:0.875rem;font-size:0.9rem;cursor:pointer;font-family:'Inter',sans-serif;">Get Started Free</button>
+                <a href="{{ route('xenoraa.get-started') }}?plan=starter&billing=monthly" class="xn-btn-ghost" style="width:100%;text-align:center;display:block;padding:0.875rem;font-size:0.9rem;font-family:'Inter',sans-serif;text-decoration:none;">Get Started</a>
             </div>
 
             {{-- Professional --}}
@@ -107,22 +107,22 @@
                     <sup>₹</sup><span class="price-monthly">999</span><span class="price-yearly" style="display:none;">833</span><sub>/mo</sub>
                 </div>
                 <div class="xn-plan-yearly"><span class="yearly-note" style="display:none;">₹9,999/year — save ₹1,989</span><span class="monthly-note">Billed monthly</span></div>
-                <div class="xn-plan-desc">Designed for consultants, advocates, doctors, coaches, and creators who need full professional tools.</div>
+                <div class="xn-plan-desc">Designed for consultants, advocates, doctors, coaches, and creators who need AI tools, CRM, and POS alongside their website.</div>
                 <ul class="xn-plan-features">
                     <li><i class="fas fa-check"></i> Everything in Starter</li>
                     <li><i class="fas fa-check"></i> CRM & Lead Management</li>
-                    <li><i class="fas fa-check"></i> Custom Domain Mapping</li>
-                    <li><i class="fas fa-check"></i> AI Content Assistant</li>
+                    <li><i class="fas fa-check"></i> AI Hub — AI Assistance</li>
                     <li><i class="fas fa-check"></i> AI Chat Widget</li>
-                    <li><i class="fas fa-check"></i> Unlimited Blog Posts</li>
+                    <li><i class="fas fa-check"></i> AI Conversations</li>
+                    <li><i class="fas fa-check"></i> Point of Sale (POS)</li>
                     <li><i class="fas fa-check"></i> Newsletter & Subscribers</li>
                     <li><i class="fas fa-check"></i> Advanced Analytics</li>
+                    <li><i class="fas fa-check"></i> Custom Domain Mapping</li>
                     <li><i class="fas fa-check"></i> Priority Support</li>
-                    <li><i class="fas fa-check"></i> Expense Tracking</li>
-                    <li class="disabled"><i class="fas fa-times"></i> E-Commerce Store</li>
+                    <li class="disabled"><i class="fas fa-times"></i> White Label Branding</li>
                     <li class="disabled"><i class="fas fa-times"></i> Team Members</li>
                 </ul>
-                <button onclick="startCheckout('professional','Professional')" class="xn-btn-primary" style="width:100%;text-align:center;display:block;padding:0.875rem;font-size:0.9rem;cursor:pointer;font-family:'Inter',sans-serif;">Get Started</button>
+                <a href="{{ route('xenoraa.get-started') }}?plan=professional&billing=monthly" class="xn-btn-primary" style="width:100%;text-align:center;display:block;padding:0.875rem;font-size:0.9rem;font-family:'Inter',sans-serif;text-decoration:none;">Get Started</a>
             </div>
 
             {{-- Business Pro --}}
@@ -132,22 +132,22 @@
                     <sup>₹</sup><span class="price-monthly">1,999</span><span class="price-yearly" style="display:none;">1,666</span><sub>/mo</sub>
                 </div>
                 <div class="xn-plan-yearly"><span class="yearly-note" style="display:none;">₹19,999/year — save ₹3,989</span><span class="monthly-note">Billed monthly</span></div>
-                <div class="xn-plan-desc">Built for growing professionals, founders, and organizations who need the complete Xenoraa ecosystem.</div>
+                <div class="xn-plan-desc">Built for growing businesses, founders, and organisations who need the complete Xenoraa ecosystem with all modules unlocked.</div>
                 <ul class="xn-plan-features">
                     <li><i class="fas fa-check"></i> Everything in Professional</li>
-                    <li><i class="fas fa-check"></i> E-Commerce Store (unlimited)</li>
+                    <li><i class="fas fa-check"></i> All Modules Unlocked</li>
+                    <li><i class="fas fa-check"></i> White Label Branding</li>
                     <li><i class="fas fa-check"></i> Team Members (up to 5)</li>
                     <li><i class="fas fa-check"></i> Automation Workflows</li>
                     <li><i class="fas fa-check"></i> API Access</li>
-                    <li><i class="fas fa-check"></i> White Label Branding</li>
-                    <li><i class="fas fa-check"></i> Job Board Module</li>
-                    <li><i class="fas fa-check"></i> Community Forum</li>
                     <li><i class="fas fa-check"></i> Dedicated Support</li>
                     <li><i class="fas fa-check"></i> Custom Integrations</li>
                     <li><i class="fas fa-check"></i> SLA Guarantee</li>
                     <li><i class="fas fa-check"></i> Onboarding Assistance</li>
+                    <li><i class="fas fa-check"></i> Future Modules Included</li>
+                    <li><i class="fas fa-check"></i> Theme Store Access</li>
                 </ul>
-                <button onclick="startCheckout('business','Business Pro')" class="xn-btn-ghost" style="width:100%;text-align:center;display:block;padding:0.875rem;font-size:0.9rem;cursor:pointer;font-family:'Inter',sans-serif;">Get Started</button>
+                <a href="{{ route('xenoraa.get-started') }}?plan=business&billing=monthly" class="xn-btn-ghost" style="width:100%;text-align:center;display:block;padding:0.875rem;font-size:0.9rem;font-family:'Inter',sans-serif;text-decoration:none;">Get Started</a>
             </div>
         </div>
 
@@ -165,25 +165,26 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr class="section-row"><td colspan="4">Profile & Branding</td></tr>
-                    <tr><td>Personal Profile Website</td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
+                    <tr class="section-row"><td colspan="4">Website & Site Builder</td></tr>
+                    <tr><td>Site Builder (full website)</td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
                     <tr><td>xenoraa.com/username URL</td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
                     <tr><td>Custom Domain Mapping</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
-                    <tr><td>Portfolio Projects</td><td>Up to 10</td><td>Unlimited</td><td>Unlimited</td></tr>
+                    <tr><td>Theme Store Access</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
                     <tr class="section-row"><td colspan="4">Content & Publishing</td></tr>
-                    <tr><td>Blog Posts</td><td>Up to 20</td><td>Unlimited</td><td>Unlimited</td></tr>
+                    <tr><td>Blog Posts</td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
+                    <tr><td>Community Forum</td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
                     <tr><td>Newsletter & Subscribers</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
-                    <tr><td>Community Forum</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
+                    <tr class="section-row"><td colspan="4">E-Commerce & Jobs</td></tr>
+                    <tr><td>E-Commerce / Shop</td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
+                    <tr><td>Job Board</td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
+                    <tr><td>Point of Sale (POS)</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
                     <tr class="section-row"><td colspan="4">Business Tools</td></tr>
                     <tr><td>CRM & Lead Management</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
-                    <tr><td>Calendar & Scheduling</td><td>Basic</td><td>Advanced</td><td>Advanced</td></tr>
-                    <tr><td>Notes & Knowledge Hub</td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
-                    <tr><td>Expense Tracking</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
-                    <tr><td>E-Commerce Store</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-times xn-check-no"></i></td><td>Unlimited</td></tr>
-                    <tr><td>Job Board</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
+                    <tr><td>Calendar & Notes</td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
+                    <tr><td>Analytics</td><td>Basic</td><td>Advanced</td><td>Advanced</td></tr>
                     <tr class="section-row"><td colspan="4">AI & Automation</td></tr>
+                    <tr><td>AI Hub — AI Assistance</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
                     <tr><td>AI Chat Widget</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
-                    <tr><td>AI Content Assistant</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
                     <tr><td>Automation Workflows</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
                     <tr><td>API Access</td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-times xn-check-no"></i></td><td><i class="fas fa-check xn-check-yes"></i></td></tr>
                     <tr class="section-row"><td colspan="4">Support</td></tr>
@@ -200,7 +201,7 @@
             @php
             $faqs = [
                 ['q'=>'Can I change my plan later?','a'=>'Yes, you can upgrade or downgrade your plan at any time. Changes take effect immediately.'],
-                ['q'=>'Is there a free trial?','a'=>'Yes! You can start with a 14-day free trial on any plan. No credit card required.'],
+                ['q'=>'How does the sign-up process work?','a'=>'Click "Get Started" on any plan, fill in your business details on the registration page, then complete payment. Your website is created automatically using AI from the information you provide.'],
                 ['q'=>'Can I use my own domain?','a'=>'Yes, on the Professional and Business Pro plans you can map your own custom domain (e.g., gopi.blog) to your Xenoraa profile.'],
                 ['q'=>'What happens to my data if I cancel?','a'=>'Your data is retained for 30 days after cancellation. You can export all your data at any time.'],
                 ['q'=>'Do you offer refunds?','a'=>'Yes, we offer a 30-day money-back guarantee on all paid plans.'],
@@ -220,14 +221,13 @@
     <div class="xn-container">
         <h2 class="xn-heading-lg" style="max-width:600px;margin:0 auto 1rem;">Start Building Your<br><span style="color:#a855f7;">Digital Identity Today</span></h2>
         <p class="xn-body" style="max-width:480px;margin:0 auto 2.5rem;">Join professionals who are already using Xenoraa to build their brand and grow their business.</p>
-        <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-primary-lg">Start Free Trial 🚀</a>
-        <p style="margin-top:1rem;font-size:0.8rem;color:#3f3f46;">No credit card required · 14-day free trial · Cancel anytime</p>
+        <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-primary-lg">Get Started Now 🚀</a>
+        <p style="margin-top:1rem;font-size:0.8rem;color:#3f3f46;">30-day money-back guarantee · Cancel anytime</p>
     </div>
 </section>
 @endsection
 
 @section('scripts')
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 let currentBilling = 'monthly';
 
@@ -238,58 +238,12 @@ function toggleBilling() {
     document.querySelectorAll('.price-yearly').forEach(el => el.style.display = yearly ? 'inline' : 'none');
     document.querySelectorAll('.yearly-note').forEach(el => el.style.display = yearly ? 'inline' : 'none');
     document.querySelectorAll('.monthly-note').forEach(el => el.style.display = yearly ? 'none' : 'inline');
-}
-
-async function startCheckout(plan, planName) {
-    try {
-        const res = await fetch('/payment/create-order', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
-            },
-            body: JSON.stringify({ plan: plan, billing: currentBilling })
-        });
-        const data = await res.json();
-        if (!data.success) { alert(data.message || 'Failed to initiate payment. Please try again.'); return; }
-
-        const options = {
-            key: data.key_id,
-            amount: data.amount,
-            currency: data.currency,
-            name: 'Xenoraa',
-            description: planName + ' Plan — ' + (currentBilling === 'yearly' ? 'Annual' : 'Monthly'),
-            order_id: data.order_id,
-            prefill: { name: data.user_name, email: data.user_email },
-            theme: { color: '#7c3aed' },
-            handler: async function(response) {
-                const verifyRes = await fetch('/payment/verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        razorpay_payment_id: response.razorpay_payment_id,
-                        razorpay_order_id: response.razorpay_order_id,
-                        razorpay_signature: response.razorpay_signature,
-                        plan: plan,
-                        billing: currentBilling
-                    })
-                });
-                const verifyData = await verifyRes.json();
-                if (verifyData.success) {
-                    window.location.href = '/payment/success?plan=' + plan + '&payment_id=' + response.razorpay_payment_id;
-                } else {
-                    window.location.href = '/payment/failed';
-                }
-            },
-            modal: { ondismiss: function() { console.log('Payment cancelled'); } }
-        };
-        const rzp = new Razorpay(options);
-        rzp.on('payment.failed', function() { window.location.href = '/payment/failed'; });
-        rzp.open();
-    } catch (err) {
-        console.error('Checkout error:', err);
-        alert('Something went wrong. Please try again.');
-    }
+    // Update all Get Started links with current billing
+    document.querySelectorAll('a[href*="get-started"]').forEach(link => {
+        const url = new URL(link.href, window.location.origin);
+        url.searchParams.set('billing', currentBilling);
+        link.href = url.toString();
+    });
 }
 </script>
 @endsection

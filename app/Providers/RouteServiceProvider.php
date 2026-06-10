@@ -44,7 +44,7 @@ class RouteServiceProvider extends ServiceProvider
 
         // Staff
         if (method_exists($user, 'isStaff') && $user->isStaff()) {
-            return '/staff/dashboard';
+            return '/admin/dashboard'; // Staff uses admin panel with module-gated sidebar
         }
 
         // Regular visitor / sub-user

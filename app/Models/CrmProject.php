@@ -16,11 +16,27 @@ class CrmProject extends Model
     public function deal()    { return $this->belongsTo(CrmDeal::class, 'deal_id'); }
     public function tasks()   { return $this->hasMany(CrmProjectTask::class, 'project_id'); }
 
+    // Accessor: $project->progress (original)
     public function getProgressAttribute(): int
     {
-        $total = $this->tasks()->count();
+        $total = $this->tasks_count ?? $this->tasks()->count();
         if ($total === 0) return 0;
         $done = $this->tasks()->where('status', 'completed')->count();
         return (int) round(($done / $total) * 100);
+    }
+
+    // Accessor: $project->progress_percent (used in views)
+    public function getProgressPercentAttribute(): int
+    {
+        return $this->getProgressAttribute();
+    }
+
+    // Accessor: $project->tasks_count (fallback if withCount not used)
+    public function getTasksCountAttribute(): int
+    {
+        if (array_key_exists('tasks_count', $this->attributes)) {
+            return (int) $this->attributes['tasks_count'];
+        }
+        return $this->tasks()->count();
     }
 }

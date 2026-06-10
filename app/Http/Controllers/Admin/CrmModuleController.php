@@ -180,7 +180,7 @@ class CrmModuleController extends Controller
         $leads = $contacts = $accounts = $deals = $forecasts = collect();
 
         if ($tab === 'leads') {
-            $q = CrmLead::where('user_id', $tid);
+            $q = CrmLead::where('user_id', $tid)->withCount('conversations');
             if ($search) $q->where(fn($q) => $q->where('name','like',"%$search%")->orWhere('email','like',"%$search%")->orWhere('company','like',"%$search%"));
             if ($request->status) $q->where('status', $request->status);
             $leads = $q->orderByDesc('created_at')->paginate(20)->withQueryString();
@@ -740,4 +740,336 @@ class CrmModuleController extends Controller
 
         return back()->with('success', ucfirst($type) . ' deleted.');
     }
+
+    // ══════════════════════════════════════════════════════════════
+    // SALES SUB-MODULE PAGES
+    // ══════════════════════════════════════════════════════════════
+
+    public function salesLeads(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $q = CrmLead::where('user_id', $tid)->withCount('conversations');
+        if ($search) $q->where(fn($q) => $q->where('name','like',"%$search%")->orWhere('email','like',"%$search%")->orWhere('company','like',"%$search%"));
+        if ($request->status) $q->where('status', $request->status);
+        $leads = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.sales.leads', compact('leads'));
+    }
+
+    public function salesLeadsCreate()
+    {
+        return view('admin.crm2.sales.create-lead');
+    }
+
+    public function salesContacts(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $q = CrmContact::where('user_id', $tid)->with('account');
+        if ($search) $q->where(fn($q) => $q->where('first_name','like',"%$search%")->orWhere('last_name','like',"%$search%")->orWhere('email','like',"%$search%"));
+        $contacts = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.sales.contacts', compact('contacts', 'accounts_list'));
+    }
+
+    public function salesContactsCreate()
+    {
+        $tid = $this->tenantId();
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.sales.create-contact', compact('accounts_list'));
+    }
+
+    public function salesAccounts(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $q = CrmAccount::where('user_id', $tid)->withCount(['contacts','deals']);
+        if ($search) $q->where(fn($q) => $q->where('name','like',"%$search%")->orWhere('email','like',"%$search%"));
+        if ($request->type) $q->where('type', $request->type);
+        $accounts = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.sales.accounts', compact('accounts'));
+    }
+
+    public function salesAccountsCreate()
+    {
+        return view('admin.crm2.sales.create-account');
+    }
+
+    public function salesDeals(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $contacts_list = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
+        $q = CrmDeal::where('user_id', $tid)->with(['account','contact']);
+        if ($search) $q->where('title','like',"%$search%");
+        if ($request->stage) $q->where('stage', $request->stage);
+        $deals = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.sales.deals', compact('deals', 'accounts_list', 'contacts_list'));
+    }
+
+    public function salesDealsCreate()
+    {
+        $tid = $this->tenantId();
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $contacts_list = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
+        return view('admin.crm2.sales.create-deal', compact('accounts_list', 'contacts_list'));
+    }
+
+    public function salesForecasts(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $q = CrmForecast::where('user_id', $tid);
+        if ($search) $q->where('notes','like',"%$search%");
+        $forecasts = $q->orderByDesc('year')->orderByDesc('quarter')->paginate(25)->withQueryString();
+        return view('admin.crm2.sales.forecasts', compact('forecasts'));
+    }
+
+    public function salesForecastsCreate()
+    {
+        return view('admin.crm2.sales.create-forecast');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // ACTIVITIES SUB-MODULE PAGES
+    // ══════════════════════════════════════════════════════════════
+
+    public function activitiesTasks(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $q = CrmActivity::where('user_id', $tid)->where('type', 'task');
+        if ($search) $q->where('title','like',"%$search%");
+        $activities = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.activities.tasks', compact('activities'));
+    }
+
+    public function activitiesTasksCreate()
+    {
+        return view('admin.crm2.activities.create-activity', ['type' => 'task']);
+    }
+
+    public function activitiesMeetings(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $q = CrmActivity::where('user_id', $tid)->where('type', 'meeting');
+        if ($search) $q->where('title','like',"%$search%");
+        $activities = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.activities.meetings', compact('activities'));
+    }
+
+    public function activitiesMeetingsCreate()
+    {
+        return view('admin.crm2.activities.create-activity', ['type' => 'meeting']);
+    }
+
+    public function activitiesCalls(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $q = CrmActivity::where('user_id', $tid)->where('type', 'call');
+        if ($search) $q->where('title','like',"%$search%");
+        $activities = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.activities.calls', compact('activities'));
+    }
+
+    public function activitiesCallsCreate()
+    {
+        return view('admin.crm2.activities.create-activity', ['type' => 'call']);
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // INVENTORY SUB-MODULE PAGES
+    // ══════════════════════════════════════════════════════════════
+
+    public function inventoryPriceBooks(Request $request)
+    {
+        $tid = $this->tenantId();
+        $items = CrmPriceBook::where('user_id', $tid)->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.inventory.price-books', compact('items'));
+    }
+
+    public function inventoryPriceBooksCreate()
+    {
+        return view('admin.crm2.inventory.create-price-book');
+    }
+
+    public function inventoryQuotes(Request $request)
+    {
+        $tid = $this->tenantId();
+        $items = CrmQuote::where('user_id', $tid)->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.inventory.quotes', compact('items'));
+    }
+
+    public function inventoryQuotesCreate()
+    {
+        $tid = $this->tenantId();
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.inventory.create-quote', compact('accounts_list'));
+    }
+
+    public function inventorySalesOrders(Request $request)
+    {
+        $tid = $this->tenantId();
+        $items = CrmSalesOrder::where('user_id', $tid)->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.inventory.sales-orders', compact('items'));
+    }
+
+    public function inventorySalesOrdersCreate()
+    {
+        $tid = $this->tenantId();
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.inventory.create-sales-order', compact('accounts_list'));
+    }
+
+    public function inventoryPurchaseOrders(Request $request)
+    {
+        $tid = $this->tenantId();
+        $items = CrmPurchaseOrder::where('user_id', $tid)->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.inventory.purchase-orders', compact('items'));
+    }
+
+    public function inventoryPurchaseOrdersCreate()
+    {
+        $tid = $this->tenantId();
+        $vendors_list = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.inventory.create-purchase-order', compact('vendors_list'));
+    }
+
+    public function inventoryInvoices(Request $request)
+    {
+        $tid = $this->tenantId();
+        $items = CrmInvoice::where('user_id', $tid)->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.inventory.invoices', compact('items'));
+    }
+
+    public function inventoryInvoicesCreate()
+    {
+        $tid = $this->tenantId();
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.inventory.create-invoice', compact('accounts_list'));
+    }
+
+    public function inventoryVendors(Request $request)
+    {
+        $tid = $this->tenantId();
+        $items = CrmVendor::where('user_id', $tid)->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.inventory.vendors', compact('items'));
+    }
+
+    public function inventoryVendorsCreate()
+    {
+        return view('admin.crm2.inventory.create-vendor');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // SUPPORT SUB-MODULE PAGES
+    // ══════════════════════════════════════════════════════════════
+
+    public function supportCases(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $q = CrmCase::where('user_id', $tid);
+        if ($search) $q->where(fn($q) => $q->where('subject','like',"%$search%")->orWhere('description','like',"%$search%"));
+        $cases = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.support.cases', compact('cases'));
+    }
+
+    public function supportCasesCreate()
+    {
+        return view('admin.crm2.support.create-case');
+    }
+
+    public function supportSolutions(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $q = CrmSolution::where('user_id', $tid);
+        if ($search) $q->where(fn($q) => $q->where('title','like',"%$search%")->orWhere('content','like',"%$search%"));
+        $solutions = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.support.solutions', compact('solutions'));
+    }
+
+    public function supportSolutionsCreate()
+    {
+        return view('admin.crm2.support.create-solution');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // SERVICES SUB-MODULE PAGES
+    // ══════════════════════════════════════════════════════════════
+
+    public function servicesCatalog(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $q = CrmService::where('user_id', $tid);
+        if ($search) $q->where('name','like',"%$search%");
+        $services = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.services.catalog', compact('services'));
+    }
+
+    public function servicesCatalogCreate()
+    {
+        return view('admin.crm2.services.create-service');
+    }
+
+    public function servicesBookings(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $services_list = CrmService::where('user_id', $tid)->orderBy('name')->get();
+        $q = CrmServiceBooking::where('user_id', $tid)->with('service');
+        if ($search) $q->where(fn($q) => $q->where('client_name','like',"%$search%")->orWhere('client_email','like',"%$search%"));
+        $bookings = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.services.bookings', compact('bookings', 'services_list'));
+    }
+
+    public function servicesBookingsCreate()
+    {
+        $tid = $this->tenantId();
+        $services_list = CrmService::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.services.create-booking', compact('services_list'));
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // PROJECTS SUB-MODULE PAGES
+    // ══════════════════════════════════════════════════════════════
+
+    public function projectsList(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $q = CrmProject::where('user_id', $tid)->withCount('tasks');
+        if ($search) $q->where('name','like',"%$search%");
+        $projects = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.projects.list', compact('projects'));
+    }
+
+    public function projectsListCreate()
+    {
+        return view('admin.crm2.projects.create-project');
+    }
+
+    public function projectsTasks(Request $request)
+    {
+        $tid = $this->tenantId();
+        $search = $request->input('search');
+        $projects_list = CrmProject::where('user_id', $tid)->orderBy('name')->get();
+        $q = CrmProjectTask::whereHas('project', fn($q) => $q->where('user_id', $tid));
+        if ($search) $q->where('title','like',"%$search%");
+        $tasks = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.projects.tasks', compact('tasks', 'projects_list'));
+    }
+
+    public function projectsTasksCreate()
+    {
+        $tid = $this->tenantId();
+        $projects_list = CrmProject::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.projects.create-task', compact('projects_list'));
+    }
+
 }

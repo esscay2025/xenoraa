@@ -28,6 +28,7 @@
     <div class="card">
         <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
             <h2 style="font-size: 1rem; font-weight: 600; margin: 0;">Calendar Events ({{ $events->total() }})</h2>
+            <button onclick="document.getElementById('modal-add-event').style.display='flex'" class="btn btn-primary" style="padding: 0.4rem 0.9rem; font-size: 0.8rem;"><i class="fas fa-plus"></i> Add Event</button>
         </div>
         {{-- Filter --}}
         <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border);">
@@ -92,8 +93,9 @@
 
     {{-- Notes --}}
     <div class="card">
-        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
             <h2 style="font-size: 1rem; font-weight: 600; margin: 0;">Recent User Notes ({{ $notes->count() }})</h2>
+            <button onclick="document.getElementById('modal-add-note').style.display='flex'" class="btn btn-primary" style="padding: 0.4rem 0.9rem; font-size: 0.8rem;"><i class="fas fa-plus"></i> Add Note</button>
         </div>
         <div style="padding: 1rem;">
             @forelse($notes as $note)
@@ -114,6 +116,105 @@
             <div style="padding: 2rem; text-align: center; color: var(--text-muted);">No notes yet.</div>
             @endforelse
         </div>
+    </div>
+</div>
+
+{{-- Add Event Modal --}}
+<div id="modal-add-event" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:2rem; width:100%; max-width:480px; position:relative;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+            <h3 style="font-size:1.1rem; font-weight:700; margin:0;"><i class="fas fa-calendar-plus" style="color:#3b82f6; margin-right:0.5rem;"></i> Add Calendar Event</h3>
+            <button onclick="document.getElementById('modal-add-event').style.display='none'" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem;"><i class="fas fa-times"></i></button>
+        </div>
+        @if(session('success'))<div style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); color:#22c55e; padding:0.75rem 1rem; border-radius:8px; margin-bottom:1rem; font-size:0.85rem;"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>@endif
+        <form method="POST" action="{{ route('admin.calendar.events.store') }}">
+            @csrf
+            <div style="margin-bottom:1rem;">
+                <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">Event Title *</label>
+                <input type="text" name="title" required style="width:100%; background:var(--bg-dark); border:1px solid var(--border); color:white; padding:0.6rem 0.9rem; border-radius:8px; font-size:0.9rem;" placeholder="e.g. Team Meeting">
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                <div>
+                    <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">Date *</label>
+                    <input type="date" name="event_date" required style="width:100%; background:var(--bg-dark); border:1px solid var(--border); color:white; padding:0.6rem 0.9rem; border-radius:8px; font-size:0.9rem;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">Time</label>
+                    <input type="time" name="event_time" style="width:100%; background:var(--bg-dark); border:1px solid var(--border); color:white; padding:0.6rem 0.9rem; border-radius:8px; font-size:0.9rem;">
+                </div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                <div>
+                    <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">Assign to User</label>
+                    <select name="user_id" style="width:100%; background:var(--bg-dark); border:1px solid var(--border); color:white; padding:0.6rem 0.9rem; border-radius:8px; font-size:0.85rem;">
+                        <option value="">— Self —</option>
+                        @foreach($users as $u)
+                        <option value="{{ $u->id }}">{{ $u->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">Color</label>
+                    <input type="color" name="color" value="#3b82f6" style="width:100%; height:38px; background:var(--bg-dark); border:1px solid var(--border); border-radius:8px; cursor:pointer;">
+                </div>
+            </div>
+            <div style="margin-bottom:1rem;">
+                <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">Description</label>
+                <textarea name="description" rows="2" style="width:100%; background:var(--bg-dark); border:1px solid var(--border); color:white; padding:0.6rem 0.9rem; border-radius:8px; font-size:0.85rem; resize:vertical;" placeholder="Optional description..."></textarea>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem;">
+                <input type="checkbox" name="is_reminder" id="is_reminder" value="1" style="width:16px; height:16px;">
+                <label for="is_reminder" style="font-size:0.85rem; color:var(--text-secondary); cursor:pointer;">Set as reminder</label>
+            </div>
+            <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('modal-add-event').style.display='none'" style="background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text-secondary); padding:0.6rem 1.2rem; border-radius:8px; cursor:pointer;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="padding:0.6rem 1.5rem;"><i class="fas fa-save"></i> Save Event</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{{-- Add Note Modal --}}
+<div id="modal-add-note" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:2rem; width:100%; max-width:480px; position:relative;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+            <h3 style="font-size:1.1rem; font-weight:700; margin:0;"><i class="fas fa-sticky-note" style="color:#f59e0b; margin-right:0.5rem;"></i> Add Note</h3>
+            <button onclick="document.getElementById('modal-add-note').style.display='none'" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem;"><i class="fas fa-times"></i></button>
+        </div>
+        <form method="POST" action="{{ route('admin.calendar.notes.store') }}">
+            @csrf
+            <div style="margin-bottom:1rem;">
+                <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">Title (optional)</label>
+                <input type="text" name="title" style="width:100%; background:var(--bg-dark); border:1px solid var(--border); color:white; padding:0.6rem 0.9rem; border-radius:8px; font-size:0.9rem;" placeholder="Note title...">
+            </div>
+            <div style="margin-bottom:1rem;">
+                <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">Note Content *</label>
+                <textarea name="content" required rows="4" style="width:100%; background:var(--bg-dark); border:1px solid var(--border); color:white; padding:0.6rem 0.9rem; border-radius:8px; font-size:0.85rem; resize:vertical;" placeholder="Write your note here..."></textarea>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1rem;">
+                <div>
+                    <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">Assign to User</label>
+                    <select name="user_id" style="width:100%; background:var(--bg-dark); border:1px solid var(--border); color:white; padding:0.6rem 0.9rem; border-radius:8px; font-size:0.85rem;">
+                        <option value="">— Self —</option>
+                        @foreach($users as $u)
+                        <option value="{{ $u->id }}">{{ $u->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:0.4rem;">Color</label>
+                    <input type="color" name="color" value="#f59e0b" style="width:100%; height:38px; background:var(--bg-dark); border:1px solid var(--border); border-radius:8px; cursor:pointer;">
+                </div>
+            </div>
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1.5rem;">
+                <input type="checkbox" name="is_pinned" id="is_pinned" value="1" style="width:16px; height:16px;">
+                <label for="is_pinned" style="font-size:0.85rem; color:var(--text-secondary); cursor:pointer;">Pin this note</label>
+            </div>
+            <div style="display:flex; gap:0.75rem; justify-content:flex-end;">
+                <button type="button" onclick="document.getElementById('modal-add-note').style.display='none'" style="background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text-secondary); padding:0.6rem 1.2rem; border-radius:8px; cursor:pointer;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="padding:0.6rem 1.5rem;"><i class="fas fa-save"></i> Save Note</button>
+            </div>
+        </form>
     </div>
 </div>
 @endsection

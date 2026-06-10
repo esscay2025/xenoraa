@@ -166,7 +166,7 @@
 @endif
 
 {{-- STATS --}}
-@if($_show('stats') && count($statsItems))
+@if($_show('stats'))
 <div class="xn-con-stats-row">
     @foreach($statsItems as $stat)
     <div class="xn-con-stat-cell">
@@ -230,7 +230,7 @@
 @endif
 
 {{-- TESTIMONIALS --}}
-@if($_show('testimonials') && count($testimonials))
+@if($_show('testimonials'))
 <div class="xn-con-section">
     <div class="xn-con-section-header">
         <div class="xn-con-badge">Client Success</div>
@@ -257,7 +257,7 @@
 @endif
 
 {{-- BLOG --}}
-@if($_show('blog') && (isset($featuredPost) && $featuredPost || !empty($categoryPosts)))
+@if($_show('blog'))
 <div class="xn-con-section">
     <div class="xn-con-section-header">
         <div class="xn-con-badge">Insights</div>
@@ -291,7 +291,7 @@
 @endif
 
 {{-- JOBS --}}
-@if($_show('jobs') && isset($activeJobs) && $activeJobs->count())
+@if($_show('jobs'))
 <div class="xn-con-section">
     <div class="xn-con-section-header">
         <div class="xn-con-badge">Careers</div>

@@ -224,12 +224,32 @@
 {{-- SSL Note --}}
 <div class="dom-card">
     <div class="dom-section-title"><i class="fas fa-lock" style="margin-right:0.4rem;"></i> SSL Certificate (HTTPS)</div>
+    @php
+        $sslActive = $customDomain && file_exists('/etc/letsencrypt/live/' . $customDomain . '/fullchain.pem');
+        $sslProvisioning = $customDomain && !$sslActive && file_exists(storage_path('logs/ssl-provision.log'));
+    @endphp
+    @if($sslActive)
     <div class="dom-alert success">
         <i class="fas fa-shield-alt" style="color:#22c55e;flex-shrink:0;margin-top:0.1rem;"></i>
         <div>
-            <strong>Automatic SSL via Let's Encrypt.</strong> Once your DNS is pointing to our server and propagated, contact Xenoraa support at <a href="mailto:support@xenoraa.com" style="color:#22c55e;">support@xenoraa.com</a> with your domain name. We will issue a free SSL certificate within 24 hours so your site loads on <strong>https://</strong>.
+            <strong>SSL Active!</strong> Your domain <strong>{{ $customDomain }}</strong> is secured with a free Let's Encrypt SSL certificate. Your site is accessible at <a href="https://{{ $customDomain }}" target="_blank" style="color:#22c55e;">https://{{ $customDomain }}</a>.
         </div>
     </div>
+    @elseif($customDomain)
+    <div class="dom-alert warning">
+        <i class="fas fa-spinner fa-spin" style="color:#f59e0b;flex-shrink:0;margin-top:0.1rem;"></i>
+        <div>
+            <strong>SSL Provisioning in Progress.</strong> Your SSL certificate for <strong>{{ $customDomain }}</strong> is being automatically provisioned. This usually takes 1–2 minutes after your DNS has propagated. Refresh this page to check status.
+        </div>
+    </div>
+    @else
+    <div class="dom-alert success">
+        <i class="fas fa-shield-alt" style="color:#22c55e;flex-shrink:0;margin-top:0.1rem;"></i>
+        <div>
+            <strong>Automatic SSL via Let's Encrypt.</strong> When you save a custom domain and your DNS is pointing to our server, SSL is provisioned <strong>automatically</strong> — no manual steps needed. Your site will load on <strong>https://</strong> within 1–2 minutes.
+        </div>
+    </div>
+    @endif
     <div class="dom-alert warning" style="margin-top:1rem;">
         <i class="fas fa-exclamation-triangle" style="color:#f59e0b;flex-shrink:0;margin-top:0.1rem;"></i>
         <div>

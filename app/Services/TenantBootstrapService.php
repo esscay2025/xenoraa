@@ -88,10 +88,12 @@ class TenantBootstrapService
         if ($existing) return $existing;
 
         $profession = strtolower($user->profession ?? '');
+        if (str_contains($profession, 'ecommerce') || str_contains($profession, 'e-commerce') || str_contains($profession, 'online store') || str_contains($profession, 'e_commerce')) return 'ecommerce';
+        if (str_contains($profession, 'business') || str_contains($profession, 'company') || str_contains($profession, 'real estate') || str_contains($profession, 'travel') || str_contains($profession, 'tours')) return 'business';
         if (str_contains($profession, 'influencer') || str_contains($profession, 'creator') || str_contains($profession, 'lifestyle')) return 'influencer';
         if (str_contains($profession, 'advocate') || str_contains($profession, 'lawyer') || str_contains($profession, 'legal')) return 'advocate';
         if (str_contains($profession, 'doctor') || str_contains($profession, 'physician') || str_contains($profession, 'health')) return 'doctor';
-        if (str_contains($profession, 'entrepreneur') || str_contains($profession, 'startup') || str_contains($profession, 'business')) return 'entrepreneur';
+        if (str_contains($profession, 'entrepreneur') || str_contains($profession, 'startup')) return 'entrepreneur';
         if (str_contains($profession, 'politi') || str_contains($profession, 'government') || str_contains($profession, 'public')) return 'politician';
         return 'consultant';
     }
@@ -175,6 +177,8 @@ class TenantBootstrapService
             'doctor'      => $this->doctorConfig($name, $email, $username),
             'entrepreneur'=> $this->entrepreneurConfig($name, $email, $username),
             'politician'  => $this->politicianConfig($name, $email, $username),
+            'ecommerce'   => $this->ecommerceConfig($name, $email, $username),
+            'business'    => $this->businessConfig($name, $email, $username),
             default       => $this->consultantConfig($name, $email, $username),
         };
     }
@@ -2096,6 +2100,141 @@ HTML;
             ['category' => 'Grievances', 'question' => 'How do I submit a grievance?', 'answer' => "Grievances can be submitted through the Contact page, by visiting the constituency office during office hours, or by calling the office. All grievances are logged and addressed within 15 working days."],
             ['category' => 'Vision', 'question' => 'What is your vision for the constituency?', 'answer' => "My vision is a constituency where every citizen has access to quality education, healthcare, employment, and infrastructure. The 5-year development agenda focuses on completing the highway, opening 10 new schools, building a new district hospital, and creating 5,000 additional jobs."],
             ['category' => 'Contact', 'question' => 'What is the office address?', 'answer' => "The constituency office is located at 45, Main Road, Town Centre. Office hours are Monday to Friday, 10:00 AM to 5:00 PM. For the Parliament office, please contact through the official Parliament website."],
+        ];
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // E-COMMERCE theme
+    // ─────────────────────────────────────────────────────────────────────────
+    private function ecommerceConfig(string $name, string $email, string $username): array
+    {
+        return [
+            'settings' => [
+                'profile_template'    => 'ecommerce',
+                'site_name'           => $name,
+                'site_tagline'        => 'Premium Online Store — Shop the Best, Live the Best',
+                'accent_color'        => '#f97316',
+                'chatbot_enabled'     => '1',
+                'ai_assistant_name'   => $name . ' Support',
+                'ai_assistant_tagline'=> 'Ask me about products, orders, shipping, and returns',
+                'profile_title'       => 'Online Store Owner & E-Commerce Entrepreneur',
+                'profile_about'       => $name . ' runs a premium online store offering thousands of authentic products across fashion, electronics, home decor, beauty, and more. With a focus on quality, affordability, and fast delivery, the store has served 10,000+ happy customers.',
+                'contact_email'       => $email,
+            ],
+            'pages' => [
+                [
+                    'title'      => 'Home',
+                    'slug'       => 'home',
+                    'page_type'  => 'home',
+                    'meta_title' => $name . ' — Online Store',
+                    'content'    => '',
+                ],
+                [
+                    'title'      => 'About Us',
+                    'slug'       => 'about',
+                    'page_type'  => 'about',
+                    'meta_title' => 'About ' . $name,
+                    'content'    => '<h2>About ' . $name . '</h2><p>We are passionate about bringing you the finest products at unbeatable prices. From everyday essentials to premium lifestyle goods, our curated collection is designed to elevate your life.</p>',
+                ],
+                [
+                    'title'      => 'Contact',
+                    'slug'       => 'contact',
+                    'page_type'  => 'contact',
+                    'meta_title' => 'Contact ' . $name,
+                    'content'    => '<h2>Customer Support</h2><p>Have questions about your order? We are here to help 24/7.</p>',
+                ],
+            ],
+            'menus' => [
+                ['label' => 'Home',    'url' => '/'],
+                ['label' => 'Shop',    'url' => '/shop'],
+                ['label' => 'Blog',    'url' => '/blog'],
+                ['label' => 'About',   'url' => '/about'],
+                ['label' => 'Contact', 'url' => '/contact'],
+            ],
+            'training' => $this->ecommerceTraining($name),
+        ];
+    }
+
+    private function ecommerceTraining(string $name): array
+    {
+        return [
+            ['category' => 'Orders',   'question' => 'How do I track my order?',          'answer' => 'You can track your order using the tracking link sent to your email after dispatch. Orders are typically dispatched within 24 hours of payment confirmation.'],
+            ['category' => 'Shipping', 'question' => 'What are the shipping charges?',     'answer' => 'Shipping is free on all orders above ₹999. For orders below ₹999, a flat shipping fee of ₹49 applies. Express delivery is available for an additional ₹99.'],
+            ['category' => 'Returns',  'question' => 'What is the return policy?',         'answer' => 'We offer a 30-day hassle-free return policy. If you are not satisfied with your purchase, you can return it for a full refund or exchange. Products must be unused and in original packaging.'],
+            ['category' => 'Payment',  'question' => 'What payment methods are accepted?', 'answer' => 'We accept all major credit/debit cards, UPI (GPay, PhonePe, Paytm), net banking, and Cash on Delivery (COD) for eligible orders.'],
+            ['category' => 'Products', 'question' => 'Are the products authentic?',        'answer' => 'Yes, all products sold on ' . $name . ' are 100% authentic and quality-verified. We source directly from authorised manufacturers and distributors.'],
+            ['category' => 'Contact',  'question' => 'How do I contact customer support?', 'answer' => 'You can reach our support team via email, phone, or the Contact page. We are available Monday to Saturday, 9 AM to 7 PM. We respond to all queries within 4 hours.'],
+        ];
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // BUSINESS / COMPANY theme
+    // ─────────────────────────────────────────────────────────────────────────
+    private function businessConfig(string $name, string $email, string $username): array
+    {
+        return [
+            'settings' => [
+                'profile_template'    => 'business',
+                'site_name'           => $name,
+                'site_tagline'        => 'Your Trusted Business Partner',
+                'accent_color'        => '#0ea5e9',
+                'chatbot_enabled'     => '1',
+                'ai_assistant_name'   => $name . ' Assistant',
+                'ai_assistant_tagline'=> 'Ask me about our services, projects, and how we can help your business',
+                'profile_title'       => 'Business Owner & Managing Director',
+                'profile_about'       => $name . ' is a results-driven company committed to delivering exceptional value to clients across multiple industries including real estate, travel, consulting, and corporate services. With 15+ years of experience and 500+ satisfied clients, we are your trusted business partner.',
+                'contact_email'       => $email,
+            ],
+            'pages' => [
+                [
+                    'title'      => 'Home',
+                    'slug'       => 'home',
+                    'page_type'  => 'home',
+                    'meta_title' => $name . ' — Business & Company',
+                    'content'    => '',
+                ],
+                [
+                    'title'      => 'About Us',
+                    'slug'       => 'about',
+                    'page_type'  => 'about',
+                    'meta_title' => 'About ' . $name,
+                    'content'    => '<h2>About ' . $name . '</h2><p>A results-driven company committed to delivering exceptional value across multiple industries.</p>',
+                ],
+                [
+                    'title'      => 'Services',
+                    'slug'       => 'services',
+                    'page_type'  => 'services',
+                    'meta_title' => 'Services — ' . $name,
+                    'content'    => '<h2>Our Services</h2><p>Comprehensive business solutions tailored to your needs.</p>',
+                ],
+                [
+                    'title'      => 'Contact',
+                    'slug'       => 'contact',
+                    'page_type'  => 'contact',
+                    'meta_title' => 'Contact ' . $name,
+                    'content'    => '<h2>Contact Us</h2><p>Get in touch for a free consultation and customised proposal.</p>',
+                ],
+            ],
+            'menus' => [
+                ['label' => 'Home',     'url' => '/'],
+                ['label' => 'About',    'url' => '/about'],
+                ['label' => 'Services', 'url' => '/services'],
+                ['label' => 'Blog',     'url' => '/blog'],
+                ['label' => 'Contact',  'url' => '/contact'],
+            ],
+            'training' => $this->businessTraining($name),
+        ];
+    }
+
+    private function businessTraining(string $name): array
+    {
+        return [
+            ['category' => 'Services',  'question' => 'What services do you offer?',           'answer' => $name . ' offers a comprehensive range of business services including project management, strategic consulting, real estate development, travel packages, digital transformation, and business analytics. Contact us for a customised proposal.'],
+            ['category' => 'Quote',     'question' => 'How do I get a quote?',                 'answer' => 'You can request a free quote by filling out the Contact form, calling our office, or emailing us. We will get back to you within 24 hours with a detailed proposal tailored to your requirements.'],
+            ['category' => 'Projects',  'question' => 'What types of projects have you done?', 'answer' => 'We have successfully completed 500+ projects across real estate development, corporate consulting, travel and hospitality, and digital transformation. Our portfolio includes residential complexes, commercial developments, and international tour packages.'],
+            ['category' => 'Process',   'question' => 'What is your working process?',         'answer' => 'Our process starts with a free consultation to understand your requirements, followed by a detailed proposal. Once approved, we assign a dedicated project manager and provide regular progress updates.'],
+            ['category' => 'Contact',   'question' => 'How can I reach your team?',            'answer' => 'You can reach us via email, phone, or the Contact page on our website. Our office is open Monday to Friday, 9 AM to 6 PM. We respond to all enquiries within 24 hours.'],
+            ['category' => 'Pricing',   'question' => 'What are your fees?',                   'answer' => 'Our fees vary based on the scope and complexity of the project. We offer competitive pricing and flexible payment terms. Contact us for a free, no-obligation quote tailored to your specific requirements.'],
         ];
     }
 }

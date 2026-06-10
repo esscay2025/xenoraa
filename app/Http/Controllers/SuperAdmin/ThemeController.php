@@ -114,4 +114,19 @@ class ThemeController extends Controller
         $theme->update(['is_active' => !$theme->is_active]);
         return back()->with('success', 'Theme status updated.');
     }
+
+    /**
+     * Full-page live preview of a theme (opens in new tab from superadmin theme store).
+     */
+    public function preview(Theme $theme)
+    {
+        $styles  = $theme->getPreviewStyles();
+        $accent  = $styles['accent'] ?? '#6366f1';
+        $bg      = $styles['bg']     ?? '#fff';
+        $text    = $styles['text']   ?? '#111';
+        $card    = $styles['card']   ?? '#f9fafb';
+        $isDark  = in_array(substr($bg, 0, 2), ['#0', '#1']) || $bg === '#0f0f0f';
+        $sections = $theme->sections ?? ['Hero', 'About', 'Services', 'Portfolio', 'Contact'];
+        return view('superadmin.themes.preview', compact('theme', 'accent', 'bg', 'text', 'card', 'isDark', 'sections'));
+    }
 }

@@ -39,3 +39,20 @@
   - SA flyout: dark panel with purple active highlights matching SA theme
   - SA state persisted in localStorage (key: xenoraa_sa_sidebar_collapsed)
   - Both sidebars verified: expand/collapse/flyout all working in automated playwright tests
+
+- v4.5.0 (2026-06-10): CRM Module Navigation Refactor + Sidebar Icon Fix
+  - admin.blade.php: Added gap:0 to .sidebar.collapsed .sidebar-group-btn and .sidebar-link to fix icon alignment
+  - admin.blade.php: Added .sidebar-sub-group-btn CSS class for nested CRM sub-groups
+  - admin.blade.php: CRM sidebar restructured - each module (Sales, Activities, Inventory, Support, Services, Projects) is now a nested sub-group with its own flyout submenu
+  - routes/web.php: Added dedicated routes per CRM sub-module (e.g. /admin/crm2/sales/leads, /admin/crm2/sales/leads/create, etc.)
+  - CrmModuleController.php: Added 30+ new methods for each sub-module list and create page
+  - New full-page views created (no more tabs, no more modals for creation):
+    - crm2/sales/{leads,contacts,accounts,deals,forecasts}.blade.php (list pages)
+    - crm2/sales/create-{lead,contact,account,deal,forecast}.blade.php (create pages)
+    - crm2/activities/{tasks,meetings,calls}.blade.php + create-activity.blade.php
+    - crm2/inventory/{price-books,quotes,sales-orders,purchase-orders,invoices,vendors}.blade.php
+    - crm2/inventory/create-{price-book,quote,sales-order,purchase-order,invoice,vendor}.blade.php
+    - crm2/support/{cases,solutions}.blade.php + create-{case,solution}.blade.php
+    - crm2/services/{catalog,bookings}.blade.php + create-{service,booking}.blade.php
+    - crm2/projects/{list,tasks}.blade.php + create-{project,task}.blade.php
+  - Legacy routes kept for backward compatibility (redirect to first sub-module)

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Xenoraa;
 
 use App\Http\Controllers\Controller;
+use App\Services\TenantBootstrapService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
@@ -19,6 +20,34 @@ class PaymentController extends Controller
             config('services.razorpay.key_id'),
             config('services.razorpay.key_secret')
         );
+    }
+
+    /**
+     * Show the dedicated checkout page (after registration, before payment)
+     */
+    public function checkout(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user) return redirect()->route('xenoraa.get-started');
+
+        $plan    = $request->query('plan', $user->plan ?? 'starter');
+        $billing = $request->query('billing', session('pending_billing', 'monthly'));
+
+        $prices = [
+            'starter'      => ['monthly' => 499,  'yearly' => 4999,  'monthly_paise' => 49900,  'yearly_paise' => 499900],
+            'professional' => ['monthly' => 999,  'yearly' => 9999,  'monthly_paise' => 99900,  'yearly_paise' => 999900],
+            'business'     => ['monthly' => 1999, 'yearly' => 19999, 'monthly_paise' => 199900, 'yearly_paise' => 1999900],
+        ];
+        $planNames = ['starter' => 'Starter', 'professional' => 'Professional', 'business' => 'Business Pro'];
+
+        return view('xenoraa.payment.checkout', [
+            'user'      => $user,
+            'plan'      => $plan,
+            'billing'   => $billing,
+            'prices'    => $prices,
+            'planNames' => $planNames,
+            'razorpayKey' => config('services.razorpay.key_id'),
+        ]);
     }
 
     /**
@@ -159,9 +188,9 @@ class PaymentController extends Controller
         }
 
         // Activate subscription for authenticated user
+        $bootstrapped = false;
         if (Auth::check()) {
             $user = Auth::user();
-            $trialDays = $billing === 'yearly' ? 0 : 0; // already paid
             $expiresAt = $request->billing === 'yearly'
                 ? now()->addYear()
                 : now()->addMonth();
@@ -175,12 +204,26 @@ class PaymentController extends Controller
             ]);
 
             Log::info("Subscription activated: User #{$user->id} → {$request->plan} ({$request->billing}) | Payment: {$request->razorpay_payment_id}");
+
+            // Bootstrap the tenant site (only if not already bootstrapped)
+            // Check if site settings already exist (indicates site was previously bootstrapped)
+            $alreadyBootstrapped = \App\Models\SiteSetting::where('user_id', $user->id)->exists();
+            if (!$alreadyBootstrapped) {
+                try {
+                    $bootstrap = new TenantBootstrapService();
+                    $bootstrap->bootstrapNewTenant($user);
+                    $bootstrapped = true;
+                } catch (\Throwable $e) {
+                    Log::warning('TenantBootstrap failed for user ' . $user->id . ': ' . $e->getMessage());
+                }
+            }
         }
 
         return response()->json([
-            'success' => true,
-            'message' => 'Payment successful! Your subscription is now active.',
-            'redirect' => Auth::check() ? route('dashboard') : route('login'),
+            'success'       => true,
+            'message'       => 'Payment successful! Your subscription is now active.',
+            'redirect'      => Auth::check() ? route('onboarding.welcome') : route('login'),
+            'bootstrapped'  => $bootstrapped,
         ]);
     }
 

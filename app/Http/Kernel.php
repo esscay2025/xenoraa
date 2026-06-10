@@ -70,5 +70,7 @@ class Kernel extends HttpKernel
         'sa.role' => \App\Http\Middleware\SaRoleMiddleware::class,
         'sa.permission' => \App\Http\Middleware\SaPermissionMiddleware::class,
         'tenant' => \App\Http\Middleware\TenantMiddleware::class,
+        'subscribed' => \App\Http\Middleware\EnsurePaidSubscription::class,
     ];
+
 }

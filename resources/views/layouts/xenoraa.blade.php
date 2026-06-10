@@ -4,8 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Xenoraa — Build Your Digital Identity')</title>
-    <meta name="description" content="@yield('meta_description', 'Xenoraa is the all-in-one platform for professionals, consultants, founders, creators, and leaders to showcase their personal brand while managing their daily business operations.')">
+    @php
+        $xnSeo = \DB::table('site_settings')->whereNull('user_id')->pluck('value','key')->toArray();
+        $xnGtagId      = $xnSeo['google_tag_id'] ?? 'G-SKMW277LED';
+        $xnGtagEnabled = ($xnSeo['google_tag_enabled'] ?? '1') === '1';
+        $xnGtagFull    = str_starts_with($xnGtagId, 'G-') ? $xnGtagId : 'G-'.$xnGtagId;
+    @endphp
+    <title>@yield('title', $xnSeo['seo_meta_title'] ?? 'Xenoraa — Build Your Digital Identity')</title>
+    <meta name="description" content="@yield('meta_description', $xnSeo['seo_meta_description'] ?? 'Xenoraa is the all-in-one platform for professionals to build their digital identity.')">
+    @if(!empty($xnSeo['seo_meta_keywords']))
+    <meta name="keywords" content="{{ $xnSeo['seo_meta_keywords'] }}">
+    @endif
+    @if(!empty($xnSeo['seo_robots']))
+    <meta name="robots" content="{{ $xnSeo['seo_robots'] }}">
+    @endif
+    @if(!empty($xnSeo['seo_canonical_url']))
+    <link rel="canonical" href="{{ $xnSeo['seo_canonical_url'] }}">
+    @endif
+    {{-- Open Graph --}}
+    <meta property="og:type"        content="{{ $xnSeo['og_type'] ?? 'website' }}">
+    <meta property="og:site_name"   content="{{ $xnSeo['og_site_name'] ?? 'Xenoraa' }}">
+    <meta property="og:title"       content="@yield('og_title', $xnSeo['og_title'] ?? 'Xenoraa — Build Your Digital Identity')">
+    <meta property="og:description" content="@yield('og_description', $xnSeo['og_description'] ?? 'Xenoraa is the all-in-one SaaS platform for professionals.')">
+    @if(!empty($xnSeo['og_image']))
+    <meta property="og:image" content="{{ $xnSeo['og_image'] }}">
+    @endif
+    {{-- Twitter Card --}}
+    <meta name="twitter:card"        content="{{ $xnSeo['twitter_card'] ?? 'summary_large_image' }}">
+    @if(!empty($xnSeo['twitter_site']))
+    <meta name="twitter:site"        content="{{ $xnSeo['twitter_site'] }}">
+    @endif
+    <meta name="twitter:title"       content="@yield('twitter_title', $xnSeo['twitter_title'] ?? 'Xenoraa — Build Your Digital Identity')">
+    <meta name="twitter:description" content="@yield('twitter_description', $xnSeo['twitter_description'] ?? 'Xenoraa is the all-in-one SaaS platform for professionals.')">
+    @if(!empty($xnSeo['twitter_image']))
+    <meta name="twitter:image" content="{{ $xnSeo['twitter_image'] }}">
+    @endif
+    {{-- Google Tag (gtag.js) --}}
+    @if($xnGtagEnabled && !empty($xnGtagFull))
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ $xnGtagFull }}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '{{ $xnGtagFull }}');
+    </script>
+    @endif
     <link rel="icon" type="image/png" href="/images/xenoraa/logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -268,6 +311,26 @@
         }
     </style>
     @yield('styles')
+    {{-- Custom head scripts from SEO settings --}}
+    @if(!empty($xnSeo['custom_head_scripts']))
+    {!! $xnSeo['custom_head_scripts'] !!}
+    @endif
+    {{-- Schema.org JSON-LD --}}
+    @if(!empty($xnSeo['schema_org_name'] ?? ''))
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "{{ $xnSeo['schema_org_type'] ?? 'Organization' }}",
+      "name": "{{ $xnSeo['schema_org_name'] ?? 'Xenoraa' }}",
+      "url": "{{ $xnSeo['schema_org_url'] ?? 'https://xenoraa.com' }}"
+      @if(!empty($xnSeo['schema_org_logo'] ?? '')),"logo": "{{ $xnSeo['schema_org_logo'] }}"@endif
+      @if(!empty($xnSeo['schema_org_description'] ?? '')),"description": "{{ addslashes($xnSeo['schema_org_description']) }}"@endif
+      @if(!empty($xnSeo['schema_org_phone'] ?? '')),"telephone": "{{ $xnSeo['schema_org_phone'] }}"@endif
+      @if(!empty($xnSeo['schema_org_email'] ?? '')),"email": "{{ $xnSeo['schema_org_email'] }}"@endif
+      @if(!empty($xnSeo['schema_org_address'] ?? '')),"address": {"@type": "PostalAddress", "addressLocality": "{{ $xnSeo['schema_org_address'] }}"}@endif
+    }
+    </script>
+    @endif
 </head>
 <body>
 
@@ -370,5 +433,9 @@ window.addEventListener('scroll', () => {
 </script>
 @yield('scripts')
 <x-xena-widget />
+{{-- Custom body scripts from SEO settings --}}
+@if(!empty($xnSeo['custom_body_scripts'] ?? ''))
+{!! $xnSeo['custom_body_scripts'] !!}
+@endif
 </body>
 </html>

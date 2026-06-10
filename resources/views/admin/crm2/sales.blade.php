@@ -81,6 +81,9 @@
             <td>{{ $lead->created_at->format('d M Y') }}</td>
             <td class="actions-cell">
               <button class="crm2-icon-btn edit" onclick='editRecord("lead", {{ $lead->id }}, @json($lead))' title="Edit"><i class="fas fa-edit"></i></button>
+              @if(($lead->conversations_count ?? 0) > 0 || in_array($lead->source, ['chatbot','ai_chatbot']))
+              <a href="{{ route('admin.crm.conversations') }}" class="crm2-icon-btn" style="color:#6366f1;text-decoration:none;" title="View AI Conversations ({{ $lead->conversations_count ?? 0 }} messages)"><i class="fas fa-comments"></i></a>
+              @endif
               <form method="POST" action="{{ route('admin.crm2.sales.destroy', ['type'=>'lead','id'=>$lead->id]) }}" onsubmit="return confirm('Delete this lead?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete" title="Delete"><i class="fas fa-trash"></i></button></form>
             </td>
           </tr>

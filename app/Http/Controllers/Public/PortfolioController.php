@@ -181,6 +181,8 @@ class PortfolioController extends Controller
             'consultant'   => 'tenant.templates.consultant',
             'entrepreneur' => 'tenant.templates.entrepreneur',
             'influencer'   => 'tenant.templates.influencer',
+            'ecommerce'    => 'tenant.templates.ecommerce',
+            'business'     => 'tenant.templates.business',
         ];
         $view = $templateViews[$template] ?? 'tenant.templates.consultant';
 

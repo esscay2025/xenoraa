@@ -7,9 +7,8 @@
       <h1 class="crm2-title"><i class="fas fa-concierge-bell"></i> Services</h1>
       <p class="crm2-subtitle">Streamline every aspect of your service business — appointments, delivery, and invoicing.</p>
     </div>
-    <button class="crm2-btn crm2-btn-primary" onclick="openModal('modal-create-{{ $tab === \'catalog\' ? \'service\' : \'booking\' }}')">
-      <i class="fas fa-plus"></i> {{ $tab === 'catalog' ? 'New Service' : 'New Booking' }}
-    </button>
+    @php $createModalId = $tab === 'catalog' ? 'modal-create-service' : 'modal-create-booking'; $createBtnLabel = $tab === 'catalog' ? 'New Service' : 'New Booking'; @endphp
+    <button class="crm2-btn crm2-btn-primary" onclick="openModal('{{ $createModalId }}')"><i class="fas fa-plus"></i> {{ $createBtnLabel }}</button>
   </div>
 
   {{-- Tabs --}}

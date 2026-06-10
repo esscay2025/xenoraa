@@ -122,7 +122,7 @@
             <a href="{{ route('admin.site.index') }}" style="color:var(--text-muted);text-decoration:none;font-size:0.85rem;"><i class="fas fa-arrow-left"></i> Site Builder</a>
         </div>
         <h1 style="font-size:1.75rem;font-weight:800;margin:0;">Theme Store</h1>
-        <p style="color:var(--text-secondary);margin:0.25rem 0 0;font-size:0.9rem;">6 premium, profession-specific themes. Preview and activate with one click.</p>
+        <p style="color:var(--text-secondary);margin:0.25rem 0 0;font-size:0.9rem;">8 premium, profession-specific themes. Preview and activate with one click.</p>
     </div>
 </div>
 

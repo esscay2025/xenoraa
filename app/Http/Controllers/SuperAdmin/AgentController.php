@@ -299,6 +299,8 @@ class AgentController extends Controller
             return back()->with('error', 'You have no available subscription quota. Contact your administrator.');
         }
         $professions = [
+            'ecommerce'    => 'E-Commerce / Online Store',
+            'business'     => 'Business / Company (Real Estate, Travel, etc.)',
             'influencer'   => 'Influencer / Content Creator',
             'consultant'   => 'Consultant / Coach',
             'advocate'     => 'Advocate / Lawyer',

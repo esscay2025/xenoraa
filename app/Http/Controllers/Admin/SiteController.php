@@ -79,7 +79,7 @@ class SiteController extends Controller
     {
         // Accept any valid theme slug from DB or the hardcoded list
         $validSlugs = array_merge(
-            ['consultant','influencer','advocate','entrepreneur','doctor','politician'],
+            ['consultant','influencer','advocate','entrepreneur','doctor','politician','ecommerce','business'],
             \App\Models\Theme::where('is_active', true)->pluck('slug')->toArray()
         );
         $request->validate(['theme' => 'required|string|in:' . implode(',', array_unique($validSlugs))]);
@@ -187,6 +187,36 @@ class SiteController extends Controller
                 'hero_sub'    => 'Governance · Development · People',
                 'sections'    => ['Hero', 'Vision', 'Achievements', 'Events', 'Blog', 'Contact'],
                 'best_for'    => 'Politicians, Public Servants, NGO Leaders',
+                'premium'     => true,
+            ],
+            'ecommerce' => [
+                'id'          => 'ecommerce',
+                'name'        => 'ShopFront',
+                'category'    => 'E-Commerce & Online Store',
+                'description' => 'A complete, conversion-optimised online store. Product categories, featured items, shop, cart, testimonials, and customer support — everything an e-commerce business needs.',
+                'tags'        => ['E-Commerce', 'Shop', 'Products', 'Conversion'],
+                'accent'      => '#f97316',
+                'bg'          => '#fff',
+                'preview_css' => 'bg:#fff;text:#1a1a1a;accent:#f97316;card:#fff7ed',
+                'hero_title'  => 'Premium Online Store',
+                'hero_sub'    => 'Fashion · Electronics · Home · Beauty',
+                'sections'    => ['Hero', 'Categories', 'Featured Products', 'About', 'Testimonials', 'Contact'],
+                'best_for'    => 'Online Stores, D2C Brands, Retailers, E-Commerce Entrepreneurs',
+                'premium'     => true,
+            ],
+            'business' => [
+                'id'          => 'business',
+                'name'        => 'Corpora',
+                'category'    => 'Business & Company',
+                'description' => 'A complete corporate website for companies, real estate firms, travel agencies, and any business. Features services, divisions, team, case studies, and a strong contact section.',
+                'tags'        => ['Corporate', 'Company', 'Real Estate', 'Travel'],
+                'accent'      => '#0ea5e9',
+                'bg'          => '#f8fafc',
+                'preview_css' => 'bg:#f8fafc;text:#0f172a;accent:#0ea5e9;card:#fff',
+                'hero_title'  => 'Your Trusted Business Partner',
+                'hero_sub'    => 'Real Estate · Travel · Consulting · Services',
+                'sections'    => ['Hero', 'Services', 'About', 'Divisions', 'Testimonials', 'Contact'],
+                'best_for'    => 'Companies, Real Estate Firms, Travel Agencies, Corporates',
                 'premium'     => true,
             ],
         ];
@@ -513,20 +543,25 @@ class SiteController extends Controller
         $request->validate([
             'custom_domain' => 'nullable|string|max:255|regex:/^[a-zA-Z0-9][a-zA-Z0-9\-\.]{1,253}[a-zA-Z0-9]$/',
         ]);
-
         $user = auth()->user();
         $domain = $request->input('custom_domain');
-
         // Strip protocol if accidentally included
         $domain = preg_replace('#^https?://#', '', $domain ?? '');
         $domain = rtrim($domain, '/');
         $domain = $domain ?: null;
-
         $user->update(['custom_domain' => $domain]);
 
-        $msg = $domain
-            ? 'Custom domain saved. Follow the DNS instructions below to complete setup.'
-            : 'Custom domain removed. Your site is accessible via the default URL.';
+        if ($domain) {
+            // Auto-provision nginx config + Let's Encrypt SSL in the background
+            // We dispatch as a background process so the user doesn't wait
+            $artisan = base_path('artisan');
+            $logFile = storage_path('logs/ssl-provision.log');
+            $cmd = "php {$artisan} xenoraa:provision-domain {$domain} >> {$logFile} 2>&1 &";
+            shell_exec($cmd);
+            $msg = 'Custom domain saved! SSL certificate is being provisioned automatically in the background. This may take 1-2 minutes. Refresh this page to check status.';
+        } else {
+            $msg = 'Custom domain removed. Your site is accessible via the default URL.';
+        }
 
         return redirect()->route('admin.site.domain')->with('success', $msg);
     }

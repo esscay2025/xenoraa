@@ -177,7 +177,7 @@
 @endif
 
 {{-- STATS STRIP --}}
-@if($_show('stats') && count($statsItems))
+@if($_show('stats'))
 <div class="xn-inf-section" style="padding-top:0;">
     <div class="xn-inf-stats-strip">
         @foreach($statsItems as $stat)
@@ -258,7 +258,7 @@
 @endif
 
 {{-- TESTIMONIALS --}}
-@if($_show('testimonials') && count($testimonials))
+@if($_show('testimonials'))
 <div class="xn-inf-section">
     <div class="xn-inf-section-header">
         <div class="xn-inf-badge">Brand Love</div>
@@ -286,7 +286,7 @@
 @endif
 
 {{-- BLOG --}}
-@if($_show('blog') && (isset($featuredPost) && $featuredPost || !empty($categoryPosts)))
+@if($_show('blog'))
 <div class="xn-inf-section">
     <div class="xn-inf-section-header">
         <div class="xn-inf-badge">Latest</div>

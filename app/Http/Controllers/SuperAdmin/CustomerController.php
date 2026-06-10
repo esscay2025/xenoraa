@@ -68,6 +68,8 @@ class CustomerController extends Controller
         $this->authorize_sa('customers.create');
         $agents = Agent::with('user')->where('status', 'active')->get();
         $professions = [
+            'ecommerce'    => 'E-Commerce / Online Store',
+            'business'     => 'Business / Company (Real Estate, Travel, etc.)',
             'influencer'   => 'Influencer / Content Creator',
             'consultant'   => 'Consultant / Coach',
             'advocate'     => 'Advocate / Lawyer',

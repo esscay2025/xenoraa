@@ -195,7 +195,7 @@
             </p>
             <div class="xn-hero-actions">
                 <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-primary-lg">
-                    Start Free Trial <i class="fas fa-arrow-right"></i>
+                    Get Started <i class="fas fa-arrow-right"></i>
                 </a>
                 <a href="{{ route('xenoraa.showcase') }}" class="xn-btn-outline-lg">
                     View Showcase
@@ -440,10 +440,10 @@
         <h2 class="xn-heading-lg" style="max-width:700px;margin:0 auto 1rem;">Your Profile Is More Than<br><span style="color:#a855f7;">A Website.</span></h2>
         <p class="xn-body-lg" style="max-width:560px;margin:0 auto 2.5rem;">It's your digital headquarters. Join Xenoraa and transform the way you manage your professional identity, business relationships, and personal growth.</p>
         <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
-            <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-primary-lg">Start Your Free Trial 🚀</a>
+            <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-primary-lg">Get Started Now 🚀</a>
             <a href="{{ route('xenoraa.features') }}" class="xn-btn-outline-lg">Explore Features</a>
         </div>
-        <p style="margin-top:1.5rem;font-size:0.8rem;color:#3f3f46;">No credit card required · Setup in 2 minutes · Cancel anytime</p>
+        <p style="margin-top:1.5rem;font-size:0.8rem;color:#3f3f46;">30-day money-back guarantee · Setup in minutes · Cancel anytime</p>
     </div>
 </section>
 

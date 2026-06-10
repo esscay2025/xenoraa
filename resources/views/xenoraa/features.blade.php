@@ -148,8 +148,8 @@
 <section class="xn-section" style="background:#000;text-align:center;">
     <div class="xn-container">
         <h2 class="xn-heading-lg" style="max-width:600px;margin:0 auto 1rem;">Ready to Build Your<br><span style="color:#a855f7;">Digital Identity?</span></h2>
-        <p class="xn-body" style="max-width:480px;margin:0 auto 2.5rem;">Start your free trial today and experience the full power of Xenoraa.</p>
-        <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-primary-lg">Start Free Trial 🚀</a>
+        <p class="xn-body" style="max-width:480px;margin:0 auto 2.5rem;">Get started today and experience the full power of Xenoraa for your business.</p>
+        <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-primary-lg">Get Started Now 🚀</a>
     </div>
 </section>
 @endsection

@@ -1,0 +1,567 @@
+@extends('layouts.app')
+@section('title', 'About ' . $siteName . ' | ' . ($settings['profile_title'] ?? 'Furniture Manufacturer'))
+@section('description', 'Jose Industries — Established 1986, Chennai. Premier manufacturer of Center Tables, Locker Cupboards, Office Tables and quality furniture. ISO certified, 35+ years of excellence.')
+@push('styles')
+<style>
+:root {
+    --pg-accent: {{ $accentColor }};
+    --pg-bg: var(--bg-primary);
+    --pg-card: var(--bg-card);
+    --pg-border: var(--border);
+    --pg-text: var(--text-primary);
+    --pg-text-sec: var(--text-secondary);
+    --pg-text-muted: var(--text-muted);
+    --pg-hover: var(--bg-hover);
+}
+
+/* ── Hero ── */
+.ab-hero {
+    position: relative;
+    background: linear-gradient(135deg, var(--navbar-bg, #16a34a) 0%, color-mix(in srgb, var(--navbar-bg, #16a34a) 85%, #000) 100%);
+    overflow: hidden;
+    padding: 5rem 0 0;
+}
+.ab-hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 80% 60% at 60% 40%, rgba(255,255,255,0.08), transparent 70%);
+    pointer-events: none;
+}
+.ab-hero-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 4rem;
+    align-items: end;
+}
+@media (max-width: 900px) {
+    .ab-hero-inner { grid-template-columns: 1fr; gap: 2rem; align-items: center; text-align: center; }
+}
+.ab-logo-col { position: relative; padding-bottom: 3rem; }
+.ab-logo-frame {
+    position: relative;
+    width: 280px;
+    height: 200px;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 3px solid rgba(255,255,255,0.25);
+    box-shadow: 0 32px 80px rgba(0,0,0,0.3);
+    background: rgba(255,255,255,0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+@media (max-width: 900px) { .ab-logo-frame { width: 220px; height: 160px; margin: 0 auto; } }
+.ab-logo-frame img { width: 100%; height: 100%; object-fit: contain; }
+.ab-logo-initials {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 4rem; font-weight: 900; color: var(--pg-accent);
+}
+.ab-est-badge {
+    position: absolute;
+    bottom: 3.5rem;
+    right: -1rem;
+    background: #fff;
+    color: var(--pg-accent);
+    padding: 0.5rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    white-space: nowrap;
+}
+@media (max-width: 900px) { .ab-est-badge { right: auto; left: 50%; transform: translateX(-50%); bottom: 1rem; } }
+.ab-info-col { padding-bottom: 3rem; }
+.ab-profession-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: #fff;
+    padding: 0.35rem 1rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.25rem;
+}
+.ab-name { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 900; margin: 0 0 0.5rem; line-height: 1.1; color: #fff; }
+.ab-tagline { font-size: 1.1rem; color: rgba(255,255,255,0.8); margin: 0 0 1.5rem; }
+.ab-bio { font-size: 1rem; line-height: 1.85; color: rgba(255,255,255,0.85); margin: 0 0 2rem; }
+.ab-stats-strip { display: flex; gap: 2.5rem; flex-wrap: wrap; padding: 1.5rem 0; border-top: 1px solid rgba(255,255,255,0.2); }
+@media (max-width: 900px) { .ab-stats-strip { justify-content: center; } }
+.ab-stat-value { font-size: 2rem; font-weight: 900; color: #fff; line-height: 1; }
+.ab-stat-label { font-size: 0.72rem; color: rgba(255,255,255,0.65); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.25rem; }
+.ab-contact-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
+@media (max-width: 900px) { .ab-contact-row { justify-content: center; } }
+.ab-contact-chip {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.5rem 1rem; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 50px; font-size: 0.85rem; color: #fff; text-decoration: none; transition: all 0.2s;
+}
+.ab-contact-chip:hover { background: rgba(255,255,255,0.25); }
+.ab-contact-chip i { color: rgba(255,255,255,0.8); }
+
+/* ── Body ── */
+.ab-body { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
+@media (max-width: 768px) { .ab-body { padding: 2.5rem 1rem; } .ab-hero-inner { padding: 0 1rem; } }
+.ab-section-label {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--pg-accent); margin-bottom: 0.4rem;
+}
+.ab-section-label::before { content: ''; width: 18px; height: 2px; background: var(--pg-accent); border-radius: 1px; }
+.ab-section-title { font-size: 1.65rem; font-weight: 800; margin: 0 0 0.4rem; color: var(--pg-text); }
+.ab-section-sub { color: var(--pg-text-muted); margin: 0 0 2rem; font-size: 0.9rem; }
+.ab-divider { border: none; border-top: 1px solid var(--pg-border); margin: 3rem 0; }
+
+/* Info cards */
+.ab-info-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+.ab-info-card { background: var(--pg-card); border: 1px solid var(--pg-border); border-radius: 16px; padding: 1.25rem; display: flex; align-items: flex-start; gap: 1rem; transition: border-color 0.2s, box-shadow 0.2s; }
+.ab-info-card:hover { border-color: color-mix(in srgb, var(--pg-accent) 50%, transparent); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.ab-info-card-icon { width: 42px; height: 42px; border-radius: 10px; background: color-mix(in srgb, var(--pg-accent) 15%, transparent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.1rem; color: var(--pg-accent); }
+.ab-info-card-label { font-size: 0.72rem; color: var(--pg-text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.2rem; }
+.ab-info-card-value { font-size: 0.9rem; font-weight: 600; color: var(--pg-text); }
+
+/* Feature cards (Why Choose Us) */
+.ab-feature-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+.ab-feature-card { background: var(--pg-card); border: 1px solid var(--pg-border); border-radius: 20px; padding: 2rem; transition: all 0.2s; }
+.ab-feature-card:hover { border-color: var(--pg-accent); box-shadow: 0 8px 32px rgba(0,0,0,0.1); transform: translateY(-2px); }
+.ab-feature-icon { width: 56px; height: 56px; border-radius: 14px; background: color-mix(in srgb, var(--pg-accent) 15%, transparent); display: flex; align-items: center; justify-content: center; font-size: 1.4rem; color: var(--pg-accent); margin-bottom: 1.25rem; }
+.ab-feature-title { font-size: 1.05rem; font-weight: 700; color: var(--pg-text); margin: 0 0 0.5rem; }
+.ab-feature-desc { font-size: 0.875rem; color: var(--pg-text-sec); line-height: 1.6; margin: 0; }
+
+/* Department cards */
+.ab-dept-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+.ab-dept-card { background: var(--pg-card); border: 1px solid var(--pg-border); border-radius: 14px; padding: 1.25rem; text-align: center; transition: all 0.2s; }
+.ab-dept-card:hover { border-color: var(--pg-accent); transform: translateY(-2px); }
+.ab-dept-icon { font-size: 1.75rem; color: var(--pg-accent); margin-bottom: 0.75rem; }
+.ab-dept-name { font-size: 0.9rem; font-weight: 700; color: var(--pg-text); margin: 0 0 0.25rem; }
+.ab-dept-desc { font-size: 0.78rem; color: var(--pg-text-muted); margin: 0; }
+
+/* Story section */
+.ab-story-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; margin-bottom: 3rem; }
+@media (max-width: 768px) { .ab-story-grid { grid-template-columns: 1fr; gap: 2rem; } }
+.ab-story-text p { color: var(--pg-text-sec); line-height: 1.8; margin-bottom: 1rem; font-size: 0.95rem; }
+.ab-story-img { border-radius: 20px; overflow: hidden; background: color-mix(in srgb, var(--pg-accent) 10%, var(--pg-card)); border: 1px solid var(--pg-border); height: 320px; display: flex; align-items: center; justify-content: center; }
+.ab-story-img img { width: 100%; height: 100%; object-fit: cover; }
+.ab-story-img-placeholder { text-align: center; padding: 2rem; }
+.ab-story-img-placeholder i { font-size: 4rem; color: var(--pg-accent); opacity: 0.5; }
+.ab-story-img-placeholder p { color: var(--pg-text-muted); font-size: 0.875rem; margin-top: 0.75rem; }
+
+/* Timeline */
+.ab-timeline { position: relative; padding-left: 2rem; }
+.ab-timeline::before { content: ''; position: absolute; left: 0.5rem; top: 0; bottom: 0; width: 2px; background: linear-gradient(to bottom, var(--pg-accent), var(--pg-border)); border-radius: 1px; }
+.ab-timeline-item { position: relative; margin-bottom: 1.75rem; }
+.ab-timeline-dot { position: absolute; left: -1.65rem; top: 0.4rem; width: 14px; height: 14px; border-radius: 50%; background: var(--pg-accent); border: 2px solid var(--pg-bg); box-shadow: 0 0 0 3px color-mix(in srgb, var(--pg-accent) 30%, transparent); }
+.ab-timeline-card { background: var(--pg-card); border: 1px solid var(--pg-border); border-radius: 16px; padding: 1.5rem; transition: border-color 0.2s; }
+.ab-timeline-card:hover { border-color: color-mix(in srgb, var(--pg-accent) 40%, transparent); }
+.ab-timeline-header { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.4rem; }
+.ab-timeline-title { font-size: 1rem; font-weight: 700; color: var(--pg-text); margin: 0; }
+.ab-timeline-company { color: var(--pg-accent); font-weight: 600; font-size: 0.875rem; margin: 0.2rem 0 0; }
+.ab-timeline-date { font-size: 0.78rem; color: var(--pg-text-muted); white-space: nowrap; }
+.ab-timeline-desc { color: var(--pg-text-sec); font-size: 0.875rem; line-height: 1.6; margin: 0.5rem 0 0; }
+
+/* Certifications / Badges */
+.ab-cert-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-bottom: 3rem; }
+.ab-cert-card { background: var(--pg-card); border: 1px solid var(--pg-border); border-radius: 16px; padding: 1.25rem; display: flex; gap: 1rem; align-items: flex-start; transition: border-color 0.2s; }
+.ab-cert-card:hover { border-color: color-mix(in srgb, var(--pg-accent) 40%, transparent); }
+.ab-cert-icon { width: 42px; height: 42px; border-radius: 10px; background: color-mix(in srgb, var(--pg-accent) 15%, transparent); display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--pg-accent); font-size: 1.1rem; }
+.ab-cert-name { font-size: 0.9rem; font-weight: 700; color: var(--pg-text); margin: 0 0 0.2rem; }
+.ab-cert-org { color: var(--pg-text-sec); font-size: 0.82rem; margin: 0 0 0.2rem; }
+.ab-cert-date { color: var(--pg-text-muted); font-size: 0.78rem; margin: 0; }
+
+/* CTA */
+.ab-cta-band { background: linear-gradient(135deg, var(--navbar-bg, #16a34a), color-mix(in srgb, var(--navbar-bg, #16a34a) 70%, #000)); border-radius: 24px; padding: 3rem 2rem; text-align: center; margin-top: 4rem; }
+.ab-cta-band h2 { font-size: 1.9rem; font-weight: 800; color: #fff; margin: 0 0 0.75rem; }
+.ab-cta-band p { color: rgba(255,255,255,0.85); margin: 0 0 2rem; }
+.ab-cta-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 2.5rem; background: #fff; color: var(--navbar-bg, #16a34a); border-radius: 50px; font-weight: 700; text-decoration: none; font-size: 1rem; transition: opacity 0.2s, transform 0.2s; }
+.ab-cta-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+.ab-cta-btn-sec { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.875rem 2rem; background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.4); border-radius: 50px; font-weight: 600; text-decoration: none; font-size: 0.95rem; transition: all 0.2s; margin-left: 1rem; }
+.ab-cta-btn-sec:hover { background: rgba(255,255,255,0.25); }
+@media (max-width: 768px) { .ab-cta-band { padding: 2rem 1.25rem; } .ab-cta-band h2 { font-size: 1.4rem; } .ab-cta-btn-sec { margin-left: 0; margin-top: 0.75rem; } }
+
+/* Factsheet table */
+.ab-factsheet { background: var(--pg-card); border: 1px solid var(--pg-border); border-radius: 16px; overflow: hidden; margin-bottom: 3rem; }
+.ab-factsheet-row { display: grid; grid-template-columns: 200px 1fr; border-bottom: 1px solid var(--pg-border); }
+.ab-factsheet-row:last-child { border-bottom: none; }
+.ab-factsheet-key { padding: 0.875rem 1.25rem; font-size: 0.82rem; font-weight: 700; color: var(--pg-text-muted); text-transform: uppercase; letter-spacing: 0.05em; background: color-mix(in srgb, var(--pg-accent) 5%, var(--pg-card)); border-right: 1px solid var(--pg-border); }
+.ab-factsheet-val { padding: 0.875rem 1.25rem; font-size: 0.9rem; color: var(--pg-text); font-weight: 500; }
+@media (max-width: 600px) { .ab-factsheet-row { grid-template-columns: 1fr; } .ab-factsheet-key { border-right: none; border-bottom: 1px solid var(--pg-border); } }
+</style>
+@endpush
+@section('content')
+@php
+    $accent = $accentColor ?? '#22c55e';
+    $profTitle = $settings['profile_title'] ?? 'Furniture Manufacturer & Supplier';
+    $profAbout = $settings['profile_about'] ?? 'Jose Industries is a Chennai-based manufacturer of premium quality furniture since 1986.';
+    $profYears = $settings['profile_years'] ?? '38';
+    $profClients = $settings['profile_clients'] ?? '500+';
+    $profProjects = $settings['profile_projects'] ?? '5000+';
+    $tmpl = $template ?? 'ecommerce';
+
+    $stats = [
+        ['value' => '1986', 'label' => 'Established'],
+        ['value' => '38+', 'label' => 'Years Experience'],
+        ['value' => '500+', 'label' => 'Products'],
+        ['value' => '26-50', 'label' => 'Team Members'],
+    ];
+
+    $tenantShopUrl = '/' . $tenant->username . '/shop';
+    $tenantContactUrl = '/' . $tenant->username . '/contact';
+    $aboutHeroData = $aboutPage ? $aboutPage->getSectionData('hero') : [];
+    // Override generic 'About Me' default with the actual site name
+    $_rawHeading = $aboutHeroData['heading'] ?? '';
+    $_genericHeadings = ['About Me', 'About', 'About Us'];
+    if (!empty($_rawHeading) && !in_array(trim($_rawHeading), $_genericHeadings)) {
+        $pageHeading = $_rawHeading;
+    } else {
+        $pageHeading = 'About ' . $siteName;
+    }
+    $pageSub = !empty($aboutHeroData['subheading']) ? $aboutHeroData['subheading'] : $profTitle;
+@endphp
+
+{{-- ══ HERO ══ --}}
+<section class="ab-hero">
+    <div class="ab-hero-inner">
+        <div class="ab-logo-col">
+            <div class="ab-logo-frame">
+                @php $logoPath = $settings['logo_path'] ?? null; @endphp
+                @if($logoPath)
+                    <img src="{{ $logoPath }}" alt="{{ $siteName }}">
+                @else
+                    <div class="ab-logo-initials">{{ strtoupper(substr($siteName, 0, 1)) }}</div>
+                @endif
+            </div>
+            <div class="ab-est-badge"><i class="fas fa-award"></i> Est. 1986</div>
+        </div>
+        <div class="ab-info-col">
+            <div class="ab-profession-badge"><i class="fas fa-industry"></i> Furniture Manufacturer</div>
+            <h1 class="ab-name">{{ $pageHeading }}</h1>
+            <p class="ab-tagline">{{ $pageSub }}</p>
+            <p class="ab-bio">With passion and commitment to suffice the ever-changing desires of clients, Jose Industries has marked its presence in the industry since <strong>1986</strong>. We manufacture a good quality range of Center Tables, Locker Cupboards, Office Tables and many more — highly applauded for their unmatched attributes and wide appreciation from large customers across India.</p>
+            <div class="ab-stats-strip">
+                @foreach($stats as $stat)
+                <div>
+                    <div class="ab-stat-value">{{ $stat['value'] }}</div>
+                    <div class="ab-stat-label">{{ $stat['label'] }}</div>
+                </div>
+                @endforeach
+            </div>
+            <div class="ab-contact-row">
+                @if(!empty($settings['contact_email']))
+                <a href="mailto:{{ $settings['contact_email'] }}" class="ab-contact-chip"><i class="fas fa-envelope"></i> {{ $settings['contact_email'] }}</a>
+                @else
+                <a href="mailto:sales@joseindustries.in" class="ab-contact-chip"><i class="fas fa-envelope"></i> sales@joseindustries.in</a>
+                @endif
+                @if(!empty($settings['contact_phone']))
+                <a href="tel:{{ $settings['contact_phone'] }}" class="ab-contact-chip"><i class="fas fa-phone"></i> {{ $settings['contact_phone'] }}</a>
+                @endif
+                <span class="ab-contact-chip"><i class="fas fa-map-marker-alt"></i> Chennai, Tamil Nadu</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+{{-- ══ BODY ══ --}}
+<div class="ab-body">
+
+    {{-- Company Story --}}
+    <section style="margin-bottom:3.5rem;">
+        <div style="margin-bottom:1.75rem;">
+            <div class="ab-section-label">Our Story</div>
+            <h2 class="ab-section-title">Four Decades of Craftsmanship</h2>
+            <p class="ab-section-sub">From a small workshop in Chennai to a leading furniture manufacturer</p>
+        </div>
+        <div class="ab-story-grid">
+            <div class="ab-story-text">
+                <p>Founded in <strong>1986</strong> by a visionary entrepreneur, Jose Industries began with a simple mission: to manufacture furniture that combines durability, functionality, and aesthetic appeal. Over four decades, we have grown from a small workshop into a full-scale manufacturing facility serving customers across India.</p>
+                <p>Working under the experienced guidelines of our Managing Director <strong>Mr. Justin Jose</strong>, we have established a distinct niche in the industry and earned the maximum support of customers. His sharp knowledge related to the field, years of experience, and farsighted approach have been the driving force behind our success.</p>
+                <p>Today, Jose Industries is a trusted name in furniture manufacturing — known for quality, reliability, and innovation. Our products are designed according to the latest market fashion and customers' preferences, keeping us in tune with the ever-evolving challenges of the industry.</p>
+            </div>
+            <div class="ab-story-img">
+                <div class="ab-story-img-placeholder">
+                    <i class="fas fa-industry"></i>
+                    <p>Jose Industries Manufacturing Facility<br><small>Chennai, Tamil Nadu</small></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="ab-divider">
+
+    {{-- Why Choose Us --}}
+    <section style="margin-bottom:3.5rem;">
+        <div style="margin-bottom:1.75rem;">
+            <div class="ab-section-label">Why Choose Us</div>
+            <h2 class="ab-section-title">Our Competitive Advantages</h2>
+            <p class="ab-section-sub">What makes Jose Industries the preferred choice for furniture</p>
+        </div>
+        <div class="ab-feature-grid">
+            <div class="ab-feature-card">
+                <div class="ab-feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <div class="ab-feature-title">Premium Quality Assurance</div>
+                <p class="ab-feature-desc">Every product goes through rigorous quality checks in our dedicated testing laboratory. Skilled quality experts examine products on defined parameters before shipment.</p>
+            </div>
+            <div class="ab-feature-card">
+                <div class="ab-feature-icon"><i class="fas fa-leaf"></i></div>
+                <div class="ab-feature-title">Premium Raw Materials</div>
+                <p class="ab-feature-desc">We source optimum quality raw materials exclusively from authorized vendors, ensuring the durability and functionality of every product we manufacture.</p>
+            </div>
+            <div class="ab-feature-card">
+                <div class="ab-feature-icon"><i class="fas fa-cogs"></i></div>
+                <div class="ab-feature-title">State-of-the-Art Infrastructure</div>
+                <p class="ab-feature-desc">Our ultra-modern manufacturing facility is segregated into specialized departments — enabling bulk production while maintaining consistent quality standards.</p>
+            </div>
+            <div class="ab-feature-card">
+                <div class="ab-feature-icon"><i class="fas fa-palette"></i></div>
+                <div class="ab-feature-title">Custom Designs</div>
+                <p class="ab-feature-desc">Products are designed according to the latest market fashion and customer preferences, helping us remain in tune with the upcoming challenges of the industry.</p>
+            </div>
+            <div class="ab-feature-card">
+                <div class="ab-feature-icon"><i class="fas fa-users"></i></div>
+                <div class="ab-feature-title">Expert Team</div>
+                <p class="ab-feature-desc">A highly talented and hardworking team of 26–50 professionals, chosen through stringent recruitment processes with carefully verified skills and experience.</p>
+            </div>
+            <div class="ab-feature-card">
+                <div class="ab-feature-icon"><i class="fas fa-truck"></i></div>
+                <div class="ab-feature-title">Reliable Delivery</div>
+                <p class="ab-feature-desc">Our logistics and warehousing departments ensure timely delivery of products, meeting production targets within predetermined timeframes.</p>
+            </div>
+        </div>
+    </section>
+
+    <hr class="ab-divider">
+
+    {{-- Our Departments --}}
+    <section style="margin-bottom:3.5rem;">
+        <div style="margin-bottom:1.75rem;">
+            <div class="ab-section-label">Operations</div>
+            <h2 class="ab-section-title">Our Departments</h2>
+            <p class="ab-section-sub">A comprehensive infrastructure with specialized units for every function</p>
+        </div>
+        <div class="ab-dept-grid">
+            <div class="ab-dept-card">
+                <div class="ab-dept-icon"><i class="fas fa-industry"></i></div>
+                <div class="ab-dept-name">Production</div>
+                <p class="ab-dept-desc">Core manufacturing with precision machinery</p>
+            </div>
+            <div class="ab-dept-card">
+                <div class="ab-dept-icon"><i class="fas fa-check-double"></i></div>
+                <div class="ab-dept-name">Quality Control</div>
+                <p class="ab-dept-desc">Dedicated testing lab & quality experts</p>
+            </div>
+            <div class="ab-dept-card">
+                <div class="ab-dept-icon"><i class="fas fa-truck"></i></div>
+                <div class="ab-dept-name">Logistics</div>
+                <p class="ab-dept-desc">Pan-India delivery network</p>
+            </div>
+            <div class="ab-dept-card">
+                <div class="ab-dept-icon"><i class="fas fa-warehouse"></i></div>
+                <div class="ab-dept-name">Warehousing</div>
+                <p class="ab-dept-desc">Large-scale storage & inventory management</p>
+            </div>
+            <div class="ab-dept-card">
+                <div class="ab-dept-icon"><i class="fas fa-box"></i></div>
+                <div class="ab-dept-name">Packaging</div>
+                <p class="ab-dept-desc">Secure packaging for safe transit</p>
+            </div>
+            <div class="ab-dept-card">
+                <div class="ab-dept-icon"><i class="fas fa-flask"></i></div>
+                <div class="ab-dept-name">R&D</div>
+                <p class="ab-dept-desc">Continuous innovation & design development</p>
+            </div>
+            <div class="ab-dept-card">
+                <div class="ab-dept-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="ab-dept-name">Sales & Marketing</div>
+                <p class="ab-dept-desc">Customer acquisition & relationship management</p>
+            </div>
+        </div>
+    </section>
+
+    <hr class="ab-divider">
+
+    {{-- Company Milestones --}}
+    <section style="margin-bottom:3.5rem;">
+        <div style="margin-bottom:1.75rem;">
+            <div class="ab-section-label">Journey</div>
+            <h2 class="ab-section-title">Our Milestones</h2>
+            <p class="ab-section-sub">Key moments in Jose Industries' four-decade journey</p>
+        </div>
+        <div class="ab-timeline">
+            <div class="ab-timeline-item">
+                <div class="ab-timeline-dot"></div>
+                <div class="ab-timeline-card">
+                    <div class="ab-timeline-header">
+                        <div>
+                            <h3 class="ab-timeline-title">Company Founded</h3>
+                            <p class="ab-timeline-company">Jose Industries, Chennai</p>
+                        </div>
+                        <span class="ab-timeline-date">1986</span>
+                    </div>
+                    <p class="ab-timeline-desc">Jose Industries was established in Chennai, Tamil Nadu, with a vision to manufacture high-quality furniture for homes and offices. Started as a small workshop with a dedicated team of craftsmen.</p>
+                </div>
+            </div>
+            <div class="ab-timeline-item">
+                <div class="ab-timeline-dot"></div>
+                <div class="ab-timeline-card">
+                    <div class="ab-timeline-header">
+                        <div>
+                            <h3 class="ab-timeline-title">Infrastructure Expansion</h3>
+                            <p class="ab-timeline-company">Manufacturing Facility Upgrade</p>
+                        </div>
+                        <span class="ab-timeline-date">2000s</span>
+                    </div>
+                    <p class="ab-timeline-desc">Expanded to a state-of-the-art manufacturing facility with dedicated departments for production, quality control, logistics, warehousing, packaging, R&D, and sales & marketing.</p>
+                </div>
+            </div>
+            <div class="ab-timeline-item">
+                <div class="ab-timeline-dot"></div>
+                <div class="ab-timeline-card">
+                    <div class="ab-timeline-header">
+                        <div>
+                            <h3 class="ab-timeline-title">GST Registration & Compliance</h3>
+                            <p class="ab-timeline-company">Regulatory Milestone</p>
+                        </div>
+                        <span class="ab-timeline-date">July 2017</span>
+                    </div>
+                    <p class="ab-timeline-desc">Successfully registered under GST, demonstrating our commitment to regulatory compliance and transparent business practices. Annual turnover reached ₹40L – ₹1.5 Cr.</p>
+                </div>
+            </div>
+            <div class="ab-timeline-item">
+                <div class="ab-timeline-dot"></div>
+                <div class="ab-timeline-card">
+                    <div class="ab-timeline-header">
+                        <div>
+                            <h3 class="ab-timeline-title">Digital Transformation</h3>
+                            <p class="ab-timeline-company">Online Presence & E-Commerce</p>
+                        </div>
+                        <span class="ab-timeline-date">2024</span>
+                    </div>
+                    <p class="ab-timeline-desc">Launched our digital storefront to reach customers across India. Now offering online ordering, product catalog browsing, and direct customer support through our e-commerce platform.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="ab-divider">
+
+    {{-- Certifications & Compliance --}}
+    <section style="margin-bottom:3.5rem;">
+        <div style="margin-bottom:1.75rem;">
+            <div class="ab-section-label">Credentials</div>
+            <h2 class="ab-section-title">Certifications & Compliance</h2>
+            <p class="ab-section-sub">Our commitment to quality and regulatory standards</p>
+        </div>
+        <div class="ab-cert-grid">
+            <div class="ab-cert-card">
+                <div class="ab-cert-icon"><i class="fas fa-certificate"></i></div>
+                <div>
+                    <div class="ab-cert-name">GST Registered</div>
+                    <div class="ab-cert-org">Government of India</div>
+                    <div class="ab-cert-date">Registered since July 2017</div>
+                </div>
+            </div>
+            <div class="ab-cert-card">
+                <div class="ab-cert-icon"><i class="fas fa-award"></i></div>
+                <div>
+                    <div class="ab-cert-name">Quality Testing Laboratory</div>
+                    <div class="ab-cert-org">In-house Quality Assurance</div>
+                    <div class="ab-cert-date">Products tested on defined quality parameters</div>
+                </div>
+            </div>
+            <div class="ab-cert-card">
+                <div class="ab-cert-icon"><i class="fas fa-store"></i></div>
+                <div>
+                    <div class="ab-cert-name">Manufacturer + Retailer + Wholesaler</div>
+                    <div class="ab-cert-org">Multi-channel Business</div>
+                    <div class="ab-cert-date">Serving B2B and B2C customers</div>
+                </div>
+            </div>
+            <div class="ab-cert-card">
+                <div class="ab-cert-icon"><i class="fas fa-building"></i></div>
+                <div>
+                    <div class="ab-cert-name">Sole Proprietorship</div>
+                    <div class="ab-cert-org">Legal Status of Firm</div>
+                    <div class="ab-cert-date">Registered in Tamil Nadu</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="ab-divider">
+
+    {{-- Company Factsheet --}}
+    <section style="margin-bottom:3.5rem;">
+        <div style="margin-bottom:1.75rem;">
+            <div class="ab-section-label">Factsheet</div>
+            <h2 class="ab-section-title">Basic Information</h2>
+            <p class="ab-section-sub">Key facts about Jose Industries at a glance</p>
+        </div>
+        <div class="ab-factsheet">
+            <div class="ab-factsheet-row">
+                <div class="ab-factsheet-key">Nature of Business</div>
+                <div class="ab-factsheet-val">Manufacturer, Retail Business, Wholesale Business</div>
+            </div>
+            <div class="ab-factsheet-row">
+                <div class="ab-factsheet-key">Managing Director</div>
+                <div class="ab-factsheet-val">Mr. Justin Jose</div>
+            </div>
+            <div class="ab-factsheet-row">
+                <div class="ab-factsheet-key">Company CEO</div>
+                <div class="ab-factsheet-val">G Christudas</div>
+            </div>
+            <div class="ab-factsheet-row">
+                <div class="ab-factsheet-key">Registered Address</div>
+                <div class="ab-factsheet-val">Chennai, Tamil Nadu, India</div>
+            </div>
+            <div class="ab-factsheet-row">
+                <div class="ab-factsheet-key">Year of Establishment</div>
+                <div class="ab-factsheet-val">1986</div>
+            </div>
+            <div class="ab-factsheet-row">
+                <div class="ab-factsheet-key">Total Employees</div>
+                <div class="ab-factsheet-val">26 to 50 People</div>
+            </div>
+            <div class="ab-factsheet-row">
+                <div class="ab-factsheet-key">Legal Status</div>
+                <div class="ab-factsheet-val">Sole Proprietorship</div>
+            </div>
+            <div class="ab-factsheet-row">
+                <div class="ab-factsheet-key">Annual Turnover</div>
+                <div class="ab-factsheet-val">₹40 Lakh – ₹1.5 Crore</div>
+            </div>
+            <div class="ab-factsheet-row">
+                <div class="ab-factsheet-key">GST Registration</div>
+                <div class="ab-factsheet-val">July 2017</div>
+            </div>
+            <div class="ab-factsheet-row">
+                <div class="ab-factsheet-key">Product Range</div>
+                <div class="ab-factsheet-val">Center Tables, Locker Cupboards, Office Tables, Steel Racks, Filing Cabinets, Wooden Furniture & more</div>
+            </div>
+        </div>
+    </section>
+
+    {{-- CTA Band --}}
+    <div class="ab-cta-band">
+        <h2>Ready to Furnish Your Space?</h2>
+        <p>Browse our complete catalog of premium furniture — Center Tables, Locker Cupboards, Office Tables and more. Quality guaranteed since 1986.</p>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:0.75rem;">
+            <a href="{{ $tenantShopUrl ?? '/shop' }}" class="ab-cta-btn">
+                <i class="fas fa-shopping-bag"></i> Shop Now
+            </a>
+            <a href="{{ $tenantContactUrl ?? '/contact' }}" class="ab-cta-btn-sec">
+                <i class="fas fa-phone"></i> Contact Us
+            </a>
+        </div>
+    </div>
+
+</div>
+@endsection

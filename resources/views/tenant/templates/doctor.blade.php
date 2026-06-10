@@ -158,7 +158,7 @@
 @endif
 
 {{-- STATS --}}
-@if($_show('stats') && count($statsItems))
+@if($_show('stats'))
 <div class="xn-doc-stats-row">
     @foreach($statsItems as $stat)
     <div class="xn-doc-stat-cell">
@@ -223,7 +223,7 @@
 @endif
 
 {{-- TESTIMONIALS --}}
-@if($_show('testimonials') && count($testimonials))
+@if($_show('testimonials'))
 <div class="xn-doc-section">
     <div class="xn-doc-section-header">
         <div class="xn-doc-badge">Patient Reviews</div>
@@ -249,7 +249,7 @@
 @endif
 
 {{-- BLOG --}}
-@if($_show('blog') && (isset($featuredPost) && $featuredPost || !empty($categoryPosts)))
+@if($_show('blog'))
 <div class="xn-doc-section">
     <div class="xn-doc-section-header">
         <div class="xn-doc-badge">Health Tips</div>

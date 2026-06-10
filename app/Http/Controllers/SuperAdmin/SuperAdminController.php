@@ -142,6 +142,61 @@ class SuperAdminController extends Controller
     }
 
     /**
+     * Plan Modules Management — show which modules each plan includes
+     */
+    public function planModules()
+    {
+        $planModules = config('xenoraa.plan_modules', []);
+        $plans       = config('xenoraa.plans', []);
+        $allModules  = [
+            'site_builder' => ['label' => 'Site Builder',          'icon' => 'fa-globe',         'desc' => 'Page manager, branding, domain, menu builder'],
+            'content'      => ['label' => 'Content (Blog + Forum)', 'icon' => 'fa-pen-nib',       'desc' => 'Blog posts, forum topics'],
+            'ecommerce'    => ['label' => 'E-Commerce / Shop',      'icon' => 'fa-shopping-cart',  'desc' => 'Products, orders, shop management'],
+            'recruitment'  => ['label' => 'Jobs / Recruitment',     'icon' => 'fa-briefcase',      'desc' => 'Job listings and applications'],
+            'analytics'    => ['label' => 'Analytics',              'icon' => 'fa-chart-bar',      'desc' => 'Traffic and engagement analytics'],
+            'crm'          => ['label' => 'CRM',                    'icon' => 'fa-users',          'desc' => 'Leads, contacts, projects, services, sales pipeline'],
+            'ai'           => ['label' => 'AI Hub (AI Assistance)', 'icon' => 'fa-robot',          'desc' => 'AI chatbot, AI conversations'],
+            'pos'          => ['label' => 'Point of Sale (POS)',    'icon' => 'fa-cash-register',  'desc' => 'POS terminal, orders, sessions'],
+            'newsletter'   => ['label' => 'Newsletter',             'icon' => 'fa-envelope',       'desc' => 'Email campaigns and subscriber management'],
+        ];
+        return view('superadmin.plan-modules', compact('planModules', 'plans', 'allModules'));
+    }
+
+    /**
+     * Save updated plan module assignments (writes to xenoraa.php config file)
+     */
+    public function savePlanModules(Request $request)
+    {
+        $planKeys   = array_keys(config('xenoraa.plans', []));
+        $allModKeys = ['site_builder','content','ecommerce','recruitment','analytics','crm','ai','pos','newsletter'];
+        $newMap     = [];
+        foreach ($planKeys as $plan) {
+            $newMap[$plan] = array_values(array_intersect($allModKeys, $request->input($plan, [])));
+        }
+        // Persist to config file
+        $configPath = config_path('xenoraa.php');
+        $current    = file_get_contents($configPath);
+        // Build the plan_modules PHP array string
+        $lines = "    'plan_modules' => [\n";
+        foreach ($newMap as $plan => $mods) {
+            $quoted = array_map(fn($m) => "'$m'", $mods);
+            $lines .= "        '$plan' => [" . implode(', ', $quoted) . "],\n";
+        }
+        $lines .= "    ],\n";
+        // Replace existing plan_modules block
+        $updated = preg_replace(
+            "/'plan_modules'\s*=>\s*\[.*?\],\n/s",
+            $lines,
+            $current
+        );
+        if ($updated && $updated !== $current) {
+            file_put_contents($configPath, $updated);
+            \Illuminate\Support\Facades\Artisan::call('config:cache');
+        }
+        return back()->with('success', 'Plan module access updated successfully.');
+    }
+
+    /**
      * Revenue Overview
      */
     public function revenue()
@@ -221,6 +276,41 @@ class SuperAdminController extends Controller
             DB::table('site_settings')->updateOrInsert(['key' => $key], ['value' => $value]);
         }
         return back()->with('success', 'Platform settings updated.');
+    }
+
+    /**
+     * SEO Management
+     */
+    public function seo()
+    {
+        $settings = DB::table('site_settings')->whereNull('user_id')->pluck('value', 'key')->toArray();
+        return view('superadmin.seo', compact('settings'));
+    }
+
+    /**
+     * Update SEO Settings
+     */
+    public function updateSeo(Request $request)
+    {
+        $seoKeys = [
+            'seo_meta_title', 'seo_meta_description', 'seo_meta_keywords',
+            'seo_canonical_url', 'seo_robots',
+            'google_tag_id', 'google_tag_enabled',
+            'og_title', 'og_description', 'og_image', 'og_type', 'og_site_name',
+            'twitter_card', 'twitter_site', 'twitter_title', 'twitter_description', 'twitter_image',
+            'sitemap_enabled', 'sitemap_frequency', 'sitemap_priority',
+            'schema_org_type', 'schema_org_name', 'schema_org_url', 'schema_org_logo',
+            'schema_org_description', 'schema_org_phone', 'schema_org_email', 'schema_org_address',
+            'custom_head_scripts', 'custom_body_scripts',
+        ];
+        foreach ($seoKeys as $key) {
+            $value = $request->input($key, '');
+            DB::table('site_settings')->updateOrInsert(
+                ['key' => $key, 'user_id' => null],
+                ['value' => $value]
+            );
+        }
+        return back()->with('success', 'SEO settings saved successfully.');
     }
 
     /**

@@ -158,7 +158,7 @@
 @endif
 
 {{-- STATS --}}
-@if($_show('stats') && count($statsItems))
+@if($_show('stats'))
 <div class="xn-adv-stats-row">
     @foreach($statsItems as $stat)
     <div class="xn-adv-stat-cell">
@@ -222,7 +222,7 @@
 @endif
 
 {{-- TESTIMONIALS --}}
-@if($_show('testimonials') && count($testimonials))
+@if($_show('testimonials'))
 <div class="xn-adv-section">
     <div class="xn-adv-section-header">
         <div class="xn-adv-badge">Client Testimonials</div>
@@ -247,7 +247,7 @@
 @endif
 
 {{-- BLOG --}}
-@if($_show('blog') && (isset($featuredPost) && $featuredPost || !empty($categoryPosts)))
+@if($_show('blog'))
 <div class="xn-adv-section">
     <div class="xn-adv-section-header">
         <div class="xn-adv-badge">Legal Insights</div>

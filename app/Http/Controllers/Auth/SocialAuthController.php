@@ -67,7 +67,7 @@ class SocialAuthController extends Controller
         if ($user->isAdmin()) {
             return redirect()->route('admin.dashboard');
         } elseif ($user->isStaff()) {
-            return redirect()->route('staff.dashboard');
+            return redirect()->route('admin.dashboard');
         }
 
         return redirect()->route('home');

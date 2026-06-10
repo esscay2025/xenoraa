@@ -85,23 +85,34 @@
     <span class="emoji">🎉</span>
     <h1 class="title">Welcome to <span>Xenoraa</span>, {{ explode(' ', $user->name)[0] }}!</h1>
     <p class="subtitle">
-        Your account is ready. You're now on a <strong>14-day free trial</strong> of the
-        <strong>{{ ucfirst($user->plan ?? 'Starter') }}</strong> plan — no credit card needed.
+        Your account is ready. You are now on the
+        <strong>{{ ucfirst($user->plan ?? 'Starter') }}</strong> plan.
+        Let's set up your professional website.
     </p>
 
+    @php
+    $planModules = config('xenoraa.plan_modules.' . ($user->plan ?? 'starter'), []);
+    $planLabels = [
+        'site_builder' => 'Site Builder & Website',
+        'ecommerce' => 'E-Commerce / Shop',
+        'blog' => 'Blog Publishing',
+        'jobs' => 'Job Board',
+        'forum' => 'Community Forum',
+        'crm' => 'CRM & Lead Management',
+        'ai_hub' => 'AI Hub & AI Assistance',
+        'pos' => 'Point of Sale (POS)',
+        'newsletter' => 'Newsletter',
+        'analytics' => 'Analytics & Insights',
+    ];
+    @endphp
     <div class="trial-box">
-        <h3>Your trial includes:</h3>
+        <h3>Your {{ ucfirst($user->plan ?? 'Starter') }} plan includes:</h3>
         <ul class="trial-items">
-            <li>Full portfolio and blog management</li>
-            <li>AI-powered chatbot for lead capture</li>
-            <li>CRM with conversation tracking</li>
-            <li>Newsletter and subscriber tools</li>
-            @if(in_array($user->plan ?? 'starter', ['professional', 'business']))
-            <li>Custom domain mapping</li>
+            @foreach($planModules as $mod)
+            @if(isset($planLabels[$mod]))
+            <li>{{ $planLabels[$mod] }}</li>
             @endif
-            @if(($user->plan ?? 'starter') === 'business')
-            <li>E-commerce store with product management</li>
-            @endif
+            @endforeach
         </ul>
     </div>
 

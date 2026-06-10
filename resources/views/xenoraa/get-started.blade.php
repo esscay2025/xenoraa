@@ -1,6 +1,6 @@
 @extends('layouts.xenoraa')
 @section('title', 'Get Started — Xenoraa')
-@section('meta_description', 'Create your Xenoraa account and start building your digital identity today. Free 14-day trial.')
+@section('meta_description', 'Create your Xenoraa account and start building your digital identity today. Choose your plan and get started.')
 
 @section('styles')
 <style>
@@ -116,8 +116,8 @@
                 <li>
                     <div class="xn-benefit-icon"><i class="fas fa-shield-alt"></i></div>
                     <div>
-                        <div class="xn-benefit-title">14-Day Free Trial</div>
-                        <div class="xn-benefit-desc">No credit card required. Full access to all features for 14 days.</div>
+                        <div class="xn-benefit-title">30-Day Money-Back Guarantee</div>
+                        <div class="xn-benefit-desc">Not satisfied? Get a full refund within 30 days, no questions asked.</div>
                     </div>
                 </li>
             </ul>
@@ -126,7 +126,7 @@
         {{-- Right: Registration Form --}}
         <div class="xn-auth-card">
             <div class="xn-auth-title">Create Your Account</div>
-            <div class="xn-auth-subtitle">Start your 14-day free trial. No credit card required.</div>
+            <div class="xn-auth-subtitle">Fill in your details below. You'll complete payment on the next step.</div>
 
             @if($errors->any())
             <div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:1rem;margin-bottom:1.5rem;font-size:0.825rem;color:#f87171;">
@@ -177,20 +177,30 @@
 
                 {{-- Profession --}}
                 <div class="xn-form-group">
-                    <label class="xn-form-label">Your Profession / Role *</label>
+                    <label class="xn-form-label">Your Business / Profession / Role *</label>
                     <select name="profession" class="xn-form-input" required style="cursor:pointer;">
-                        <option value="" disabled {{ old('profession') ? '' : 'selected' }}>— Select your profession —</option>
-                        <option value="doctor" {{ old('profession')=='doctor' ? 'selected' : '' }}>🩺 Doctor / Medical Professional</option>
-                        <option value="advocate" {{ old('profession')=='advocate' ? 'selected' : '' }}>⚖️ Advocate / Lawyer</option>
-                        <option value="politician" {{ old('profession')=='politician' ? 'selected' : '' }}>🏛️ Politician / Public Leader</option>
-                        <option value="consultant" {{ old('profession')=='consultant' ? 'selected' : '' }}>📊 Consultant / Business Advisor</option>
-                        <option value="entrepreneur" {{ old('profession')=='entrepreneur' ? 'selected' : '' }}>🚀 Entrepreneur / Startup Founder</option>
-                        <option value="influencer" {{ old('profession')=='influencer' ? 'selected' : '' }}>⭐ Influencer / Content Creator</option>
-                        <option value="software_developer" {{ old('profession')=='software_developer' ? 'selected' : '' }}>💻 Software Developer / Engineer</option>
-                        <option value="designer" {{ old('profession')=='designer' ? 'selected' : '' }}>🎨 Designer / Creative Professional</option>
-                        <option value="educator" {{ old('profession')=='educator' ? 'selected' : '' }}>📚 Educator / Trainer / Coach</option>
-                        <option value="freelancer" {{ old('profession')=='freelancer' ? 'selected' : '' }}>🧑‍💻 Freelancer / Independent Professional</option>
-                        <option value="other" {{ old('profession')=='other' ? 'selected' : '' }}>✨ Other</option>
+                        <option value="" disabled {{ old('profession') ? '' : 'selected' }}>— Select your business / profession —</option>
+                        <optgroup label="Business & Commerce">
+                            <option value="ecommerce" {{ old('profession')=='ecommerce' ? 'selected' : '' }}>🛒 E-Commerce / Online Store</option>
+                            <option value="business" {{ old('profession')=='business' ? 'selected' : '' }}>🏢 Business / Company (Real Estate, Travel, etc.)</option>
+                            <option value="entrepreneur" {{ old('profession')=='entrepreneur' ? 'selected' : '' }}>🚀 Entrepreneur / Startup Founder</option>
+                            <option value="consultant" {{ old('profession')=='consultant' ? 'selected' : '' }}>📊 Consultant / Business Advisor</option>
+                        </optgroup>
+                        <optgroup label="Professional Services">
+                            <option value="doctor" {{ old('profession')=='doctor' ? 'selected' : '' }}>🩺 Doctor / Medical Professional</option>
+                            <option value="advocate" {{ old('profession')=='advocate' ? 'selected' : '' }}>⚖️ Advocate / Lawyer</option>
+                            <option value="educator" {{ old('profession')=='educator' ? 'selected' : '' }}>📚 Educator / Trainer / Coach</option>
+                            <option value="freelancer" {{ old('profession')=='freelancer' ? 'selected' : '' }}>🧑‍💻 Freelancer / Independent Professional</option>
+                        </optgroup>
+                        <optgroup label="Creative & Digital">
+                            <option value="influencer" {{ old('profession')=='influencer' ? 'selected' : '' }}>⭐ Influencer / Content Creator</option>
+                            <option value="software_developer" {{ old('profession')=='software_developer' ? 'selected' : '' }}>💻 Software Developer / Engineer</option>
+                            <option value="designer" {{ old('profession')=='designer' ? 'selected' : '' }}>🎨 Designer / Creative Professional</option>
+                        </optgroup>
+                        <optgroup label="Public & Civic">
+                            <option value="politician" {{ old('profession')=='politician' ? 'selected' : '' }}>🏛️ Politician / Public Leader</option>
+                            <option value="other" {{ old('profession')=='other' ? 'selected' : '' }}>✨ Other</option>
+                        </optgroup>
                     </select>
                 </div>
 
@@ -198,15 +208,15 @@
                 <div class="xn-form-group">
                     <label class="xn-form-label">Choose Your Plan</label>
                     <div class="xn-plan-select">
-                        <div class="xn-plan-option selected" onclick="selectPlan(this,'starter')">
+                        <div class="xn-plan-option selected" data-plan="starter" onclick="selectPlan(this,'starter')">
                             <div class="xn-plan-option-name">Starter</div>
                             <div class="xn-plan-option-price">₹499/mo</div>
                         </div>
-                        <div class="xn-plan-option" onclick="selectPlan(this,'professional')">
+                        <div class="xn-plan-option" data-plan="professional" onclick="selectPlan(this,'professional')">
                             <div class="xn-plan-option-name" style="color:#a855f7;">Professional</div>
                             <div class="xn-plan-option-price">₹999/mo</div>
                         </div>
-                        <div class="xn-plan-option" onclick="selectPlan(this,'business')">
+                        <div class="xn-plan-option" data-plan="business" onclick="selectPlan(this,'business')">
                             <div class="xn-plan-option-name">Business Pro</div>
                             <div class="xn-plan-option-price">₹1,999/mo</div>
                         </div>
@@ -224,7 +234,7 @@
                     <input type="password" name="password_confirmation" class="xn-form-input" placeholder="Repeat your password" required>
                 </div>
 
-                <button type="submit" class="xn-form-submit" id="submitBtn">Create My Account 🚀</button>
+                <button type="submit" class="xn-form-submit" id="submitBtn">Continue to Payment 🚀</button>
             </form>
 
             <div class="xn-form-divider"><span>Already have an account?</span></div>
@@ -247,6 +257,20 @@ function selectPlan(el, plan) {
     el.classList.add('selected');
     document.getElementById('selectedPlan').value = plan;
 }
+
+// Pre-select plan from URL param (e.g. ?plan=professional)
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const plan = params.get('plan');
+    if (plan) {
+        const el = document.querySelector('.xn-plan-option[data-plan="' + plan + '"]');
+        if (el) {
+            document.querySelectorAll('.xn-plan-option').forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+            document.getElementById('selectedPlan').value = plan;
+        }
+    }
+})();
 
 // Auto-suggest username from first + last name
 let userEditedUsername = false;

@@ -35,6 +35,10 @@ class User extends Authenticatable
         'city',
         'website',
         'module_permissions',
+        'plan_billing',
+        'payment_id',
+        'business_info',
+        'business_info_ai',
     ];
 
     protected $hidden = [
@@ -49,6 +53,7 @@ class User extends Authenticatable
         'plan_expires_at'   => 'datetime',
         'onboarding_completed' => 'boolean',
         'module_permissions'   => 'array',
+        'business_info_ai'     => 'array',
     ];
 
     // =============================================
@@ -240,6 +245,27 @@ class User extends Authenticatable
         $plan = $this->getPlan();
         $plans = config('xenoraa.plans', []);
         return $plans[$plan]['features'][$feature] ?? false;
+    }
+
+    /**
+     * Check if the tenant's subscription plan includes a given module.
+     * SuperAdmins and tenant owners on the 'business' plan always get everything.
+     * For other plans, check the plan_modules config.
+     */
+    public function planHasModule(string $module): bool
+    {
+        // SuperAdmins and tenant owners on business plan get all modules
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+        $plan = $this->getPlan();
+        // Business Pro gets everything
+        if ($plan === 'business') {
+            return true;
+        }
+        $planModules = config('xenoraa.plan_modules', []);
+        $allowed = $planModules[$plan] ?? [];
+        return in_array($module, $allowed) || in_array('*', $allowed);
     }
 
     public function isTrialing(): bool

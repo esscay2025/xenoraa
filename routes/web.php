@@ -182,7 +182,7 @@ Route::prefix('forum')->name('forum.')->group(function () {
 // =============================================
 // ADMIN ROUTES (Admin only)
 // =============================================
-Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subscribed'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -272,6 +272,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     // Community: Calendar Admin
     Route::get('/calendar', [\App\Http\Controllers\Admin\CalendarAdminController::class, 'index'])->name('calendar.index');
+    Route::post('/calendar/events', [\App\Http\Controllers\Admin\CalendarAdminController::class, 'storeEvent'])->name('calendar.events.store');
+    Route::post('/calendar/notes', [\App\Http\Controllers\Admin\CalendarAdminController::class, 'storeNote'])->name('calendar.notes.store');
     Route::delete('/calendar/events/{event}', [\App\Http\Controllers\Admin\CalendarAdminController::class, 'destroy'])->name('calendar.destroy');
     Route::delete('/calendar/notes/{note}', [\App\Http\Controllers\Admin\CalendarAdminController::class, 'destroyNote'])->name('calendar.note.destroy');
 
@@ -354,42 +356,88 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
         Route::get('/analysis', [$ctrl, 'analysis'])->name('analysis');
         Route::get('/reports',  [$ctrl, 'reports'])->name('reports');
 
-        // Sales (Leads, Contacts, Accounts, Deals, Forecasts)
-        Route::get('/sales',                        [$ctrl, 'sales'])->name('sales');
+        // Sales sub-module routes
+        Route::get('/sales/leads',                  [$ctrl, 'salesLeads'])->name('sales.leads');
+        Route::get('/sales/leads/create',           [$ctrl, 'salesLeadsCreate'])->name('sales.leads.create');
+        Route::get('/sales/contacts',               [$ctrl, 'salesContacts'])->name('sales.contacts');
+        Route::get('/sales/contacts/create',        [$ctrl, 'salesContactsCreate'])->name('sales.contacts.create');
+        Route::get('/sales/accounts',               [$ctrl, 'salesAccounts'])->name('sales.accounts');
+        Route::get('/sales/accounts/create',        [$ctrl, 'salesAccountsCreate'])->name('sales.accounts.create');
+        Route::get('/sales/deals',                  [$ctrl, 'salesDeals'])->name('sales.deals');
+        Route::get('/sales/deals/create',           [$ctrl, 'salesDealsCreate'])->name('sales.deals.create');
+        Route::get('/sales/forecasts',              [$ctrl, 'salesForecasts'])->name('sales.forecasts');
+        Route::get('/sales/forecasts/create',       [$ctrl, 'salesForecastsCreate'])->name('sales.forecasts.create');
         Route::post('/sales',                       [$ctrl, 'salesStore'])->name('sales.store');
         Route::patch('/sales/{type}/{id}',          [$ctrl, 'salesUpdate'])->name('sales.update');
         Route::delete('/sales/{type}/{id}',         [$ctrl, 'salesDestroy'])->name('sales.destroy');
+        // Legacy redirect
+        Route::get('/sales',                        [$ctrl, 'salesLeads'])->name('sales');
 
-        // Activities (Tasks, Meetings, Calls)
-        Route::get('/activities',                   [$ctrl, 'activities'])->name('activities');
+        // Activities sub-module routes
+        Route::get('/activities/tasks',             [$ctrl, 'activitiesTasks'])->name('activities.tasks');
+        Route::get('/activities/tasks/create',      [$ctrl, 'activitiesTasksCreate'])->name('activities.tasks.create');
+        Route::get('/activities/meetings',          [$ctrl, 'activitiesMeetings'])->name('activities.meetings');
+        Route::get('/activities/meetings/create',   [$ctrl, 'activitiesMeetingsCreate'])->name('activities.meetings.create');
+        Route::get('/activities/calls',             [$ctrl, 'activitiesCalls'])->name('activities.calls');
+        Route::get('/activities/calls/create',      [$ctrl, 'activitiesCallsCreate'])->name('activities.calls.create');
         Route::post('/activity',                    [$ctrl, 'activityStore'])->name('activity.store');
         Route::patch('/activity/{id}',              [$ctrl, 'activityUpdate'])->name('activity.update');
         Route::patch('/activity/{id}/complete',     [$ctrl, 'activityComplete'])->name('activity.complete');
         Route::delete('/activity/{id}',             [$ctrl, 'activityDestroy'])->name('activity.destroy');
+        // Legacy redirect
+        Route::get('/activities',                   [$ctrl, 'activitiesTasks'])->name('activities');
 
-        // Inventory (Price Books, Quotes, Sales Orders, Purchase Orders, Invoices, Vendors)
-        Route::get('/inventory',                    [$ctrl, 'inventory'])->name('inventory');
+        // Inventory sub-module routes
+        Route::get('/inventory/price-books',        [$ctrl, 'inventoryPriceBooks'])->name('inventory.price-books');
+        Route::get('/inventory/price-books/create', [$ctrl, 'inventoryPriceBooksCreate'])->name('inventory.price-books.create');
+        Route::get('/inventory/quotes',             [$ctrl, 'inventoryQuotes'])->name('inventory.quotes');
+        Route::get('/inventory/quotes/create',      [$ctrl, 'inventoryQuotesCreate'])->name('inventory.quotes.create');
+        Route::get('/inventory/sales-orders',       [$ctrl, 'inventorySalesOrders'])->name('inventory.sales-orders');
+        Route::get('/inventory/sales-orders/create',[$ctrl, 'inventorySalesOrdersCreate'])->name('inventory.sales-orders.create');
+        Route::get('/inventory/purchase-orders',    [$ctrl, 'inventoryPurchaseOrders'])->name('inventory.purchase-orders');
+        Route::get('/inventory/purchase-orders/create',[$ctrl,'inventoryPurchaseOrdersCreate'])->name('inventory.purchase-orders.create');
+        Route::get('/inventory/invoices',           [$ctrl, 'inventoryInvoices'])->name('inventory.invoices');
+        Route::get('/inventory/invoices/create',    [$ctrl, 'inventoryInvoicesCreate'])->name('inventory.invoices.create');
+        Route::get('/inventory/vendors',            [$ctrl, 'inventoryVendors'])->name('inventory.vendors');
+        Route::get('/inventory/vendors/create',     [$ctrl, 'inventoryVendorsCreate'])->name('inventory.vendors.create');
         Route::post('/inventory',                   [$ctrl, 'inventoryStore'])->name('inventory.store');
         Route::delete('/inventory/{type}/{id}',     [$ctrl, 'inventoryDestroy'])->name('inventory.destroy');
+        // Legacy redirect
+        Route::get('/inventory',                    [$ctrl, 'inventoryPriceBooks'])->name('inventory');
 
-        // Support (Cases, Solutions)
-        Route::get('/support',                      [$ctrl, 'support'])->name('support');
+        // Support sub-module routes
+        Route::get('/support/cases',                [$ctrl, 'supportCases'])->name('support.cases');
+        Route::get('/support/cases/create',         [$ctrl, 'supportCasesCreate'])->name('support.cases.create');
+        Route::get('/support/solutions',            [$ctrl, 'supportSolutions'])->name('support.solutions');
+        Route::get('/support/solutions/create',     [$ctrl, 'supportSolutionsCreate'])->name('support.solutions.create');
         Route::post('/support',                     [$ctrl, 'supportStore'])->name('support.store');
         Route::patch('/support/{type}/{id}',        [$ctrl, 'supportUpdate'])->name('support.update');
         Route::delete('/support/{type}/{id}',       [$ctrl, 'supportDestroy'])->name('support.destroy');
+        // Legacy redirect
+        Route::get('/support',                      [$ctrl, 'supportCases'])->name('support');
 
-        // Services
-        Route::get('/services',                     [$ctrl, 'services'])->name('services');
+        // Services sub-module routes
+        Route::get('/services/catalog',             [$ctrl, 'servicesCatalog'])->name('services.catalog');
+        Route::get('/services/catalog/create',      [$ctrl, 'servicesCatalogCreate'])->name('services.catalog.create');
+        Route::get('/services/bookings',            [$ctrl, 'servicesBookings'])->name('services.bookings');
+        Route::get('/services/bookings/create',     [$ctrl, 'servicesBookingsCreate'])->name('services.bookings.create');
         Route::post('/services',                    [$ctrl, 'servicesStore'])->name('services.store');
         Route::patch('/services/{type}/{id}',       [$ctrl, 'servicesUpdate'])->name('services.update');
         Route::delete('/services/{type}/{id}',      [$ctrl, 'servicesDestroy'])->name('services.destroy');
+        // Legacy redirect
+        Route::get('/services',                     [$ctrl, 'servicesCatalog'])->name('services');
 
-        // Projects
-        Route::get('/projects',                     [$ctrl, 'projects'])->name('projects');
+        // Projects sub-module routes
+        Route::get('/projects/list',                [$ctrl, 'projectsList'])->name('projects.list');
+        Route::get('/projects/list/create',         [$ctrl, 'projectsListCreate'])->name('projects.list.create');
+        Route::get('/projects/tasks',               [$ctrl, 'projectsTasks'])->name('projects.tasks');
+        Route::get('/projects/tasks/create',        [$ctrl, 'projectsTasksCreate'])->name('projects.tasks.create');
         Route::post('/projects',                    [$ctrl, 'projectsStore'])->name('projects.store');
         Route::patch('/projects/{type}/{id}',       [$ctrl, 'projectsUpdate'])->name('projects.update');
         Route::patch('/projects/task/{id}/status',  [$ctrl, 'projectTaskStatus'])->name('projects.task.status');
         Route::delete('/projects/{type}/{id}',      [$ctrl, 'projectsDestroy'])->name('projects.destroy');
+        // Legacy redirect
+        Route::get('/projects',                     [$ctrl, 'projectsList'])->name('projects');
     });
 
     // ─── CoreModules ──────────────────────────────────────────────────────
@@ -470,8 +518,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 // STAFF ROUTES (Staff + Admin)
 // =============================================
 Route::prefix('staff')->name('staff.')->middleware(['auth', 'role:admin,staff'])->group(function () {
+    // Staff dashboard redirects to the admin panel (which already gates modules by staff role permissions)
     Route::get('/dashboard', function () {
-        return view('staff.dashboard');
+        return redirect()->route('admin.dashboard');
     })->name('dashboard');
     Route::resource('expenses', ExpenseController::class);
 });
@@ -502,6 +551,7 @@ Route::get('/terms', function () {
 // =============================================
 // PAYMENT ROUTES (Razorpay)
 // =============================================
+Route::get('/payment/checkout', [PaymentController::class, 'checkout'])->name('payment.checkout')->middleware('auth');
 Route::post('/payment/create-order', [PaymentController::class, 'createOrder'])->name('payment.create-order');
 Route::post('/payment/verify', [PaymentController::class, 'verifyPayment'])->name('payment.verify');
 Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
@@ -519,6 +569,9 @@ Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmi
     Route::get('/exit-impersonation', [SuperAdminController::class, 'exitImpersonation'])->name('exit-impersonation');
     Route::patch('/users/{id}/toggle-status', [SuperAdminController::class, 'toggleUserStatus'])->name('users.toggle-status');
     Route::get('/subscriptions', [SuperAdminController::class, 'subscriptions'])->name('subscriptions');
+    // Plan Modules Management
+    Route::get('/plan-modules', [SuperAdminController::class, 'planModules'])->name('plan-modules');
+    Route::post('/plan-modules', [SuperAdminController::class, 'savePlanModules'])->name('plan-modules.save');
     Route::get('/revenue', [SuperAdminController::class, 'revenue'])->name('revenue');
     Route::get('/domains', [SuperAdminController::class, 'domains'])->name('domains');
     Route::patch('/domains/{id}', [SuperAdminController::class, 'updateDomain'])->name('domains.update');
@@ -528,6 +581,9 @@ Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmi
     Route::post('/settings', [SuperAdminController::class, 'updateSettings'])->name('settings.update');
     Route::get('/emails', [SuperAdminController::class, 'emails'])->name('emails');
     Route::get('/logs', [SuperAdminController::class, 'logs'])->name('logs');
+    // SEO Manager
+    Route::get('/seo', [SuperAdminController::class, 'seo'])->name('seo');
+    Route::post('/seo', [SuperAdminController::class, 'updateSeo'])->name('seo.update');
     // Theme Store
     Route::get('/themes', [SuperAdminThemeController::class, 'index'])->name('themes.index');
     Route::get('/themes/create', [SuperAdminThemeController::class, 'create'])->name('themes.create');
@@ -536,6 +592,7 @@ Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmi
     Route::put('/themes/{theme}', [SuperAdminThemeController::class, 'update'])->name('themes.update');
     Route::delete('/themes/{theme}', [SuperAdminThemeController::class, 'destroy'])->name('themes.destroy');
     Route::patch('/themes/{theme}/toggle', [SuperAdminThemeController::class, 'toggleActive'])->name('themes.toggle');
+    Route::get('/themes/{theme}/preview', [SuperAdminThemeController::class, 'preview'])->name('themes.preview');
 
     // ---- ADMINISTRATION: Customers ----
     Route::get('/customers', [\App\Http\Controllers\SuperAdmin\CustomerController::class, 'index'])->name('customers.index');
@@ -604,8 +661,10 @@ Route::get('/xenoraa/check-username', [OnboardingController::class, 'checkUserna
 // =============================================
 // ONBOARDING ROUTES (post-registration)
 // =============================================
-Route::middleware('auth')->prefix('onboarding')->name('onboarding.')->group(function () {
+Route::middleware(['auth', 'subscribed'])->prefix('onboarding')->name('onboarding.')->group(function () {
     Route::get('/welcome', [OnboardingController::class, 'welcome'])->name('welcome');
+    Route::get('/business-info', [OnboardingController::class, 'businessInfo'])->name('business-info');
+    Route::post('/business-info', [OnboardingController::class, 'saveBusinessInfo'])->name('business-info.save');
     Route::get('/profile', [OnboardingController::class, 'profile'])->name('profile');
     Route::post('/profile', [OnboardingController::class, 'saveProfile'])->name('profile.save');
     Route::get('/complete', [OnboardingController::class, 'complete'])->name('complete');
@@ -639,7 +698,7 @@ Route::get('/dashboard', function (\Illuminate\Http\Request $request) {
     }
 
     if ($user->isStaff()) {
-        return redirect()->route('staff.dashboard');
+        return redirect()->route('admin.dashboard');
     }
 
     return redirect()->route('user.dashboard');

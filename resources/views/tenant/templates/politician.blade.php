@@ -148,7 +148,7 @@
 @endif
 
 {{-- STATS --}}
-@if($_show('stats') && count($statsItems))
+@if($_show('stats'))
 <div class="xn-pol-stats-row">
     @foreach($statsItems as $stat)
     <div class="xn-pol-stat-cell">
@@ -161,7 +161,7 @@
 @endif
 
 {{-- AGENDA --}}
-@if($_show('agenda') && count($agendaItems))
+@if($_show('agenda'))
 <div class="xn-pol-section" style="padding-top:0;">
     <div class="xn-pol-section-header">
         <div class="xn-pol-badge">Vision 2030</div>
@@ -204,7 +204,7 @@
 @endif
 
 {{-- TESTIMONIALS --}}
-@if($_show('testimonials') && count($testimonials))
+@if($_show('testimonials'))
 <div class="xn-pol-section">
     <div class="xn-pol-section-header">
         <div class="xn-pol-badge">People's Voice</div>
@@ -229,7 +229,7 @@
 @endif
 
 {{-- BLOG --}}
-@if($_show('blog') && (isset($featuredPost) && $featuredPost || !empty($categoryPosts)))
+@if($_show('blog'))
 <div class="xn-pol-section">
     <div class="xn-pol-section-header">
         <div class="xn-pol-badge">Updates</div>

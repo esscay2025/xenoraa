@@ -36,7 +36,7 @@ class RegisteredUserController extends Controller
     }
 
     /**
-     * Handle registration with username, plan selection, and 14-day trial.
+     * Handle registration with username, plan selection, and payment redirect.
      */
     public function store(Request $request): RedirectResponse
     {
@@ -97,7 +97,7 @@ class RegisteredUserController extends Controller
             $userData['username']      = strtolower($request->username);
             $userData['plan']          = $request->plan ?? 'starter';
             $userData['profession']    = $request->profession ?? null;
-            $userData['trial_ends_at'] = now()->addDays(config('xenoraa.trial_days', 14));
+            $userData['status']        = 'pending_payment'; // Awaiting payment
         }
 
         $user = User::create($userData);
@@ -116,15 +116,12 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
         Auth::login($user);
 
-        // Bootstrap default tenant site for Xenoraa registrations
+        // Redirect to payment gateway for Xenoraa registrations
         if ($isXenoraa) {
-            try {
-                $bootstrap = new TenantBootstrapService();
-                $bootstrap->bootstrapNewTenant($user);
-            } catch (\Throwable $e) {
-                \Log::warning('TenantBootstrap failed for user ' . $user->id . ': ' . $e->getMessage());
-            }
-            return redirect()->route('onboarding.welcome');
+            // Store billing preference in session
+            session(['pending_billing' => $request->input('billing', 'monthly')]);
+            // Redirect to payment page (Razorpay checkout)
+            return redirect()->route('payment.checkout', ['plan' => $user->plan, 'billing' => $request->input('billing', 'monthly')]);
         }
 
         return redirect()->route('home');

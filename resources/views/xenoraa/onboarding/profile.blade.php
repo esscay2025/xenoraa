@@ -83,6 +83,8 @@ body { background: #050508; font-family: 'Inter', sans-serif; color: #e2e8f0; mi
             <div class="ob-profession-grid" id="professionGrid">
                 @php
                 $professions = [
+                    ['value'=>'ecommerce','icon'=>'🛒','name'=>'E-Commerce'],
+                    ['value'=>'business','icon'=>'🏢','name'=>'Business'],
                     ['value'=>'doctor','icon'=>'🩺','name'=>'Doctor'],
                     ['value'=>'advocate','icon'=>'⚖️','name'=>'Advocate'],
                     ['value'=>'politician','icon'=>'🏛️','name'=>'Politician'],
@@ -150,6 +152,8 @@ body { background: #050508; font-family: 'Inter', sans-serif; color: #e2e8f0; mi
 
 <script>
 const templates = {
+    ecommerce:          { icon: '🛒', name: 'E-Commerce Store Template', desc: 'Complete online store layout with product categories, shop, cart, and customer support' },
+    business:           { icon: '🏢', name: 'Business / Company Template', desc: 'Corporate website layout with services, divisions, team, and contact — ideal for real estate, travel, and companies' },
     doctor:             { icon: '🩺', name: 'Medical Professional Template', desc: 'Clinical layout with specializations, clinic hours, and appointment booking' },
     advocate:           { icon: '⚖️', name: 'Legal Professional Template', desc: 'Authoritative design with practice areas, case types, and consultation booking' },
     politician:         { icon: '🏛️', name: 'Public Leader Template', desc: 'Bold civic layout with manifesto, constituency info, and social channels' },

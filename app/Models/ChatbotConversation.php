@@ -7,10 +7,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ChatbotConversation extends Model
 {
-    protected $fillable = ['lead_id', 'session_id', 'role', 'message'];
+    protected $fillable = ['user_id', 'lead_id', 'session_id', 'role', 'message'];
 
     public function lead(): BelongsTo
     {
         return $this->belongsTo(CrmLead::class, 'lead_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

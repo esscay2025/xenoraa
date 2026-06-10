@@ -133,6 +133,7 @@
         .sidebar.collapsed .sidebar-link {
             padding: 0.625rem 0;
             justify-content: center;
+            gap: 0;
             border-left: none;
             border-right: 3px solid transparent;
             position: relative;
@@ -141,6 +142,7 @@
         .sidebar.collapsed .sidebar-group-btn {
             padding: 0.625rem 0;
             justify-content: center;
+            gap: 0;
             border-left: none;
             position: relative;
         }
@@ -383,6 +385,21 @@
         .sidebar-sub-link:hover { color: var(--text-primary); background-color: var(--bg-hover); }
         .sidebar-sub-link.active { color: var(--text-primary); background-color: rgba(255,255,255,0.05); border-left-color: var(--text-primary); }
         .sidebar-sub-link i { width: 14px; text-align: center; font-size: 0.8rem; }
+        /* ── CRM Sub-group buttons ──────────────────────────── */
+        .sidebar-sub-group-btn {
+            padding: 0.4rem 1.5rem 0.4rem 2.5rem !important;
+            font-size: 0.8rem !important;
+            font-weight: 500 !important;
+            border-left: 3px solid transparent;
+        }
+        .sidebar-sub-sub-link {
+            padding-left: 4rem !important;
+        }
+        .sidebar.collapsed .sidebar-sub-group-btn {
+            padding: 0.4rem 0 !important;
+            justify-content: center;
+            gap: 0;
+        }
         /* Mobile Hamburger Button */
         .mobile-menu-btn {
             display: none;
@@ -520,23 +537,79 @@
                 <a href="{{ route('admin.crm2.analysis') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.analysis') ? 'active' : '' }}"><i class="fas fa-chart-line"></i> Analysis</a>
                 <a href="{{ route('admin.crm2.reports') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.reports') ? 'active' : '' }}"><i class="fas fa-file-chart-line"></i> Reports</a>
 
-                {{-- Sales (Leads, Contacts, Accounts, Deals, Forecasts) --}}
-                <a href="{{ route('admin.crm2.sales', ['tab'=>'leads']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.sales') && request('tab','leads')==='leads' ? 'active' : '' }}"><i class="fas fa-chart-line"></i> Sales</a>
+                {{-- Sales sub-group --}}
+                @php $salesActive = request()->routeIs('admin.crm2.sales*'); @endphp
+                <button class="sidebar-group-btn sidebar-sub-group-btn {{ $salesActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgCrmSales', this)">
+                    <i class="fas fa-chart-bar group-icon" style="font-size:0.8rem;width:14px;"></i> <span class="group-label">Sales</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $salesActive ? 'open' : '' }}" id="sgCrmSales">
+                    <a href="{{ route('admin.crm2.sales.leads') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.sales.leads*') ? 'active' : '' }}"><i class="fas fa-user-tag"></i> Leads</a>
+                    <a href="{{ route('admin.crm2.sales.contacts') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.sales.contacts*') ? 'active' : '' }}"><i class="fas fa-address-book"></i> Contacts</a>
+                    <a href="{{ route('admin.crm2.sales.accounts') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.sales.accounts*') ? 'active' : '' }}"><i class="fas fa-building"></i> Accounts</a>
+                    <a href="{{ route('admin.crm2.sales.deals') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.sales.deals*') ? 'active' : '' }}"><i class="fas fa-funnel-dollar"></i> Deals</a>
+                    <a href="{{ route('admin.crm2.sales.forecasts') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.sales.forecasts*') ? 'active' : '' }}"><i class="fas fa-chart-pie"></i> Forecasts</a>
+                </div>
 
-                {{-- Activities (Tasks, Meetings, Calls) --}}
-                <a href="{{ route('admin.crm2.activities', ['tab'=>'tasks']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.activities') ? 'active' : '' }}"><i class="fas fa-tasks"></i> Activities</a>
+                {{-- Activities sub-group --}}
+                @php $activitiesActive = request()->routeIs('admin.crm2.activities*'); @endphp
+                <button class="sidebar-group-btn sidebar-sub-group-btn {{ $activitiesActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgCrmActivities', this)">
+                    <i class="fas fa-tasks group-icon" style="font-size:0.8rem;width:14px;"></i> <span class="group-label">Activities</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $activitiesActive ? 'open' : '' }}" id="sgCrmActivities">
+                    <a href="{{ route('admin.crm2.activities.tasks') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.activities.tasks*') ? 'active' : '' }}"><i class="fas fa-check-square"></i> Tasks</a>
+                    <a href="{{ route('admin.crm2.activities.meetings') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.activities.meetings*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Meetings</a>
+                    <a href="{{ route('admin.crm2.activities.calls') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.activities.calls*') ? 'active' : '' }}"><i class="fas fa-phone-alt"></i> Calls</a>
+                </div>
 
-                {{-- Inventory --}}
-                <a href="{{ route('admin.crm2.inventory', ['tab'=>'price_books']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.inventory') ? 'active' : '' }}"><i class="fas fa-boxes"></i> Inventory</a>
+                {{-- Inventory sub-group --}}
+                @php $inventoryActive = request()->routeIs('admin.crm2.inventory*'); @endphp
+                <button class="sidebar-group-btn sidebar-sub-group-btn {{ $inventoryActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgCrmInventory', this)">
+                    <i class="fas fa-boxes group-icon" style="font-size:0.8rem;width:14px;"></i> <span class="group-label">Inventory</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $inventoryActive ? 'open' : '' }}" id="sgCrmInventory">
+                    <a href="{{ route('admin.crm2.inventory.price-books') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.inventory.price-books*') ? 'active' : '' }}"><i class="fas fa-tag"></i> Price Books</a>
+                    <a href="{{ route('admin.crm2.inventory.quotes') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.inventory.quotes*') ? 'active' : '' }}"><i class="fas fa-file-alt"></i> Quotes</a>
+                    <a href="{{ route('admin.crm2.inventory.sales-orders') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.inventory.sales-orders*') ? 'active' : '' }}"><i class="fas fa-shopping-cart"></i> Sales Orders</a>
+                    <a href="{{ route('admin.crm2.inventory.purchase-orders') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.inventory.purchase-orders*') ? 'active' : '' }}"><i class="fas fa-truck"></i> Purchase Orders</a>
+                    <a href="{{ route('admin.crm2.inventory.invoices') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.inventory.invoices*') ? 'active' : '' }}"><i class="fas fa-file-invoice-dollar"></i> Invoices</a>
+                    <a href="{{ route('admin.crm2.inventory.vendors') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.inventory.vendors*') ? 'active' : '' }}"><i class="fas fa-store"></i> Vendors</a>
+                </div>
 
-                {{-- Support --}}
-                <a href="{{ route('admin.crm2.support', ['tab'=>'cases']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.support') ? 'active' : '' }}"><i class="fas fa-headset"></i> Support</a>
+                {{-- Support sub-group --}}
+                @php $supportActive = request()->routeIs('admin.crm2.support*'); @endphp
+                <button class="sidebar-group-btn sidebar-sub-group-btn {{ $supportActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgCrmSupport', this)">
+                    <i class="fas fa-headset group-icon" style="font-size:0.8rem;width:14px;"></i> <span class="group-label">Support</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $supportActive ? 'open' : '' }}" id="sgCrmSupport">
+                    <a href="{{ route('admin.crm2.support.cases') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.support.cases*') ? 'active' : '' }}"><i class="fas fa-ticket-alt"></i> Cases</a>
+                    <a href="{{ route('admin.crm2.support.solutions') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.support.solutions*') ? 'active' : '' }}"><i class="fas fa-lightbulb"></i> Solutions</a>
+                </div>
 
-                {{-- Services --}}
-                <a href="{{ route('admin.crm2.services', ['tab'=>'catalog']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.services') ? 'active' : '' }}"><i class="fas fa-concierge-bell"></i> Services</a>
+                {{-- Services sub-group --}}
+                @php $servicesActive = request()->routeIs('admin.crm2.services*'); @endphp
+                <button class="sidebar-group-btn sidebar-sub-group-btn {{ $servicesActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgCrmServices', this)">
+                    <i class="fas fa-concierge-bell group-icon" style="font-size:0.8rem;width:14px;"></i> <span class="group-label">Services</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $servicesActive ? 'open' : '' }}" id="sgCrmServices">
+                    <a href="{{ route('admin.crm2.services.catalog') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.services.catalog*') ? 'active' : '' }}"><i class="fas fa-list-alt"></i> Service Catalog</a>
+                    <a href="{{ route('admin.crm2.services.bookings') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.services.bookings*') ? 'active' : '' }}"><i class="fas fa-calendar-check"></i> Bookings</a>
+                </div>
 
-                {{-- Projects --}}
-                <a href="{{ route('admin.crm2.projects', ['tab'=>'projects']) }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.projects') ? 'active' : '' }}"><i class="fas fa-project-diagram"></i> Projects</a>
+                {{-- Projects sub-group --}}
+                @php $projectsCrmActive = request()->routeIs('admin.crm2.projects*'); @endphp
+                <button class="sidebar-group-btn sidebar-sub-group-btn {{ $projectsCrmActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgCrmProjects', this)">
+                    <i class="fas fa-project-diagram group-icon" style="font-size:0.8rem;width:14px;"></i> <span class="group-label">Projects</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $projectsCrmActive ? 'open' : '' }}" id="sgCrmProjects">
+                    <a href="{{ route('admin.crm2.projects.list') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.projects.list*') ? 'active' : '' }}"><i class="fas fa-folder-open"></i> Projects</a>
+                    <a href="{{ route('admin.crm2.projects.tasks') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.projects.tasks*') ? 'active' : '' }}"><i class="fas fa-tasks"></i> Tasks</a>
+                </div>
 
                 <div class="sidebar-divider"></div>
                 <a href="{{ route('admin.newsletter.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Newsletter</a>
