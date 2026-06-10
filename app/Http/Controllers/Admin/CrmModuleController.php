@@ -657,8 +657,8 @@ class CrmModuleController extends Controller
             ));
         } elseif ($type === 'booking') {
             CrmServiceBooking::create(array_merge(
-                $request->only(['service_id','contact_id','account_id','booking_time','status','price','notes']),
-                ['user_id' => $tid]
+                $request->only(['service_id','contact_id','account_id','status','price','notes']),
+                ['booking_time' => $request->input('booking_date'), 'user_id' => $tid]
             ));
         }
 
@@ -674,7 +674,7 @@ class CrmModuleController extends Controller
                 ->update($request->only(['name','description','price','duration_minutes','is_active']));
         } elseif ($type === 'booking') {
             CrmServiceBooking::where('id', $id)->where('user_id', $tid)
-                ->update($request->only(['status','notes','price']));
+                ->update($request->only(['service_id','status','notes','price','booking_time']));
         }
 
         return back()->with('success', ucfirst($type) . ' updated.');
@@ -739,7 +739,7 @@ class CrmModuleController extends Controller
             ));
         } elseif ($type === 'task') {
             CrmProjectTask::create(
-                $request->only(['project_id','name','priority','status','due_date','estimated_hours','description'])
+                array_merge($request->only(['project_id','priority','status','due_date','estimated_hours','description']), ['name' => $request->input('title')])
             );
         }
 
