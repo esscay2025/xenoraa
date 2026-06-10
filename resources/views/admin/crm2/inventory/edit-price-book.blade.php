@@ -10,10 +10,10 @@
   @if($errors->any())<div class="crm2-alert danger"><ul style="margin:0;padding-left:1.2rem;">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
   @if(session('success'))<div class="crm2-alert success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>@endif
   <div class="crm2-card"><div class="crm2-card-body">
-    <form method="POST" action="{{ route('admin.crm2.inventory.update', ['type'=>'price_books','id'=>\$item->id]) }}">@csrf @method('PATCH')
+    <form method="POST" action="{{ route('admin.crm2.inventory.update', ['type'=>'price_books','id'=>$item->id]) }}">@csrf @method('PATCH')
       <div class="crm2-form-grid">
         <div class="form-group full"><label>Name *</label><input type="text" name="name" class="crm2-input" value="{{ old('name', $item->name) }}" required autofocus></div>
-        <div class="form-group"><label>Currency</label><input type="text" name="currency" class="crm2-input" value="{{ old('currency', $item->currency ?? 'INR') }}" placeholder="INR"></div>
+        <div class="form-group"><label>Pricing Percentage (%)</label><input type="number" name="pricing_percentage" class="crm2-input" value="{{ old('pricing_percentage', $item->pricing_percentage) }}" step="0.01" min="0"></div>
         <div class="form-group"><label>Active</label><select name="is_active" class="crm2-select"><option value="1" {{ $item->is_active?'selected':'' }}>Yes</option><option value="0" {{ !$item->is_active?'selected':'' }}>No</option></select></div>
         <div class="form-group full"><label>Description</label><textarea name="description" class="crm2-textarea" rows="4">{{ old('description', $item->description) }}</textarea></div>
       </div>

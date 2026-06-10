@@ -21,13 +21,13 @@
       <tbody>
         @forelse($activities as $activity)
         <tr>
-          <td><strong>{{ $activity->title }}</strong></td>
-          <td>{{ $activity->due_date ? \Carbon\Carbon::parse($activity->due_date)->format('d M Y') : '—' }}</td>
-          <td><span class="crm2-badge priority-{{ $activity->priority ?? 'medium' }}">{{ ucfirst($activity->priority ?? 'Medium') }}</span></td>
-          <td><span class="crm2-badge status-{{ $activity->is_completed ? 'won' : 'new' }}">{{ $activity->is_completed ? 'Completed' : 'Pending' }}</span></td>
+          <td><strong>{{ $activity->subject }}</strong></td>
+          <td>{{ $activity->due_at ? \Carbon\Carbon::parse($activity->due_at)->format('d M Y') : '—' }}</td>
+          <td><span class="crm2-badge priority-{{ ($activity->status ?? 'pending') ?? 'medium' }}">{{ ucfirst(($activity->status ?? 'pending') ?? 'Medium') }}</span></td>
+          <td><span class="crm2-badge status-{{ ($activity->status === 'completed') ? 'won' : 'new' }}">{{ ($activity->status === 'completed') ? 'Completed' : 'Pending' }}</span></td>
           <td>{{ $activity->created_at->format('d M Y') }}</td>
           <td class="actions-cell">
-            @if(!$activity->is_completed)
+            @if(!($activity->status === 'completed'))
             <form method="POST" action="{{ route('admin.crm2.activity.complete', $activity->id) }}" style="display:inline">@csrf @method('PATCH')<button type="submit" class="crm2-icon-btn" title="Mark Complete" style="color:#22c55e;"><i class="fas fa-check"></i></button></form>
             @endif
             <form method="POST" action="{{ route('admin.crm2.activity.destroy', $activity->id) }}" onsubmit="return confirm('Delete?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete"><i class="fas fa-trash"></i></button></form>

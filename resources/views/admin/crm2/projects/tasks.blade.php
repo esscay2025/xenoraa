@@ -14,7 +14,7 @@
       <tbody>
         @forelse($tasks as $task)
         <tr>
-          <td><strong>{{ $task->title }}</strong></td>
+          <td><strong>{{ $task->name }}</strong></td>
           <td>{{ $task->project?->name ?? '—' }}</td>
           <td><span class="crm2-badge priority-{{ $task->priority ?? 'medium' }}">{{ ucfirst($task->priority ?? 'Medium') }}</span></td>
           <td><span class="crm2-badge status-{{ $task->status ?? 'new' }}">{{ ucwords(str_replace('_',' ',$task->status ?? 'todo')) }}</span></td>

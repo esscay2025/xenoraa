@@ -17,7 +17,7 @@
       <div class="crm2-form-grid">
         <div class="form-group"><label>Name *</label><input type="text" name="name" class="crm2-input" required autofocus></div>
         <div class="form-group"><label>Email</label><input type="email" name="email" class="crm2-input"></div>
-        <div class="form-group"><label>Phone</label><input type="text" name="phone" class="crm2-input"></div>
+        <div class="form-group"><label>Mobile</label><input type="text" name="mobile" class="crm2-input"></div>
         <div class="form-group"><label>Company</label><input type="text" name="company" class="crm2-input"></div>
         <div class="form-group"><label>Source</label>
           <select name="source" class="crm2-select"><option value="manual">Manual</option><option value="website">Website</option><option value="referral">Referral</option><option value="linkedin">LinkedIn</option><option value="ai_chatbot">AI Chatbot</option><option value="other">Other</option></select>

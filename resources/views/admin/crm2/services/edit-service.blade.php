@@ -10,11 +10,11 @@
   @if($errors->any())<div class="crm2-alert danger"><ul style="margin:0;padding-left:1.2rem;">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
   @if(session('success'))<div class="crm2-alert success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>@endif
   <div class="crm2-card"><div class="crm2-card-body">
-    <form method="POST" action="{{ route('admin.crm2.services.update', ['type'=>'service','id'=>\$item->id]) }}">@csrf @method('PATCH')
+    <form method="POST" action="{{ route('admin.crm2.services.update', ['type'=>'service','id'=>$item->id]) }}">@csrf @method('PATCH')
       <div class="crm2-form-grid">
         <div class="form-group full"><label>Name *</label><input type="text" name="name" class="crm2-input" value="{{ old('name', $item->name) }}" required autofocus></div>
         <div class="form-group"><label>Price (₹)</label><input type="number" name="price" class="crm2-input" value="{{ old('price', $item->price) }}" step="0.01" min="0"></div>
-        <div class="form-group"><label>Duration (minutes)</label><input type="number" name="duration" class="crm2-input" value="{{ old('duration', $item->duration) }}" min="0"></div>
+        <div class="form-group"><label>Duration (minutes)</label><input type="number" name="duration_minutes" class="crm2-input" value="{{ old('duration_minutes', $item->duration_minutes) }}" min="0"></div>
         <div class="form-group"><label>Active</label><select name="is_active" class="crm2-select"><option value="1" {{ $item->is_active?'selected':'' }}>Yes</option><option value="0" {{ !$item->is_active?'selected':'' }}>No</option></select></div>
         <div class="form-group full"><label>Description</label><textarea name="description" class="crm2-textarea" rows="5">{{ old('description', $item->description) }}</textarea></div>
       </div>

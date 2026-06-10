@@ -221,7 +221,7 @@ class CrmModuleController extends Controller
 
         switch ($type) {
             case 'lead':
-                CrmLead::create(array_merge($request->only(['name','email','phone','company','source','status','deal_value','notes']), ['user_id' => $tid]));
+                CrmLead::create(array_merge($request->only(['name','email','mobile','source','status','priority','deal_value','notes']), ['user_id' => $tid]));
                 break;
             case 'contact':
                 CrmContact::create(array_merge($request->only(['first_name','last_name','email','phone','job_title','account_id','source','notes']), ['user_id' => $tid]));
@@ -246,16 +246,16 @@ class CrmModuleController extends Controller
 
         switch ($type) {
             case 'lead':
-                CrmLead::where('id', $id)->where('user_id', $tid)->update($request->only(['name','email','phone','company','status','deal_value','notes']));
+                CrmLead::where('id', $id)->where('user_id', $tid)->update($request->only(['name','email','mobile','source','status','priority','deal_value','notes']));
                 break;
             case 'contact':
-                CrmContact::where('id', $id)->where('user_id', $tid)->update($request->only(['first_name','last_name','email','phone','job_title','status']));
+                CrmContact::where('id', $id)->where('user_id', $tid)->update($request->only(['first_name','last_name','email','phone','job_title','department','account_id','status','city','country','notes']));
                 break;
             case 'account':
-                CrmAccount::where('id', $id)->where('user_id', $tid)->update($request->only(['name','type','industry','email','phone','status']));
+                CrmAccount::where('id', $id)->where('user_id', $tid)->update($request->only(['name','type','industry','email','phone','website','annual_revenue','employees','status','city','country','notes']));
                 break;
             case 'deal':
-                CrmDeal::where('id', $id)->where('user_id', $tid)->update($request->only(['title','value','stage','probability','expected_close','notes']));
+                CrmDeal::where('id', $id)->where('user_id', $tid)->update($request->only(['title','value','stage','probability','expected_close','account_id','contact_id','notes']));
                 break;
             case 'forecast':
                 CrmForecast::where('id', $id)->where('user_id', $tid)->update($request->only(['year','quarter','target_amount','achieved_amount','notes']));
@@ -1100,16 +1100,16 @@ class CrmModuleController extends Controller
     }
 
     public function activitiesTasksEdit($id) {
-        $item = CrmActivity::where('user_id', auth()->id())->where('type', 'task')->findOrFail($id);
-        return view('admin.crm2.activities.edit-activity', ['item' => $item, 'type' => 'task', 'backRoute' => 'admin.crm2.activities.tasks']);
+        $item = CrmActivity::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.activities.edit-activity', ['item' => $item, 'backRoute' => 'admin.crm2.activities.tasks']);
     }
     public function activitiesMeetingsEdit($id) {
-        $item = CrmActivity::where('user_id', auth()->id())->where('type', 'meeting')->findOrFail($id);
-        return view('admin.crm2.activities.edit-activity', ['item' => $item, 'type' => 'meeting', 'backRoute' => 'admin.crm2.activities.meetings']);
+        $item = CrmActivity::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.activities.edit-activity', ['item' => $item, 'backRoute' => 'admin.crm2.activities.meetings']);
     }
     public function activitiesCallsEdit($id) {
-        $item = CrmActivity::where('user_id', auth()->id())->where('type', 'call')->findOrFail($id);
-        return view('admin.crm2.activities.edit-activity', ['item' => $item, 'type' => 'call', 'backRoute' => 'admin.crm2.activities.calls']);
+        $item = CrmActivity::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.activities.edit-activity', ['item' => $item, 'backRoute' => 'admin.crm2.activities.calls']);
     }
 
     public function inventoryPriceBooksEdit($id) {
@@ -1142,20 +1142,31 @@ class CrmModuleController extends Controller
     }
     public function inventoryUpdate(Request $request, $type, $id) {
         $uid = auth()->id();
-        $data = $request->except(['_token','_method','_type']);
-        switch ($type) {
-            case 'price_books': CrmPriceBook::where('user_id',$uid)->findOrFail($id)->update($data); break;
-            case 'quotes': CrmQuote::where('user_id',$uid)->findOrFail($id)->update($data); break;
-            case 'sales_orders': CrmSalesOrder::where('user_id',$uid)->findOrFail($id)->update($data); break;
-            case 'purchase_orders': CrmPurchaseOrder::where('user_id',$uid)->findOrFail($id)->update($data); break;
-            case 'invoices': CrmInvoice::where('user_id',$uid)->findOrFail($id)->update($data); break;
-            case 'vendors': CrmVendor::where('user_id',$uid)->findOrFail($id)->update($data); break;
-        }
         $routeMap = [
             'price_books'=>'admin.crm2.inventory.price-books','quotes'=>'admin.crm2.inventory.quotes',
             'sales_orders'=>'admin.crm2.inventory.sales-orders','purchase_orders'=>'admin.crm2.inventory.purchase-orders',
             'invoices'=>'admin.crm2.inventory.invoices','vendors'=>'admin.crm2.inventory.vendors',
         ];
+        switch ($type) {
+            case 'price_books':
+                CrmPriceBook::where('user_id',$uid)->findOrFail($id)->update($request->only(['name','description','pricing_percentage','is_active']));
+                break;
+            case 'quotes':
+                CrmQuote::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','account_id','stage','valid_until','subtotal','discount_amount','tax_amount','total','notes']));
+                break;
+            case 'sales_orders':
+                CrmSalesOrder::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','account_id','status','delivery_date','subtotal','discount_amount','tax_amount','total','notes']));
+                break;
+            case 'purchase_orders':
+                CrmPurchaseOrder::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','vendor_id','status','expected_delivery','subtotal','discount_amount','tax_amount','total','notes']));
+                break;
+            case 'invoices':
+                CrmInvoice::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','account_id','status','due_date','subtotal','discount_amount','tax_amount','total','amount_paid','notes']));
+                break;
+            case 'vendors':
+                CrmVendor::where('user_id',$uid)->findOrFail($id)->update($request->only(['name','email','phone','website','category','address','description','status']));
+                break;
+        }
         return redirect()->route($routeMap[$type] ?? 'admin.crm2.inventory.price-books')->with('success', ucwords(str_replace('_',' ',$type)).' updated successfully.');
     }
 

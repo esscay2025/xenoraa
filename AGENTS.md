@@ -71,3 +71,16 @@
   - All list views updated: edit buttons now link to /{id}/edit pages instead of triggering JS popups
   - Inventory list views also gained edit buttons (previously only had delete)
   - inventoryUpdate() PATCH method added to handle all inventory sub-module updates
+
+- v4.7.0 (2026-06-10): CRM 500 Error Fixes (create + edit pages)
+  - Root cause 1: Blade syntax error - all edit views had \->id (backslash escape from Python generation) causing ParseError
+  - Root cause 2: DB field mismatch - crm_leads has 'mobile' not 'phone', 'name' not 'first_name'/'last_name'
+  - Root cause 3: crm_activities has 'subject'/'due_at' not 'title'/'due_date'
+  - Root cause 4: inventoryUpdate/supportUpdate/servicesUpdate/projectsUpdate used wrong column names
+  - Fix: All 20 edit views completely rewritten with correct DB column names
+  - Fix: create-lead.blade.php: 'phone' -> 'mobile', removed 'company' field
+  - Fix: create-activity.blade.php: 'title'/'due_date' -> 'subject'/'due_at'
+  - Fix: CrmModuleController: salesStore/salesUpdate/activityStore/inventoryUpdate/supportUpdate/servicesUpdate/projectsUpdate all fixed
+  - Fix: activities/tasks.blade.php, meetings.blade.php, calls.blade.php: title->subject, due_date->due_at
+  - Fix: projects/tasks.blade.php: title->name
+  - All 27 CRM pages verified returning HTTP 200
