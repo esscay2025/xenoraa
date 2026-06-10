@@ -29,7 +29,8 @@
           <td>{{ $account->contacts_count }}</td>
           <td>{{ $account->deals_count }}</td>
           <td class="actions-cell">
-            <button class="crm2-icon-btn edit" onclick='editRecord("account", {{ $account->id }}, @json($account))' title="Edit"><i class="fas fa-edit"></i></button>
+            <a href="{{ route('admin.crm2.sales.accounts.show', $account->id) }}" class="crm2-icon-btn view" title="View"><i class="fas fa-eye"></i></a>
+            <a href="{{ route('admin.crm2.sales.accounts.edit', $account->id) }}" class="crm2-icon-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
             <form method="POST" action="{{ route('admin.crm2.sales.destroy', ['type'=>'account','id'=>$account->id]) }}" onsubmit="return confirm('Delete?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete"><i class="fas fa-trash"></i></button></form>
           </td>
         </tr>

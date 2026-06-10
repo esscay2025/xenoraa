@@ -28,7 +28,8 @@
           <td>{{ $contact->account?->name ?? '—' }}</td>
           <td>{{ $contact->created_at->format('d M Y') }}</td>
           <td class="actions-cell">
-            <button class="crm2-icon-btn edit" onclick='editRecord("contact", {{ $contact->id }}, @json($contact))' title="Edit"><i class="fas fa-edit"></i></button>
+            <a href="{{ route('admin.crm2.sales.contacts.show', $contact->id) }}" class="crm2-icon-btn view" title="View"><i class="fas fa-eye"></i></a>
+            <a href="{{ route('admin.crm2.sales.contacts.edit', $contact->id) }}" class="crm2-icon-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
             <form method="POST" action="{{ route('admin.crm2.sales.destroy', ['type'=>'contact','id'=>$contact->id]) }}" onsubmit="return confirm('Delete?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete"><i class="fas fa-trash"></i></button></form>
           </td>
         </tr>
@@ -41,12 +42,7 @@
   @if($contacts->hasPages())<div class="crm2-pagination">{{ $contacts->links() }}</div>@endif
   </div>
 </div>
-<div class="crm2-modal-overlay" id="modal-edit-record">
-  <div class="crm2-modal">
-    <div class="crm2-modal-header"><h3 id="edit-modal-title">Edit Contact</h3><button onclick="closeModal('modal-edit-record')"><i class="fas fa-times"></i></button></div>
-    <form id="edit-record-form" method="POST">@csrf @method('PATCH')
-      <div class="crm2-modal-body" id="edit-modal-body"></div>
-      <div class="crm2-modal-footer"><button type="button" onclick="closeModal('modal-edit-record')" class="crm2-btn crm2-btn-ghost">Cancel</button><button type="submit" class="crm2-btn crm2-btn-primary"><i class="fas fa-save"></i> Update</button></div>
+
     </form>
   </div>
 </div>

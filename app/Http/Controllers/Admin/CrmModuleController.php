@@ -805,9 +805,7 @@ class CrmModuleController extends Controller
         public function salesLeadsCreate()
     {
         $tid = $this->tenantId();
-        $staff = \App\Models\User::where('id', $tid)
-            ->orWhereHas('roles', fn($q) => $q->where('user_id', $tid))
-            ->orderBy('name')->get();
+        $staff = \App\Models\User::orderBy('name')->get();
         // Fallback: get all users for this tenant
         if ($staff->isEmpty()) {
             $staff = \App\Models\User::orderBy('name')->limit(20)->get();
@@ -903,11 +901,13 @@ class CrmModuleController extends Controller
         return view('admin.crm2.sales.contacts', compact('contacts', 'accounts_list'));
     }
 
-    public function salesContactsCreate()
+    public function salesContactsCreate(Request $request)
     {
         $tid = $this->tenantId();
+        $staff = \App\Models\User::where('id', $tid)->orWhere('parent_id', $tid)->get();
         $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
-        return view('admin.crm2.sales.create-contact', compact('accounts_list'));
+        $prefill_account_id = $request->query('account_id');
+        return view('admin.crm2.sales.create-contact', compact('staff', 'accounts_list', 'prefill_account_id'));
     }
 
     public function salesAccounts(Request $request)
@@ -923,7 +923,10 @@ class CrmModuleController extends Controller
 
     public function salesAccountsCreate()
     {
-        return view('admin.crm2.sales.create-account');
+        $tid = $this->tenantId();
+        $staff = \App\Models\User::where('id', $tid)->orWhere('parent_id', $tid)->get();
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.sales.create-account', compact('staff', 'accounts_list'));
     }
 
     public function salesDeals(Request $request)
@@ -939,12 +942,15 @@ class CrmModuleController extends Controller
         return view('admin.crm2.sales.deals', compact('deals', 'accounts_list', 'contacts_list'));
     }
 
-    public function salesDealsCreate()
+    public function salesDealsCreate(Request $request)
     {
         $tid = $this->tenantId();
+        $staff = \App\Models\User::where('id', $tid)->orWhere('parent_id', $tid)->get();
         $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
         $contacts_list = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
-        return view('admin.crm2.sales.create-deal', compact('accounts_list', 'contacts_list'));
+        $prefill_account_id = $request->query('account_id');
+        $prefill_contact_id = $request->query('contact_id');
+        return view('admin.crm2.sales.create-deal', compact('staff', 'accounts_list', 'contacts_list', 'prefill_account_id', 'prefill_contact_id'));
     }
 
     public function salesForecasts(Request $request)
@@ -1328,6 +1334,105 @@ class CrmModuleController extends Controller
         $item = CrmProjectTask::where('user_id', auth()->id())->findOrFail($id);
         $projects_list = CrmProject::where('user_id', auth()->id())->orderBy('name')->get();
         return view('admin.crm2.projects.edit-task', compact('item', 'projects_list'));
+    }
+
+    // ─── CONTACTS STORE / SHOW / UPDATE ─────────────────────────────────────────
+    public function salesContactsStore(Request $request)
+    {
+        $data = $request->except(['_token']);
+        $data['user_id'] = auth()->id();
+        if ($request->hasFile('contact_image')) {
+            $data['contact_image'] = $request->file('contact_image')->store('crm/contacts', 'public');
+        }
+        $data['email_opt_out'] = $request->has('email_opt_out') ? 1 : 0;
+        CrmContact::create($data);
+        return redirect()->route('admin.crm2.sales.contacts')->with('success', 'Contact created successfully.');
+    }
+
+    public function salesContactsShow($id)
+    {
+        $contact = CrmContact::with(['account','owner','reportingTo'])->where('user_id', auth()->id())->findOrFail($id);
+        $deals = CrmDeal::where('user_id', auth()->id())->where('contact_id', $id)->get();
+        $leads = CrmLead::where('user_id', auth()->id())->where('contact_id', $id)->get();
+        $activities = \App\Models\CrmActivity::where('user_id', auth()->id())
+            ->where('related_type', 'contact')->where('related_id', $id)->orderByDesc('created_at')->get();
+        return view('admin.crm2.sales.view-contact', compact('contact', 'deals', 'leads', 'activities'));
+    }
+
+    public function salesContactsUpdate(Request $request, $id)
+    {
+        $contact = CrmContact::where('user_id', auth()->id())->findOrFail($id);
+        $data = $request->except(['_token', '_method']);
+        if ($request->hasFile('contact_image')) {
+            $data['contact_image'] = $request->file('contact_image')->store('crm/contacts', 'public');
+        }
+        $data['email_opt_out'] = $request->has('email_opt_out') ? 1 : 0;
+        $contact->update($data);
+        return redirect()->route('admin.crm2.sales.contacts')->with('success', 'Contact updated successfully.');
+    }
+
+    // ─── ACCOUNTS STORE / SHOW / UPDATE ─────────────────────────────────────────
+    public function salesAccountsStore(Request $request)
+    {
+        $data = $request->except(['_token']);
+        $data['user_id'] = auth()->id();
+        if ($request->hasFile('account_image')) {
+            $data['account_image'] = $request->file('account_image')->store('crm/accounts', 'public');
+        }
+        CrmAccount::create($data);
+        return redirect()->route('admin.crm2.sales.accounts')->with('success', 'Account created successfully.');
+    }
+
+    public function salesAccountsShow($id)
+    {
+        $account = CrmAccount::with(['owner','contacts','deals','leads'])->where('user_id', auth()->id())->findOrFail($id);
+        $contacts = $account->contacts;
+        $deals = $account->deals;
+        $leads = $account->leads;
+        return view('admin.crm2.sales.view-account', compact('account', 'contacts', 'deals', 'leads'));
+    }
+
+    public function salesAccountsUpdate(Request $request, $id)
+    {
+        $account = CrmAccount::where('user_id', auth()->id())->findOrFail($id);
+        $data = $request->except(['_token', '_method']);
+        if ($request->hasFile('account_image')) {
+            $data['account_image'] = $request->file('account_image')->store('crm/accounts', 'public');
+        }
+        $account->update($data);
+        return redirect()->route('admin.crm2.sales.accounts')->with('success', 'Account updated successfully.');
+    }
+
+    // ─── DEALS STORE / SHOW / UPDATE ─────────────────────────────────────────────
+    public function salesDealsStore(Request $request)
+    {
+        $data = $request->except(['_token']);
+        $data['user_id'] = auth()->id();
+        // Map name/amount/closing_date to DB columns
+        if (!isset($data['title']) && isset($data['name'])) $data['title'] = $data['name'];
+        if (!isset($data['value']) && isset($data['amount'])) $data['value'] = $data['amount'];
+        if (!isset($data['expected_close']) && isset($data['closing_date'])) $data['expected_close'] = $data['closing_date'];
+        CrmDeal::create($data);
+        return redirect()->route('admin.crm2.sales.deals')->with('success', 'Deal created successfully.');
+    }
+
+    public function salesDealsShow($id)
+    {
+        $deal = CrmDeal::with(['account','contact','owner'])->where('user_id', auth()->id())->findOrFail($id);
+        $activities = \App\Models\CrmActivity::where('user_id', auth()->id())
+            ->where('related_type', 'deal')->where('related_id', $id)->orderByDesc('created_at')->get();
+        return view('admin.crm2.sales.view-deal', compact('deal', 'activities'));
+    }
+
+    public function salesDealsUpdate(Request $request, $id)
+    {
+        $deal = CrmDeal::where('user_id', auth()->id())->findOrFail($id);
+        $data = $request->except(['_token', '_method']);
+        if (!isset($data['title']) && isset($data['name'])) $data['title'] = $data['name'];
+        if (!isset($data['value']) && isset($data['amount'])) $data['value'] = $data['amount'];
+        if (!isset($data['expected_close']) && isset($data['closing_date'])) $data['expected_close'] = $data['closing_date'];
+        $deal->update($data);
+        return redirect()->route('admin.crm2.sales.deals')->with('success', 'Deal updated successfully.');
     }
 
 }

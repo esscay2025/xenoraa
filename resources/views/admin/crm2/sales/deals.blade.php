@@ -29,6 +29,7 @@
           <td>{{ $deal->probability ?? 0 }}%</td>
           <td>{{ $deal->expected_close ? \Carbon\Carbon::parse($deal->expected_close)->format('d M Y') : '—' }}</td>
           <td class="actions-cell">
+            <a href="{{ route('admin.crm2.sales.deals.show', $deal->id) }}" class="crm2-icon-btn view" title="View"><i class="fas fa-eye"></i></a>
             <a href="{{ route('admin.crm2.sales.deals.edit', $deal->id) }}" class="crm2-icon-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
             <form method="POST" action="{{ route('admin.crm2.sales.destroy', ['type'=>'deal','id'=>$deal->id]) }}" onsubmit="return confirm('Delete?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete"><i class="fas fa-trash"></i></button></form>
           </td>

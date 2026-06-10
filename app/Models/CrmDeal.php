@@ -7,8 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class CrmDeal extends Model
 {
     protected $fillable = [
-        'user_id', 'account_id', 'contact_id', 'lead_id', 'title', 'value', 'currency',
-        'stage', 'probability', 'expected_close', 'closed_at', 'notes', 'lost_reason',
+        'user_id', 'owner_id', 'account_id', 'contact_id', 'lead_id',
+        'name', 'title', 'type', 'next_step', 'lead_source',
+        'value', 'amount', 'currency', 'stage', 'qualification', 'probability', 'expected_revenue',
+        'expected_close', 'closing_date', 'closed_at', 'campaign_source',
+        'description', 'notes', 'lost_reason',
     ];
 
     protected $casts = [
@@ -27,6 +30,7 @@ class CrmDeal extends Model
     ];
 
     public function tenant()  { return $this->belongsTo(User::class, 'user_id'); }
+    public function owner()   { return $this->belongsTo(User::class, 'owner_id'); }
     public function account() { return $this->belongsTo(CrmAccount::class, 'account_id'); }
     public function contact() { return $this->belongsTo(CrmContact::class, 'contact_id'); }
     public function lead()    { return $this->belongsTo(CrmLead::class, 'lead_id'); }
