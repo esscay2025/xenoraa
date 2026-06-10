@@ -589,12 +589,13 @@ class CrmModuleController extends Controller
         $vendors_list = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
         return view('admin.crm2.inventory.view-product', compact('item', 'vendors_list'));
     }
-    public function inventoryProductsEdit($id) {
-        $tid = $this->tenantId();
-        $item = \App\Models\CrmProduct::where('user_id', $tid)->findOrFail($id);
-        $vendors_list = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
+        public function inventoryProductsEdit($id) {
+        $tid = auth()->id();
+        $item = CrmProduct::where('user_id', $tid)->findOrFail($id);
         $staff = \App\Models\User::where('id', $tid)->get();
-        return view('admin.crm2.inventory.edit-product', compact('item', 'vendors_list', 'staff'));
+        $vendors = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
+        $price_books = CrmPriceBook::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.inventory.edit-product', compact('item', 'staff', 'vendors', 'price_books'));
     }
     public function inventoryProductsUpdate(Request $request, $id) {
         $tid = $this->tenantId();
@@ -1353,32 +1354,51 @@ class CrmModuleController extends Controller
     }
 
     public function inventoryPriceBooksEdit($id) {
-        $item = CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
-        return view('admin.crm2.inventory.edit-price-book', compact('item'));
+        $tid = auth()->id();
+        $item = CrmPriceBook::where('user_id', $tid)->findOrFail($id);
+        $staff = \App\Models\User::where('id', $tid)->get();
+        return view('admin.crm2.inventory.edit-price-book', compact('item', 'staff'));
     }
     public function inventoryQuotesEdit($id) {
-        $item = CrmQuote::where('user_id', auth()->id())->findOrFail($id);
-        $accounts_list = CrmAccount::where('user_id', auth()->id())->orderBy('name')->get();
-        return view('admin.crm2.inventory.edit-quote', compact('item', 'accounts_list'));
+        $tid = auth()->id();
+        $item = CrmQuote::where('user_id', $tid)->findOrFail($id);
+        $staff = \App\Models\User::where('id', $tid)->get();
+        $accounts = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $contacts = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
+        $deals = CrmDeal::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.inventory.edit-quote', compact('item', 'staff', 'accounts', 'contacts', 'deals'));
     }
     public function inventorySalesOrdersEdit($id) {
-        $item = CrmSalesOrder::where('user_id', auth()->id())->findOrFail($id);
-        $accounts_list = CrmAccount::where('user_id', auth()->id())->orderBy('name')->get();
-        return view('admin.crm2.inventory.edit-sales-order', compact('item', 'accounts_list'));
+        $tid = auth()->id();
+        $item = CrmSalesOrder::where('user_id', $tid)->findOrFail($id);
+        $staff = \App\Models\User::where('id', $tid)->get();
+        $accounts = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $contacts = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
+        $deals = CrmDeal::where('user_id', $tid)->orderBy('name')->get();
+        $quotes = CrmQuote::where('user_id', $tid)->orderBy('subject')->get();
+        return view('admin.crm2.inventory.edit-sales-order', compact('item', 'staff', 'accounts', 'contacts', 'deals', 'quotes'));
     }
     public function inventoryPurchaseOrdersEdit($id) {
-        $item = CrmPurchaseOrder::where('user_id', auth()->id())->findOrFail($id);
-        $vendors_list = CrmVendor::where('user_id', auth()->id())->orderBy('name')->get();
-        return view('admin.crm2.inventory.edit-purchase-order', compact('item', 'vendors_list'));
+        $tid = auth()->id();
+        $item = CrmPurchaseOrder::where('user_id', $tid)->findOrFail($id);
+        $staff = \App\Models\User::where('id', $tid)->get();
+        $vendors = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
+        $contacts = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
+        return view('admin.crm2.inventory.edit-purchase-order', compact('item', 'staff', 'vendors', 'contacts'));
     }
     public function inventoryInvoicesEdit($id) {
-        $item = CrmInvoice::where('user_id', auth()->id())->findOrFail($id);
-        $accounts_list = CrmAccount::where('user_id', auth()->id())->orderBy('name')->get();
-        return view('admin.crm2.inventory.edit-invoice', compact('item', 'accounts_list'));
+        $tid = auth()->id();
+        $item = CrmInvoice::where('user_id', $tid)->findOrFail($id);
+        $staff = \App\Models\User::where('id', $tid)->get();
+        $accounts = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $contacts = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
+        return view('admin.crm2.inventory.edit-invoice', compact('item', 'staff', 'accounts', 'contacts'));
     }
     public function inventoryVendorsEdit($id) {
-        $item = CrmVendor::where('user_id', auth()->id())->findOrFail($id);
-        return view('admin.crm2.inventory.edit-vendor', compact('item'));
+        $tid = auth()->id();
+        $item = CrmVendor::where('user_id', $tid)->findOrFail($id);
+        $staff = \App\Models\User::where('id', $tid)->get();
+        return view('admin.crm2.inventory.edit-vendor', compact('item', 'staff'));
     }
     public function inventoryUpdate(Request $request, $type, $id) {
         $uid = auth()->id();
