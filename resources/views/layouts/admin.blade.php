@@ -25,7 +25,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @if(request()->routeIs('admin.crm2*'))
-    <link rel="stylesheet" href="{{ asset('css/crm2.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/crm2.css') }}?v={{ filemtime(public_path('css/crm2.css')) }}">
     @endif
     <style>
         /* ── Dark mode (default) ─────────────────── */
