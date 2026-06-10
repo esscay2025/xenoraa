@@ -84,3 +84,14 @@
   - Fix: activities/tasks.blade.php, meetings.blade.php, calls.blade.php: title->subject, due_date->due_at
   - Fix: projects/tasks.blade.php: title->name
   - All 27 CRM pages verified returning HTTP 200
+
+- v4.8.0 (2026-06-10): Enhanced Leads Module
+  - Migration: 2026_06_10_073837_enhance_crm_leads_all_fields.php (35+ new columns)
+  - New columns: lead_image, owner_id, lead_status, rating, salutation, first_name, last_name, title, company, industry, secondary_email, fax, website, twitter, linkedin, facebook, instagram, email_opt_out, country, flat_no, street, city, state, zip, annual_revenue, no_of_employees, budget, requirement, expected_purchase_date, decision_maker, competitor, interest_level, follow_up_date, campaign_source, campaign_name, referral_source, last_activity_date, converted_date, is_converted, description, internal_notes
+  - create-lead.blade.php: 8-section grouped/responsive form (Profile, Personal, Contact, Address, Business, Qualification, Tracking, Notes)
+  - view-lead.blade.php: Full detail view with Convert button, Convert confirmation popup, linked Activities (Task/Meeting/Call log + history)
+  - Routes added: GET /sales/leads/{id} (show), POST /sales/leads/{id}/convert
+  - Controller: salesLeadsCreate (staff dropdown), salesLeadsShow, salesLeadsConvert (creates Account+Contact+optional Deal)
+  - CrmLead model: fillable updated with all new fields
+  - Leads list: View (eye) button added, name is now a clickable link to view page
+  - Demo data: 10 leads seeded (Arjun Mehta, Priya Sharma, Ravi Kumar, Fatima Al-Rashid, Lim Wei Jian, Kavitha Nair, Mohammed Al-Farsi, Siti Rahimah, Rajesh Patel, Ananya Krishnan)
