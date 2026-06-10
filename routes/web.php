@@ -367,6 +367,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/sales/deals/create',           [$ctrl, 'salesDealsCreate'])->name('sales.deals.create');
         Route::get('/sales/forecasts',              [$ctrl, 'salesForecasts'])->name('sales.forecasts');
         Route::get('/sales/forecasts/create',       [$ctrl, 'salesForecastsCreate'])->name('sales.forecasts.create');
+        Route::get('/sales/leads/{id}/edit',        [$ctrl, 'salesLeadsEdit'])->name('sales.leads.edit');
+        Route::get('/sales/contacts/{id}/edit',     [$ctrl, 'salesContactsEdit'])->name('sales.contacts.edit');
+        Route::get('/sales/accounts/{id}/edit',     [$ctrl, 'salesAccountsEdit'])->name('sales.accounts.edit');
+        Route::get('/sales/deals/{id}/edit',        [$ctrl, 'salesDealsEdit'])->name('sales.deals.edit');
+        Route::get('/sales/forecasts/{id}/edit',    [$ctrl, 'salesForecastsEdit'])->name('sales.forecasts.edit');
         Route::post('/sales',                       [$ctrl, 'salesStore'])->name('sales.store');
         Route::patch('/sales/{type}/{id}',          [$ctrl, 'salesUpdate'])->name('sales.update');
         Route::delete('/sales/{type}/{id}',         [$ctrl, 'salesDestroy'])->name('sales.destroy');
@@ -380,6 +385,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/activities/meetings/create',   [$ctrl, 'activitiesMeetingsCreate'])->name('activities.meetings.create');
         Route::get('/activities/calls',             [$ctrl, 'activitiesCalls'])->name('activities.calls');
         Route::get('/activities/calls/create',      [$ctrl, 'activitiesCallsCreate'])->name('activities.calls.create');
+        Route::get('/activities/tasks/{id}/edit',   [$ctrl, 'activitiesTasksEdit'])->name('activities.tasks.edit');
+        Route::get('/activities/meetings/{id}/edit',[$ctrl, 'activitiesMeetingsEdit'])->name('activities.meetings.edit');
+        Route::get('/activities/calls/{id}/edit',   [$ctrl, 'activitiesCallsEdit'])->name('activities.calls.edit');
         Route::post('/activity',                    [$ctrl, 'activityStore'])->name('activity.store');
         Route::patch('/activity/{id}',              [$ctrl, 'activityUpdate'])->name('activity.update');
         Route::patch('/activity/{id}/complete',     [$ctrl, 'activityComplete'])->name('activity.complete');
@@ -400,7 +408,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/invoices/create',    [$ctrl, 'inventoryInvoicesCreate'])->name('inventory.invoices.create');
         Route::get('/inventory/vendors',            [$ctrl, 'inventoryVendors'])->name('inventory.vendors');
         Route::get('/inventory/vendors/create',     [$ctrl, 'inventoryVendorsCreate'])->name('inventory.vendors.create');
+        Route::get('/inventory/price-books/{id}/edit',[$ctrl,'inventoryPriceBooksEdit'])->name('inventory.price-books.edit');
+        Route::get('/inventory/quotes/{id}/edit',   [$ctrl, 'inventoryQuotesEdit'])->name('inventory.quotes.edit');
+        Route::get('/inventory/sales-orders/{id}/edit',[$ctrl,'inventorySalesOrdersEdit'])->name('inventory.sales-orders.edit');
+        Route::get('/inventory/purchase-orders/{id}/edit',[$ctrl,'inventoryPurchaseOrdersEdit'])->name('inventory.purchase-orders.edit');
+        Route::get('/inventory/invoices/{id}/edit', [$ctrl, 'inventoryInvoicesEdit'])->name('inventory.invoices.edit');
+        Route::get('/inventory/vendors/{id}/edit',  [$ctrl, 'inventoryVendorsEdit'])->name('inventory.vendors.edit');
         Route::post('/inventory',                   [$ctrl, 'inventoryStore'])->name('inventory.store');
+        Route::patch('/inventory/{type}/{id}',      [$ctrl, 'inventoryUpdate'])->name('inventory.update');
         Route::delete('/inventory/{type}/{id}',     [$ctrl, 'inventoryDestroy'])->name('inventory.destroy');
         // Legacy redirect
         Route::get('/inventory',                    [$ctrl, 'inventoryPriceBooks'])->name('inventory');
@@ -410,6 +425,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/support/cases/create',         [$ctrl, 'supportCasesCreate'])->name('support.cases.create');
         Route::get('/support/solutions',            [$ctrl, 'supportSolutions'])->name('support.solutions');
         Route::get('/support/solutions/create',     [$ctrl, 'supportSolutionsCreate'])->name('support.solutions.create');
+        Route::get('/support/cases/{id}/edit',      [$ctrl, 'supportCasesEdit'])->name('support.cases.edit');
+        Route::get('/support/solutions/{id}/edit',  [$ctrl, 'supportSolutionsEdit'])->name('support.solutions.edit');
         Route::post('/support',                     [$ctrl, 'supportStore'])->name('support.store');
         Route::patch('/support/{type}/{id}',        [$ctrl, 'supportUpdate'])->name('support.update');
         Route::delete('/support/{type}/{id}',       [$ctrl, 'supportDestroy'])->name('support.destroy');
@@ -421,6 +438,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/services/catalog/create',      [$ctrl, 'servicesCatalogCreate'])->name('services.catalog.create');
         Route::get('/services/bookings',            [$ctrl, 'servicesBookings'])->name('services.bookings');
         Route::get('/services/bookings/create',     [$ctrl, 'servicesBookingsCreate'])->name('services.bookings.create');
+        Route::get('/services/catalog/{id}/edit',   [$ctrl, 'servicesCatalogEdit'])->name('services.catalog.edit');
+        Route::get('/services/bookings/{id}/edit',  [$ctrl, 'servicesBookingsEdit'])->name('services.bookings.edit');
         Route::post('/services',                    [$ctrl, 'servicesStore'])->name('services.store');
         Route::patch('/services/{type}/{id}',       [$ctrl, 'servicesUpdate'])->name('services.update');
         Route::delete('/services/{type}/{id}',      [$ctrl, 'servicesDestroy'])->name('services.destroy');
@@ -432,6 +451,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/projects/list/create',         [$ctrl, 'projectsListCreate'])->name('projects.list.create');
         Route::get('/projects/tasks',               [$ctrl, 'projectsTasks'])->name('projects.tasks');
         Route::get('/projects/tasks/create',        [$ctrl, 'projectsTasksCreate'])->name('projects.tasks.create');
+        Route::get('/projects/list/{id}/edit',      [$ctrl, 'projectsListEdit'])->name('projects.list.edit');
+        Route::get('/projects/tasks/{id}/edit',     [$ctrl, 'projectsTasksEdit'])->name('projects.tasks.edit');
         Route::post('/projects',                    [$ctrl, 'projectsStore'])->name('projects.store');
         Route::patch('/projects/{type}/{id}',       [$ctrl, 'projectsUpdate'])->name('projects.update');
         Route::patch('/projects/task/{id}/status',  [$ctrl, 'projectTaskStatus'])->name('projects.task.status');

@@ -19,6 +19,7 @@
           <td>{{ $booking->booking_date ? \Carbon\Carbon::parse($booking->booking_date)->format('d M Y H:i') : '—' }}</td>
           <td><span class="crm2-badge status-{{ $booking->status ?? 'new' }}">{{ ucfirst($booking->status ?? 'Pending') }}</span></td>
           <td class="actions-cell">
+            <a href="{{ route('admin.crm2.services.bookings.edit', $booking->id) }}" class="crm2-icon-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
             <form method="POST" action="{{ route('admin.crm2.services.destroy', ['type'=>'booking','id'=>$booking->id]) }}" onsubmit="return confirm('Delete?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete"><i class="fas fa-trash"></i></button></form>
           </td>
         </tr>

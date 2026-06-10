@@ -1072,4 +1072,120 @@ class CrmModuleController extends Controller
         return view('admin.crm2.projects.create-task', compact('projects_list'));
     }
 
+
+    // ─── EDIT METHODS (full-page edit forms) ─────────────────────────────────
+
+    public function salesLeadsEdit($id) {
+        $item = CrmLead::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.sales.edit-lead', compact('item'));
+    }
+    public function salesContactsEdit($id) {
+        $item = CrmContact::where('user_id', auth()->id())->findOrFail($id);
+        $accounts = CrmAccount::where('user_id', auth()->id())->orderBy('name')->get();
+        return view('admin.crm2.sales.edit-contact', compact('item', 'accounts'));
+    }
+    public function salesAccountsEdit($id) {
+        $item = CrmAccount::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.sales.edit-account', compact('item'));
+    }
+    public function salesDealsEdit($id) {
+        $item = CrmDeal::where('user_id', auth()->id())->findOrFail($id);
+        $accounts = CrmAccount::where('user_id', auth()->id())->orderBy('name')->get();
+        $contacts = CrmContact::where('user_id', auth()->id())->orderBy('first_name')->get();
+        return view('admin.crm2.sales.edit-deal', compact('item', 'accounts', 'contacts'));
+    }
+    public function salesForecastsEdit($id) {
+        $item = CrmForecast::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.sales.edit-forecast', compact('item'));
+    }
+
+    public function activitiesTasksEdit($id) {
+        $item = CrmActivity::where('user_id', auth()->id())->where('type', 'task')->findOrFail($id);
+        return view('admin.crm2.activities.edit-activity', ['item' => $item, 'type' => 'task', 'backRoute' => 'admin.crm2.activities.tasks']);
+    }
+    public function activitiesMeetingsEdit($id) {
+        $item = CrmActivity::where('user_id', auth()->id())->where('type', 'meeting')->findOrFail($id);
+        return view('admin.crm2.activities.edit-activity', ['item' => $item, 'type' => 'meeting', 'backRoute' => 'admin.crm2.activities.meetings']);
+    }
+    public function activitiesCallsEdit($id) {
+        $item = CrmActivity::where('user_id', auth()->id())->where('type', 'call')->findOrFail($id);
+        return view('admin.crm2.activities.edit-activity', ['item' => $item, 'type' => 'call', 'backRoute' => 'admin.crm2.activities.calls']);
+    }
+
+    public function inventoryPriceBooksEdit($id) {
+        $item = CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.inventory.edit-price-book', compact('item'));
+    }
+    public function inventoryQuotesEdit($id) {
+        $item = CrmQuote::where('user_id', auth()->id())->findOrFail($id);
+        $accounts_list = CrmAccount::where('user_id', auth()->id())->orderBy('name')->get();
+        return view('admin.crm2.inventory.edit-quote', compact('item', 'accounts_list'));
+    }
+    public function inventorySalesOrdersEdit($id) {
+        $item = CrmSalesOrder::where('user_id', auth()->id())->findOrFail($id);
+        $accounts_list = CrmAccount::where('user_id', auth()->id())->orderBy('name')->get();
+        return view('admin.crm2.inventory.edit-sales-order', compact('item', 'accounts_list'));
+    }
+    public function inventoryPurchaseOrdersEdit($id) {
+        $item = CrmPurchaseOrder::where('user_id', auth()->id())->findOrFail($id);
+        $vendors_list = CrmVendor::where('user_id', auth()->id())->orderBy('name')->get();
+        return view('admin.crm2.inventory.edit-purchase-order', compact('item', 'vendors_list'));
+    }
+    public function inventoryInvoicesEdit($id) {
+        $item = CrmInvoice::where('user_id', auth()->id())->findOrFail($id);
+        $accounts_list = CrmAccount::where('user_id', auth()->id())->orderBy('name')->get();
+        return view('admin.crm2.inventory.edit-invoice', compact('item', 'accounts_list'));
+    }
+    public function inventoryVendorsEdit($id) {
+        $item = CrmVendor::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.inventory.edit-vendor', compact('item'));
+    }
+    public function inventoryUpdate(Request $request, $type, $id) {
+        $uid = auth()->id();
+        $data = $request->except(['_token','_method','_type']);
+        switch ($type) {
+            case 'price_books': CrmPriceBook::where('user_id',$uid)->findOrFail($id)->update($data); break;
+            case 'quotes': CrmQuote::where('user_id',$uid)->findOrFail($id)->update($data); break;
+            case 'sales_orders': CrmSalesOrder::where('user_id',$uid)->findOrFail($id)->update($data); break;
+            case 'purchase_orders': CrmPurchaseOrder::where('user_id',$uid)->findOrFail($id)->update($data); break;
+            case 'invoices': CrmInvoice::where('user_id',$uid)->findOrFail($id)->update($data); break;
+            case 'vendors': CrmVendor::where('user_id',$uid)->findOrFail($id)->update($data); break;
+        }
+        $routeMap = [
+            'price_books'=>'admin.crm2.inventory.price-books','quotes'=>'admin.crm2.inventory.quotes',
+            'sales_orders'=>'admin.crm2.inventory.sales-orders','purchase_orders'=>'admin.crm2.inventory.purchase-orders',
+            'invoices'=>'admin.crm2.inventory.invoices','vendors'=>'admin.crm2.inventory.vendors',
+        ];
+        return redirect()->route($routeMap[$type] ?? 'admin.crm2.inventory.price-books')->with('success', ucwords(str_replace('_',' ',$type)).' updated successfully.');
+    }
+
+    public function supportCasesEdit($id) {
+        $item = CrmCase::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.support.edit-case', compact('item'));
+    }
+    public function supportSolutionsEdit($id) {
+        $item = CrmSolution::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.support.edit-solution', compact('item'));
+    }
+
+    public function servicesCatalogEdit($id) {
+        $item = CrmService::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.services.edit-service', compact('item'));
+    }
+    public function servicesBookingsEdit($id) {
+        $item = CrmServiceBooking::where('user_id', auth()->id())->findOrFail($id);
+        $services_list = CrmService::where('user_id', auth()->id())->orderBy('name')->get();
+        return view('admin.crm2.services.edit-booking', compact('item', 'services_list'));
+    }
+
+    public function projectsListEdit($id) {
+        $item = CrmProject::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.projects.edit-project', compact('item'));
+    }
+    public function projectsTasksEdit($id) {
+        $item = CrmProjectTask::where('user_id', auth()->id())->findOrFail($id);
+        $projects_list = CrmProject::where('user_id', auth()->id())->orderBy('name')->get();
+        return view('admin.crm2.projects.edit-task', compact('item', 'projects_list'));
+    }
+
 }

@@ -27,6 +27,7 @@
           <td>{{ $project->start_date ? \Carbon\Carbon::parse($project->start_date)->format('d M Y') : '—' }}</td>
           <td>{{ $project->end_date ? \Carbon\Carbon::parse($project->end_date)->format('d M Y') : '—' }}</td>
           <td class="actions-cell">
+            <a href="{{ route('admin.crm2.projects.list.edit', $project->id) }}" class="crm2-icon-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
             <form method="POST" action="{{ route('admin.crm2.projects.destroy', ['type'=>'project','id'=>$project->id]) }}" onsubmit="return confirm('Delete?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete"><i class="fas fa-trash"></i></button></form>
           </td>
         </tr>

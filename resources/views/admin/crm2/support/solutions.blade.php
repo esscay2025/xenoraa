@@ -25,6 +25,7 @@
           <td><span class="crm2-badge {{ $solution->is_published ? 'status-won' : 'status-new' }}">{{ $solution->is_published ? 'Published' : 'Draft' }}</span></td>
           <td>{{ $solution->created_at->format('d M Y') }}</td>
           <td class="actions-cell">
+            <a href="{{ route('admin.crm2.support.solutions.edit', $solution->id) }}" class="crm2-icon-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
             <form method="POST" action="{{ route('admin.crm2.support.destroy', ['type'=>'solution','id'=>$solution->id]) }}" onsubmit="return confirm('Delete?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete"><i class="fas fa-trash"></i></button></form>
           </td>
         </tr>

@@ -56,3 +56,18 @@
     - crm2/services/{catalog,bookings}.blade.php + create-{service,booking}.blade.php
     - crm2/projects/{list,tasks}.blade.php + create-{project,task}.blade.php
   - Legacy routes kept for backward compatibility (redirect to first sub-module)
+
+- v4.6.0 (2026-06-10): CRM Edit Popup Removal — Full-Page Edit Forms
+  - All edit/view popup modals removed from every CRM sub-module list page
+  - 20 new dedicated edit routes added (e.g. /admin/crm2/sales/leads/{id}/edit)
+  - 20 new edit controller methods added to CrmModuleController.php
+  - 20 new full-page edit views created (pre-filled with existing record data):
+    - crm2/sales/edit-{lead,contact,account,deal,forecast}.blade.php
+    - crm2/activities/edit-activity.blade.php (shared for tasks/meetings/calls)
+    - crm2/inventory/edit-{price-book,quote,sales-order,purchase-order,invoice,vendor}.blade.php
+    - crm2/support/edit-{case,solution}.blade.php
+    - crm2/services/edit-{service,booking}.blade.php
+    - crm2/projects/edit-{project,task}.blade.php
+  - All list views updated: edit buttons now link to /{id}/edit pages instead of triggering JS popups
+  - Inventory list views also gained edit buttons (previously only had delete)
+  - inventoryUpdate() PATCH method added to handle all inventory sub-module updates

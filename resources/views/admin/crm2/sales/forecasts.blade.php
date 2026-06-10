@@ -23,7 +23,7 @@
           </td>
           <td>{{ Str::limit($f->notes ?? '—', 40) }}</td>
           <td class="actions-cell">
-            <button class="crm2-icon-btn edit" onclick='editRecord("forecast", {{ $f->id }}, @json($f))' title="Edit"><i class="fas fa-edit"></i></button>
+            <a href="{{ route('admin.crm2.sales.forecasts.edit', $f->id) }}" class="crm2-icon-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
             <form method="POST" action="{{ route('admin.crm2.sales.destroy', ['type'=>'forecast','id'=>$f->id]) }}" onsubmit="return confirm('Delete?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete"><i class="fas fa-trash"></i></button></form>
           </td>
         </tr>
@@ -45,23 +45,5 @@
     </form>
   </div>
 </div>
-@push('scripts')
-<script>
-function openModal(id){document.getElementById(id).classList.add('active');}
-function closeModal(id){document.getElementById(id).classList.remove('active');}
-function editRecord(type,id,data){
-  const form=document.getElementById('edit-record-form');
-  form.action=`/admin/crm2/sales/${type}/${id}`;
-  function esc(v){return v?String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
-  document.getElementById('edit-modal-body').innerHTML=`<div class="crm2-form-grid">
-    <div class="form-group"><label>Year</label><input name="year" type="number" class="crm2-input" value="${data.year}"></div>
-    <div class="form-group"><label>Quarter</label><select name="quarter" class="crm2-select">${[1,2,3,4].map(q=>`<option value="${q}" ${data.quarter==q?'selected':''}>${'Q'+q}</option>`).join('')}</select></div>
-    <div class="form-group"><label>Target (₹)</label><input name="target_amount" type="number" class="crm2-input" value="${data.target_amount}"></div>
-    <div class="form-group"><label>Achieved (₹)</label><input name="achieved_amount" type="number" class="crm2-input" value="${data.achieved_amount}"></div>
-    <div class="form-group full"><label>Notes</label><textarea name="notes" class="crm2-textarea" rows="2">${esc(data.notes)}</textarea></div>
-  </div>`;
-  openModal('modal-edit-record');
-}
-</script>
-@endpush
+
 @endsection

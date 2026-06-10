@@ -50,24 +50,5 @@
     </form>
   </div>
 </div>
-@push('scripts')
-<script>
-function openModal(id){document.getElementById(id).classList.add('active');}
-function closeModal(id){document.getElementById(id).classList.remove('active');}
-function editRecord(type,id,data){
-  const form=document.getElementById('edit-record-form');
-  form.action=`/admin/crm2/sales/${type}/${id}`;
-  function esc(v){return v?String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
-  document.getElementById('edit-modal-body').innerHTML=`<div class="crm2-form-grid">
-    <div class="form-group"><label>First Name *</label><input name="first_name" class="crm2-input" value="${esc(data.first_name)}" required></div>
-    <div class="form-group"><label>Last Name</label><input name="last_name" class="crm2-input" value="${esc(data.last_name)}"></div>
-    <div class="form-group"><label>Email</label><input name="email" class="crm2-input" value="${esc(data.email)}"></div>
-    <div class="form-group"><label>Phone</label><input name="phone" class="crm2-input" value="${esc(data.phone)}"></div>
-    <div class="form-group"><label>Job Title</label><input name="job_title" class="crm2-input" value="${esc(data.job_title)}"></div>
-    <div class="form-group"><label>Status</label><select name="status" class="crm2-select"><option value="active" ${data.status==="active"?"selected":""}>Active</option><option value="inactive" ${data.status==="inactive"?"selected":""}>Inactive</option></select></div>
-  </div>`;
-  openModal('modal-edit-record');
-}
-</script>
-@endpush
+
 @endsection

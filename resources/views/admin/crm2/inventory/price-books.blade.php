@@ -19,6 +19,7 @@
           <td><span class="crm2-badge {{ $item->is_active ? 'status-won' : 'status-lost' }}">{{ $item->is_active ? 'Active' : 'Inactive' }}</span></td>
           <td>{{ $item->created_at->format('d M Y') }}</td>
           <td class="actions-cell">
+            <a href="{{ route('admin.crm2.inventory.price-books.edit', $item->id) }}" class="crm2-icon-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
             <form method="POST" action="{{ route('admin.crm2.inventory.destroy', ['type'=>'price_books','id'=>$item->id]) }}" onsubmit="return confirm('Delete?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete"><i class="fas fa-trash"></i></button></form>
           </td>
         </tr>

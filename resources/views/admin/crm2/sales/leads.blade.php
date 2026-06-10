@@ -34,7 +34,7 @@
           <td>{{ $lead->deal_value ? '₹'.number_format($lead->deal_value,0) : '—' }}</td>
           <td>{{ $lead->created_at->format('d M Y') }}</td>
           <td class="actions-cell">
-            <button class="crm2-icon-btn edit" onclick='editRecord("lead", {{ $lead->id }}, @json($lead))' title="Edit"><i class="fas fa-edit"></i></button>
+            <a href="{{ route('admin.crm2.sales.leads.edit', $lead->id) }}" class="crm2-icon-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
             <form method="POST" action="{{ route('admin.crm2.sales.destroy', ['type'=>'lead','id'=>$lead->id]) }}" onsubmit="return confirm('Delete this lead?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete" title="Delete"><i class="fas fa-trash"></i></button></form>
           </td>
         </tr>
@@ -57,26 +57,5 @@
     </form>
   </div>
 </div>
-@push('scripts')
-<script>
-function openModal(id){document.getElementById(id).classList.add('active');}
-function closeModal(id){document.getElementById(id).classList.remove('active');}
-function editRecord(type,id,data){
-  const form=document.getElementById('edit-record-form');
-  form.action=`/admin/crm2/sales/${type}/${id}`;
-  document.getElementById('edit-modal-title').innerHTML=`<i class="fas fa-edit"></i> Edit Lead`;
-  function esc(v){return v?String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
-  document.getElementById('edit-modal-body').innerHTML=`<div class="crm2-form-grid">
-    <div class="form-group"><label>Name *</label><input name="name" class="crm2-input" value="${esc(data.name)}" required></div>
-    <div class="form-group"><label>Email</label><input name="email" class="crm2-input" value="${esc(data.email)}"></div>
-    <div class="form-group"><label>Phone</label><input name="phone" class="crm2-input" value="${esc(data.phone)}"></div>
-    <div class="form-group"><label>Company</label><input name="company" class="crm2-input" value="${esc(data.company)}"></div>
-    <div class="form-group"><label>Status</label><select name="status" class="crm2-select">${['new','contacted','qualified','proposal','won','lost'].map(s=>`<option value="${s}" ${data.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}</select></div>
-    <div class="form-group"><label>Deal Value</label><input name="deal_value" type="number" class="crm2-input" value="${data.deal_value||''}"></div>
-    <div class="form-group full"><label>Notes</label><textarea name="notes" class="crm2-textarea" rows="3">${esc(data.notes)}</textarea></div>
-  </div>`;
-  openModal('modal-edit-record');
-}
-</script>
-@endpush
+
 @endsection

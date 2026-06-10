@@ -26,7 +26,7 @@
           <td><span class="crm2-badge status-{{ $case->status ?? 'new' }}">{{ ucfirst($case->status ?? 'Open') }}</span></td>
           <td>{{ $case->created_at->format('d M Y') }}</td>
           <td class="actions-cell">
-            <button class="crm2-icon-btn edit" onclick='editRecord("case", {{ $case->id }}, @json($case))' title="Edit"><i class="fas fa-edit"></i></button>
+            <a href="{{ route('admin.crm2.support.cases.edit', $case->id) }}" class="crm2-icon-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
             <form method="POST" action="{{ route('admin.crm2.support.destroy', ['type'=>'case','id'=>$case->id]) }}" onsubmit="return confirm('Delete?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete"><i class="fas fa-trash"></i></button></form>
           </td>
         </tr>
@@ -48,22 +48,5 @@
     </form>
   </div>
 </div>
-@push('scripts')
-<script>
-function openModal(id){document.getElementById(id).classList.add('active');}
-function closeModal(id){document.getElementById(id).classList.remove('active');}
-function editRecord(type,id,data){
-  const form=document.getElementById('edit-record-form');
-  form.action=`/admin/crm2/support/${type}/${id}`;
-  function esc(v){return v?String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
-  document.getElementById('edit-modal-body').innerHTML=`<div class="crm2-form-grid">
-    <div class="form-group full"><label>Subject *</label><input name="subject" class="crm2-input" value="${esc(data.subject)}" required></div>
-    <div class="form-group"><label>Priority</label><select name="priority" class="crm2-select">${['low','medium','high','critical'].map(p=>`<option value="${p}" ${data.priority===p?'selected':''}>${p.charAt(0).toUpperCase()+p.slice(1)}</option>`).join('')}</select></div>
-    <div class="form-group"><label>Status</label><select name="status" class="crm2-select">${['open','in_progress','resolved','closed'].map(s=>`<option value="${s}" ${data.status===s?'selected':''}>${s.replace(/_/g,' ').replace(/\w/g,l=>l.toUpperCase())}</option>`).join('')}</select></div>
-    <div class="form-group full"><label>Description</label><textarea name="description" class="crm2-textarea" rows="4">${esc(data.description)}</textarea></div>
-  </div>`;
-  openModal('modal-edit-record');
-}
-</script>
-@endpush
+
 @endsection
