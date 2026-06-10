@@ -29,6 +29,8 @@ use App\Models\CrmServiceBooking;
 use App\Models\CrmProject;
 use App\Models\CrmProjectTask;
 use App\Models\CrmNote;
+use App\Models\CrmMailConfig;
+use App\Models\CrmMailTemplate;
 use App\Models\CrmProduct;
 use App\Models\User;
 
@@ -1701,6 +1703,508 @@ class CrmModuleController extends Controller
         if (!isset($data['expected_close']) && isset($data['closing_date'])) $data['expected_close'] = $data['closing_date'];
         $deal->update($data);
         return redirect()->route('admin.crm2.sales.deals')->with('success', 'Deal updated successfully.');
+    }
+
+
+    // ══════════════════════════════════════════════════════════════
+    // INTEGRATIONS — MAIL CONFIG
+    // ══════════════════════════════════════════════════════════════
+
+    public function integrationMailConfig()
+    {
+        $tid    = $this->tenantId();
+        $config = CrmMailConfig::where('user_id', $tid)->first();
+        return view('admin.crm2.integrations.mail-config', compact('config'));
+    }
+
+    public function integrationMailConfigSave(Request $request)
+    {
+        $tid = $this->tenantId();
+        $data = $request->only([
+            'mail_driver', 'mail_host', 'mail_port', 'mail_username',
+            'mail_encryption', 'from_address', 'from_name', 'reply_to', 'is_active',
+        ]);
+        $data['user_id']   = $tid;
+        $data['is_active'] = $request->boolean('is_active');
+
+        // Only update password if a new one is provided
+        if ($request->filled('mail_password')) {
+            $data['mail_password'] = $request->input('mail_password');
+        }
+
+        $config = CrmMailConfig::updateOrCreate(['user_id' => $tid], $data);
+
+        return redirect()->route('admin.crm2.integrations.mail-config')
+            ->with('success', 'Mail configuration saved successfully.');
+    }
+
+    public function integrationMailConfigTest(Request $request)
+    {
+        $tid    = $this->tenantId();
+        $config = CrmMailConfig::where('user_id', $tid)->first();
+
+        if (!$config || !$config->mail_host) {
+            return response()->json(['success' => false, 'message' => 'No mail configuration found. Please save your settings first.']);
+        }
+
+        try {
+            // Temporarily override mail config for this request
+            config([
+                'mail.mailers.smtp.host'       => $config->mail_host,
+                'mail.mailers.smtp.port'       => $config->mail_port,
+                'mail.mailers.smtp.username'   => $config->mail_username,
+                'mail.mailers.smtp.password'   => $config->mail_password,
+                'mail.mailers.smtp.encryption' => $config->mail_encryption === 'none' ? null : $config->mail_encryption,
+                'mail.from.address'            => $config->from_address,
+                'mail.from.name'               => $config->from_name ?? 'CRM Test',
+            ]);
+
+            $toEmail = $request->input('test_email', $config->from_address);
+
+            \Illuminate\Support\Facades\Mail::raw(
+                'This is a test email from your CRM Mail Configuration. If you received this, your SMTP settings are working correctly!',
+                function ($message) use ($config, $toEmail) {
+                    $message->to($toEmail)
+                            ->subject('CRM Mail Config Test — ' . now()->format('d M Y H:i'));
+                    if ($config->reply_to) {
+                        $message->replyTo($config->reply_to);
+                    }
+                }
+            );
+
+            // Mark as verified
+            $config->update(['verified_at' => now(), 'last_error' => null]);
+
+            return response()->json(['success' => true, 'message' => 'Test email sent successfully to ' . $toEmail]);
+        } catch (\Exception $e) {
+            $config->update(['last_error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed: ' . $e->getMessage()]);
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // SETTINGS — MAIL TEMPLATES
+    // ══════════════════════════════════════════════════════════════
+
+    public function settingsMailTemplates(Request $request)
+    {
+        $tid       = $this->tenantId();
+        $type      = $request->input('type');
+        $q         = CrmMailTemplate::where('user_id', $tid);
+        if ($type) $q->where('type', $type);
+        $templates = $q->orderByDesc('created_at')->paginate(20)->withQueryString();
+        $types     = CrmMailTemplate::types();
+        return view('admin.crm2.settings.mail-templates', compact('templates', 'types', 'type'));
+    }
+
+    public function settingsMailTemplatesCreate()
+    {
+        $types = CrmMailTemplate::types();
+        return view('admin.crm2.settings.create-mail-template', compact('types'));
+    }
+
+    public function settingsMailTemplatesStore(Request $request)
+    {
+        $tid  = $this->tenantId();
+        $data = $request->except(['_token']);
+        $data['user_id']    = $tid;
+        $data['show_logo']  = $request->boolean('show_logo');
+        $data['show_footer']= $request->boolean('show_footer');
+        $data['is_default'] = $request->boolean('is_default');
+        $data['is_active']  = $request->boolean('is_active', true);
+
+        if ($request->hasFile('logo')) {
+            $data['logo_path'] = $request->file('logo')->store('crm/mail-logos', 'public');
+        }
+
+        // If set as default, unset others of same type
+        if (!empty($data['is_default'])) {
+            CrmMailTemplate::where('user_id', $tid)->where('type', $data['type'])->update(['is_default' => false]);
+        }
+
+        CrmMailTemplate::create($data);
+
+        return redirect()->route('admin.crm2.settings.mail-templates')
+            ->with('success', 'Mail template created successfully.');
+    }
+
+    public function settingsMailTemplatesShow($id)
+    {
+        $tid      = $this->tenantId();
+        $template = CrmMailTemplate::where('user_id', $tid)->findOrFail($id);
+        $types    = CrmMailTemplate::types();
+        return view('admin.crm2.settings.view-mail-template', compact('template', 'types'));
+    }
+
+    public function settingsMailTemplatesEdit($id)
+    {
+        $tid      = $this->tenantId();
+        $template = CrmMailTemplate::where('user_id', $tid)->findOrFail($id);
+        $types    = CrmMailTemplate::types();
+        return view('admin.crm2.settings.edit-mail-template', compact('template', 'types'));
+    }
+
+    public function settingsMailTemplatesUpdate(Request $request, $id)
+    {
+        $tid      = $this->tenantId();
+        $template = CrmMailTemplate::where('user_id', $tid)->findOrFail($id);
+        $data     = $request->except(['_token', '_method', 'logo']);
+        $data['show_logo']  = $request->boolean('show_logo');
+        $data['show_footer']= $request->boolean('show_footer');
+        $data['is_default'] = $request->boolean('is_default');
+        $data['is_active']  = $request->boolean('is_active', true);
+
+        if ($request->hasFile('logo')) {
+            // Delete old logo
+            if ($template->logo_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($template->logo_path);
+            }
+            $data['logo_path'] = $request->file('logo')->store('crm/mail-logos', 'public');
+        }
+
+        // If set as default, unset others of same type
+        if (!empty($data['is_default'])) {
+            CrmMailTemplate::where('user_id', $tid)->where('type', $data['type'] ?? $template->type)
+                ->where('id', '!=', $id)->update(['is_default' => false]);
+        }
+
+        $template->update($data);
+
+        return redirect()->route('admin.crm2.settings.mail-templates')
+            ->with('success', 'Mail template updated successfully.');
+    }
+
+    public function settingsMailTemplatesDestroy($id)
+    {
+        $tid      = $this->tenantId();
+        $template = CrmMailTemplate::where('user_id', $tid)->findOrFail($id);
+        if ($template->logo_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($template->logo_path);
+        }
+        $template->delete();
+        return redirect()->route('admin.crm2.settings.mail-templates')
+            ->with('success', 'Template deleted.');
+    }
+
+    public function settingsMailTemplatesPreview($id)
+    {
+        $tid      = $this->tenantId();
+        $template = CrmMailTemplate::where('user_id', $tid)->findOrFail($id);
+        return view('admin.crm2.settings.preview-mail-template', compact('template'));
+    }
+
+    public function settingsMailTemplatesSeedDefaults()
+    {
+        $tid = $this->tenantId();
+
+        // Only seed if no templates exist yet
+        if (CrmMailTemplate::where('user_id', $tid)->count() > 0) {
+            return redirect()->route('admin.crm2.settings.mail-templates')
+                ->with('info', 'Templates already exist. Seeding skipped.');
+        }
+
+        $defaults = $this->getDefaultMailTemplates($tid);
+        foreach ($defaults as $tpl) {
+            CrmMailTemplate::create($tpl);
+        }
+
+        return redirect()->route('admin.crm2.settings.mail-templates')
+            ->with('success', count($defaults) . ' default templates created.');
+    }
+
+    private function getDefaultMailTemplates(int $tid): array
+    {
+        $base = [
+            'user_id'         => $tid,
+            'primary_color'   => '#6366f1',
+            'secondary_color' => '#f8fafc',
+            'font_family'     => 'Inter, sans-serif',
+            'show_logo'       => true,
+            'show_footer'     => true,
+            'is_default'      => true,
+            'is_active'       => true,
+        ];
+
+        return [
+            array_merge($base, [
+                'name'        => 'Invoice Template',
+                'type'        => 'invoice',
+                'subject'     => 'Invoice {{invoice_number}} from {{company_name}}',
+                'header_text' => '{{company_name}}',
+                'footer_text' => 'Thank you for your business. Payment is due by {{due_date}}.',
+                'body_html'   => $this->invoiceTemplateHtml(),
+            ]),
+            array_merge($base, [
+                'name'        => 'Quote Template',
+                'type'        => 'quote',
+                'subject'     => 'Quotation {{quote_number}} from {{company_name}}',
+                'header_text' => '{{company_name}}',
+                'footer_text' => 'This quote is valid until {{valid_until}}. Contact us for any queries.',
+                'body_html'   => $this->quoteTemplateHtml(),
+            ]),
+            array_merge($base, [
+                'name'        => 'Sales Order Template',
+                'type'        => 'sales_order',
+                'subject'     => 'Sales Order {{so_number}} Confirmation',
+                'header_text' => '{{company_name}}',
+                'footer_text' => 'Thank you for your order. Expected delivery: {{delivery_date}}.',
+                'body_html'   => $this->salesOrderTemplateHtml(),
+            ]),
+            array_merge($base, [
+                'name'        => 'Purchase Order Template',
+                'type'        => 'purchase_order',
+                'subject'     => 'Purchase Order {{po_number}} from {{company_name}}',
+                'header_text' => '{{company_name}}',
+                'footer_text' => 'Please confirm receipt of this purchase order.',
+                'body_html'   => $this->purchaseOrderTemplateHtml(),
+            ]),
+            array_merge($base, [
+                'name'        => 'General Template',
+                'type'        => 'general',
+                'subject'     => 'Message from {{company_name}}',
+                'header_text' => '{{company_name}}',
+                'footer_text' => 'This email was sent from {{company_name}}. Please do not reply to this email.',
+                'body_html'   => $this->generalTemplateHtml(),
+            ]),
+            array_merge($base, [
+                'name'        => 'All-in-One Template',
+                'type'        => 'all_in_one',
+                'subject'     => 'Documents from {{company_name}}',
+                'header_text' => '{{company_name}}',
+                'footer_text' => 'Please find the attached documents. Contact us for any queries.',
+                'body_html'   => $this->allInOneTemplateHtml(),
+            ]),
+        ];
+    }
+
+    private function invoiceTemplateHtml(): string
+    {
+        return '<table width="100%" cellpadding="0" cellspacing="0" style="max-width:680px;margin:0 auto;font-family:{{font_family}};color:#1e293b;">
+  <tr><td style="background:{{primary_color}};padding:32px 40px;border-radius:12px 12px 0 0;">
+    <table width="100%"><tr>
+      <td><h1 style="margin:0;color:#fff;font-size:1.6rem;font-weight:700;">INVOICE</h1>
+          <p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:0.9rem;">{{invoice_number}}</p></td>
+      <td align="right"><p style="margin:0;color:rgba(255,255,255,0.9);font-size:0.85rem;">Date: {{invoice_date}}<br>Due: {{due_date}}</p></td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="background:#fff;padding:32px 40px;">
+    <table width="100%"><tr>
+      <td width="50%" style="vertical-align:top;">
+        <p style="margin:0 0 4px;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;">Billed To</p>
+        <p style="margin:0;font-weight:600;font-size:1rem;">{{client_name}}</p>
+        <p style="margin:4px 0 0;font-size:0.875rem;color:#475569;">{{client_address}}</p>
+      </td>
+      <td width="50%" align="right" style="vertical-align:top;">
+        <p style="margin:0 0 4px;font-size:0.75rem;color:#64748b;text-transform:uppercase;letter-spacing:0.05em;">From</p>
+        <p style="margin:0;font-weight:600;font-size:1rem;">{{company_name}}</p>
+        <p style="margin:4px 0 0;font-size:0.875rem;color:#475569;">{{company_address}}</p>
+      </td>
+    </tr></table>
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;">
+    <table width="100%" style="border-collapse:collapse;">
+      <thead><tr style="background:{{secondary_color}};">
+        <th style="padding:10px 12px;text-align:left;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Item</th>
+        <th style="padding:10px 12px;text-align:center;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Qty</th>
+        <th style="padding:10px 12px;text-align:right;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Rate</th>
+        <th style="padding:10px 12px;text-align:right;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Amount</th>
+      </tr></thead>
+      <tbody>{{line_items}}</tbody>
+    </table>
+    <table width="100%" style="margin-top:16px;"><tr>
+      <td></td>
+      <td width="220" style="background:{{secondary_color}};padding:16px;border-radius:8px;">
+        <table width="100%">
+          <tr><td style="font-size:0.875rem;color:#475569;">Subtotal</td><td align="right" style="font-size:0.875rem;">{{subtotal}}</td></tr>
+          <tr><td style="font-size:0.875rem;color:#475569;">Tax</td><td align="right" style="font-size:0.875rem;">{{tax_amount}}</td></tr>
+          <tr><td style="font-size:0.875rem;color:#475569;">Discount</td><td align="right" style="font-size:0.875rem;">{{discount_amount}}</td></tr>
+          <tr><td colspan="2"><hr style="border:none;border-top:1px solid #e2e8f0;margin:8px 0;"></td></tr>
+          <tr><td style="font-weight:700;font-size:1rem;color:{{primary_color}};">Total</td><td align="right" style="font-weight:700;font-size:1rem;color:{{primary_color}};">{{total}}</td></tr>
+        </table>
+      </td>
+    </tr></table>
+    {{#notes}}<div style="margin-top:24px;padding:16px;background:#f8fafc;border-left:4px solid {{primary_color}};border-radius:0 8px 8px 0;">
+      <p style="margin:0 0 4px;font-size:0.75rem;color:#64748b;text-transform:uppercase;font-weight:600;">Notes</p>
+      <p style="margin:0;font-size:0.875rem;color:#475569;">{{notes}}</p>
+    </div>{{/notes}}
+  </td></tr>
+</table>';
+    }
+
+    private function quoteTemplateHtml(): string
+    {
+        return '<table width="100%" cellpadding="0" cellspacing="0" style="max-width:680px;margin:0 auto;font-family:{{font_family}};color:#1e293b;">
+  <tr><td style="background:{{primary_color}};padding:32px 40px;border-radius:12px 12px 0 0;">
+    <table width="100%"><tr>
+      <td><h1 style="margin:0;color:#fff;font-size:1.6rem;font-weight:700;">QUOTATION</h1>
+          <p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:0.9rem;">{{quote_number}}</p></td>
+      <td align="right"><p style="margin:0;color:rgba(255,255,255,0.9);font-size:0.85rem;">Date: {{quote_date}}<br>Valid Until: {{valid_until}}</p></td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="background:#fff;padding:32px 40px;">
+    <p style="margin:0 0 24px;font-size:0.95rem;color:#475569;">Dear <strong>{{client_name}}</strong>,<br><br>Thank you for your interest. Please find below our quotation for your reference.</p>
+    <table width="100%" style="border-collapse:collapse;">
+      <thead><tr style="background:{{secondary_color}};">
+        <th style="padding:10px 12px;text-align:left;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Description</th>
+        <th style="padding:10px 12px;text-align:center;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Qty</th>
+        <th style="padding:10px 12px;text-align:right;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Unit Price</th>
+        <th style="padding:10px 12px;text-align:right;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Total</th>
+      </tr></thead>
+      <tbody>{{line_items}}</tbody>
+    </table>
+    <table width="100%" style="margin-top:16px;"><tr><td></td>
+      <td width="220" style="background:{{secondary_color}};padding:16px;border-radius:8px;">
+        <table width="100%">
+          <tr><td style="font-size:0.875rem;color:#475569;">Subtotal</td><td align="right" style="font-size:0.875rem;">{{subtotal}}</td></tr>
+          <tr><td style="font-size:0.875rem;color:#475569;">Tax</td><td align="right" style="font-size:0.875rem;">{{tax_amount}}</td></tr>
+          <tr><td colspan="2"><hr style="border:none;border-top:1px solid #e2e8f0;margin:8px 0;"></td></tr>
+          <tr><td style="font-weight:700;font-size:1rem;color:{{primary_color}};">Grand Total</td><td align="right" style="font-weight:700;font-size:1rem;color:{{primary_color}};">{{total}}</td></tr>
+        </table>
+      </td>
+    </tr></table>
+    <p style="margin:24px 0 0;font-size:0.875rem;color:#475569;">We look forward to working with you. Please do not hesitate to contact us if you have any questions.</p>
+  </td></tr>
+</table>';
+    }
+
+    private function salesOrderTemplateHtml(): string
+    {
+        return '<table width="100%" cellpadding="0" cellspacing="0" style="max-width:680px;margin:0 auto;font-family:{{font_family}};color:#1e293b;">
+  <tr><td style="background:{{primary_color}};padding:32px 40px;border-radius:12px 12px 0 0;">
+    <table width="100%"><tr>
+      <td><h1 style="margin:0;color:#fff;font-size:1.6rem;font-weight:700;">SALES ORDER</h1>
+          <p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:0.9rem;">{{so_number}}</p></td>
+      <td align="right"><p style="margin:0;color:rgba(255,255,255,0.9);font-size:0.85rem;">Order Date: {{order_date}}<br>Delivery: {{delivery_date}}</p></td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="background:#fff;padding:32px 40px;">
+    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:16px;margin-bottom:24px;">
+      <p style="margin:0;font-size:0.875rem;color:#166534;"><strong>Order Confirmed</strong> — Status: <strong>{{status}}</strong></p>
+    </div>
+    <table width="100%"><tr>
+      <td width="50%" style="vertical-align:top;">
+        <p style="margin:0 0 4px;font-size:0.75rem;color:#64748b;text-transform:uppercase;">Ship To</p>
+        <p style="margin:0;font-weight:600;">{{client_name}}</p>
+        <p style="margin:4px 0 0;font-size:0.875rem;color:#475569;">{{shipping_address}}</p>
+      </td>
+      <td width="50%" align="right" style="vertical-align:top;">
+        <p style="margin:0 0 4px;font-size:0.75rem;color:#64748b;text-transform:uppercase;">Bill To</p>
+        <p style="margin:0;font-weight:600;">{{client_name}}</p>
+        <p style="margin:4px 0 0;font-size:0.875rem;color:#475569;">{{billing_address}}</p>
+      </td>
+    </tr></table>
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;">
+    <table width="100%" style="border-collapse:collapse;">
+      <thead><tr style="background:{{secondary_color}};">
+        <th style="padding:10px 12px;text-align:left;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Item</th>
+        <th style="padding:10px 12px;text-align:center;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Qty</th>
+        <th style="padding:10px 12px;text-align:right;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Price</th>
+        <th style="padding:10px 12px;text-align:right;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Total</th>
+      </tr></thead>
+      <tbody>{{line_items}}</tbody>
+    </table>
+    <table width="100%" style="margin-top:16px;"><tr><td></td>
+      <td width="220" style="background:{{secondary_color}};padding:16px;border-radius:8px;">
+        <table width="100%">
+          <tr><td style="font-size:0.875rem;color:#475569;">Subtotal</td><td align="right">{{subtotal}}</td></tr>
+          <tr><td style="font-size:0.875rem;color:#475569;">Tax</td><td align="right">{{tax_amount}}</td></tr>
+          <tr><td colspan="2"><hr style="border:none;border-top:1px solid #e2e8f0;margin:8px 0;"></td></tr>
+          <tr><td style="font-weight:700;color:{{primary_color}};">Order Total</td><td align="right" style="font-weight:700;color:{{primary_color}};">{{total}}</td></tr>
+        </table>
+      </td>
+    </tr></table>
+  </td></tr>
+</table>';
+    }
+
+    private function purchaseOrderTemplateHtml(): string
+    {
+        return '<table width="100%" cellpadding="0" cellspacing="0" style="max-width:680px;margin:0 auto;font-family:{{font_family}};color:#1e293b;">
+  <tr><td style="background:{{primary_color}};padding:32px 40px;border-radius:12px 12px 0 0;">
+    <table width="100%"><tr>
+      <td><h1 style="margin:0;color:#fff;font-size:1.6rem;font-weight:700;">PURCHASE ORDER</h1>
+          <p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:0.9rem;">{{po_number}}</p></td>
+      <td align="right"><p style="margin:0;color:rgba(255,255,255,0.9);font-size:0.85rem;">Date: {{po_date}}<br>Expected: {{expected_delivery}}</p></td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="background:#fff;padding:32px 40px;">
+    <p style="margin:0 0 24px;font-size:0.95rem;color:#475569;">To: <strong>{{vendor_name}}</strong><br><br>Please supply the following items as per the terms below.</p>
+    <table width="100%" style="border-collapse:collapse;">
+      <thead><tr style="background:{{secondary_color}};">
+        <th style="padding:10px 12px;text-align:left;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Item</th>
+        <th style="padding:10px 12px;text-align:center;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Qty</th>
+        <th style="padding:10px 12px;text-align:right;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Unit Price</th>
+        <th style="padding:10px 12px;text-align:right;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Total</th>
+      </tr></thead>
+      <tbody>{{line_items}}</tbody>
+    </table>
+    <table width="100%" style="margin-top:16px;"><tr><td></td>
+      <td width="220" style="background:{{secondary_color}};padding:16px;border-radius:8px;">
+        <table width="100%">
+          <tr><td style="font-size:0.875rem;color:#475569;">Subtotal</td><td align="right">{{subtotal}}</td></tr>
+          <tr><td style="font-size:0.875rem;color:#475569;">Tax</td><td align="right">{{tax_amount}}</td></tr>
+          <tr><td colspan="2"><hr style="border:none;border-top:1px solid #e2e8f0;margin:8px 0;"></td></tr>
+          <tr><td style="font-weight:700;color:{{primary_color}};">PO Total</td><td align="right" style="font-weight:700;color:{{primary_color}};">{{total}}</td></tr>
+        </table>
+      </td>
+    </tr></table>
+    <div style="margin-top:24px;padding:16px;background:#fefce8;border:1px solid #fde047;border-radius:8px;">
+      <p style="margin:0;font-size:0.875rem;color:#713f12;"><strong>Authorised by:</strong> {{authorised_by}} &nbsp;|&nbsp; <strong>Status:</strong> {{status}}</p>
+    </div>
+  </td></tr>
+</table>';
+    }
+
+    private function generalTemplateHtml(): string
+    {
+        return '<table width="100%" cellpadding="0" cellspacing="0" style="max-width:680px;margin:0 auto;font-family:{{font_family}};color:#1e293b;">
+  <tr><td style="background:{{primary_color}};padding:32px 40px;border-radius:12px 12px 0 0;">
+    <h1 style="margin:0;color:#fff;font-size:1.4rem;font-weight:700;">{{email_subject}}</h1>
+    <p style="margin:8px 0 0;color:rgba(255,255,255,0.8);font-size:0.875rem;">{{company_name}}</p>
+  </td></tr>
+  <tr><td style="background:#fff;padding:32px 40px;">
+    <p style="margin:0 0 16px;font-size:0.95rem;color:#475569;">Dear <strong>{{recipient_name}}</strong>,</p>
+    <div style="font-size:0.95rem;color:#475569;line-height:1.7;">{{message_body}}</div>
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:32px 0 24px;">
+    <p style="margin:0;font-size:0.875rem;color:#475569;">Warm regards,<br><strong>{{sender_name}}</strong><br>{{company_name}}</p>
+  </td></tr>
+</table>';
+    }
+
+    private function allInOneTemplateHtml(): string
+    {
+        return '<table width="100%" cellpadding="0" cellspacing="0" style="max-width:680px;margin:0 auto;font-family:{{font_family}};color:#1e293b;">
+  <tr><td style="background:{{primary_color}};padding:32px 40px;border-radius:12px 12px 0 0;">
+    <table width="100%"><tr>
+      <td><h1 style="margin:0;color:#fff;font-size:1.4rem;font-weight:700;">{{document_title}}</h1>
+          <p style="margin:4px 0 0;color:rgba(255,255,255,0.8);font-size:0.875rem;">{{company_name}}</p></td>
+      <td align="right"><p style="margin:0;color:rgba(255,255,255,0.9);font-size:0.85rem;">Date: {{document_date}}</p></td>
+    </tr></table>
+  </td></tr>
+  <tr><td style="background:#fff;padding:32px 40px;">
+    <p style="margin:0 0 24px;font-size:0.95rem;color:#475569;">Dear <strong>{{recipient_name}}</strong>,<br><br>{{intro_message}}</p>
+    <div style="background:{{secondary_color}};border-radius:8px;padding:20px;margin-bottom:24px;">
+      <table width="100%">
+        <tr><td style="font-size:0.8rem;color:#64748b;text-transform:uppercase;font-weight:600;padding-bottom:8px;" colspan="2">Document Summary</td></tr>
+        <tr><td style="font-size:0.875rem;color:#475569;padding:4px 0;">Reference No.</td><td align="right" style="font-size:0.875rem;font-weight:600;">{{reference_number}}</td></tr>
+        <tr><td style="font-size:0.875rem;color:#475569;padding:4px 0;">Document Type</td><td align="right" style="font-size:0.875rem;font-weight:600;">{{document_type}}</td></tr>
+        <tr><td style="font-size:0.875rem;color:#475569;padding:4px 0;">Amount</td><td align="right" style="font-size:0.875rem;font-weight:700;color:{{primary_color}};">{{total_amount}}</td></tr>
+        <tr><td style="font-size:0.875rem;color:#475569;padding:4px 0;">Status</td><td align="right" style="font-size:0.875rem;font-weight:600;">{{status}}</td></tr>
+      </table>
+    </div>
+    <table width="100%" style="border-collapse:collapse;">
+      <thead><tr style="background:{{secondary_color}};">
+        <th style="padding:10px 12px;text-align:left;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Item</th>
+        <th style="padding:10px 12px;text-align:center;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Qty</th>
+        <th style="padding:10px 12px;text-align:right;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Price</th>
+        <th style="padding:10px 12px;text-align:right;font-size:0.8rem;color:#64748b;font-weight:600;text-transform:uppercase;">Total</th>
+      </tr></thead>
+      <tbody>{{line_items}}</tbody>
+    </table>
+    <p style="margin:24px 0 0;font-size:0.875rem;color:#475569;">{{closing_message}}</p>
+    <hr style="border:none;border-top:1px solid #e2e8f0;margin:24px 0;">
+    <p style="margin:0;font-size:0.875rem;color:#475569;">{{sender_name}}<br>{{company_name}}</p>
+  </td></tr>
+</table>';
     }
 
 }

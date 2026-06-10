@@ -490,6 +490,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::delete('/projects/{type}/{id}',      [$ctrl, 'projectsDestroy'])->name('projects.destroy');
         // Legacy redirect
         Route::get('/projects',                     [$ctrl, 'projectsList'])->name('projects');
+
+        // ── Integrations sub-module routes ──────────────────────────────────
+        Route::get('/integrations/mail-config',       [$ctrl, 'integrationMailConfig'])->name('integrations.mail-config');
+        Route::post('/integrations/mail-config',      [$ctrl, 'integrationMailConfigSave'])->name('integrations.mail-config.save');
+        Route::post('/integrations/mail-config/test', [$ctrl, 'integrationMailConfigTest'])->name('integrations.mail-config.test');
+
+        // ── Settings sub-module routes ───────────────────────────────────────
+        Route::get('/settings/mail-templates',                    [$ctrl, 'settingsMailTemplates'])->name('settings.mail-templates');
+        Route::get('/settings/mail-templates/create',             [$ctrl, 'settingsMailTemplatesCreate'])->name('settings.mail-templates.create');
+        Route::post('/settings/mail-templates',                   [$ctrl, 'settingsMailTemplatesStore'])->name('settings.mail-templates.store');
+        Route::get('/settings/mail-templates/seed',               [$ctrl, 'settingsMailTemplatesSeedDefaults'])->name('settings.mail-templates.seed');
+        Route::get('/settings/mail-templates/{id}',               [$ctrl, 'settingsMailTemplatesShow'])->name('settings.mail-templates.show');
+        Route::get('/settings/mail-templates/{id}/edit',          [$ctrl, 'settingsMailTemplatesEdit'])->name('settings.mail-templates.edit');
+        Route::patch('/settings/mail-templates/{id}',             [$ctrl, 'settingsMailTemplatesUpdate'])->name('settings.mail-templates.update');
+        Route::delete('/settings/mail-templates/{id}',            [$ctrl, 'settingsMailTemplatesDestroy'])->name('settings.mail-templates.destroy');
+        Route::get('/settings/mail-templates/{id}/preview',       [$ctrl, 'settingsMailTemplatesPreview'])->name('settings.mail-templates.preview');
     });
 
     // ─── CoreModules ──────────────────────────────────────────────────────

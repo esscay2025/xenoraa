@@ -613,6 +613,28 @@
                 </div>
 
                 <div class="sidebar-divider"></div>
+
+                {{-- Integrations Group --}}
+                @php $integrationsActive = request()->routeIs('admin.crm2.integrations*'); @endphp
+                <button class="sidebar-group-btn sidebar-sub-group-btn {{ $integrationsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgCrmIntegrations', this)">
+                    <i class="fas fa-plug group-icon" style="font-size:0.8rem;width:14px;"></i> <span class="group-label">Integrations</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $integrationsActive ? 'open' : '' }}" id="sgCrmIntegrations">
+                    <a href="{{ route('admin.crm2.integrations.mail-config') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.integrations.mail-config*') ? 'active' : '' }}"><i class="fas fa-envelope-open-text"></i> Mail Config</a>
+                </div>
+
+                {{-- Settings Group --}}
+                @php $crmSettingsActive = request()->routeIs('admin.crm2.settings*'); @endphp
+                <button class="sidebar-group-btn sidebar-sub-group-btn {{ $crmSettingsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgCrmSettings', this)">
+                    <i class="fas fa-cog group-icon" style="font-size:0.8rem;width:14px;"></i> <span class="group-label">Settings</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $crmSettingsActive ? 'open' : '' }}" id="sgCrmSettings">
+                    <a href="{{ route('admin.crm2.settings.mail-templates') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.settings.mail-templates*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Mail Templates</a>
+                </div>
+
+                <div class="sidebar-divider"></div>
                 <a href="{{ route('admin.newsletter.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Newsletter</a>
                 <a href="{{ route('admin.calendar.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.calendar*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Calendar &amp; Notes</a>
             </div>
