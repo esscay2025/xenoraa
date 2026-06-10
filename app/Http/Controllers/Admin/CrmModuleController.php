@@ -487,28 +487,28 @@ class CrmModuleController extends Controller
                 break;
             case 'quote':
                 CrmQuote::create(array_merge(
-                    $request->only(['subject','account_id','contact_id','stage','valid_until','terms','notes']),
+                    $request->only(['subject','account_id','contact_id','stage','valid_until','terms','notes','billing_street','billing_city','billing_state','billing_code','billing_country','shipping_street','shipping_city','shipping_state','shipping_code','shipping_country']),
                     $common,
                     ['quote_number' => 'QT-' . strtoupper(Str::random(8))]
                 ));
                 break;
             case 'sales_order':
                 CrmSalesOrder::create(array_merge(
-                    $request->only(['subject','account_id','status','delivery_date','notes']),
+                    $request->only(['subject','account_id','contact_id','status','delivery_date','notes','billing_street','billing_city','billing_state','billing_code','billing_country','shipping_street','shipping_city','shipping_state','shipping_code','shipping_country']),
                     $common,
                     ['so_number' => 'SO-' . strtoupper(Str::random(8))]
                 ));
                 break;
             case 'purchase_order':
                 CrmPurchaseOrder::create(array_merge(
-                    $request->only(['subject','vendor_id','status','expected_delivery','notes']),
+                    $request->only(['subject','vendor_id','contact_id','status','expected_delivery','notes','billing_street','billing_city','billing_state','billing_code','billing_country','shipping_street','shipping_city','shipping_state','shipping_code','shipping_country']),
                     $common,
                     ['po_number' => 'PO-' . strtoupper(Str::random(8))]
                 ));
                 break;
             case 'invoice':
                 $inv = array_merge(
-                    $request->only(['subject','account_id','status','due_date','amount_paid','notes']),
+                    $request->only(['subject','account_id','contact_id','status','due_date','amount_paid','notes','billing_street','billing_city','billing_state','billing_code','billing_country','shipping_street','shipping_city','shipping_state','shipping_code','shipping_country']),
                     $common,
                     ['invoice_number' => 'INV-' . strtoupper(Str::random(8))]
                 );
@@ -516,11 +516,100 @@ class CrmModuleController extends Controller
                 CrmInvoice::create($inv);
                 break;
             case 'vendor':
-                CrmVendor::create(array_merge($request->only(['name','email','phone','website','category','status','address','description']), ['user_id' => $tid]));
+                CrmVendor::create(array_merge($request->only(['name','email','phone','mobile','fax','website','category','status','address','description','billing_street','billing_city','billing_state','billing_code','billing_country','shipping_street','shipping_city','shipping_state','shipping_code','shipping_country']), ['user_id' => $tid]));
                 break;
         }
 
         return back()->with('success', ucwords(str_replace('_', ' ', $type)) . ' created successfully.');
+    }
+
+
+    // ══════════════════════════════════════════════════════════════
+    // INVENTORY SHOW METHODS
+    // ══════════════════════════════════════════════════════════════
+    public function inventoryPriceBooksShow($id) {
+        $item = CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.inventory.view-price-book', compact('item'));
+    }
+    public function inventoryQuotesShow($id) {
+        $tid = auth()->id();
+        $item = CrmQuote::where('user_id', $tid)->findOrFail($id);
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.inventory.view-quote', compact('item', 'accounts_list'));
+    }
+    public function inventorySalesOrdersShow($id) {
+        $tid = auth()->id();
+        $item = CrmSalesOrder::where('user_id', $tid)->findOrFail($id);
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.inventory.view-sales-order', compact('item', 'accounts_list'));
+    }
+    public function inventoryPurchaseOrdersShow($id) {
+        $tid = auth()->id();
+        $item = CrmPurchaseOrder::where('user_id', $tid)->findOrFail($id);
+        $vendors_list = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.inventory.view-purchase-order', compact('item', 'vendors_list'));
+    }
+    public function inventoryInvoicesShow($id) {
+        $tid = auth()->id();
+        $item = CrmInvoice::where('user_id', $tid)->findOrFail($id);
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.inventory.view-invoice', compact('item', 'accounts_list'));
+    }
+    public function inventoryVendorsShow($id) {
+        $item = CrmVendor::where('user_id', auth()->id())->findOrFail($id);
+        return view('admin.crm2.inventory.view-vendor', compact('item'));
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // PRODUCTS SUB-MODULE
+    // ══════════════════════════════════════════════════════════════
+    public function inventoryProducts(Request $request) {
+        $tid = $this->tenantId();
+        $items = \App\Models\CrmProduct::where('user_id', $tid)->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.inventory.products', compact('items'));
+    }
+    public function inventoryProductsCreate() {
+        $tid = $this->tenantId();
+        $vendors_list = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
+        $staff = \App\Models\User::where('id', $tid)->get();
+        return view('admin.crm2.inventory.create-product', compact('vendors_list', 'staff'));
+    }
+    public function inventoryProductsStore(Request $request) {
+        $data = $request->except(['_token']);
+        $data['user_id'] = $this->tenantId();
+        if ($request->hasFile('product_image')) {
+            $data['product_image'] = $request->file('product_image')->store('crm/products', 'public');
+        }
+        \App\Models\CrmProduct::create($data);
+        return redirect()->route('admin.newcrm.inventory.products')->with('success', 'Product created successfully.');
+    }
+    public function inventoryProductsShow($id) {
+        $tid = $this->tenantId();
+        $item = \App\Models\CrmProduct::where('user_id', $tid)->findOrFail($id);
+        $vendors_list = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.inventory.view-product', compact('item', 'vendors_list'));
+    }
+    public function inventoryProductsEdit($id) {
+        $tid = $this->tenantId();
+        $item = \App\Models\CrmProduct::where('user_id', $tid)->findOrFail($id);
+        $vendors_list = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
+        $staff = \App\Models\User::where('id', $tid)->get();
+        return view('admin.crm2.inventory.edit-product', compact('item', 'vendors_list', 'staff'));
+    }
+    public function inventoryProductsUpdate(Request $request, $id) {
+        $tid = $this->tenantId();
+        $item = \App\Models\CrmProduct::where('user_id', $tid)->findOrFail($id);
+        $data = $request->except(['_token', '_method']);
+        if ($request->hasFile('product_image')) {
+            $data['product_image'] = $request->file('product_image')->store('crm/products', 'public');
+        }
+        $item->update($data);
+        return redirect()->route('admin.newcrm.inventory.products')->with('success', 'Product updated successfully.');
+    }
+    public function inventoryProductsDestroy($id) {
+        $tid = $this->tenantId();
+        \App\Models\CrmProduct::where('user_id', $tid)->findOrFail($id)->delete();
+        return back()->with('success', 'Product deleted.');
     }
 
     public function inventoryDestroy(string $type, int $id)

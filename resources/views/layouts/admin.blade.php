@@ -576,6 +576,7 @@
                     <a href="{{ route('admin.crm2.inventory.purchase-orders') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.inventory.purchase-orders*') ? 'active' : '' }}"><i class="fas fa-truck"></i> Purchase Orders</a>
                     <a href="{{ route('admin.crm2.inventory.invoices') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.inventory.invoices*') ? 'active' : '' }}"><i class="fas fa-file-invoice-dollar"></i> Invoices</a>
                     <a href="{{ route('admin.crm2.inventory.vendors') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.inventory.vendors*') ? 'active' : '' }}"><i class="fas fa-store"></i> Vendors</a>
+                                <a href="{{ route('admin.crm2.inventory.products') }}" class="sidebar-sub-link {{ request()->routeIs('admin.crm2.inventory.products*') ? 'active' : '' }}">Products</a>
                 </div>
 
                 {{-- Support sub-group --}}

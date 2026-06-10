@@ -120,3 +120,14 @@
   - salesLeadsEdit/salesContactsEdit/salesAccountsEdit/salesDealsEdit: Fixed to pass $staff, $accounts_list, $contacts_list
   - Demo data: 10 accounts, 10 contacts, 9 deals seeded for user_id=1 (Gopi K tenant)
   - crm_leads: Updated existing 10 demo leads with proper first_name/last_name split from name column
+
+- v4.10.0 (2026-06-10): CRM Inventory Enhancement + New Products Sub-Module
+  - DB: Added 30+ new columns to crm_price_books, crm_quotes, crm_sales_orders, crm_purchase_orders, crm_invoices, crm_vendors (billing/shipping address, contact_id, terms, etc.)
+  - DB: Added balance_due column to crm_invoices
+  - DB: Created crm_products table (owner_id, vendor_id, name, product_code, product_category, manufacturer, is_active, sales/support dates, unit_price, tax, commission_rate, qty_in_stock, reorder_level, description, image)
+  - Model: App\Models\CrmProduct (with vendor() and owner() relationships)
+  - Routes: 7 new product routes (admin.crm2.inventory.products.*) + 6 new show routes for all inventory sub-modules
+  - Controller: Added inventoryPriceBooksShow, inventoryQuotesShow, inventorySalesOrdersShow, inventoryPurchaseOrdersShow, inventoryInvoicesShow, inventoryVendorsShow, inventoryProducts, inventoryProductsCreate, inventoryProductsStore, inventoryProductsShow, inventoryProductsEdit, inventoryProductsUpdate, inventoryProductsDestroy
+  - Views: 39 new/updated blade files (3 per sub-module × 7 sub-modules = 21 create/view/edit + 7 list pages + 4 detail pages)
+  - Sidebar: Products added to Inventory group in admin.blade.php
+  - Demo data: Price Books (4), Vendors (3), Products (5), Quotes (3), Sales Orders (3), Purchase Orders (3), Invoices (3)

@@ -427,6 +427,21 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/vendors/{id}/edit',  [$ctrl, 'inventoryVendorsEdit'])->name('inventory.vendors.edit');
         Route::post('/inventory',                   [$ctrl, 'inventoryStore'])->name('inventory.store');
         Route::patch('/inventory/{type}/{id}',      [$ctrl, 'inventoryUpdate'])->name('inventory.update');
+        // Products sub-module
+        Route::get('/inventory/products',              [$ctrl, 'inventoryProducts'])->name('inventory.products');
+        Route::get('/inventory/products/create',       [$ctrl, 'inventoryProductsCreate'])->name('inventory.products.create');
+        Route::post('/inventory/products',             [$ctrl, 'inventoryProductsStore'])->name('inventory.products.store');
+        Route::get('/inventory/products/{id}',         [$ctrl, 'inventoryProductsShow'])->name('inventory.products.show');
+        Route::get('/inventory/products/{id}/edit',    [$ctrl, 'inventoryProductsEdit'])->name('inventory.products.edit');
+        Route::patch('/inventory/products/{id}',       [$ctrl, 'inventoryProductsUpdate'])->name('inventory.products.update');
+        Route::delete('/inventory/products/{id}',      [$ctrl, 'inventoryProductsDestroy'])->name('inventory.products.destroy');
+        // Inventory show routes
+        Route::get('/inventory/price-books/{id}',      [$ctrl, 'inventoryPriceBooksShow'])->name('inventory.price-books.show');
+        Route::get('/inventory/quotes/{id}',           [$ctrl, 'inventoryQuotesShow'])->name('inventory.quotes.show');
+        Route::get('/inventory/sales-orders/{id}',     [$ctrl, 'inventorySalesOrdersShow'])->name('inventory.sales-orders.show');
+        Route::get('/inventory/purchase-orders/{id}',  [$ctrl, 'inventoryPurchaseOrdersShow'])->name('inventory.purchase-orders.show');
+        Route::get('/inventory/invoices/{id}',         [$ctrl, 'inventoryInvoicesShow'])->name('inventory.invoices.show');
+        Route::get('/inventory/vendors/{id}',          [$ctrl, 'inventoryVendorsShow'])->name('inventory.vendors.show');
         Route::delete('/inventory/{type}/{id}',     [$ctrl, 'inventoryDestroy'])->name('inventory.destroy');
         // Legacy redirect
         Route::get('/inventory',                    [$ctrl, 'inventoryPriceBooks'])->name('inventory');

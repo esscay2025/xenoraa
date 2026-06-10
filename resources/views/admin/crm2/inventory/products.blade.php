@@ -156,69 +156,60 @@ function serializeLineItems(tableId, fieldId) {
 
 <div class="cf-page">
     <div class="cf-header">
-        <a href="{{ route('admin.crm2.inventory.vendors') }}" class="cf-back">&#8592; Vendors</a>
-        <h1>Edit Vendor</h1>
+        <h1>Products</h1>
+        <a href="{{ route('admin.crm2.inventory.products.create') }}" class="cf-btn cf-btn-primary">+ New Product</a>
     </div>
-    <form method="POST" action="{{ route('admin.crm2.inventory.update', ['type'=>'vendor','id'=>$item->id]) }}">
-        @csrf @method('PATCH')
 
-        <div class="cf-section">
-            <div class="cf-section-header" onclick="toggleSection(this)">
-                <h3>Vendor Information</h3><span class="cf-chevron">&#9660;</span>
-            </div>
-            <div class="cf-section-body">
-                <div class="cf-grid cf-grid-3">
-                    <div class="cf-field"><label>Vendor Owner</label>
-                        <select name="owner_id"><option value="">-- Select Owner --</option>
-                        @foreach($staff as $s)<option value="{{ $s->id }}" {{ $item->owner_id == $s->id ? 'selected' : '' }}>{{ $s->name }}</option>@endforeach</select>
-                    </div>
-                    <div class="cf-field"><label>Vendor Name *</label><input type="text" name="name" required value="{{ old('name', $item->name) }}"></div>
-                    <div class="cf-field"><label>Phone</label><input type="text" name="phone" value="{{ old('phone', $item->phone) }}"></div>
-                    <div class="cf-field"><label>Email</label><input type="email" name="email" value="{{ old('email', $item->email) }}"></div>
-                    <div class="cf-field"><label>Website</label><input type="url" name="website" value="{{ old('website', $item->website) }}"></div>
-                    <div class="cf-field"><label>GL Account</label><input type="text" name="gl_account" value="{{ old('gl_account', $item->gl_account) }}"></div>
-                    <div class="cf-field"><label>Category</label><input type="text" name="category" value="{{ old('category', $item->category) }}"></div>
-                    <div class="cf-field"><label>Payment Terms</label>
-                        <select name="payment_terms">@foreach(['Net 15','Net 30','Net 45','Net 60','Due on Receipt'] as $t)
-                        <option value="{{ $t }}" {{ $item->payment_terms == $t ? 'selected' : '' }}>{{ $t }}</option>@endforeach</select>
-                    </div>
-                    <div class="cf-field"><label>Currency</label>
-                        <select name="currency">@foreach(['INR'=>'INR (₹)','USD'=>'USD ($)','EUR'=>'EUR (€)','GBP'=>'GBP (£)'] as $v=>$l)
-                        <option value="{{ $v }}" {{ ($item->currency ?? 'INR') == $v ? 'selected' : '' }}>{{ $l }}</option>@endforeach</select>
-                    </div>
-                </div>
-            </div>
-        </div>
+    @if(session('success'))
+    <div style="background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:.75rem 1.25rem;border-radius:8px;margin-bottom:1rem">
+        {{ session('success') }}
+    </div>
+    @endif
 
-        <div class="cf-section">
-            <div class="cf-section-header" onclick="toggleSection(this)">
-                <h3>Address Information</h3><span class="cf-chevron">&#9660;</span>
-            </div>
-            <div class="cf-section-body">
-                <div class="cf-grid cf-grid-3">
-                    <div class="cf-field"><label>Country</label><input type="text" name="country" value="{{ old('country', $item->country) }}"></div>
-                    <div class="cf-field"><label>Building</label><input type="text" name="building" value="{{ old('building', $item->building) }}"></div>
-                    <div class="cf-field"><label>Street</label><input type="text" name="street" value="{{ old('street', $item->street) }}"></div>
-                    <div class="cf-field"><label>City</label><input type="text" name="city" value="{{ old('city', $item->city) }}"></div>
-                    <div class="cf-field"><label>State</label><input type="text" name="state" value="{{ old('state', $item->state) }}"></div>
-                    <div class="cf-field"><label>Zip</label><input type="text" name="zip" value="{{ old('zip', $item->zip) }}"></div>
-                </div>
-            </div>
+    <div class="cv-section">
+        <div class="cv-section-body" style="padding:0">
+            <table style="width:100%;border-collapse:collapse;font-size:.88rem">
+                <thead>
+                    <tr style="background:var(--cf-accent)">
+                        <th style="padding:.6rem 1rem;color:#fff;text-align:left;font-size:.78rem">Product Name</th>
+                        <th style="padding:.6rem 1rem;color:#fff;text-align:left;font-size:.78rem">Category</th>
+                        <th style="padding:.6rem 1rem;color:#fff;text-align:left;font-size:.78rem">Unit Price</th>
+                        <th style="padding:.6rem 1rem;color:#fff;text-align:left;font-size:.78rem">Qty in Stock</th>
+                        <th style="padding:.6rem 1rem;color:#fff;text-align:left;font-size:.78rem">Active</th>
+                        <th style="padding:.6rem 1rem;color:#fff;text-align:left;font-size:.78rem">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($items as $p)
+                    <tr style="border-bottom:1px solid var(--cf-border)">
+                        <td style="padding:.6rem 1rem;color:var(--cf-text)">
+                            <a href="{{ route('admin.crm2.inventory.products.show', $p->id) }}" style="color:var(--cf-accent);font-weight:600;text-decoration:none">{{ $p->name }}</a>
+                        </td>
+                        <td style="padding:.6rem 1rem;color:var(--cf-text)">{{ $p->category ?: '—' }}</td>
+                        <td style="padding:.6rem 1rem;color:var(--cf-text)">{{ $p->unit_price ? '₹' . number_format($p->unit_price, 2) : '—' }}</td>
+                        <td style="padding:.6rem 1rem;color:var(--cf-text)">{{ $p->qty_in_stock ?? '—' }}</td>
+                        <td style="padding:.6rem 1rem">
+                            <span style="padding:.2rem .6rem;border-radius:20px;font-size:.72rem;font-weight:600;background:{{ $p->is_active ? '#d1fae5' : '#fee2e2' }};color:{{ $p->is_active ? '#065f46' : '#991b1b' }}">
+                                {{ $p->is_active ? 'Active' : 'Inactive' }}
+                            </span>
+                        </td>
+                        <td style="padding:.6rem 1rem">
+                            <div style="display:flex;gap:.4rem">
+                                <a href="{{ route('admin.crm2.inventory.products.show', $p->id) }}" class="cf-btn cf-btn-secondary" style="padding:.25rem .6rem;font-size:.75rem">View</a>
+                                <a href="{{ route('admin.crm2.inventory.products.edit', $p->id) }}" class="cf-btn cf-btn-primary" style="padding:.25rem .6rem;font-size:.75rem">Edit</a>
+                                <form method="POST" action="{{ route('admin.crm2.inventory.products.destroy', $p->id) }}" style="display:inline" onsubmit="return confirm('Delete?')">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="cf-btn cf-btn-danger" style="padding:.25rem .6rem;font-size:.75rem">Delete</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--cf-muted);font-style:italic">No products found. <a href="{{ route('admin.crm2.inventory.products.create') }}" style="color:var(--cf-accent)">Create one</a>.</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
-
-        <div class="cf-section">
-            <div class="cf-section-header" onclick="toggleSection(this)">
-                <h3>Description</h3><span class="cf-chevron">&#9660;</span>
-            </div>
-            <div class="cf-section-body">
-                <div class="cf-field"><label>Description</label><textarea name="description" rows="4">{{ old('description', $item->description) }}</textarea></div>
-            </div>
-        </div>
-
-        <div class="cf-actions">
-            <button type="submit" class="cf-btn cf-btn-primary">&#10003; Update Vendor</button>
-            <a href="{{ route('admin.crm2.inventory.vendors') }}" class="cf-btn cf-btn-secondary">Cancel</a>
-        </div>
-    </form>
+    </div>
 </div>
 @endsection
