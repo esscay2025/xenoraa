@@ -523,7 +523,16 @@ class CrmModuleController extends Controller
                 break;
         }
 
-        return back()->with('success', ucwords(str_replace('_', ' ', $type)) . ' created successfully.');
+        $createRouteMap = [
+            'price_book'     => 'admin.crm2.inventory.price-books',
+            'quote'          => 'admin.crm2.inventory.quotes',
+            'sales_order'    => 'admin.crm2.inventory.sales-orders',
+            'purchase_order' => 'admin.crm2.inventory.purchase-orders',
+            'invoice'        => 'admin.crm2.inventory.invoices',
+            'vendor'         => 'admin.crm2.inventory.vendors',
+        ];
+        return redirect()->route($createRouteMap[$type] ?? 'admin.crm2.inventory.price-books')
+            ->with('success', ucwords(str_replace('_', ' ', $type)) . ' created successfully.');
     }
 
 
@@ -1128,7 +1137,9 @@ class CrmModuleController extends Controller
 
     public function inventoryPriceBooksCreate()
     {
-        return view('admin.crm2.inventory.create-price-book');
+        $tid   = $this->tenantId();
+        $staff = User::where('id', $tid)->get();
+        return view('admin.crm2.inventory.create-price-book', compact('staff'));
     }
 
     public function inventoryQuotes(Request $request)
@@ -1140,9 +1151,12 @@ class CrmModuleController extends Controller
 
     public function inventoryQuotesCreate()
     {
-        $tid = $this->tenantId();
-        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
-        return view('admin.crm2.inventory.create-quote', compact('accounts_list'));
+        $tid      = $this->tenantId();
+        $staff    = User::where('id', $tid)->get();
+        $accounts = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $contacts = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
+        $deals    = CrmDeal::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.inventory.create-quote', compact('staff', 'accounts', 'contacts', 'deals'));
     }
 
     public function inventorySalesOrders(Request $request)
@@ -1154,9 +1168,13 @@ class CrmModuleController extends Controller
 
     public function inventorySalesOrdersCreate()
     {
-        $tid = $this->tenantId();
-        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
-        return view('admin.crm2.inventory.create-sales-order', compact('accounts_list'));
+        $tid      = $this->tenantId();
+        $staff    = User::where('id', $tid)->get();
+        $accounts = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $contacts = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
+        $deals    = CrmDeal::where('user_id', $tid)->orderBy('name')->get();
+        $quotes   = CrmQuote::where('user_id', $tid)->orderBy('subject')->get();
+        return view('admin.crm2.inventory.create-sales-order', compact('staff', 'accounts', 'contacts', 'deals', 'quotes'));
     }
 
     public function inventoryPurchaseOrders(Request $request)
@@ -1168,9 +1186,11 @@ class CrmModuleController extends Controller
 
     public function inventoryPurchaseOrdersCreate()
     {
-        $tid = $this->tenantId();
-        $vendors_list = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
-        return view('admin.crm2.inventory.create-purchase-order', compact('vendors_list'));
+        $tid      = $this->tenantId();
+        $staff    = User::where('id', $tid)->get();
+        $vendors  = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
+        $contacts = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
+        return view('admin.crm2.inventory.create-purchase-order', compact('staff', 'vendors', 'contacts'));
     }
 
     public function inventoryInvoices(Request $request)
@@ -1182,9 +1202,11 @@ class CrmModuleController extends Controller
 
     public function inventoryInvoicesCreate()
     {
-        $tid = $this->tenantId();
-        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
-        return view('admin.crm2.inventory.create-invoice', compact('accounts_list'));
+        $tid      = $this->tenantId();
+        $staff    = User::where('id', $tid)->get();
+        $accounts = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $contacts = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
+        return view('admin.crm2.inventory.create-invoice', compact('staff', 'accounts', 'contacts'));
     }
 
     public function inventoryVendors(Request $request)
@@ -1196,7 +1218,9 @@ class CrmModuleController extends Controller
 
     public function inventoryVendorsCreate()
     {
-        return view('admin.crm2.inventory.create-vendor');
+        $tid   = $this->tenantId();
+        $staff = User::where('id', $tid)->get();
+        return view('admin.crm2.inventory.create-vendor', compact('staff'));
     }
 
     // ══════════════════════════════════════════════════════════════
@@ -1410,28 +1434,45 @@ class CrmModuleController extends Controller
     public function inventoryUpdate(Request $request, $type, $id) {
         $uid = auth()->id();
         $routeMap = [
-            'price_books'=>'admin.crm2.inventory.price-books','quotes'=>'admin.crm2.inventory.quotes',
-            'sales_orders'=>'admin.crm2.inventory.sales-orders','purchase_orders'=>'admin.crm2.inventory.purchase-orders',
-            'invoices'=>'admin.crm2.inventory.invoices','vendors'=>'admin.crm2.inventory.vendors',
+            // plural keys (legacy)
+            'price_books'    => 'admin.crm2.inventory.price-books',
+            'quotes'         => 'admin.crm2.inventory.quotes',
+            'sales_orders'   => 'admin.crm2.inventory.sales-orders',
+            'purchase_orders'=> 'admin.crm2.inventory.purchase-orders',
+            'invoices'       => 'admin.crm2.inventory.invoices',
+            'vendors'        => 'admin.crm2.inventory.vendors',
+            // singular keys (what edit forms actually send)
+            'price_book'     => 'admin.crm2.inventory.price-books',
+            'quote'          => 'admin.crm2.inventory.quotes',
+            'sales_order'    => 'admin.crm2.inventory.sales-orders',
+            'purchase_order' => 'admin.crm2.inventory.purchase-orders',
+            'invoice'        => 'admin.crm2.inventory.invoices',
+            'vendor'         => 'admin.crm2.inventory.vendors',
         ];
         switch ($type) {
             case 'price_books':
+            case 'price_book':
                 CrmPriceBook::where('user_id',$uid)->findOrFail($id)->update($request->only(['name','description','pricing_percentage','is_active']));
                 break;
             case 'quotes':
-                CrmQuote::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','account_id','stage','valid_until','subtotal','discount_amount','tax_amount','total','notes']));
+            case 'quote':
+                CrmQuote::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','account_id','contact_id','stage','valid_until','subtotal','discount_amount','tax_amount','total','notes','owner_id']));
                 break;
             case 'sales_orders':
-                CrmSalesOrder::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','account_id','status','delivery_date','subtotal','discount_amount','tax_amount','total','notes']));
+            case 'sales_order':
+                CrmSalesOrder::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','account_id','contact_id','status','delivery_date','subtotal','discount_amount','tax_amount','total','notes','owner_id']));
                 break;
             case 'purchase_orders':
-                CrmPurchaseOrder::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','vendor_id','status','expected_delivery','subtotal','discount_amount','tax_amount','total','notes']));
+            case 'purchase_order':
+                CrmPurchaseOrder::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','vendor_id','contact_id','status','expected_delivery','subtotal','discount_amount','tax_amount','total','notes','owner_id']));
                 break;
             case 'invoices':
-                CrmInvoice::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','account_id','status','due_date','subtotal','discount_amount','tax_amount','total','amount_paid','notes']));
+            case 'invoice':
+                CrmInvoice::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','account_id','contact_id','status','due_date','subtotal','discount_amount','tax_amount','total','amount_paid','notes','owner_id']));
                 break;
             case 'vendors':
-                CrmVendor::where('user_id',$uid)->findOrFail($id)->update($request->only(['name','email','phone','website','category','address','description','status']));
+            case 'vendor':
+                CrmVendor::where('user_id',$uid)->findOrFail($id)->update($request->only(['name','email','phone','mobile','website','category','address','description','status','owner_id']));
                 break;
         }
         return redirect()->route($routeMap[$type] ?? 'admin.crm2.inventory.price-books')->with('success', ucwords(str_replace('_',' ',$type)).' updated successfully.');
