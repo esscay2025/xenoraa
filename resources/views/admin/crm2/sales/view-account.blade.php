@@ -350,6 +350,164 @@
       </div>
     </div>
 
+    {{-- ═══════════════════════════════════════════════════════
+         EMAIL SECTION
+    ═══════════════════════════════════════════════════════ --}}
+    <div class="av-section" id="sec-email">
+      <div class="av-section-header">
+        <div class="av-section-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+          Email
+        </div>
+        <div class="av-section-actions">
+          <button class="av-btn primary sm" onclick="openComposeSlider()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Compose Mail
+          </button>
+        </div>
+      </div>
+      <div class="av-section-body" style="padding:0">
+        {{-- Email Tabs --}}
+        <div class="av-email-tabs">
+          <button class="av-email-tab active" onclick="switchEmailTab('mail', this)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+            Mail
+            <span class="av-email-count" id="email-count-mail">{{ $sentEmails->count() }}</span>
+          </button>
+          <button class="av-email-tab" onclick="switchEmailTab('draft', this)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Draft
+            <span class="av-email-count" id="email-count-draft">{{ $draftEmails->count() }}</span>
+          </button>
+          <button class="av-email-tab" onclick="switchEmailTab('scheduled', this)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Scheduled
+            <span class="av-email-count" id="email-count-scheduled">{{ $scheduledEmails->count() }}</span>
+          </button>
+        </div>
+
+        {{-- Scheduled Source Dropdown (only visible on Scheduled tab) --}}
+        <div class="av-email-source-bar" id="email-source-bar" style="display:none">
+          <label class="av-email-source-label">Source:</label>
+          <div class="av-dropdown" id="dd-email-source">
+            <button class="av-dropdown-btn" onclick="toggleDropdown('dd-email-source')">
+              <span id="email-source-label-text">Accounts - Sent Email from CRM</span>
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="av-dropdown-menu">
+              <button class="av-dropdown-item active" onclick="setEmailSource('crm', this)">Accounts - Sent Email from CRM</button>
+              <button class="av-dropdown-item" onclick="setEmailSource('contact', this)">Emails Associated with the related contact</button>
+            </div>
+          </div>
+        </div>
+
+        {{-- Mail Tab Pane --}}
+        <div class="av-email-pane active" id="email-pane-mail">
+          @if($sentEmails->count())
+          <div class="av-email-list">
+            @foreach($sentEmails as $em)
+            <div class="av-email-item">
+              <div class="av-email-avatar">{{ strtoupper(substr($em->to_email, 0, 1)) }}</div>
+              <div class="av-email-content">
+                <div class="av-email-header">
+                  <span class="av-email-to">To: {{ $em->to_email }}</span>
+                  <span class="av-email-date">{{ $em->sent_at ? $em->sent_at->format('d M Y, h:i A') : $em->created_at->format('d M Y, h:i A') }}</span>
+                </div>
+                <div class="av-email-subject">{{ $em->subject }}</div>
+                <div class="av-email-preview">{{ strip_tags($em->body_html) }}</div>
+                @if($em->error_message)
+                <div class="av-email-error"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> {{ $em->error_message }}</div>
+                @endif
+              </div>
+              <div class="av-email-actions">
+                <button class="av-icon-btn" title="View" onclick="viewEmail({{ $em->id }})">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button class="av-icon-btn danger" title="Delete" onclick="deleteEmail({{ $em->id }}, this)">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                </button>
+              </div>
+            </div>
+            @endforeach
+          </div>
+          @else
+          <div class="av-empty">
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:0.3;margin-bottom:8px"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+            <p>No emails sent yet. Click <strong>Compose Mail</strong> to send your first email.</p>
+          </div>
+          @endif
+        </div>
+
+        {{-- Draft Tab Pane --}}
+        <div class="av-email-pane" id="email-pane-draft">
+          @if($draftEmails->count())
+          <div class="av-email-list">
+            @foreach($draftEmails as $em)
+            <div class="av-email-item">
+              <div class="av-email-avatar draft">{{ strtoupper(substr($em->to_email, 0, 1)) }}</div>
+              <div class="av-email-content">
+                <div class="av-email-header">
+                  <span class="av-email-to">To: {{ $em->to_email }}</span>
+                  <span class="av-email-date">{{ $em->created_at->format('d M Y, h:i A') }}</span>
+                </div>
+                <div class="av-email-subject">{{ $em->subject }} <span class="av-email-badge draft">Draft</span></div>
+                <div class="av-email-preview">{{ strip_tags($em->body_html) }}</div>
+                @if($em->error_message)
+                <div class="av-email-error"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> {{ $em->error_message }}</div>
+                @endif
+              </div>
+              <div class="av-email-actions">
+                <button class="av-icon-btn" title="Edit Draft" onclick="editDraft({{ $em->id }}, {{ json_encode($em) }})">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="av-icon-btn danger" title="Delete" onclick="deleteEmail({{ $em->id }}, this)">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                </button>
+              </div>
+            </div>
+            @endforeach
+          </div>
+          @else
+          <div class="av-empty">
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:0.3;margin-bottom:8px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <p>No drafts saved.</p>
+          </div>
+          @endif
+        </div>
+
+        {{-- Scheduled Tab Pane --}}
+        <div class="av-email-pane" id="email-pane-scheduled">
+          @if($scheduledEmails->count())
+          <div class="av-email-list">
+            @foreach($scheduledEmails as $em)
+            <div class="av-email-item">
+              <div class="av-email-avatar scheduled">{{ strtoupper(substr($em->to_email, 0, 1)) }}</div>
+              <div class="av-email-content">
+                <div class="av-email-header">
+                  <span class="av-email-to">To: {{ $em->to_email }}</span>
+                  <span class="av-email-date">Scheduled: {{ $em->scheduled_at ? $em->scheduled_at->format('d M Y, h:i A') : '—' }}</span>
+                </div>
+                <div class="av-email-subject">{{ $em->subject }} <span class="av-email-badge scheduled">Scheduled</span></div>
+                <div class="av-email-preview">{{ strip_tags($em->body_html) }}</div>
+              </div>
+              <div class="av-email-actions">
+                <button class="av-icon-btn danger" title="Cancel" onclick="deleteEmail({{ $em->id }}, this)">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                </button>
+              </div>
+            </div>
+            @endforeach
+          </div>
+          @else
+          <div class="av-empty">
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:0.3;margin-bottom:8px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <p>No scheduled emails.</p>
+          </div>
+          @endif
+        </div>
+      </div>
+    </div>
+
     {{-- ─── SECTION 5: Open Activities ─── --}}
     <div class="av-section" id="sec-open-activities">
       <div class="av-section-header">
@@ -621,161 +779,6 @@
     </div>
 
 
-    {{-- ═══════════════════════════════════════════════════════
-         EMAIL SECTION
-    ═══════════════════════════════════════════════════════ --}}
-    <div class="av-section" id="sec-email">
-      <div class="av-section-head">
-        <div class="av-section-title">
-          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
-          Email
-        </div>
-        <button class="av-btn primary" onclick="openComposeSlider()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          Compose Mail
-        </button>
-      </div>
-      <div class="av-section-body" style="padding:0">
-        {{-- Email Tabs --}}
-        <div class="av-email-tabs">
-          <button class="av-email-tab active" onclick="switchEmailTab('mail', this)">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
-            Mail
-            <span class="av-email-count" id="email-count-mail">{{ $sentEmails->count() }}</span>
-          </button>
-          <button class="av-email-tab" onclick="switchEmailTab('draft', this)">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Draft
-            <span class="av-email-count" id="email-count-draft">{{ $draftEmails->count() }}</span>
-          </button>
-          <button class="av-email-tab" onclick="switchEmailTab('scheduled', this)">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Scheduled
-            <span class="av-email-count" id="email-count-scheduled">{{ $scheduledEmails->count() }}</span>
-          </button>
-        </div>
-
-        {{-- Scheduled Source Dropdown (only visible on Scheduled tab) --}}
-        <div class="av-email-source-bar" id="email-source-bar" style="display:none">
-          <label class="av-email-source-label">Source:</label>
-          <div class="av-dropdown" id="dd-email-source">
-            <button class="av-dropdown-btn" onclick="toggleDropdown('dd-email-source')">
-              <span id="email-source-label-text">Accounts - Sent Email from CRM</span>
-              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="av-dropdown-menu">
-              <button class="av-dropdown-item active" onclick="setEmailSource('crm', this)">Accounts - Sent Email from CRM</button>
-              <button class="av-dropdown-item" onclick="setEmailSource('contact', this)">Emails Associated with the related contact</button>
-            </div>
-          </div>
-        </div>
-
-        {{-- Mail Tab Pane --}}
-        <div class="av-email-pane active" id="email-pane-mail">
-          @if($sentEmails->count())
-          <div class="av-email-list">
-            @foreach($sentEmails as $em)
-            <div class="av-email-item">
-              <div class="av-email-avatar">{{ strtoupper(substr($em->to_email, 0, 1)) }}</div>
-              <div class="av-email-content">
-                <div class="av-email-header">
-                  <span class="av-email-to">To: {{ $em->to_email }}</span>
-                  <span class="av-email-date">{{ $em->sent_at ? $em->sent_at->format('d M Y, h:i A') : $em->created_at->format('d M Y, h:i A') }}</span>
-                </div>
-                <div class="av-email-subject">{{ $em->subject }}</div>
-                <div class="av-email-preview">{{ strip_tags($em->body_html) }}</div>
-                @if($em->error_message)
-                <div class="av-email-error"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> {{ $em->error_message }}</div>
-                @endif
-              </div>
-              <div class="av-email-actions">
-                <button class="av-icon-btn" title="View" onclick="viewEmail({{ $em->id }})">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                </button>
-                <button class="av-icon-btn danger" title="Delete" onclick="deleteEmail({{ $em->id }}, this)">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-                </button>
-              </div>
-            </div>
-            @endforeach
-          </div>
-          @else
-          <div class="av-empty">
-            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:0.3;margin-bottom:8px"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
-            <p>No emails sent yet. Click <strong>Compose Mail</strong> to send your first email.</p>
-          </div>
-          @endif
-        </div>
-
-        {{-- Draft Tab Pane --}}
-        <div class="av-email-pane" id="email-pane-draft">
-          @if($draftEmails->count())
-          <div class="av-email-list">
-            @foreach($draftEmails as $em)
-            <div class="av-email-item">
-              <div class="av-email-avatar draft">{{ strtoupper(substr($em->to_email, 0, 1)) }}</div>
-              <div class="av-email-content">
-                <div class="av-email-header">
-                  <span class="av-email-to">To: {{ $em->to_email }}</span>
-                  <span class="av-email-date">{{ $em->created_at->format('d M Y, h:i A') }}</span>
-                </div>
-                <div class="av-email-subject">{{ $em->subject }} <span class="av-email-badge draft">Draft</span></div>
-                <div class="av-email-preview">{{ strip_tags($em->body_html) }}</div>
-                @if($em->error_message)
-                <div class="av-email-error"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> {{ $em->error_message }}</div>
-                @endif
-              </div>
-              <div class="av-email-actions">
-                <button class="av-icon-btn" title="Edit Draft" onclick="editDraft({{ $em->id }}, {{ json_encode($em) }})">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                </button>
-                <button class="av-icon-btn danger" title="Delete" onclick="deleteEmail({{ $em->id }}, this)">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-                </button>
-              </div>
-            </div>
-            @endforeach
-          </div>
-          @else
-          <div class="av-empty">
-            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:0.3;margin-bottom:8px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            <p>No drafts saved.</p>
-          </div>
-          @endif
-        </div>
-
-        {{-- Scheduled Tab Pane --}}
-        <div class="av-email-pane" id="email-pane-scheduled">
-          @if($scheduledEmails->count())
-          <div class="av-email-list">
-            @foreach($scheduledEmails as $em)
-            <div class="av-email-item">
-              <div class="av-email-avatar scheduled">{{ strtoupper(substr($em->to_email, 0, 1)) }}</div>
-              <div class="av-email-content">
-                <div class="av-email-header">
-                  <span class="av-email-to">To: {{ $em->to_email }}</span>
-                  <span class="av-email-date">Scheduled: {{ $em->scheduled_at ? $em->scheduled_at->format('d M Y, h:i A') : '—' }}</span>
-                </div>
-                <div class="av-email-subject">{{ $em->subject }} <span class="av-email-badge scheduled">Scheduled</span></div>
-                <div class="av-email-preview">{{ strip_tags($em->body_html) }}</div>
-              </div>
-              <div class="av-email-actions">
-                <button class="av-icon-btn danger" title="Cancel" onclick="deleteEmail({{ $em->id }}, this)">
-                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
-                </button>
-              </div>
-            </div>
-            @endforeach
-          </div>
-          @else
-          <div class="av-empty">
-            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:0.3;margin-bottom:8px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <p>No scheduled emails.</p>
-          </div>
-          @endif
-        </div>
-      </div>
-    </div>
   </div>{{-- end av-main --}}
 
   {{-- ── SECTION NAVIGATOR (frozen right sidebar) ── --}}
@@ -797,6 +800,10 @@
       <a class="av-nav-item" href="#sec-contacts" onclick="setActive(this)">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
         Contacts
+      </a>
+      <a class="av-nav-item" href="#sec-email" onclick="setActive(this)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+        Email
       </a>
       <a class="av-nav-item" href="#sec-open-activities" onclick="setActive(this)">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -1170,7 +1177,7 @@
 .av-email-warning { display:flex; align-items:center; gap:8px; padding:10px 14px; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); border-radius:8px; font-size:0.82rem; color:#92400e; margin-bottom:16px; flex-wrap:wrap; }
 [data-theme="dark"] .av-email-warning { color:#fbbf24; }
 /* Compose Slider */
-.av-compose-slider { width:520px !important; }
+.av-compose-slider { width:520px !important; right:-540px; }
 .av-template-picker { display:flex; gap:8px; }
 .av-template-picker select { flex:1; }
 .av-email-editor-toolbar { display:flex; gap:4px; padding:6px 8px; background:var(--bg-secondary); border:1px solid var(--border); border-bottom:none; border-radius:8px 8px 0 0; flex-wrap:wrap; }
