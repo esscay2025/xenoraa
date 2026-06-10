@@ -28,6 +28,9 @@ use App\Models\CrmService;
 use App\Models\CrmServiceBooking;
 use App\Models\CrmProject;
 use App\Models\CrmProjectTask;
+use App\Models\CrmNote;
+use App\Models\CrmProduct;
+use App\Models\User;
 
 class CrmModuleController extends Controller
 {
@@ -1508,11 +1511,108 @@ class CrmModuleController extends Controller
 
     public function salesAccountsShow($id)
     {
-        $account = CrmAccount::with(['owner','contacts','deals','leads'])->where('user_id', auth()->id())->findOrFail($id);
-        $contacts = $account->contacts;
-        $deals = $account->deals;
-        $leads = $account->leads;
-        return view('admin.crm2.sales.view-account', compact('account', 'contacts', 'deals', 'leads'));
+        $uid = auth()->id();
+        $account = CrmAccount::with(['owner','contacts','deals','leads'])->where('user_id', $uid)->findOrFail($id);
+        $notes            = CrmNote::where('notable_type','account')->where('notable_id',$id)->with('user')->latest()->get();
+        $deals            = CrmDeal::where('user_id',$uid)->where('account_id',$id)->get();
+        $contacts         = CrmContact::where('user_id',$uid)->where('account_id',$id)->get();
+        $openActivities   = CrmActivity::where('user_id',$uid)->where('related_type','account')->where('related_id',$id)->whereNotIn('status',['Completed','completed'])->get();
+        $closedActivities = CrmActivity::where('user_id',$uid)->where('related_type','account')->where('related_id',$id)->whereIn('status',['Completed','completed'])->get();
+        $accountProducts  = $account->products;
+        $allProducts      = CrmProduct::where('user_id',$uid)->get();
+        $quotes           = CrmQuote::where('user_id',$uid)->where('account_id',$id)->get();
+        $salesOrders      = CrmSalesOrder::where('user_id',$uid)->where('account_id',$id)->get();
+        $invoices         = CrmInvoice::where('user_id',$uid)->where('account_id',$id)->get();
+        $allDeals         = CrmDeal::where('user_id',$uid)->get();
+        $allContacts      = CrmContact::where('user_id',$uid)->get();
+        $allQuotes        = CrmQuote::where('user_id',$uid)->get();
+        $allSalesOrders   = CrmSalesOrder::where('user_id',$uid)->get();
+        $allInvoices      = CrmInvoice::where('user_id',$uid)->get();
+        $leads            = $account->leads;
+        return view('admin.crm2.sales.view-account', compact(
+            'account','notes','deals','contacts','openActivities','closedActivities',
+            'accountProducts','allProducts','quotes','salesOrders','invoices',
+            'allDeals','allContacts','allQuotes','allSalesOrders','allInvoices','leads'
+        ));
+    }
+
+    // ─── ACCOUNT NOTES STORE ─────────────────────────────────────────────────────
+    public function accountNotesStore(Request $request, $id)
+    {
+        $request->validate(['content' => 'required|string|max:5000']);
+        CrmNote::create([
+            'user_id'      => auth()->id(),
+            'notable_type' => 'account',
+            'notable_id'   => $id,
+            'content'      => $request->content,
+        ]);
+        return redirect()->route('admin.crm2.sales.accounts.show', $id)->with('success', 'Note added.');
+    }
+
+    // ─── ACCOUNT ACTIVITIES STORE ─────────────────────────────────────────────────
+    public function accountActivitiesStore(Request $request, $id)
+    {
+        $request->validate(['subject' => 'required|string|max:255']);
+        CrmActivity::create([
+            'user_id'      => auth()->id(),
+            'type'         => $request->input('type', 'Task'),
+            'subject'      => $request->subject,
+            'description'  => $request->description,
+            'due_at'       => $request->due_at ?: null,
+            'status'       => $request->input('status', 'Open'),
+            'related_type' => 'account',
+            'related_id'   => $id,
+        ]);
+        return redirect()->route('admin.crm2.sales.accounts.show', $id)->with('success', 'Activity added.');
+    }
+
+    // ─── ACCOUNT ASSIGN (AJAX) ────────────────────────────────────────────────────
+    public function accountAssign(Request $request, $id)
+    {
+        $account = CrmAccount::where('user_id', auth()->id())->findOrFail($id);
+        $type      = $request->input('type');
+        $recordId  = $request->input('record_id');
+        $action    = $request->input('action', 'assign'); // assign or unassign
+
+        switch ($type) {
+            case 'deal':
+                CrmDeal::where('user_id', auth()->id())->where('id', $recordId)
+                    ->update(['account_id' => $action === 'assign' ? $id : null]);
+                break;
+            case 'contact':
+                CrmContact::where('user_id', auth()->id())->where('id', $recordId)
+                    ->update(['account_id' => $action === 'assign' ? $id : null]);
+                break;
+            case 'product':
+                if ($action === 'assign') {
+                    $account->products()->syncWithoutDetaching([$recordId]);
+                } else {
+                    $account->products()->detach($recordId);
+                }
+                break;
+            case 'quote':
+                CrmQuote::where('user_id', auth()->id())->where('id', $recordId)
+                    ->update(['account_id' => $action === 'assign' ? $id : null]);
+                break;
+            case 'sales-order':
+                CrmSalesOrder::where('user_id', auth()->id())->where('id', $recordId)
+                    ->update(['account_id' => $action === 'assign' ? $id : null]);
+                break;
+            case 'invoice':
+                CrmInvoice::where('user_id', auth()->id())->where('id', $recordId)
+                    ->update(['account_id' => $action === 'assign' ? $id : null]);
+                break;
+            default:
+                return response()->json(['success' => false, 'message' => 'Unknown type']);
+        }
+        return response()->json(['success' => true]);
+    }
+
+    // ─── ACCOUNT DESTROY ─────────────────────────────────────────────────────────
+    public function salesAccountsDestroy($id)
+    {
+        CrmAccount::where('user_id', auth()->id())->findOrFail($id)->delete();
+        return redirect()->route('admin.crm2.sales.accounts')->with('success', 'Account deleted.');
     }
 
     public function salesAccountsUpdate(Request $request, $id)

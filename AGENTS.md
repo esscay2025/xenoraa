@@ -131,3 +131,21 @@
   - Views: 39 new/updated blade files (3 per sub-module × 7 sub-modules = 21 create/view/edit + 7 list pages + 4 detail pages)
   - Sidebar: Products added to Inventory group in admin.blade.php
   - Demo data: Price Books (4), Vendors (3), Products (5), Quotes (3), Sales Orders (3), Purchase Orders (3), Invoices (3)
+- v4.11.0 (2026-06-10): Comprehensive Account View Page Redesign
+  - DB: Created crm_notes table (id, user_id, notable_type, notable_id, content, timestamps) — polymorphic notes for any CRM entity
+  - DB: Created crm_account_products pivot table (account_id, product_id) — links products to accounts
+  - Model: App\Models\CrmNote (user_id, notable_type, notable_id, content; belongs to User)
+  - Model: App\Models\CrmAccount updated — added products(), notes(), activities(), quotes(), salesOrders(), invoices() relationships
+  - View: resources/views/admin/crm2/sales/view-account.blade.php — fully redesigned with:
+    - Frozen right-side section navigator (sticky, scroll-spy, 10 sections)
+    - 10 sections: Account Information, Notes, Deals, Contacts, Open Activities, Closed Activities, Products, Quotes, Sales Orders, Invoices
+    - Notes: inline add form + chronological list
+    - Deals/Contacts: table list + Assign slider + New/Edit buttons
+    - Open/Closed Activities: tabbed (Task/Meeting/Call) + Add Activity dropdown popup
+    - Products: table list + Add Product slider with search
+    - Quotes/Sales Orders/Invoices: table list + Assign slider + New button
+    - All Assign sliders: searchable, AJAX-based toggle assign/unassign
+    - Activity popup: Task/Meeting/Call type, subject, due date, status, description
+    - Responsive layout (mobile: nav moves to top horizontal scroll)
+  - Routes: POST /sales/accounts/{id}/notes (accounts.notes.store), POST /sales/accounts/{id}/activities (accounts.activities.store), POST /sales/accounts/{id}/assign (accounts.assign), DELETE /sales/accounts/{id} (sales.accounts.destroy)
+  - Controller: Added accountNotesStore, accountActivitiesStore, accountAssign, salesAccountsDestroy methods; updated salesAccountsShow to pass 16 variables (notes, deals, contacts, openActivities, closedActivities, accountProducts, allProducts, quotes, salesOrders, invoices, allDeals, allContacts, allQuotes, allSalesOrders, allInvoices, leads)

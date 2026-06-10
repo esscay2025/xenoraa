@@ -381,6 +381,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/sales/leads/{id}/edit',        [$ctrl, 'salesLeadsEdit'])->name('sales.leads.edit');
         Route::get('/sales/contacts/{id}/edit',     [$ctrl, 'salesContactsEdit'])->name('sales.contacts.edit');
         Route::get('/sales/accounts/{id}/edit',     [$ctrl, 'salesAccountsEdit'])->name('sales.accounts.edit');
+        Route::delete('/sales/accounts/{id}',        [$ctrl, 'salesAccountsDestroy'])->name('sales.accounts.destroy');
+        // Account sub-resource routes
+        Route::post('/sales/accounts/{id}/notes',           [$ctrl, 'accountNotesStore'])->name('accounts.notes.store');
+        Route::post('/sales/accounts/{id}/activities',      [$ctrl, 'accountActivitiesStore'])->name('accounts.activities.store');
+        Route::post('/sales/accounts/{id}/assign',          [$ctrl, 'accountAssign'])->name('accounts.assign');
         Route::get('/sales/deals/{id}/edit',        [$ctrl, 'salesDealsEdit'])->name('sales.deals.edit');
         Route::get('/sales/forecasts/{id}/edit',    [$ctrl, 'salesForecastsEdit'])->name('sales.forecasts.edit');
         Route::post('/sales',                       [$ctrl, 'salesStore'])->name('sales.store');
