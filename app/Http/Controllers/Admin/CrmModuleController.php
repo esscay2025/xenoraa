@@ -580,11 +580,13 @@ class CrmModuleController extends Controller
     public function inventoryProductsStore(Request $request) {
         $data = $request->except(['_token']);
         $data['user_id'] = $this->tenantId();
-        if ($request->hasFile('product_image')) {
-            $data['product_image'] = $request->file('product_image')->store('crm/products', 'public');
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('crm/products', 'public');
+        } elseif ($request->hasFile('product_image')) {
+            $data['image'] = $request->file('product_image')->store('crm/products', 'public');
         }
         \App\Models\CrmProduct::create($data);
-        return redirect()->route('admin.newcrm.inventory.products')->with('success', 'Product created successfully.');
+        return redirect()->route('admin.crm2.inventory.products')->with('success', 'Product created successfully.');
     }
     public function inventoryProductsShow($id) {
         $tid = $this->tenantId();
@@ -592,7 +594,7 @@ class CrmModuleController extends Controller
         $vendors_list = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
         return view('admin.crm2.inventory.view-product', compact('item', 'vendors_list'));
     }
-        public function inventoryProductsEdit($id) {
+    public function inventoryProductsEdit($id) {
         $tid = auth()->id();
         $item = CrmProduct::where('user_id', $tid)->findOrFail($id);
         $staff = \App\Models\User::where('id', $tid)->get();
@@ -604,8 +606,10 @@ class CrmModuleController extends Controller
         $tid = $this->tenantId();
         $item = \App\Models\CrmProduct::where('user_id', $tid)->findOrFail($id);
         $data = $request->except(['_token', '_method']);
-        if ($request->hasFile('product_image')) {
-            $data['product_image'] = $request->file('product_image')->store('crm/products', 'public');
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('crm/products', 'public');
+        } elseif ($request->hasFile('product_image')) {
+            $data['image'] = $request->file('product_image')->store('crm/products', 'public');
         }
         $item->update($data);
         return redirect()->route('admin.newcrm.inventory.products')->with('success', 'Product updated successfully.');

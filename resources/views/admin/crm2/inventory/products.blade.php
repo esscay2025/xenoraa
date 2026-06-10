@@ -154,62 +154,54 @@ function serializeLineItems(tableId, fieldId) {
 }
 </script>
 
-<div class="cf-page">
-    <div class="cf-header">
-        <h1>Products</h1>
-        <a href="{{ route('admin.crm2.inventory.products.create') }}" class="cf-btn cf-btn-primary">+ New Product</a>
+<div class="crm2-page">
+  <div class="crm2-header">
+    <div>
+      <h1 class="crm2-title"><i class="fas fa-box-open"></i> Products</h1>
+      <p class="crm2-subtitle">Manage your product catalogue.</p>
     </div>
-
-    @if(session('success'))
-    <div style="background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:.75rem 1.25rem;border-radius:8px;margin-bottom:1rem">
-        {{ session('success') }}
-    </div>
-    @endif
-
-    <div class="cv-section">
-        <div class="cv-section-body" style="padding:0">
-            <table style="width:100%;border-collapse:collapse;font-size:.88rem">
-                <thead>
-                    <tr style="background:var(--cf-accent)">
-                        <th style="padding:.6rem 1rem;color:#fff;text-align:left;font-size:.78rem">Product Name</th>
-                        <th style="padding:.6rem 1rem;color:#fff;text-align:left;font-size:.78rem">Category</th>
-                        <th style="padding:.6rem 1rem;color:#fff;text-align:left;font-size:.78rem">Unit Price</th>
-                        <th style="padding:.6rem 1rem;color:#fff;text-align:left;font-size:.78rem">Qty in Stock</th>
-                        <th style="padding:.6rem 1rem;color:#fff;text-align:left;font-size:.78rem">Active</th>
-                        <th style="padding:.6rem 1rem;color:#fff;text-align:left;font-size:.78rem">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($items as $p)
-                    <tr style="border-bottom:1px solid var(--cf-border)">
-                        <td style="padding:.6rem 1rem;color:var(--cf-text)">
-                            <a href="{{ route('admin.crm2.inventory.products.show', $p->id) }}" style="color:var(--cf-accent);font-weight:600;text-decoration:none">{{ $p->name }}</a>
-                        </td>
-                        <td style="padding:.6rem 1rem;color:var(--cf-text)">{{ $p->category ?: '—' }}</td>
-                        <td style="padding:.6rem 1rem;color:var(--cf-text)">{{ $p->unit_price ? '₹' . number_format($p->unit_price, 2) : '—' }}</td>
-                        <td style="padding:.6rem 1rem;color:var(--cf-text)">{{ $p->qty_in_stock ?? '—' }}</td>
-                        <td style="padding:.6rem 1rem">
-                            <span style="padding:.2rem .6rem;border-radius:20px;font-size:.72rem;font-weight:600;background:{{ $p->is_active ? '#d1fae5' : '#fee2e2' }};color:{{ $p->is_active ? '#065f46' : '#991b1b' }}">
-                                {{ $p->is_active ? 'Active' : 'Inactive' }}
-                            </span>
-                        </td>
-                        <td style="padding:.6rem 1rem">
-                            <div style="display:flex;gap:.4rem">
-                                <a href="{{ route('admin.crm2.inventory.products.show', $p->id) }}" class="cf-btn cf-btn-secondary" style="padding:.25rem .6rem;font-size:.75rem">View</a>
-                                <a href="{{ route('admin.crm2.inventory.products.edit', $p->id) }}" class="cf-btn cf-btn-primary" style="padding:.25rem .6rem;font-size:.75rem">Edit</a>
-                                <form method="POST" action="{{ route('admin.crm2.inventory.products.destroy', $p->id) }}" style="display:inline" onsubmit="return confirm('Delete?')">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="cf-btn cf-btn-danger" style="padding:.25rem .6rem;font-size:.75rem">Delete</button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr><td colspan="6" style="padding:2rem;text-align:center;color:var(--cf-muted);font-style:italic">No products found. <a href="{{ route('admin.crm2.inventory.products.create') }}" style="color:var(--cf-accent)">Create one</a>.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <a href="{{ route('admin.crm2.inventory.products.create') }}" class="crm2-btn crm2-btn-primary"><i class="fas fa-plus"></i> New Product</a>
+  </div>
+  @if(session('success'))<div class="crm2-alert success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>@endif
+  {{-- Filter --}}
+  <div class="crm2-card mb-4"><div class="crm2-card-body">
+    <form method="GET" class="crm2-filter-form">
+      <div class="filter-group flex-1"><input type="text" name="search" value="{{ request('search') }}" placeholder="Search products..." class="crm2-input"></div>
+      <button type="submit" class="crm2-btn crm2-btn-secondary"><i class="fas fa-search"></i> Filter</button>
+      <a href="{{ route('admin.crm2.inventory.products') }}" class="crm2-btn crm2-btn-ghost"><i class="fas fa-times"></i></a>
+    </form>
+  </div></div>
+  {{-- Table --}}
+  <div class="crm2-card"><div class="crm2-card-body p-0">
+    <table class="crm2-table">
+      <thead><tr>
+        <th>Product Name</th><th>Code</th><th>Category</th><th>Unit Price</th><th>Qty in Stock</th><th>Active</th><th>Actions</th>
+      </tr></thead>
+      <tbody>
+        @forelse($items as $p)
+        <tr>
+          <td><a href="{{ route('admin.crm2.inventory.products.show', $p->id) }}" style="color:var(--crm-primary);font-weight:600;text-decoration:none">{{ $p->name }}</a></td>
+          <td>{{ $p->product_code ?: '—' }}</td>
+          <td>{{ $p->product_category ?: '—' }}</td>
+          <td>{{ $p->unit_price ? '₹'.number_format($p->unit_price,2) : '—' }}</td>
+          <td>{{ $p->qty_in_stock ?? '—' }}</td>
+          <td><span class="crm2-badge {{ $p->is_active ? 'status-active' : 'status-inactive' }}">{{ $p->is_active ? 'Active' : 'Inactive' }}</span></td>
+          <td>
+            <div class="actions-cell">
+              <a href="{{ route('admin.crm2.inventory.products.show', $p->id) }}" class="crm2-icon-btn view" title="View"><i class="fas fa-eye"></i></a>
+              <a href="{{ route('admin.crm2.inventory.products.edit', $p->id) }}" class="crm2-icon-btn edit" title="Edit"><i class="fas fa-pen"></i></a>
+              <form method="POST" action="{{ route('admin.crm2.inventory.products.destroy', $p->id) }}" style="display:inline" onsubmit="return confirm('Delete this product?')">
+                @csrf @method('DELETE')
+                <button type="submit" class="crm2-icon-btn delete" title="Delete"><i class="fas fa-trash"></i></button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        @empty
+        <tr><td colspan="7"><div class="crm2-empty"><i class="fas fa-box-open"></i><p>No products found. <a href="{{ route('admin.crm2.inventory.products.create') }}" style="color:var(--crm-primary)">Create one</a>.</p></div></td></tr>
+        @endforelse
+      </tbody>
+    </table>
+  </div></div>
 </div>
 @endsection
