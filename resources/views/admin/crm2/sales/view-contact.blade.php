@@ -76,9 +76,9 @@
         <div class="cv-card-body">
           <div class="cv-grid">
             <div class="cv-field"><label>Contact Owner</label><div class="val">{{ $contact->owner?->name ?? '<span class="empty">Unassigned</span>' }}</div></div>
-            <div class="cv-field"><label>First Name</label><div class="val">{{ $contact->first_name ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Last Name</label><div class="val">{{ $contact->last_name ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Reporting To</label><div class="val">{{ $contact->reportingTo?->name ?? '<span class="empty">—</span>' }}</div></div>
+            <div class="cv-field"><label>First Name</label><div class="val">{{ $contact->first_name ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Last Name</label><div class="val">{{ $contact->last_name ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Reporting To</label><div class="val">{{ $contact->reportingTo?->name ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
           </div>
         </div>
       </div>
@@ -87,9 +87,9 @@
         <div class="cv-card-header"><i class="fas fa-building"></i> Organization Information</div>
         <div class="cv-card-body">
           <div class="cv-grid">
-            <div class="cv-field"><label>Account Name</label><div class="val">@if($contact->account)<a href="{{ route('admin.crm2.sales.accounts.show', $contact->account_id) }}" style="color:var(--accent)">{{ $contact->account->name }}</a>@else<span class="empty">—</span>@endif</div></div>
-            <div class="cv-field"><label>Department</label><div class="val">{{ $contact->department ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Title</label><div class="val">{{ $contact->job_title ?? '<span class="empty">—</span>' }}</div></div>
+            <div class="cv-field"><label>Account Name</label><div class="val">@if($contact->account)<a href="{{ route('admin.crm2.sales.accounts.show', $contact->account_id) }}" style="color:var(--accent)">{{ $contact->account->name }}</a>@else<span style="color:var(--text-muted);font-style:italic;">—</span>@endif</div></div>
+            <div class="cv-field"><label>Department</label><div class="val">{{ $contact->department ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Title</label><div class="val">{{ $contact->job_title ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
           </div>
         </div>
       </div>
@@ -98,13 +98,13 @@
         <div class="cv-card-header"><i class="fas fa-phone"></i> Contact Information</div>
         <div class="cv-card-body">
           <div class="cv-grid">
-            <div class="cv-field"><label>Email</label><div class="val">{{ $contact->email ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Secondary Email</label><div class="val">{{ $contact->secondary_email ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Phone</label><div class="val">{{ $contact->phone ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Mobile</label><div class="val">{{ $contact->mobile ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Other Phone</label><div class="val">{{ $contact->other_phone ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Home Phone</label><div class="val">{{ $contact->home_phone ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Fax</label><div class="val">{{ $contact->fax ?? '<span class="empty">—</span>' }}</div></div>
+            <div class="cv-field"><label>Email</label><div class="val">{{ $contact->email ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Secondary Email</label><div class="val">{{ $contact->secondary_email ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Phone</label><div class="val">{{ $contact->phone ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Mobile</label><div class="val">{{ $contact->mobile ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Other Phone</label><div class="val">{{ $contact->other_phone ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Home Phone</label><div class="val">{{ $contact->home_phone ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Fax</label><div class="val">{{ $contact->fax ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
             <div class="cv-field"><label>Email Opt Out</label><div class="val">{{ $contact->email_opt_out ? 'Yes' : 'No' }}</div></div>
           </div>
         </div>
@@ -114,9 +114,9 @@
         <div class="cv-card-header"><i class="fas fa-briefcase"></i> Professional Information</div>
         <div class="cv-card-body">
           <div class="cv-grid">
-            <div class="cv-field"><label>Lead Source</label><div class="val">{{ $contact->lead_source ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Assistant</label><div class="val">{{ $contact->assistant ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Assistant Phone</label><div class="val">{{ $contact->assistant_phone ?? '<span class="empty">—</span>' }}</div></div>
+            <div class="cv-field"><label>Lead Source</label><div class="val">{{ $contact->lead_source ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Assistant</label><div class="val">{{ $contact->assistant ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Assistant Phone</label><div class="val">{{ $contact->assistant_phone ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
           </div>
         </div>
       </div>
@@ -125,9 +125,9 @@
         <div class="cv-card-header"><i class="fas fa-user-circle"></i> Personal Information</div>
         <div class="cv-card-body">
           <div class="cv-grid">
-            <div class="cv-field"><label>Date of Birth</label><div class="val">{{ $contact->date_of_birth ? \Carbon\Carbon::parse($contact->date_of_birth)->format('d M Y') : '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Skype ID</label><div class="val">{{ $contact->skype_id ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Twitter / X</label><div class="val">{{ $contact->twitter ?? '<span class="empty">—</span>' }}</div></div>
+            <div class="cv-field"><label>Date of Birth</label><div class="val">{{ $contact->date_of_birth ? \Carbon\Carbon::parse($contact->date_of_birth)->format('d M Y') : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Skype ID</label><div class="val">{{ $contact->skype_id ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Twitter / X</label><div class="val">{{ $contact->twitter ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
           </div>
         </div>
       </div>
@@ -136,12 +136,12 @@
         <div class="cv-card-header"><i class="fas fa-map-marker-alt"></i> Mailing Address</div>
         <div class="cv-card-body">
           <div class="cv-grid">
-            <div class="cv-field"><label>Country</label><div class="val">{{ $contact->mailing_country ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Building</label><div class="val">{{ $contact->mailing_building ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Street</label><div class="val">{{ $contact->mailing_street ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>City</label><div class="val">{{ $contact->mailing_city ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>State</label><div class="val">{{ $contact->mailing_state ?? '<span class="empty">—</span>' }}</div></div>
-            <div class="cv-field"><label>Postal Code</label><div class="val">{{ $contact->mailing_zip ?? '<span class="empty">—</span>' }}</div></div>
+            <div class="cv-field"><label>Country</label><div class="val">{{ $contact->mailing_country ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Building</label><div class="val">{{ $contact->mailing_building ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Street</label><div class="val">{{ $contact->mailing_street ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>City</label><div class="val">{{ $contact->mailing_city ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>State</label><div class="val">{{ $contact->mailing_state ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Postal Code</label><div class="val">{{ $contact->mailing_zip ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
           </div>
         </div>
       </div>
@@ -200,7 +200,7 @@
       <div class="cv-card">
         <div class="cv-card-header"><i class="fas fa-tasks"></i> Activities</div>
         <div class="cv-card-body">
-          <form method="POST" action="{{ route('admin.crm2.activities.store') }}" class="cv-activity-form" style="margin-bottom:.8rem">
+          <form method="POST" action="{{ route('admin.newcrm.activities.store') }}" class="cv-activity-form" style="margin-bottom:.8rem">
             @csrf
             <input type="hidden" name="related_type" value="contact">
             <input type="hidden" name="related_id" value="{{ $contact->id }}">

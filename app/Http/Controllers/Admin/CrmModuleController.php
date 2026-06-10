@@ -821,7 +821,8 @@ class CrmModuleController extends Controller
             ->where('related_id', $id)
             ->orderByDesc('created_at')
             ->get();
-        return view('admin.crm2.sales.view-lead', compact('lead', 'activities'));
+        $staff = \App\Models\User::where('id', $tid)->get();
+        return view('admin.crm2.sales.view-lead', compact('lead', 'activities', 'staff'));
     }
 
     public function salesLeadsConvert(Request $request, $id)
@@ -904,7 +905,7 @@ class CrmModuleController extends Controller
     public function salesContactsCreate(Request $request)
     {
         $tid = $this->tenantId();
-        $staff = \App\Models\User::where('id', $tid)->orWhere('parent_id', $tid)->get();
+        $staff = \App\Models\User::where('id', $tid)->get();
         $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
         $prefill_account_id = $request->query('account_id');
         return view('admin.crm2.sales.create-contact', compact('staff', 'accounts_list', 'prefill_account_id'));
@@ -924,7 +925,7 @@ class CrmModuleController extends Controller
     public function salesAccountsCreate()
     {
         $tid = $this->tenantId();
-        $staff = \App\Models\User::where('id', $tid)->orWhere('parent_id', $tid)->get();
+        $staff = \App\Models\User::where('id', $tid)->get();
         $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
         return view('admin.crm2.sales.create-account', compact('staff', 'accounts_list'));
     }
@@ -945,7 +946,7 @@ class CrmModuleController extends Controller
     public function salesDealsCreate(Request $request)
     {
         $tid = $this->tenantId();
-        $staff = \App\Models\User::where('id', $tid)->orWhere('parent_id', $tid)->get();
+        $staff = \App\Models\User::where('id', $tid)->get();
         $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
         $contacts_list = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
         $prefill_account_id = $request->query('account_id');
@@ -1213,8 +1214,10 @@ class CrmModuleController extends Controller
     // ─── EDIT METHODS (full-page edit forms) ─────────────────────────────────
 
     public function salesLeadsEdit($id) {
-        $item = CrmLead::where('user_id', auth()->id())->findOrFail($id);
-        return view('admin.crm2.sales.edit-lead', compact('item'));
+        $tid = $this->tenantId();
+        $lead = CrmLead::where('user_id', $tid)->findOrFail($id);
+        $staff = \App\Models\User::where('id', $tid)->get();
+        return view('admin.crm2.sales.edit-lead', compact('lead', 'staff'));
     }
     public function salesContactsEdit($id) {
         $item = CrmContact::where('user_id', auth()->id())->findOrFail($id);

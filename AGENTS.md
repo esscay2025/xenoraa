@@ -95,3 +95,19 @@
   - CrmLead model: fillable updated with all new fields
   - Leads list: View (eye) button added, name is now a clickable link to view page
   - Demo data: 10 leads seeded (Arjun Mehta, Priya Sharma, Ravi Kumar, Fatima Al-Rashid, Lim Wei Jian, Kavitha Nair, Mohammed Al-Farsi, Siti Rahimah, Rajesh Patel, Ananya Krishnan)
+
+- v4.9.0 (2026-06-10): Enhanced CRM Contact/Account/Deal modules
+  - DB: Added ~35 new columns to crm_contacts (owner_id, mailing/other address, professional info, personal info)
+  - DB: Added ~20 new columns to crm_accounts (owner_id, billing/shipping address, company info)
+  - DB: Added ~10 new columns to crm_deals (owner_id, name, amount, closing_date, campaign_source, etc.)
+  - Models: CrmContact, CrmAccount, CrmDeal fillable arrays updated; owner()/reportingTo() relationships added
+  - Views: create-contact.blade.php - 8 grouped sections (Profile, Organization, Contact Info, Professional, Personal, Mailing, Other Address, Notes)
+  - Views: view-contact.blade.php - full detail page with linked deals/leads/activities panel
+  - Views: create-account.blade.php - 6 grouped sections (Profile, Company, Contact Info, Billing, Shipping, Notes)
+  - Views: view-account.blade.php - full detail page with summary cards, linked contacts/deals
+  - Views: create-deal.blade.php - grouped form with owner, account/contact dropdowns, stage, probability
+  - Views: view-deal.blade.php - full detail with stage progress bar, linked activities
+  - Routes: POST/GET store/show/update routes added for contacts, accounts, deals
+  - Controller: salesContactsStore/Show/Update, salesAccountsStore/Show/Update, salesDealsStore/Show/Update added
+  - List pages: accounts.blade.php and contacts.blade.php popup edit buttons replaced with view/edit page links
+  - Lead fixes: CrmLead owner() relationship added; salesLeadsCreate passes staff list
