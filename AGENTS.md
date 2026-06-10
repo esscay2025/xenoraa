@@ -179,3 +179,18 @@
   - Bug 3 (Products sidebar): Added sidebar-sub-sub-link class and fa-box-open icon.
   - Bonus: inventoryStore now redirects to correct list page after create.
   - Commit: cfcf956
+
+- v4.12.0 (2026-06-11): CRM Integrations + Settings Modules
+  - New Module: Integrations > Mail Config
+    - Per-tenant SMTP config: host, port, username, password (Crypt encrypted), encryption, from_address, from_name, reply_to
+    - Send Test Email AJAX endpoint; verified_at + last_error tracking
+    - Table: crm_mail_configs | Model: CrmMailConfig
+    - Routes: admin.crm2.integrations.mail-config (GET/POST), admin.crm2.integrations.mail-config.test (POST)
+  - New Module: Settings > Mail Templates
+    - Full CRUD with 6 pre-built professional HTML templates: Invoice, Quote, Sales Order, Purchase Order, General, All-in-One
+    - Features: logo upload (crm/mail-logos), colour pickers, font selector, live iframe preview, click-to-insert variables
+    - is_default per type, is_active toggle, seed endpoint for first-time setup
+    - Table: crm_mail_templates | Model: CrmMailTemplate
+    - Routes: 9 routes (list, create, store, show, edit, update, destroy, seed, preview)
+  - Sidebar: Integrations (fa-plug) + Settings (fa-cog) groups added inside CRM2 panel
+  - Commit: e0cd10c
