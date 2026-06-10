@@ -194,3 +194,23 @@
     - Routes: 9 routes (list, create, store, show, edit, update, destroy, seed, preview)
   - Sidebar: Integrations (fa-plug) + Settings (fa-cog) groups added inside CRM2 panel
   - Commit: e0cd10c
+
+- v4.13.0 (2026-06-11): Email Section in Account View
+  - New table: crm_account_emails (user_id, account_id, mail_template_id, status, to/cc/bcc, subject, body_html, scheduled_at, sent_at, error_message)
+  - Model: App\Models\CrmAccountEmail (scopes: sent, drafts, scheduled)
+  - 5 new routes under admin.crm2.accounts.emails.* (list, store, template, update, destroy)
+  - salesAccountsShow updated to pass mailTemplates, mailConfig, sentEmails, draftEmails, scheduledEmails
+  - Email section in view-account.blade.php:
+    - Mail / Draft / Scheduled tabs with live counts
+    - Scheduled tab has source dropdown (CRM sent / Contact associated)
+    - Compose Mail button opens 520px right-side slider
+    - Template picker (select + Load) auto-fills subject + body
+    - Rich text editor (bold/italic/underline/lists/links/clear)
+    - CC / BCC toggle fields
+    - Schedule datetime picker
+    - Send / Save Draft / Schedule via AJAX
+    - Mail config warning banner links to Integrations > Mail Config
+    - Email list: avatar, to, subject, preview, date, delete
+    - Draft edit pre-fills compose slider
+    - Email nav item in frozen right sidebar
+  - Commit: 827838d
