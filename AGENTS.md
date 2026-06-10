@@ -149,3 +149,12 @@
     - Responsive layout (mobile: nav moves to top horizontal scroll)
   - Routes: POST /sales/accounts/{id}/notes (accounts.notes.store), POST /sales/accounts/{id}/activities (accounts.activities.store), POST /sales/accounts/{id}/assign (accounts.assign), DELETE /sales/accounts/{id} (sales.accounts.destroy)
   - Controller: Added accountNotesStore, accountActivitiesStore, accountAssign, salesAccountsDestroy methods; updated salesAccountsShow to pass 16 variables (notes, deals, contacts, openActivities, closedActivities, accountProducts, allProducts, quotes, salesOrders, invoices, allDeals, allContacts, allQuotes, allSalesOrders, allInvoices, leads)
+
+- v4.11.1 (2026-06-10): CRM2 Theme Integration Fix
+  - Root cause: crm2.css used hardcoded dark hex values (#0f172a, #1e293b, #263347) independent of dashboard theme
+  - Fix: All --crm-* CSS variables now bridge to dashboard variables (--bg-primary, --bg-card, --bg-secondary, --bg-hover, --text-primary, --text-secondary, --text-muted, --border, --accent, --success, --danger, --warning, --info)
+  - CRM2 list/landing pages now automatically follow user-selected theme (dark or light)
+  - Added [data-theme="light"] overrides for crm2-input, crm2-select, crm2-textarea
+  - products.blade.php: Replaced cf-page/cv-section list section with crm2-page/crm2-table (consistent with all other list pages)
+  - Added new CSS classes: crm2-icon-btn.view, crm2-btn-success, acct-view-layout, acct-nav, crm2-slider, crm2-slider-overlay
+  - Commit: 25cb965
