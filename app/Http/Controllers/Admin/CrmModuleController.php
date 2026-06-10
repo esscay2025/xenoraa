@@ -31,6 +31,7 @@ use App\Models\CrmProjectTask;
 use App\Models\CrmNote;
 use App\Models\CrmMailConfig;
 use App\Models\CrmMailTemplate;
+use App\Models\CrmAccountEmail;
 use App\Models\CrmProduct;
 use App\Models\User;
 
@@ -1576,10 +1577,16 @@ class CrmModuleController extends Controller
         $allSalesOrders   = CrmSalesOrder::where('user_id',$uid)->get();
         $allInvoices      = CrmInvoice::where('user_id',$uid)->get();
         $leads            = $account->leads;
+        $mailTemplates    = CrmMailTemplate::where('user_id', $uid)->where('is_active', true)->get();
+        $mailConfig       = CrmMailConfig::where('user_id', $uid)->where('is_active', true)->first();
+        $sentEmails       = CrmAccountEmail::where('user_id',$uid)->where('account_id',$id)->where('status','sent')->latest()->get();
+        $draftEmails      = CrmAccountEmail::where('user_id',$uid)->where('account_id',$id)->where('status','draft')->latest()->get();
+        $scheduledEmails  = CrmAccountEmail::where('user_id',$uid)->where('account_id',$id)->where('status','scheduled')->latest()->get();
         return view('admin.crm2.sales.view-account', compact(
             'account','notes','deals','contacts','openActivities','closedActivities',
             'accountProducts','allProducts','quotes','salesOrders','invoices',
-            'allDeals','allContacts','allQuotes','allSalesOrders','allInvoices','leads'
+            'allDeals','allContacts','allQuotes','allSalesOrders','allInvoices','leads',
+            'mailTemplates','mailConfig','sentEmails','draftEmails','scheduledEmails'
         ));
     }
 
@@ -2206,5 +2213,179 @@ class CrmModuleController extends Controller
   </td></tr>
 </table>';
     }
+
+
+    // ─── ACCOUNT EMAILS: LIST (AJAX) ─────────────────────────────────────────────
+    public function accountEmailsList(Request $request, $id)
+    {
+        $uid    = auth()->id();
+        $status = $request->input('status', 'sent'); // sent | draft | scheduled
+        $source = $request->input('source', 'crm');  // crm | contact
+
+        $query = CrmAccountEmail::where('user_id', $uid)
+            ->where('account_id', $id)
+            ->where('status', $status)
+            ->with('template')
+            ->latest();
+
+        if ($source === 'contact') {
+            // Emails associated with contacts linked to this account
+            $contactEmails = \App\Models\CrmContact::where('user_id', $uid)
+                ->where('account_id', $id)
+                ->pluck('email')
+                ->filter()
+                ->values();
+            $query->whereIn('to_email', $contactEmails);
+        }
+
+        $emails = $query->get();
+
+        return response()->json(['success' => true, 'emails' => $emails]);
+    }
+
+    // ─── ACCOUNT EMAILS: COMPOSE / SEND / DRAFT / SCHEDULE ───────────────────────
+    public function accountEmailsStore(Request $request, $id)
+    {
+        $uid     = auth()->id();
+        $account = CrmAccount::where('user_id', $uid)->findOrFail($id);
+        $action  = $request->input('action', 'send'); // send | draft | schedule
+
+        $request->validate([
+            'to_email' => 'required|email',
+            'subject'  => 'required|string|max:500',
+            'body_html'=> 'required|string',
+        ]);
+
+        $status     = $action === 'draft' ? 'draft' : ($action === 'schedule' ? 'scheduled' : 'sent');
+        $scheduledAt = $action === 'schedule' ? $request->input('scheduled_at') : null;
+        $sentAt      = $action === 'send' ? now() : null;
+        $errorMsg    = null;
+
+        if ($action === 'send') {
+            // Try to send via configured mail config
+            $mailConfig = CrmMailConfig::where('user_id', $uid)->where('is_active', true)->first();
+            if ($mailConfig) {
+                try {
+                    $decryptedPassword = $mailConfig->mail_password;
+                    config([
+                        'mail.default'                     => 'smtp',
+                        'mail.mailers.smtp.host'           => $mailConfig->mail_host,
+                        'mail.mailers.smtp.port'           => $mailConfig->mail_port,
+                        'mail.mailers.smtp.username'       => $mailConfig->mail_username,
+                        'mail.mailers.smtp.password'       => $decryptedPassword,
+                        'mail.mailers.smtp.encryption'     => $mailConfig->mail_encryption ?: 'tls',
+                        'mail.from.address'                => $mailConfig->from_address,
+                        'mail.from.name'                   => $mailConfig->from_name,
+                    ]);
+
+                    \Illuminate\Support\Facades\Mail::html($request->body_html, function ($msg) use ($request, $mailConfig) {
+                        $msg->to($request->to_email)
+                            ->subject($request->subject)
+                            ->from($mailConfig->from_address, $mailConfig->from_name);
+                        if ($request->cc_email)  $msg->cc($request->cc_email);
+                        if ($request->bcc_email) $msg->bcc($request->bcc_email);
+                        if ($mailConfig->reply_to) $msg->replyTo($mailConfig->reply_to);
+                    });
+                } catch (\Exception $e) {
+                    $status   = 'draft';
+                    $sentAt   = null;
+                    $errorMsg = $e->getMessage();
+                }
+            } else {
+                // No mail config — save as draft with error note
+                $status   = 'draft';
+                $sentAt   = null;
+                $errorMsg = 'No active mail configuration found. Email saved as draft.';
+            }
+        }
+
+        $email = CrmAccountEmail::create([
+            'user_id'          => $uid,
+            'account_id'       => $id,
+            'mail_template_id' => $request->input('mail_template_id'),
+            'status'           => $status,
+            'to_email'         => $request->to_email,
+            'cc_email'         => $request->cc_email,
+            'bcc_email'        => $request->bcc_email,
+            'subject'          => $request->subject,
+            'body_html'        => $request->body_html,
+            'from_name'        => $request->input('from_name'),
+            'from_email'       => $request->input('from_email'),
+            'scheduled_at'     => $scheduledAt,
+            'sent_at'          => $sentAt,
+            'error_message'    => $errorMsg,
+        ]);
+
+        return response()->json([
+            'success'  => true,
+            'status'   => $status,
+            'email_id' => $email->id,
+            'message'  => $status === 'sent'
+                ? 'Email sent successfully.'
+                : ($status === 'scheduled'
+                    ? 'Email scheduled successfully.'
+                    : 'Email saved as draft.' . ($errorMsg ? ' Note: ' . $errorMsg : '')),
+        ]);
+    }
+
+    // ─── ACCOUNT EMAILS: DELETE ───────────────────────────────────────────────────
+    public function accountEmailsDestroy($id, $emailId)
+    {
+        $email = CrmAccountEmail::where('user_id', auth()->id())
+            ->where('account_id', $id)
+            ->findOrFail($emailId);
+        $email->delete();
+        return response()->json(['success' => true]);
+    }
+
+    // ─── ACCOUNT EMAILS: GET TEMPLATE BODY (AJAX) ────────────────────────────────
+    public function accountEmailsGetTemplate(Request $request, $id)
+    {
+        $uid        = auth()->id();
+        $templateId = $request->input('template_id');
+        $template   = CrmMailTemplate::where('user_id', $uid)->findOrFail($templateId);
+
+        // Get account data for variable substitution
+        $account = CrmAccount::where('user_id', $uid)->findOrFail($id);
+
+        $body = $template->body_html;
+        // Replace common variables
+        $vars = [
+            '{{account_name}}' => $account->account_name ?? $account->name ?? '',
+            '{{company_name}}' => $account->account_name ?? '',
+            '{{date}}'         => now()->format('d M Y'),
+            '{{sender_name}}' => auth()->user()->name ?? '',
+        ];
+        foreach ($vars as $k => $v) {
+            $body = str_replace($k, $v, $body);
+        }
+
+        return response()->json([
+            'success'  => true,
+            'subject'  => $template->subject,
+            'body_html'=> $body,
+            'template' => [
+                'id'      => $template->id,
+                'name'    => $template->name,
+                'subject' => $template->subject,
+            ],
+        ]);
+    }
+
+    // ─── ACCOUNT EMAILS: UPDATE DRAFT ─────────────────────────────────────────────
+    public function accountEmailsUpdate(Request $request, $id, $emailId)
+    {
+        $email = CrmAccountEmail::where('user_id', auth()->id())
+            ->where('account_id', $id)
+            ->findOrFail($emailId);
+
+        $email->update($request->only([
+            'to_email', 'cc_email', 'bcc_email', 'subject', 'body_html',
+            'scheduled_at', 'mail_template_id',
+        ]));
+
+        return response()->json(['success' => true]);
+    }
+
 
 }

@@ -386,6 +386,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::post('/sales/accounts/{id}/notes',           [$ctrl, 'accountNotesStore'])->name('accounts.notes.store');
         Route::post('/sales/accounts/{id}/activities',      [$ctrl, 'accountActivitiesStore'])->name('accounts.activities.store');
         Route::post('/sales/accounts/{id}/assign',          [$ctrl, 'accountAssign'])->name('accounts.assign');
+        // Account Emails
+        Route::get('/sales/accounts/{id}/emails',                [$ctrl, 'accountEmailsList'])->name('accounts.emails.list');
+        Route::post('/sales/accounts/{id}/emails',               [$ctrl, 'accountEmailsStore'])->name('accounts.emails.store');
+        Route::get('/sales/accounts/{id}/emails/template',       [$ctrl, 'accountEmailsGetTemplate'])->name('accounts.emails.template');
+        Route::patch('/sales/accounts/{id}/emails/{emailId}',    [$ctrl, 'accountEmailsUpdate'])->name('accounts.emails.update');
+        Route::delete('/sales/accounts/{id}/emails/{emailId}',   [$ctrl, 'accountEmailsDestroy'])->name('accounts.emails.destroy');
         Route::get('/sales/deals/{id}/edit',        [$ctrl, 'salesDealsEdit'])->name('sales.deals.edit');
         Route::get('/sales/forecasts/{id}/edit',    [$ctrl, 'salesForecastsEdit'])->name('sales.forecasts.edit');
         Route::post('/sales',                       [$ctrl, 'salesStore'])->name('sales.store');

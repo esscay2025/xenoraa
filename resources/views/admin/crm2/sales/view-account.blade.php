@@ -620,6 +620,162 @@
       </div>
     </div>
 
+
+    {{-- ═══════════════════════════════════════════════════════
+         EMAIL SECTION
+    ═══════════════════════════════════════════════════════ --}}
+    <div class="av-section" id="sec-email">
+      <div class="av-section-head">
+        <div class="av-section-title">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+          Email
+        </div>
+        <button class="av-btn primary" onclick="openComposeSlider()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Compose Mail
+        </button>
+      </div>
+      <div class="av-section-body" style="padding:0">
+        {{-- Email Tabs --}}
+        <div class="av-email-tabs">
+          <button class="av-email-tab active" onclick="switchEmailTab('mail', this)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+            Mail
+            <span class="av-email-count" id="email-count-mail">{{ $sentEmails->count() }}</span>
+          </button>
+          <button class="av-email-tab" onclick="switchEmailTab('draft', this)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Draft
+            <span class="av-email-count" id="email-count-draft">{{ $draftEmails->count() }}</span>
+          </button>
+          <button class="av-email-tab" onclick="switchEmailTab('scheduled', this)">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Scheduled
+            <span class="av-email-count" id="email-count-scheduled">{{ $scheduledEmails->count() }}</span>
+          </button>
+        </div>
+
+        {{-- Scheduled Source Dropdown (only visible on Scheduled tab) --}}
+        <div class="av-email-source-bar" id="email-source-bar" style="display:none">
+          <label class="av-email-source-label">Source:</label>
+          <div class="av-dropdown" id="dd-email-source">
+            <button class="av-dropdown-btn" onclick="toggleDropdown('dd-email-source')">
+              <span id="email-source-label-text">Accounts - Sent Email from CRM</span>
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="av-dropdown-menu">
+              <button class="av-dropdown-item active" onclick="setEmailSource('crm', this)">Accounts - Sent Email from CRM</button>
+              <button class="av-dropdown-item" onclick="setEmailSource('contact', this)">Emails Associated with the related contact</button>
+            </div>
+          </div>
+        </div>
+
+        {{-- Mail Tab Pane --}}
+        <div class="av-email-pane active" id="email-pane-mail">
+          @if($sentEmails->count())
+          <div class="av-email-list">
+            @foreach($sentEmails as $em)
+            <div class="av-email-item">
+              <div class="av-email-avatar">{{ strtoupper(substr($em->to_email, 0, 1)) }}</div>
+              <div class="av-email-content">
+                <div class="av-email-header">
+                  <span class="av-email-to">To: {{ $em->to_email }}</span>
+                  <span class="av-email-date">{{ $em->sent_at ? $em->sent_at->format('d M Y, h:i A') : $em->created_at->format('d M Y, h:i A') }}</span>
+                </div>
+                <div class="av-email-subject">{{ $em->subject }}</div>
+                <div class="av-email-preview">{{ strip_tags($em->body_html) }}</div>
+                @if($em->error_message)
+                <div class="av-email-error"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> {{ $em->error_message }}</div>
+                @endif
+              </div>
+              <div class="av-email-actions">
+                <button class="av-icon-btn" title="View" onclick="viewEmail({{ $em->id }})">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+                <button class="av-icon-btn danger" title="Delete" onclick="deleteEmail({{ $em->id }}, this)">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                </button>
+              </div>
+            </div>
+            @endforeach
+          </div>
+          @else
+          <div class="av-empty">
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:0.3;margin-bottom:8px"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+            <p>No emails sent yet. Click <strong>Compose Mail</strong> to send your first email.</p>
+          </div>
+          @endif
+        </div>
+
+        {{-- Draft Tab Pane --}}
+        <div class="av-email-pane" id="email-pane-draft">
+          @if($draftEmails->count())
+          <div class="av-email-list">
+            @foreach($draftEmails as $em)
+            <div class="av-email-item">
+              <div class="av-email-avatar draft">{{ strtoupper(substr($em->to_email, 0, 1)) }}</div>
+              <div class="av-email-content">
+                <div class="av-email-header">
+                  <span class="av-email-to">To: {{ $em->to_email }}</span>
+                  <span class="av-email-date">{{ $em->created_at->format('d M Y, h:i A') }}</span>
+                </div>
+                <div class="av-email-subject">{{ $em->subject }} <span class="av-email-badge draft">Draft</span></div>
+                <div class="av-email-preview">{{ strip_tags($em->body_html) }}</div>
+                @if($em->error_message)
+                <div class="av-email-error"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> {{ $em->error_message }}</div>
+                @endif
+              </div>
+              <div class="av-email-actions">
+                <button class="av-icon-btn" title="Edit Draft" onclick="editDraft({{ $em->id }}, {{ json_encode($em) }})">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="av-icon-btn danger" title="Delete" onclick="deleteEmail({{ $em->id }}, this)">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+                </button>
+              </div>
+            </div>
+            @endforeach
+          </div>
+          @else
+          <div class="av-empty">
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:0.3;margin-bottom:8px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <p>No drafts saved.</p>
+          </div>
+          @endif
+        </div>
+
+        {{-- Scheduled Tab Pane --}}
+        <div class="av-email-pane" id="email-pane-scheduled">
+          @if($scheduledEmails->count())
+          <div class="av-email-list">
+            @foreach($scheduledEmails as $em)
+            <div class="av-email-item">
+              <div class="av-email-avatar scheduled">{{ strtoupper(substr($em->to_email, 0, 1)) }}</div>
+              <div class="av-email-content">
+                <div class="av-email-header">
+                  <span class="av-email-to">To: {{ $em->to_email }}</span>
+                  <span class="av-email-date">Scheduled: {{ $em->scheduled_at ? $em->scheduled_at->format('d M Y, h:i A') : '—' }}</span>
+                </div>
+                <div class="av-email-subject">{{ $em->subject }} <span class="av-email-badge scheduled">Scheduled</span></div>
+                <div class="av-email-preview">{{ strip_tags($em->body_html) }}</div>
+              </div>
+              <div class="av-email-actions">
+                <button class="av-icon-btn danger" title="Cancel" onclick="deleteEmail({{ $em->id }}, this)">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                </button>
+              </div>
+            </div>
+            @endforeach
+          </div>
+          @else
+          <div class="av-empty">
+            <svg width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24" style="opacity:0.3;margin-bottom:8px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <p>No scheduled emails.</p>
+          </div>
+          @endif
+        </div>
+      </div>
+    </div>
   </div>{{-- end av-main --}}
 
   {{-- ── SECTION NAVIGATOR (frozen right sidebar) ── --}}
@@ -822,6 +978,115 @@
 </div>
 
 {{-- ═══════════════════════════════════════════════════════
+     COMPOSE EMAIL SLIDER
+═══════════════════════════════════════════════════════ --}}
+<div class="av-slider-overlay" id="overlay-slider-compose-email" onclick="closeComposeSlider()"></div>
+<div class="av-slider av-compose-slider" id="slider-compose-email">
+  <div class="av-slider-head">
+    <h3 id="compose-slider-title">Compose Email</h3>
+    <button class="av-slider-close" onclick="closeComposeSlider()">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div class="av-slider-body" style="padding:20px;overflow-y:auto;flex:1">
+
+    {{-- Mail Config Warning --}}
+    @if(!$mailConfig)
+    <div class="av-email-warning">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      No active mail configuration found. Emails will be saved as drafts.
+      <a href="{{ route('admin.crm2.integrations.mail-config') }}" target="_blank" style="color:var(--accent);text-decoration:underline">Configure Mail</a>
+    </div>
+    @endif
+
+    {{-- Template Picker --}}
+    <div class="av-form-group" style="margin-bottom:16px">
+      <label class="av-form-label">Mail Template <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
+      <div class="av-template-picker">
+        <select id="compose-template-select" class="av-form-input" onchange="loadEmailTemplate(this.value)">
+          <option value="">— Select a template —</option>
+          @foreach($mailTemplates as $tpl)
+          <option value="{{ $tpl->id }}">{{ $tpl->name }} ({{ ucfirst(str_replace('_', ' ', $tpl->type)) }})</option>
+          @endforeach
+        </select>
+        <button type="button" class="av-btn outline" id="load-template-btn" onclick="loadEmailTemplate(document.getElementById('compose-template-select').value)" style="white-space:nowrap">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Load
+        </button>
+      </div>
+    </div>
+
+    {{-- To --}}
+    <div class="av-form-group" style="margin-bottom:12px">
+      <label class="av-form-label">To <span style="color:var(--accent)">*</span></label>
+      <input type="email" id="compose-to" class="av-form-input" placeholder="recipient@example.com"
+        value="{{ $account->email ?? '' }}">
+    </div>
+
+    {{-- CC / BCC toggle --}}
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button type="button" class="av-btn outline" style="font-size:0.75rem;padding:4px 10px" onclick="toggleCcBcc('cc')">+ CC</button>
+      <button type="button" class="av-btn outline" style="font-size:0.75rem;padding:4px 10px" onclick="toggleCcBcc('bcc')">+ BCC</button>
+    </div>
+    <div id="compose-cc-row" style="display:none;margin-bottom:12px">
+      <label class="av-form-label">CC</label>
+      <input type="email" id="compose-cc" class="av-form-input" placeholder="cc@example.com">
+    </div>
+    <div id="compose-bcc-row" style="display:none;margin-bottom:12px">
+      <label class="av-form-label">BCC</label>
+      <input type="email" id="compose-bcc" class="av-form-input" placeholder="bcc@example.com">
+    </div>
+
+    {{-- Subject --}}
+    <div class="av-form-group" style="margin-bottom:12px">
+      <label class="av-form-label">Subject <span style="color:var(--accent)">*</span></label>
+      <input type="text" id="compose-subject" class="av-form-input" placeholder="Email subject">
+    </div>
+
+    {{-- Body --}}
+    <div class="av-form-group" style="margin-bottom:12px">
+      <label class="av-form-label">Message <span style="color:var(--accent)">*</span></label>
+      <div class="av-email-editor-toolbar">
+        <button type="button" onclick="execCmd('bold')" title="Bold"><strong>B</strong></button>
+        <button type="button" onclick="execCmd('italic')" title="Italic"><em>I</em></button>
+        <button type="button" onclick="execCmd('underline')" title="Underline"><u>U</u></button>
+        <button type="button" onclick="execCmd('insertUnorderedList')" title="Bullet List">&#8226;</button>
+        <button type="button" onclick="execCmd('insertOrderedList')" title="Numbered List">1.</button>
+        <button type="button" onclick="insertLink()" title="Insert Link">&#128279;</button>
+        <button type="button" onclick="clearEditor()" title="Clear" style="margin-left:auto;color:var(--text-muted)">Clear</button>
+      </div>
+      <div id="compose-body" class="av-email-editor" contenteditable="true" data-placeholder="Write your email message here..."></div>
+    </div>
+
+    {{-- Schedule Date (hidden by default) --}}
+    <div id="compose-schedule-row" style="display:none;margin-bottom:12px">
+      <label class="av-form-label">Schedule Date & Time</label>
+      <input type="datetime-local" id="compose-scheduled-at" class="av-form-input">
+    </div>
+
+    {{-- Status message --}}
+    <div id="compose-status" style="display:none;padding:10px 14px;border-radius:8px;font-size:0.85rem;margin-bottom:12px"></div>
+
+  </div>
+  {{-- Footer Actions --}}
+  <div class="av-slider-footer" style="padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap">
+    <button type="button" class="av-btn primary" id="compose-send-btn" onclick="submitEmail('send')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      Send
+    </button>
+    <button type="button" class="av-btn outline" onclick="submitEmail('draft')">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      Save Draft
+    </button>
+    <button type="button" class="av-btn outline" onclick="toggleSchedule()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Schedule
+    </button>
+    <button type="button" class="av-btn outline" style="margin-left:auto" onclick="closeComposeSlider()">Cancel</button>
+  </div>
+</div>
+
+{{-- ═══════════════════════════════════════════════════════
      ACTIVITY POPUP
 ═══════════════════════════════════════════════════════ --}}
 <div class="av-popup-overlay" id="popup-activity">
@@ -872,6 +1137,49 @@
   </div>
 </div>
 
+
+<style>
+/* ── Email Section ── */
+.av-email-tabs { display:flex; gap:0; border-bottom:1px solid var(--border); padding:0 20px; background:var(--bg-card); }
+.av-email-tab { display:flex; align-items:center; gap:6px; padding:12px 16px; font-size:0.85rem; font-weight:500; color:var(--text-muted); border:none; background:none; cursor:pointer; border-bottom:2px solid transparent; transition:all .2s; }
+.av-email-tab:hover { color:var(--text-primary); }
+.av-email-tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+.av-email-count { display:inline-flex; align-items:center; justify-content:center; min-width:18px; height:18px; padding:0 5px; background:var(--bg-secondary); color:var(--text-muted); border-radius:9px; font-size:0.7rem; font-weight:600; }
+.av-email-tab.active .av-email-count { background:var(--accent); color:#fff; }
+.av-email-source-bar { display:flex; align-items:center; gap:10px; padding:10px 20px; background:var(--bg-secondary); border-bottom:1px solid var(--border); font-size:0.82rem; }
+.av-email-source-label { color:var(--text-muted); white-space:nowrap; }
+.av-email-pane { display:none; }
+.av-email-pane.active { display:block; }
+.av-email-list { display:flex; flex-direction:column; }
+.av-email-item { display:flex; align-items:flex-start; gap:12px; padding:14px 20px; border-bottom:1px solid var(--border); transition:background .15s; }
+.av-email-item:hover { background:var(--bg-secondary); }
+.av-email-avatar { width:36px; height:36px; border-radius:50%; background:var(--accent); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:0.9rem; flex-shrink:0; }
+.av-email-avatar.draft { background:var(--text-muted); }
+.av-email-avatar.scheduled { background:#f59e0b; }
+.av-email-content { flex:1; min-width:0; }
+.av-email-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:3px; gap:8px; }
+.av-email-to { font-size:0.82rem; color:var(--text-muted); }
+.av-email-date { font-size:0.75rem; color:var(--text-muted); white-space:nowrap; }
+.av-email-subject { font-size:0.9rem; font-weight:600; color:var(--text-primary); margin-bottom:3px; display:flex; align-items:center; gap:8px; }
+.av-email-preview { font-size:0.8rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:400px; }
+.av-email-error { display:flex; align-items:center; gap:4px; font-size:0.75rem; color:#ef4444; margin-top:4px; }
+.av-email-badge { font-size:0.68rem; font-weight:600; padding:2px 7px; border-radius:10px; text-transform:uppercase; letter-spacing:.04em; }
+.av-email-badge.draft { background:rgba(100,116,139,.15); color:#64748b; }
+.av-email-badge.scheduled { background:rgba(245,158,11,.15); color:#f59e0b; }
+.av-email-actions { display:flex; gap:6px; flex-shrink:0; }
+.av-email-warning { display:flex; align-items:center; gap:8px; padding:10px 14px; background:rgba(245,158,11,.1); border:1px solid rgba(245,158,11,.3); border-radius:8px; font-size:0.82rem; color:#92400e; margin-bottom:16px; flex-wrap:wrap; }
+[data-theme="dark"] .av-email-warning { color:#fbbf24; }
+/* Compose Slider */
+.av-compose-slider { width:520px !important; }
+.av-template-picker { display:flex; gap:8px; }
+.av-template-picker select { flex:1; }
+.av-email-editor-toolbar { display:flex; gap:4px; padding:6px 8px; background:var(--bg-secondary); border:1px solid var(--border); border-bottom:none; border-radius:8px 8px 0 0; flex-wrap:wrap; }
+.av-email-editor-toolbar button { padding:3px 8px; background:none; border:1px solid transparent; border-radius:4px; cursor:pointer; font-size:0.82rem; color:var(--text-primary); transition:all .15s; }
+.av-email-editor-toolbar button:hover { background:var(--bg-card); border-color:var(--border); }
+.av-email-editor { min-height:200px; padding:12px; background:var(--bg-card); border:1px solid var(--border); border-radius:0 0 8px 8px; color:var(--text-primary); font-size:0.875rem; line-height:1.6; overflow-y:auto; max-height:300px; }
+.av-email-editor:empty:before { content:attr(data-placeholder); color:var(--text-muted); pointer-events:none; }
+.av-email-editor:focus { outline:none; border-color:var(--accent); }
+</style>
 <script>
 // ── Section Navigator ──
 function setActive(el) {
@@ -963,5 +1271,202 @@ function closeActivityPopup() {
 document.getElementById('popup-activity').addEventListener('click', function(e) {
   if (e.target === this) closeActivityPopup();
 });
+
+// ── Email Section ──
+let currentEditEmailId = null;
+const accountId = {{ $account->id }};
+const csrfToken = '{{ csrf_token() }}';
+const emailListUrl = '{{ route("admin.crm2.accounts.emails.list", $account->id) }}';
+const emailStoreUrl = '{{ route("admin.crm2.accounts.emails.store", $account->id) }}';
+const emailTemplateUrl = '{{ route("admin.crm2.accounts.emails.template", $account->id) }}';
+const emailDestroyBase = '{{ url("admin/crm2/sales/accounts/" . $account->id . "/emails") }}';
+
+function switchEmailTab(tab, btn) {
+  document.querySelectorAll('.av-email-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.av-email-pane').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('email-pane-' + tab).classList.add('active');
+  const sourceBar = document.getElementById('email-source-bar');
+  if (sourceBar) sourceBar.style.display = tab === 'scheduled' ? 'flex' : 'none';
+}
+
+function setEmailSource(source, btn) {
+  document.querySelectorAll('#dd-email-source .av-dropdown-item').forEach(i => i.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('email-source-label-text').textContent = btn.textContent.trim();
+  document.getElementById('dd-email-source').classList.remove('open');
+}
+
+function openComposeSlider(emailData) {
+  currentEditEmailId = null;
+  document.getElementById('compose-slider-title').textContent = 'Compose Email';
+  document.getElementById('compose-send-btn').style.display = '';
+  // Reset form
+  document.getElementById('compose-to').value = '{{ $account->email ?? "" }}';
+  document.getElementById('compose-cc').value = '';
+  document.getElementById('compose-bcc').value = '';
+  document.getElementById('compose-subject').value = '';
+  document.getElementById('compose-body').innerHTML = '';
+  document.getElementById('compose-template-select').value = '';
+  document.getElementById('compose-cc-row').style.display = 'none';
+  document.getElementById('compose-bcc-row').style.display = 'none';
+  document.getElementById('compose-schedule-row').style.display = 'none';
+  document.getElementById('compose-status').style.display = 'none';
+  if (emailData) {
+    // Pre-fill for edit draft
+    currentEditEmailId = emailData.id;
+    document.getElementById('compose-slider-title').textContent = 'Edit Draft';
+    document.getElementById('compose-send-btn').style.display = '';
+    document.getElementById('compose-to').value = emailData.to_email || '';
+    document.getElementById('compose-cc').value = emailData.cc_email || '';
+    document.getElementById('compose-bcc').value = emailData.bcc_email || '';
+    document.getElementById('compose-subject').value = emailData.subject || '';
+    document.getElementById('compose-body').innerHTML = emailData.body_html || '';
+    if (emailData.cc_email) document.getElementById('compose-cc-row').style.display = '';
+    if (emailData.bcc_email) document.getElementById('compose-bcc-row').style.display = '';
+  }
+  document.getElementById('overlay-slider-compose-email').classList.add('open');
+  document.getElementById('slider-compose-email').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeComposeSlider() {
+  document.getElementById('overlay-slider-compose-email').classList.remove('open');
+  document.getElementById('slider-compose-email').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function toggleCcBcc(field) {
+  const row = document.getElementById('compose-' + field + '-row');
+  row.style.display = row.style.display === 'none' ? '' : 'none';
+}
+
+function toggleSchedule() {
+  const row = document.getElementById('compose-schedule-row');
+  const isVisible = row.style.display !== 'none';
+  row.style.display = isVisible ? 'none' : '';
+  if (!isVisible) {
+    // Auto-set to 1 hour from now
+    const dt = new Date(Date.now() + 3600000);
+    const pad = n => String(n).padStart(2,'0');
+    document.getElementById('compose-scheduled-at').value =
+      dt.getFullYear() + '-' + pad(dt.getMonth()+1) + '-' + pad(dt.getDate()) +
+      'T' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+  }
+}
+
+function loadEmailTemplate(templateId) {
+  if (!templateId) return;
+  fetch(emailTemplateUrl + '?template_id=' + templateId, {
+    headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+  }).then(r => r.json()).then(data => {
+    if (data.success) {
+      document.getElementById('compose-subject').value = data.subject || '';
+      document.getElementById('compose-body').innerHTML = data.body_html || '';
+    }
+  }).catch(() => {});
+}
+
+function execCmd(cmd) {
+  document.getElementById('compose-body').focus();
+  document.execCommand(cmd, false, null);
+}
+function insertLink() {
+  const url = prompt('Enter URL:', 'https://');
+  if (url) { document.getElementById('compose-body').focus(); document.execCommand('createLink', false, url); }
+}
+function clearEditor() {
+  if (confirm('Clear the email body?')) document.getElementById('compose-body').innerHTML = '';
+}
+
+function submitEmail(action) {
+  const to = document.getElementById('compose-to').value.trim();
+  const subject = document.getElementById('compose-subject').value.trim();
+  const body = document.getElementById('compose-body').innerHTML.trim();
+  const statusEl = document.getElementById('compose-status');
+
+  if (!to) { showComposeStatus('Please enter a recipient email address.', 'error'); return; }
+  if (!subject) { showComposeStatus('Please enter a subject.', 'error'); return; }
+  if (!body || body === '') { showComposeStatus('Please write a message.', 'error'); return; }
+  if (action === 'schedule') {
+    const sched = document.getElementById('compose-scheduled-at').value;
+    if (!sched) { showComposeStatus('Please set a schedule date and time.', 'error'); return; }
+  }
+
+  const sendBtn = document.getElementById('compose-send-btn');
+  sendBtn.disabled = true;
+  sendBtn.textContent = action === 'send' ? 'Sending...' : 'Saving...';
+
+  const payload = {
+    action,
+    to_email: to,
+    cc_email: document.getElementById('compose-cc').value.trim() || null,
+    bcc_email: document.getElementById('compose-bcc').value.trim() || null,
+    subject,
+    body_html: body,
+    mail_template_id: document.getElementById('compose-template-select').value || null,
+    scheduled_at: action === 'schedule' ? document.getElementById('compose-scheduled-at').value : null,
+  };
+
+  fetch(emailStoreUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(r => r.json()).then(data => {
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Send';
+    if (data.success) {
+      showComposeStatus(data.message, data.status === 'sent' ? 'success' : 'warning');
+      setTimeout(() => {
+        closeComposeSlider();
+        location.reload();
+      }, 1800);
+    } else {
+      showComposeStatus(data.message || 'Failed to send email.', 'error');
+    }
+  }).catch(err => {
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Send';
+    showComposeStatus('Network error. Please try again.', 'error');
+  });
+}
+
+function showComposeStatus(msg, type) {
+  const el = document.getElementById('compose-status');
+  el.style.display = 'block';
+  el.textContent = msg;
+  const colors = {
+    success: 'rgba(34,197,94,.15)',
+    error:   'rgba(239,68,68,.15)',
+    warning: 'rgba(245,158,11,.15)'
+  };
+  const textColors = { success: '#15803d', error: '#dc2626', warning: '#92400e' };
+  el.style.background = colors[type] || colors.success;
+  el.style.color = textColors[type] || textColors.success;
+  el.style.border = '1px solid ' + (el.style.background);
+}
+
+function editDraft(emailId, emailData) {
+  openComposeSlider(emailData);
+}
+
+function viewEmail(emailId) {
+  // Open a simple modal or redirect — for now open in new tab
+  window.open(emailDestroyBase + '/' + emailId + '/view', '_blank');
+}
+
+function deleteEmail(emailId, btn) {
+  if (!confirm('Delete this email?')) return;
+  fetch(emailDestroyBase + '/' + emailId, {
+    method: 'DELETE',
+    headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+  }).then(r => r.json()).then(data => {
+    if (data.success) {
+      const item = btn.closest('.av-email-item');
+      if (item) item.remove();
+    }
+  }).catch(() => alert('Failed to delete.'));
+}
+
 </script>
 @endsection
