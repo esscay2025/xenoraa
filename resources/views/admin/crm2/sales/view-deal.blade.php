@@ -67,18 +67,18 @@
         <div class="cv-card-header"><i class="fas fa-handshake"></i> Deal Information</div>
         <div class="cv-card-body">
           <div class="cv-grid">
-            <div class="cv-field"><label>Deal Owner</label><div class="val">{{ $deal->owner?->name ?? '<span class="empty">Unassigned</span>' }}</div></div>
-            <div class="cv-field"><label>Deal Name</label><div class="val">{{ $deal->name ?? $deal->title ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Deal Owner</label><div class="val">{!! $deal->owner?->name  ?? \'<span class="empty">Unassigned</span>\' !!}</div></div>
+            <div class="cv-field"><label>Deal Name</label><div class="val">{!! $deal->name ?? $deal->title  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
             <div class="cv-field"><label>Account</label><div class="val">@if($deal->account)<a href="{{ route('admin.crm2.sales.accounts.show', $deal->account_id) }}" style="color:var(--accent)">{{ $deal->account->name }}</a>@else<span style="color:var(--text-muted);font-style:italic;">—</span>@endif</div></div>
             <div class="cv-field"><label>Contact</label><div class="val">@if($deal->contact)<a href="{{ route('admin.crm2.sales.contacts.show', $deal->contact_id) }}" style="color:var(--accent)">{{ $deal->contact->first_name }} {{ $deal->contact->last_name }}</a>@else<span style="color:var(--text-muted);font-style:italic;">—</span>@endif</div></div>
-            <div class="cv-field"><label>Type</label><div class="val">{{ $deal->type ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="cv-field"><label>Lead Source</label><div class="val">{{ $deal->lead_source ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Type</label><div class="val">{!! $deal->type  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
+            <div class="cv-field"><label>Lead Source</label><div class="val">{!! $deal->lead_source  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
             <div class="cv-field"><label>Amount</label><div class="val">{{ $deal->amount ? '$'.number_format($deal->amount,2) : ($deal->value ? '$'.number_format($deal->value,2) : '<span style="color:var(--text-muted);font-style:italic;">—</span>') }}</div></div>
             <div class="cv-field"><label>Closing Date</label><div class="val">{{ $deal->closing_date ? \Carbon\Carbon::parse($deal->closing_date)->format('d M Y') : ($deal->expected_close ? \Carbon\Carbon::parse($deal->expected_close)->format('d M Y') : '<span style="color:var(--text-muted);font-style:italic;">—</span>') }}</div></div>
             <div class="cv-field"><label>Probability</label><div class="val">{{ $deal->probability ? $deal->probability.'%' : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
             <div class="cv-field"><label>Expected Revenue</label><div class="val">{{ $deal->expected_revenue ? '$'.number_format($deal->expected_revenue,2) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="cv-field"><label>Campaign Source</label><div class="val">{{ $deal->campaign_source ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="cv-field"><label>Next Step</label><div class="val">{{ $deal->next_step ?? '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="cv-field"><label>Campaign Source</label><div class="val">{!! $deal->campaign_source  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
+            <div class="cv-field"><label>Next Step</label><div class="val">{!! $deal->next_step  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
           </div>
           @if($deal->description)
           <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0">

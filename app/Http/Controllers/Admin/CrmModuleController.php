@@ -1213,26 +1213,37 @@ class CrmModuleController extends Controller
 
     // ─── EDIT METHODS (full-page edit forms) ─────────────────────────────────
 
-    public function salesLeadsEdit($id) {
-        $tid = $this->tenantId();
-        $lead = CrmLead::where('user_id', $tid)->findOrFail($id);
+    public function salesLeadsEdit($id)
+    {
+        $tid = auth()->id();
+        $item = CrmLead::where('user_id', $tid)->findOrFail($id);
         $staff = \App\Models\User::where('id', $tid)->get();
-        return view('admin.crm2.sales.edit-lead', compact('lead', 'staff'));
+        return view('admin.crm2.sales.edit-lead', compact('item', 'staff'));
     }
-    public function salesContactsEdit($id) {
-        $item = CrmContact::where('user_id', auth()->id())->findOrFail($id);
-        $accounts = CrmAccount::where('user_id', auth()->id())->orderBy('name')->get();
-        return view('admin.crm2.sales.edit-contact', compact('item', 'accounts'));
+    public function salesContactsEdit($id)
+    {
+        $tid = auth()->id();
+        $item = CrmContact::where('user_id', $tid)->findOrFail($id);
+        $staff = \App\Models\User::where('id', $tid)->get();
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.sales.edit-contact', compact('item', 'staff', 'accounts_list'));
     }
-    public function salesAccountsEdit($id) {
-        $item = CrmAccount::where('user_id', auth()->id())->findOrFail($id);
-        return view('admin.crm2.sales.edit-account', compact('item'));
+    public function salesAccountsEdit($id)
+    {
+        $tid = auth()->id();
+        $item = CrmAccount::where('user_id', $tid)->findOrFail($id);
+        $staff = \App\Models\User::where('id', $tid)->get();
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.sales.edit-account', compact('item', 'staff', 'accounts_list'));
     }
-    public function salesDealsEdit($id) {
-        $item = CrmDeal::where('user_id', auth()->id())->findOrFail($id);
-        $accounts = CrmAccount::where('user_id', auth()->id())->orderBy('name')->get();
-        $contacts = CrmContact::where('user_id', auth()->id())->orderBy('first_name')->get();
-        return view('admin.crm2.sales.edit-deal', compact('item', 'accounts', 'contacts'));
+    public function salesDealsEdit($id)
+    {
+        $tid = auth()->id();
+        $item = CrmDeal::where('user_id', $tid)->findOrFail($id);
+        $staff = \App\Models\User::where('id', $tid)->get();
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $contacts_list = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
+        return view('admin.crm2.sales.edit-deal', compact('item', 'staff', 'accounts_list', 'contacts_list'));
     }
     public function salesForecastsEdit($id) {
         $item = CrmForecast::where('user_id', auth()->id())->findOrFail($id);

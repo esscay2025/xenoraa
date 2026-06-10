@@ -111,3 +111,12 @@
   - Controller: salesContactsStore/Show/Update, salesAccountsStore/Show/Update, salesDealsStore/Show/Update added
   - List pages: accounts.blade.php and contacts.blade.php popup edit buttons replaced with view/edit page links
   - Lead fixes: CrmLead owner() relationship added; salesLeadsCreate passes staff list
+- v4.9.2 (2026-06-10): CRM Sales module comprehensive fix
+  - edit-lead.blade.php: Fully rewritten to match create-lead structure (8 sections, all fields, correct route)
+  - edit-contact.blade.php: Rewritten to match create-contact structure (8 sections, staff/account dropdowns)
+  - edit-account.blade.php: Rewritten to match create-account structure (6 sections, staff dropdown)
+  - edit-deal.blade.php: Rewritten to match create-deal structure (stage, qualification, linked dropdowns)
+  - view-contact/account/deal.blade.php: Fixed HTML escaping ({{ }} → {!! !!}) for fallback span values
+  - salesLeadsEdit/salesContactsEdit/salesAccountsEdit/salesDealsEdit: Fixed to pass $staff, $accounts_list, $contacts_list
+  - Demo data: 10 accounts, 10 contacts, 9 deals seeded for user_id=1 (Gopi K tenant)
+  - crm_leads: Updated existing 10 demo leads with proper first_name/last_name split from name column
