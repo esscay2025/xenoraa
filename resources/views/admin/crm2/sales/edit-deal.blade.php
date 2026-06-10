@@ -1,3 +1,4 @@
+@php if(!isset($errors)) $errors = new \Illuminate\Support\MessageBag; @endphp
 @extends('layouts.admin')
 @section('title', 'Edit Deal')
 @section('page-title', 'Edit Deal')
@@ -95,7 +96,7 @@
         </div>
         <div class="cf-field">
           <label>Closing Date</label>
-          <input type="date" name="closing_date" value="{{ old('closing_date',$item->closing_date ? $item->closing_date->format('Y-m-d') : '') }}">
+          <input type="date" name="closing_date" value="{{ old('closing_date', $item->closing_date ? substr($item->closing_date, 0, 10) : '') }}">
         </div>
         <div class="cf-field">
           <label>Stage</label>

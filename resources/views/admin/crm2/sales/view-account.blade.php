@@ -74,11 +74,11 @@
         <div class="cv-card-header"><i class="fas fa-building"></i> Account Profile</div>
         <div class="cv-card-body">
           <div class="cv-grid">
-            <div class="cv-field"><label>Account Owner</label><div class="val">{!! $account->owner?->name  ?? \'<span class="empty">Unassigned</span>\' !!}</div></div>
+            <div class="cv-field"><label>Account Owner</label><div class="val">{{ $account->owner?->name ?: '—' }}</div></div>
             <div class="cv-field"><label>Account Name</label><div class="val">{{ $account->name }}</div></div>
-            <div class="cv-field"><label>Account Number</label><div class="val">{!! $account->account_number  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
-            <div class="cv-field"><label>Account Type</label><div class="val">{!! $account->account_type  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
-            <div class="cv-field"><label>Rating</label><div class="val">{!! $account->rating  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
+            <div class="cv-field"><label>Account Number</label><div class="val">{{ $account->account_number ?: '—' }}</div></div>
+            <div class="cv-field"><label>Account Type</label><div class="val">{{ $account->account_type ?: '—' }}</div></div>
+            <div class="cv-field"><label>Rating</label><div class="val">{{ $account->rating ?: '—' }}</div></div>
           </div>
         </div>
       </div>
@@ -87,12 +87,12 @@
         <div class="cv-card-header"><i class="fas fa-industry"></i> Company Information</div>
         <div class="cv-card-body">
           <div class="cv-grid">
-            <div class="cv-field"><label>Industry</label><div class="val">{!! $account->industry  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
-            <div class="cv-field"><label>Ownership</label><div class="val">{!! $account->ownership  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
+            <div class="cv-field"><label>Industry</label><div class="val">{{ $account->industry ?: '—' }}</div></div>
+            <div class="cv-field"><label>Ownership</label><div class="val">{{ $account->ownership ?: '—' }}</div></div>
             <div class="cv-field"><label>Employees</label><div class="val">{{ $account->employees ? number_format($account->employees) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
             <div class="cv-field"><label>Annual Revenue</label><div class="val">{{ $account->annual_revenue ? '$'.number_format($account->annual_revenue) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="cv-field"><label>SIC Code</label><div class="val">{!! $account->sic_code  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
-            <div class="cv-field"><label>Ticker Symbol</label><div class="val">{!! $account->ticker_symbol  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
+            <div class="cv-field"><label>SIC Code</label><div class="val">{{ $account->sic_code ?: '—' }}</div></div>
+            <div class="cv-field"><label>Ticker Symbol</label><div class="val">{{ $account->ticker_symbol ?: '—' }}</div></div>
           </div>
         </div>
       </div>
@@ -101,10 +101,10 @@
         <div class="cv-card-header"><i class="fas fa-phone"></i> Contact Information</div>
         <div class="cv-card-body">
           <div class="cv-grid">
-            <div class="cv-field"><label>Phone</label><div class="val">{!! $account->phone  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
-            <div class="cv-field"><label>Fax</label><div class="val">{!! $account->fax  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
+            <div class="cv-field"><label>Phone</label><div class="val">{{ $account->phone ?: '—' }}</div></div>
+            <div class="cv-field"><label>Fax</label><div class="val">{{ $account->fax ?: '—' }}</div></div>
             <div class="cv-field"><label>Website</label><div class="val">@if($account->website)<a href="{{ $account->website }}" target="_blank" style="color:var(--accent)">{{ $account->website }}</a>@else<span style="color:var(--text-muted);font-style:italic;">—</span>@endif</div></div>
-            <div class="cv-field"><label>Email</label><div class="val">{!! $account->email  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
+            <div class="cv-field"><label>Email</label><div class="val">{{ $account->email ?: '—' }}</div></div>
           </div>
         </div>
       </div>
@@ -113,12 +113,12 @@
         <div class="cv-card-header"><i class="fas fa-file-invoice"></i> Billing Address</div>
         <div class="cv-card-body">
           <div class="cv-grid">
-            <div class="cv-field"><label>Country</label><div class="val">{!! $account->billing_country  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
-            <div class="cv-field"><label>Building</label><div class="val">{!! $account->billing_building  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
-            <div class="cv-field"><label>Street</label><div class="val">{!! $account->billing_street  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
-            <div class="cv-field"><label>City</label><div class="val">{!! $account->billing_city  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
-            <div class="cv-field"><label>State</label><div class="val">{!! $account->billing_state  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
-            <div class="cv-field"><label>Postal Code</label><div class="val">{!! $account->billing_zip  ?? \'<span style="color:var(--text-muted);font-style:italic;">—</span>\' !!}</div></div>
+            <div class="cv-field"><label>Country</label><div class="val">{{ $account->billing_country ?: '—' }}</div></div>
+            <div class="cv-field"><label>Building</label><div class="val">{{ $account->billing_building ?: '—' }}</div></div>
+            <div class="cv-field"><label>Street</label><div class="val">{{ $account->billing_street ?: '—' }}</div></div>
+            <div class="cv-field"><label>City</label><div class="val">{{ $account->billing_city ?: '—' }}</div></div>
+            <div class="cv-field"><label>State</label><div class="val">{{ $account->billing_state ?: '—' }}</div></div>
+            <div class="cv-field"><label>Postal Code</label><div class="val">{{ $account->billing_zip ?: '—' }}</div></div>
           </div>
         </div>
       </div>
