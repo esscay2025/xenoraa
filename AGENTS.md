@@ -158,3 +158,24 @@
   - products.blade.php: Replaced cf-page/cv-section list section with crm2-page/crm2-table (consistent with all other list pages)
   - Added new CSS classes: crm2-icon-btn.view, crm2-btn-success, acct-view-layout, acct-nav, crm2-slider, crm2-slider-overlay
   - Commit: 25cb965
+
+- v4.11.3 (2026-06-10): CRM Inventory Bug Fixes
+  - Bug 1 (500 errors on create): All 6 inventory create methods were missing required view variables.
+    Fixed: inventoryPriceBooksCreate passes ; inventoryQuotesCreate passes ///;
+    inventorySalesOrdersCreate passes ////;
+    inventoryPurchaseOrdersCreate passes //;
+    inventoryInvoicesCreate passes //; inventoryVendorsCreate passes .
+  - Bug 2 (wrong redirect after update): Edit forms send singular type keys (quote, sales_order, invoice,
+    purchase_order, price_book, vendor) but inventoryUpdate routeMap only had plural keys.
+    Fixed: added both singular and plural keys to routeMap and switch cases in inventoryUpdate().
+    Also expanded update field lists to include owner_id, contact_id etc.
+  - Bug 3 (Products sidebar icon/alignment): Added sidebar-sub-sub-link class and fa-box-open icon.
+  - Bonus: inventoryStore now redirects to correct list page after create (was using back()).
+  - Commit: cfcf956
+
+- v4.11.3 (2026-06-10): CRM Inventory Bug Fixes
+  - Bug 1 (500 on create): All 6 create methods missing required view variables. Fixed: each now passes staff, accounts, contacts, deals, quotes, vendors as needed.
+  - Bug 2 (wrong redirect after update): Edit forms send singular type keys but routeMap had plural keys only. Fixed: added singular keys to routeMap and switch cases in inventoryUpdate().
+  - Bug 3 (Products sidebar): Added sidebar-sub-sub-link class and fa-box-open icon.
+  - Bonus: inventoryStore now redirects to correct list page after create.
+  - Commit: cfcf956
