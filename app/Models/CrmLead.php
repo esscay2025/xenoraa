@@ -9,12 +9,23 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class CrmLead extends Model
 {
     protected $fillable = [
-        // Legacy fields (AI chatbot / old CRM)
+        // Legacy
         'name', 'email', 'mobile', 'user_id', 'source', 'status',
         'priority', 'summary', 'notes', 'assigned_to', 'last_contacted_at',
-        // New CRM fields
         'phone', 'company', 'message', 'account_id', 'contact_id',
         'deal_value', 'tenant_owner_id',
+        // New fields
+        'lead_image', 'owner_id', 'lead_status', 'rating',
+        'salutation', 'first_name', 'last_name', 'title', 'industry',
+        'secondary_email', 'fax', 'website', 'twitter', 'linkedin',
+        'facebook', 'instagram', 'email_opt_out',
+        'country', 'flat_no', 'street', 'city', 'state', 'zip',
+        'annual_revenue', 'no_of_employees',
+        'budget', 'requirement', 'expected_purchase_date',
+        'decision_maker', 'competitor', 'interest_level', 'follow_up_date',
+        'campaign_source', 'campaign_name', 'referral_source',
+        'last_activity_date', 'converted_date', 'is_converted',
+        'description', 'internal_notes',
     ];
 
     protected $casts = [

@@ -221,7 +221,36 @@ class CrmModuleController extends Controller
 
         switch ($type) {
             case 'lead':
-                CrmLead::create(array_merge($request->only(['name','email','mobile','source','status','priority','deal_value','notes']), ['user_id' => $tid]));
+                $leadData = array_merge(
+                    $request->only([
+                        'lead_image','owner_id','lead_status','rating',
+                        'salutation','first_name','last_name','title','company','industry',
+                        'email','secondary_email','phone','mobile','fax','website',
+                        'twitter','linkedin','facebook','instagram',
+                        'country','flat_no','street','city','state','zip',
+                        'annual_revenue','no_of_employees',
+                        'budget','requirement','expected_purchase_date','deal_value',
+                        'decision_maker','competitor','interest_level','follow_up_date',
+                        'source','campaign_source','campaign_name','referral_source',
+                        'priority','description','internal_notes','notes',
+                    ]),
+                    [
+                        'user_id'       => $tid,
+                        'name'          => trim(($request->first_name ?? '') . ' ' . ($request->last_name ?? '')),
+                        'email_opt_out' => $request->boolean('email_opt_out'),
+                        'lead_status'   => $request->input('lead_status', 'Not Contacted'),
+                        'status'        => 'new',
+                    ]
+                );
+                // Handle image upload
+                if ($request->hasFile('lead_image')) {
+                    $leadData['lead_image'] = $request->file('lead_image')->store('crm/leads', 'public');
+                }
+                $lead = CrmLead::create($leadData);
+                if ($request->input('_action') === 'save_new') {
+                    return redirect()->route('admin.crm2.sales.leads.create')->with('success', 'Lead created. Add another.');
+                }
+                return redirect()->route('admin.crm2.sales.leads.show', $lead->id)->with('success', 'Lead created successfully.');
                 break;
             case 'contact':
                 CrmContact::create(array_merge($request->only(['first_name','last_name','email','phone','job_title','account_id','source','notes']), ['user_id' => $tid]));
@@ -246,7 +275,24 @@ class CrmModuleController extends Controller
 
         switch ($type) {
             case 'lead':
-                CrmLead::where('id', $id)->where('user_id', $tid)->update($request->only(['name','email','mobile','source','status','priority','deal_value','notes']));
+                $updateData = $request->only([
+                        'lead_image','owner_id','lead_status','rating',
+                        'salutation','first_name','last_name','title','company','industry',
+                        'email','secondary_email','phone','mobile','fax','website',
+                        'twitter','linkedin','facebook','instagram',
+                        'country','flat_no','street','city','state','zip',
+                        'annual_revenue','no_of_employees',
+                        'budget','requirement','expected_purchase_date','deal_value',
+                        'decision_maker','competitor','interest_level','follow_up_date',
+                        'source','campaign_source','campaign_name','referral_source',
+                        'priority','description','internal_notes','notes',
+                    ]);
+                $updateData['name'] = trim(($request->first_name ?? '') . ' ' . ($request->last_name ?? ''));
+                $updateData['email_opt_out'] = $request->boolean('email_opt_out');
+                if ($request->hasFile('lead_image')) {
+                    $updateData['lead_image'] = $request->file('lead_image')->store('crm/leads', 'public');
+                }
+                CrmLead::where('id', $id)->where('user_id', $tid)->update($updateData);
                 break;
             case 'contact':
                 CrmContact::where('id', $id)->where('user_id', $tid)->update($request->only(['first_name','last_name','email','phone','job_title','department','account_id','status','city','country','notes']));
@@ -756,9 +802,94 @@ class CrmModuleController extends Controller
         return view('admin.crm2.sales.leads', compact('leads'));
     }
 
-    public function salesLeadsCreate()
+        public function salesLeadsCreate()
     {
-        return view('admin.crm2.sales.create-lead');
+        $tid = $this->tenantId();
+        $staff = \App\Models\User::where('id', $tid)
+            ->orWhereHas('roles', fn($q) => $q->where('user_id', $tid))
+            ->orderBy('name')->get();
+        // Fallback: get all users for this tenant
+        if ($staff->isEmpty()) {
+            $staff = \App\Models\User::orderBy('name')->limit(20)->get();
+        }
+        return view('admin.crm2.sales.create-lead', compact('staff'));
+    }
+
+    public function salesLeadsShow($id)
+    {
+        $tid = $this->tenantId();
+        $lead = \App\Models\CrmLead::where('id', $id)->where('user_id', $tid)->with('owner')->firstOrFail();
+        $activities = \App\Models\CrmActivity::where('related_type', 'lead')
+            ->where('related_id', $id)
+            ->orderByDesc('created_at')
+            ->get();
+        return view('admin.crm2.sales.view-lead', compact('lead', 'activities'));
+    }
+
+    public function salesLeadsConvert(Request $request, $id)
+    {
+        $tid = $this->tenantId();
+        $lead = \App\Models\CrmLead::where('id', $id)->where('user_id', $tid)->firstOrFail();
+
+        if ($lead->is_converted) {
+            return back()->with('error', 'This lead has already been converted.');
+        }
+
+        // Create Account
+        $account = \App\Models\CrmAccount::create([
+            'user_id'  => $tid,
+            'name'     => $lead->company ?: ($lead->first_name . ' ' . $lead->last_name),
+            'type'     => 'prospect',
+            'industry' => $lead->industry,
+            'website'  => $lead->website,
+            'phone'    => $lead->phone ?? $lead->mobile,
+            'email'    => $lead->email,
+            'city'     => $lead->city,
+            'country'  => $lead->country,
+            'annual_revenue' => $lead->annual_revenue,
+            'employees'      => $lead->no_of_employees,
+            'notes'    => $lead->description,
+            'status'   => 'active',
+        ]);
+
+        // Create Contact
+        $contact = \App\Models\CrmContact::create([
+            'user_id'    => $tid,
+            'account_id' => $account->id,
+            'first_name' => $lead->first_name ?? $lead->name,
+            'last_name'  => $lead->last_name ?? '',
+            'email'      => $lead->email,
+            'phone'      => $lead->phone ?? $lead->mobile,
+            'job_title'  => $lead->title,
+            'source'     => $lead->source ?? 'manual',
+            'status'     => 'active',
+        ]);
+
+        // Optionally create Deal
+        if ($request->input('create_deal', '0') === '1') {
+            \App\Models\CrmDeal::create([
+                'user_id'        => $tid,
+                'title'          => 'Deal — ' . ($lead->company ?: $lead->first_name . ' ' . $lead->last_name),
+                'value'          => $lead->deal_value ?? $lead->budget ?? 0,
+                'stage'          => 'prospecting',
+                'account_id'     => $account->id,
+                'contact_id'     => $contact->id,
+                'expected_close' => $lead->expected_purchase_date ?? now()->addDays(30)->toDateString(),
+                'probability'    => 20,
+                'notes'          => $lead->requirement,
+            ]);
+        }
+
+        // Mark lead as converted
+        $lead->update([
+            'is_converted'   => true,
+            'converted_date' => now(),
+            'account_id'     => $account->id,
+            'contact_id'     => $contact->id,
+        ]);
+
+        return redirect()->route('admin.crm2.sales.leads')
+            ->with('success', 'Lead converted successfully! Account, Contact' . ($request->input('create_deal','0')==='1' ? ', and Deal' : '') . ' created.');
     }
 
     public function salesContacts(Request $request)

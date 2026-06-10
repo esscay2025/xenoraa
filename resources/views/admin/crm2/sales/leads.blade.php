@@ -26,7 +26,7 @@
       <tbody>
         @forelse($leads as $lead)
         <tr>
-          <td><strong>{{ $lead->name }}</strong></td>
+          <td><a href="{{ route('admin.crm2.sales.leads.show', $lead->id) }}" style="color:var(--accent,#6366f1);font-weight:600;text-decoration:none">{{ $lead->first_name ? $lead->first_name.' '.$lead->last_name : $lead->name }}</a></td>
           <td>{{ $lead->email ?? '—' }}</td>
           <td>{{ $lead->company ?? '—' }}</td>
           <td>{{ ucfirst($lead->source ?? 'manual') }}</td>
@@ -34,6 +34,7 @@
           <td>{{ $lead->deal_value ? '₹'.number_format($lead->deal_value,0) : '—' }}</td>
           <td>{{ $lead->created_at->format('d M Y') }}</td>
           <td class="actions-cell">
+            <a href="{{ route('admin.crm2.sales.leads.show', $lead->id) }}" class="crm2-icon-btn" title="View" style="color:var(--accent,#6366f1)"><i class="fas fa-eye"></i></a>
             <a href="{{ route('admin.crm2.sales.leads.edit', $lead->id) }}" class="crm2-icon-btn edit" title="Edit"><i class="fas fa-edit"></i></a>
             <form method="POST" action="{{ route('admin.crm2.sales.destroy', ['type'=>'lead','id'=>$lead->id]) }}" onsubmit="return confirm('Delete this lead?')" style="display:inline">@csrf @method('DELETE')<button type="submit" class="crm2-icon-btn delete" title="Delete"><i class="fas fa-trash"></i></button></form>
           </td>

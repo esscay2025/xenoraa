@@ -359,6 +359,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         // Sales sub-module routes
         Route::get('/sales/leads',                  [$ctrl, 'salesLeads'])->name('sales.leads');
         Route::get('/sales/leads/create',           [$ctrl, 'salesLeadsCreate'])->name('sales.leads.create');
+        Route::get('/sales/leads/{id}',             [$ctrl, 'salesLeadsShow'])->name('sales.leads.show');
+        Route::post('/sales/leads/{id}/convert',    [$ctrl, 'salesLeadsConvert'])->name('sales.leads.convert');
         Route::get('/sales/contacts',               [$ctrl, 'salesContacts'])->name('sales.contacts');
         Route::get('/sales/contacts/create',        [$ctrl, 'salesContactsCreate'])->name('sales.contacts.create');
         Route::get('/sales/accounts',               [$ctrl, 'salesAccounts'])->name('sales.accounts');
