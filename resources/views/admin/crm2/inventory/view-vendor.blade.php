@@ -364,7 +364,7 @@
       <div class="vv-card-body">
         <div style="display:flex;gap:.5rem;margin-bottom:.75rem;flex-wrap:wrap;">
           <button class="vv-btn primary sm" onclick="vvOpenSlider('slider-assign-contact')">&#43; Assign Contact</button>
-          <a href="{{ route('admin.crm2.contacts.create') }}?vendor_id={{ $item->id }}" class="vv-btn secondary sm">&#43; New Contact</a>
+          <a href="{{ route('admin.newcrm.contacts.create') }}?vendor_id={{ $item->id }}" class="vv-btn secondary sm">&#43; New Contact</a>
         </div>
         @if($contacts->count())
           <table class="vv-table">
