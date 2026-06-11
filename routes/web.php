@@ -441,6 +441,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         // Products sub-module
         Route::get('/inventory/products',              [$ctrl, 'inventoryProducts'])->name('inventory.products');
         Route::get('/inventory/products/create',       [$ctrl, 'inventoryProductsCreate'])->name('inventory.products.create');
+        Route::get('/inventory/products/search',       [$ctrl, 'inventoryProductsSearch'])->name('inventory.products.search');
         Route::post('/inventory/products',             [$ctrl, 'inventoryProductsStore'])->name('inventory.products.store');
         Route::get('/inventory/products/{id}',         [$ctrl, 'inventoryProductsShow'])->name('inventory.products.show');
         Route::get('/inventory/products/{id}/edit',    [$ctrl, 'inventoryProductsEdit'])->name('inventory.products.edit');

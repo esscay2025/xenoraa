@@ -457,34 +457,28 @@ class CrmModuleController extends Controller
         ));
     }
 
-    public function inventoryStore(Request $request)
+        public function inventoryStore(Request $request)
     {
         $tid  = $this->tenantId();
-        $type = $request->input('_type');
-
-        // Build line items JSON
-        $lineItems = [];
-        if ($request->has('item_name')) {
-            foreach ($request->item_name as $i => $name) {
-                if (!$name) continue;
-                $lineItems[] = [
-                    'name'      => $name,
-                    'qty'       => (float) ($request->item_qty[$i] ?? 1),
-                    'price'     => (float) ($request->item_price[$i] ?? 0),
-                    'discount'  => (float) ($request->item_discount[$i] ?? 0),
-                    'tax_rate'  => (float) ($request->item_tax_rate[$i] ?? 0),
-                    'total'     => (float) ($request->item_total[$i] ?? 0),
-                ];
+        $type = $request->input('type');
+                // Build line items JSON - forms send as JSON string
+        $lineItemsRaw = $request->input('line_items');
+        $lineItems = null;
+        if ($lineItemsRaw) {
+            $decoded = json_decode($lineItemsRaw, true);
+            if (is_array($decoded) && count($decoded) > 0) {
+                $lineItems = $decoded;
             }
         }
-
         $common = [
-            'user_id'  => $tid,
-            'subtotal'   => (float) $request->input('subtotal', 0),
+            'user_id'         => $tid,
+            'subtotal'        => (float) $request->input('subtotal', 0),
             'discount_amount' => (float) $request->input('discount_amount', 0),
-            'tax_amount' => (float) $request->input('tax_amount', 0),
-            'total'      => (float) $request->input('total', 0),
-            'line_items' => $lineItems ?: null,
+            'tax_amount'      => (float) $request->input('tax_amount', 0),
+            'adjustment'      => (float) $request->input('adjustment', 0),
+            'grand_total'     => (float) $request->input('grand_total', 0),
+            'total'           => (float) $request->input('grand_total', $request->input('total', 0)),
+            'line_items'      => $lineItems,
         ];
 
         switch ($type) {
@@ -493,28 +487,36 @@ class CrmModuleController extends Controller
                 break;
             case 'quote':
                 CrmQuote::create(array_merge(
-                    $request->only(['subject','account_id','contact_id','stage','valid_until','terms','notes','billing_street','billing_city','billing_state','billing_code','billing_country','shipping_street','shipping_city','shipping_state','shipping_code','shipping_country']),
+                    $request->only(['subject','account_id','contact_id','deal_id','stage','valid_until','terms','notes','team','carrier',
+                        'bill_country','bill_building','bill_street','bill_city','bill_state','bill_zip',
+                        'ship_country','ship_building','ship_street','ship_city','ship_state','ship_zip']),
                     $common,
                     ['quote_number' => 'QT-' . strtoupper(Str::random(8))]
                 ));
                 break;
             case 'sales_order':
                 CrmSalesOrder::create(array_merge(
-                    $request->only(['subject','account_id','contact_id','status','delivery_date','notes','billing_street','billing_city','billing_state','billing_code','billing_country','shipping_street','shipping_city','shipping_state','shipping_code','shipping_country']),
+                    $request->only(['subject','account_id','contact_id','deal_id','quote_id','status','delivery_date','terms','notes',
+                        'bill_country','bill_building','bill_street','bill_city','bill_state','bill_zip',
+                        'ship_country','ship_building','ship_street','ship_city','ship_state','ship_zip']),
                     $common,
                     ['so_number' => 'SO-' . strtoupper(Str::random(8))]
                 ));
                 break;
             case 'purchase_order':
                 CrmPurchaseOrder::create(array_merge(
-                    $request->only(['subject','vendor_id','contact_id','status','expected_delivery','notes','billing_street','billing_city','billing_state','billing_code','billing_country','shipping_street','shipping_city','shipping_state','shipping_code','shipping_country']),
+                    $request->only(['subject','vendor_id','contact_id','status','expected_delivery','terms','notes','requisition_no',
+                        'bill_country','bill_building','bill_street','bill_city','bill_state','bill_zip',
+                        'ship_country','ship_building','ship_street','ship_city','ship_state','ship_zip']),
                     $common,
                     ['po_number' => 'PO-' . strtoupper(Str::random(8))]
                 ));
                 break;
             case 'invoice':
                 $inv = array_merge(
-                    $request->only(['subject','account_id','contact_id','status','due_date','amount_paid','notes','billing_street','billing_city','billing_state','billing_code','billing_country','shipping_street','shipping_city','shipping_state','shipping_code','shipping_country']),
+                    $request->only(['subject','account_id','contact_id','deal_id','sales_order_id','status','due_date','amount_paid','terms','notes',
+                        'bill_country','bill_building','bill_street','bill_city','bill_state','bill_zip',
+                        'ship_country','ship_building','ship_street','ship_city','ship_state','ship_zip']),
                     $common,
                     ['invoice_number' => 'INV-' . strtoupper(Str::random(8))]
                 );
@@ -630,6 +632,23 @@ class CrmModuleController extends Controller
         $tid = $this->tenantId();
         \App\Models\CrmProduct::where('user_id', $tid)->findOrFail($id)->delete();
         return back()->with('success', 'Product deleted.');
+    }
+
+    public function inventoryProductsSearch(Request $request)
+    {
+        $tid = $this->tenantId();
+        $q = $request->input('q', '');
+        $products = \App\Models\CrmProduct::where('user_id', $tid)
+            ->where('is_active', 1)
+            ->where(function($query) use ($q) {
+                $query->where('name', 'like', "%{$q}%")
+                      ->orWhere('product_code', 'like', "%{$q}%");
+            })
+            ->select('id','name','product_code','unit_price','tax','usage_unit','qty_in_stock')
+            ->orderBy('name')
+            ->limit(20)
+            ->get();
+        return response()->json($products);
     }
 
     public function inventoryDestroy(string $type, int $id)
@@ -1452,6 +1471,26 @@ class CrmModuleController extends Controller
             'invoice'        => 'admin.crm2.inventory.invoices',
             'vendor'         => 'admin.crm2.inventory.vendors',
         ];
+        // Parse line items JSON
+        $lineItemsRaw = $request->input('line_items');
+        $lineItems = null;
+        if ($lineItemsRaw) {
+            $decoded = json_decode($lineItemsRaw, true);
+            if (is_array($decoded) && count($decoded) > 0) {
+                $lineItems = $decoded;
+            }
+        }
+        $commonFields = [
+            'subtotal'        => (float) $request->input('subtotal', 0),
+            'discount_amount' => (float) $request->input('discount_amount', 0),
+            'tax_amount'      => (float) $request->input('tax_amount', 0),
+            'adjustment'      => (float) $request->input('adjustment', 0),
+            'grand_total'     => (float) $request->input('grand_total', 0),
+            'total'           => (float) $request->input('grand_total', $request->input('total', 0)),
+            'line_items'      => $lineItems,
+        ];
+        $addrFields = ['bill_country','bill_building','bill_street','bill_city','bill_state','bill_zip',
+                       'ship_country','ship_building','ship_street','ship_city','ship_state','ship_zip'];
         switch ($type) {
             case 'price_books':
             case 'price_book':
@@ -1459,19 +1498,33 @@ class CrmModuleController extends Controller
                 break;
             case 'quotes':
             case 'quote':
-                CrmQuote::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','account_id','contact_id','stage','valid_until','subtotal','discount_amount','tax_amount','total','notes','owner_id']));
+                CrmQuote::where('user_id',$uid)->findOrFail($id)->update(array_merge(
+                    $request->only(array_merge(['subject','account_id','contact_id','deal_id','stage','valid_until','terms','notes','team','carrier','owner_id'], $addrFields)),
+                    $commonFields
+                ));
                 break;
             case 'sales_orders':
             case 'sales_order':
-                CrmSalesOrder::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','account_id','contact_id','status','delivery_date','subtotal','discount_amount','tax_amount','total','notes','owner_id']));
+                CrmSalesOrder::where('user_id',$uid)->findOrFail($id)->update(array_merge(
+                    $request->only(array_merge(['subject','account_id','contact_id','deal_id','quote_id','status','delivery_date','terms','notes','owner_id'], $addrFields)),
+                    $commonFields
+                ));
                 break;
             case 'purchase_orders':
             case 'purchase_order':
-                CrmPurchaseOrder::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','vendor_id','contact_id','status','expected_delivery','subtotal','discount_amount','tax_amount','total','notes','owner_id']));
+                CrmPurchaseOrder::where('user_id',$uid)->findOrFail($id)->update(array_merge(
+                    $request->only(array_merge(['subject','vendor_id','contact_id','status','expected_delivery','terms','notes','requisition_no','owner_id'], $addrFields)),
+                    $commonFields
+                ));
                 break;
             case 'invoices':
             case 'invoice':
-                CrmInvoice::where('user_id',$uid)->findOrFail($id)->update($request->only(['subject','account_id','contact_id','status','due_date','subtotal','discount_amount','tax_amount','total','amount_paid','notes','owner_id']));
+                $invData = array_merge(
+                    $request->only(array_merge(['subject','account_id','contact_id','deal_id','sales_order_id','status','due_date','amount_paid','terms','notes','owner_id'], $addrFields)),
+                    $commonFields
+                );
+                $invData['balance_due'] = $invData['total'] - (float) ($invData['amount_paid'] ?? 0);
+                CrmInvoice::where('user_id',$uid)->findOrFail($id)->update($invData);
                 break;
             case 'vendors':
             case 'vendor':

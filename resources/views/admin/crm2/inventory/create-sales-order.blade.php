@@ -152,6 +152,74 @@ function serializeLineItems(tableId, fieldId) {
     });
     document.getElementById(fieldId).value = JSON.stringify(items);
 }
+
+/* ── Product Search & Select ─────────────────────────────────────────── */
+let productSearchTimeout = null;
+function initProductSearch(inputEl, tableId) {
+    inputEl.addEventListener('input', function() {
+        clearTimeout(productSearchTimeout);
+        const q = this.value.trim();
+        const dropdown = inputEl.parentElement.querySelector('.product-dropdown');
+        if (q.length < 1) { if (dropdown) dropdown.remove(); return; }
+        productSearchTimeout = setTimeout(() => {
+            fetch(`{{ route('admin.crm2.inventory.products.search') }}?q=${encodeURIComponent(q)}`)
+                .then(r => r.json())
+                .then(products => {
+                    let existing = inputEl.parentElement.querySelector('.product-dropdown');
+                    if (existing) existing.remove();
+                    if (!products.length) return;
+                    const dd = document.createElement('div');
+                    dd.className = 'product-dropdown';
+                    dd.style.cssText = 'position:absolute;z-index:9999;background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.12);max-height:220px;overflow-y:auto;min-width:280px;';
+                    products.forEach(p => {
+                        const item = document.createElement('div');
+                        item.style.cssText = 'padding:.5rem .75rem;cursor:pointer;font-size:.85rem;border-bottom:1px solid var(--border,#e2e8f0);';
+                        item.innerHTML = `<strong>${p.name}</strong>${p.product_code ? ' <span style="color:#94a3b8;font-size:.78rem">['+p.product_code+']</span>' : ''}<br><span style="color:var(--accent,#6366f1);font-size:.8rem">\u20b9${parseFloat(p.unit_price).toLocaleString('en-IN',{minimumFractionDigits:2})} ${p.usage_unit ? '/ '+p.usage_unit : ''}</span>`;
+                        item.addEventListener('mouseenter', () => item.style.background = 'var(--bg-primary,#f8fafc)');
+                        item.addEventListener('mouseleave', () => item.style.background = '');
+                        item.addEventListener('click', () => {
+                            inputEl.value = p.name;
+                            inputEl.dataset.productId = p.id;
+                            const row = inputEl.closest('tr');
+                            if (row) {
+                                const priceEl = row.querySelector('.li-price');
+                                if (priceEl) { priceEl.value = parseFloat(p.unit_price).toFixed(2); priceEl.dispatchEvent(new Event('input')); }
+                            }
+                            dd.remove();
+                        });
+                        dd.appendChild(item);
+                    });
+                    inputEl.parentElement.style.position = 'relative';
+                    inputEl.parentElement.appendChild(dd);
+                    setTimeout(() => document.addEventListener('click', function handler(e) {
+                        if (!dd.contains(e.target) && e.target !== inputEl) { dd.remove(); document.removeEventListener('click', handler); }
+                    }), 10);
+                });
+        }, 250);
+    });
+}
+function addLineItemWithSearch(tableId) {
+    const tbody = document.getElementById(tableId).querySelector('tbody');
+    const row = tbody.rows[0].cloneNode(true);
+    row.querySelectorAll('input').forEach(i => {
+        if (i.classList.contains('li-qty')) i.value = '1';
+        else if (i.classList.contains('li-price') || i.classList.contains('li-disc') || i.classList.contains('li-tax') || i.classList.contains('li-amt') || i.classList.contains('li-total')) i.value = '0';
+        else i.value = '';
+        delete i.dataset.productId;
+    });
+    row.querySelectorAll('.product-dropdown').forEach(d => d.remove());
+    tbody.appendChild(row);
+    const newInput = row.querySelector('.li-product');
+    if (newInput) initProductSearch(newInput, tableId);
+    recalcTotals(tableId);
+}
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.li-product').forEach(inp => {
+        const tableId = inp.closest('table')?.id;
+        if (tableId) initProductSearch(inp, tableId);
+    });
+});
+
 </script>
 
 <div class="cf-page">
@@ -274,7 +342,7 @@ function serializeLineItems(tableId, fieldId) {
                     <tbody>
                         <tr>
                             <td>1</td>
-                            <td><input type="text" class="li-product" placeholder="Product name"></td>
+                            <td><input type="text" class="li-product" placeholder="Search product..." autocomplete="off"></td>
                             <td><input type="number" class="li-qty" value="1" min="1" style="width:60px" oninput="recalcTotals('so_items')"></td>
                             <td><input type="number" class="li-price" step="0.01" value="0" style="width:90px" oninput="recalcTotals('so_items')"></td>
                             <td><input type="number" class="li-amt" step="0.01" value="0" style="width:90px" readonly></td>
@@ -285,7 +353,7 @@ function serializeLineItems(tableId, fieldId) {
                         </tr>
                     </tbody>
                 </table>
-                <button type="button" class="li-add-btn" onclick="addLineItem('so_items')">+ Add Row</button>
+                <button type="button" class="li-add-btn" onclick="addLineItemWithSearch('so_items')">+ Add Row</button>
                 <div class="li-summary">
                     <div class="li-summary-row"><label>Sub Total (₹)</label><input type="number" id="so_items_subtotal" name="subtotal" step="0.01" value="0" readonly></div>
                     <div class="li-summary-row"><label>Discount (₹)</label><input type="number" id="so_items_discount" name="discount_amount" step="0.01" value="0" oninput="recalcTotals('so_items')"></div>
