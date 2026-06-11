@@ -404,8 +404,8 @@ document.addEventListener('DOMContentLoaded', function() {
         populateStates('ship_country','ship_state','ship_city', state, city);
     }
 
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function() {
+    // Initialize address dropdowns reliably regardless of DOM state
+    function initAddressDropdowns() {
         // Billing
         const billCountry = document.getElementById('bill_country')?.getAttribute('data-val') || '';
         const billState   = document.getElementById('bill_state')?.getAttribute('data-val') || '';
@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const shipCity    = document.getElementById('ship_city')?.getAttribute('data-val') || '';
         buildCountrySelect('ship_country', shipCountry);
         if (shipCountry) populateStates('ship_country','ship_state','ship_city', shipState, shipCity);
-        // Wire up change events via addEventListener for reliability
+        // Wire up change events
         const bc = document.getElementById('bill_country');
         const bs = document.getElementById('bill_state');
         const sc = document.getElementById('ship_country');
@@ -428,7 +428,12 @@ document.addEventListener('DOMContentLoaded', function() {
         if (bs) bs.addEventListener('change', () => populateCities('bill_country','bill_state','bill_city',''));
         if (sc) sc.addEventListener('change', () => populateStates('ship_country','ship_state','ship_city','',''));
         if (ss) ss.addEventListener('change', () => populateCities('ship_country','ship_state','ship_city',''));
-    });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initAddressDropdowns);
+    } else {
+        setTimeout(initAddressDropdowns, 0);
+    }
     /* ===== End Address JS ===== */
 
     </script>
