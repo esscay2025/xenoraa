@@ -483,35 +483,6 @@
             <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <i class="fas fa-tachometer-alt"></i><span class="sidebar-link-label"> Dashboard</span>
             </a>
-
-            {{-- Content Group --}}
-            @if($canSee('content'))
-            @php $contentActive = request()->routeIs('admin.blog*') || request()->routeIs('admin.forum*'); @endphp
-            <button class="sidebar-group-btn {{ $contentActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgContent', this)">
-                <i class="fas fa-pen-nib group-icon"></i> <span class="group-label">Content</span>
-                <i class="fas fa-chevron-down group-chevron"></i>
-            </button>
-            <div class="sidebar-group-panel {{ $contentActive ? 'open' : '' }}" id="sgContent">
-                <a href="{{ route('admin.blog.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.blog.index') ? 'active' : '' }}"><i class="fas fa-list"></i> All Posts</a>
-                <a href="{{ route('admin.blog.create') }}" class="sidebar-sub-link {{ request()->routeIs('admin.blog.create') ? 'active' : '' }}"><i class="fas fa-plus-circle"></i> New Post</a>
-                <a href="{{ route('admin.blog.comments') }}" class="sidebar-sub-link"><i class="fas fa-comments"></i> Comments</a>
-                <a href="{{ route('admin.forum.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.forum*') ? 'active' : '' }}"><i class="fas fa-comments"></i> Forum</a>
-            </div>
-            @endif
-
-            {{-- Recruitment Group --}}
-            @if($canSee('recruitment'))
-            @php $jobsActive = request()->routeIs('admin.jobs*'); @endphp
-            <button class="sidebar-group-btn {{ $jobsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgJobs', this)">
-                <i class="fas fa-briefcase group-icon"></i> <span class="group-label">Recruitment</span>
-                <i class="fas fa-chevron-down group-chevron"></i>
-            </button>
-            <div class="sidebar-group-panel {{ $jobsActive ? 'open' : '' }}" id="sgJobs">
-                <a href="{{ route('admin.jobs.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.jobs.index') ? 'active' : '' }}"><i class="fas fa-list"></i> Job Listings</a>
-                <a href="{{ route('admin.jobs.create') }}" class="sidebar-sub-link"><i class="fas fa-plus-circle"></i> Post a Job</a>
-            </div>
-            @endif
-
             {{-- Administration Group (owner only) --}}
             @if($isOwner)
             @php $usersActive = request()->routeIs('admin.users*') || request()->routeIs('admin.roles*'); @endphp
@@ -635,10 +606,6 @@
                 <div class="sidebar-group-panel {{ $crmSettingsActive ? 'open' : '' }}" id="sgCrmSettings">
                     <a href="{{ route('admin.crm2.settings.mail-templates') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.crm2.settings.mail-templates*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Mail Templates</a>
                 </div>
-
-                <div class="sidebar-divider"></div>
-                <a href="{{ route('admin.newsletter.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Newsletter</a>
-                <a href="{{ route('admin.calendar.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.calendar*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Calendar &amp; Notes</a>
             </div>
             @endif
 
@@ -745,7 +712,7 @@
 
             {{-- Site Builder Group --}}
             @if($canSee('site_builder'))
-            @php $siteActive = request()->routeIs('admin.site*') || request()->routeIs('admin.settings*'); @endphp
+            @php $siteActive = request()->routeIs('admin.site*') || request()->routeIs('admin.settings*') || request()->routeIs('admin.blog*') || request()->routeIs('admin.forum*') || request()->routeIs('admin.jobs*') || request()->routeIs('admin.newsletter*') || request()->routeIs('admin.calendar*'); @endphp
             <button class="sidebar-group-btn {{ $siteActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgSite', this)">
                 <i class="fas fa-paint-brush group-icon"></i> <span class="group-label">Site Builder</span>
                 <i class="fas fa-chevron-down group-chevron"></i>
@@ -756,6 +723,36 @@
                 <a href="{{ route('admin.site.menu') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.menu*') ? 'active' : '' }}"><i class="fas fa-bars"></i> Menu Builder</a>
                 <a href="{{ route('admin.site.domain') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.domain*') ? 'active' : '' }}"><i class="fas fa-globe"></i> Domain Config</a>
                 <a href="{{ route('admin.settings.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}"><i class="fas fa-sliders-h"></i> Site Settings</a>
+                <div class="sidebar-divider"></div>
+                {{-- Content sub-group --}}
+                @if($canSee('content'))
+                @php $contentActive = request()->routeIs('admin.blog*') || request()->routeIs('admin.forum*'); @endphp
+                <button class="sidebar-group-btn sidebar-sub-group-btn {{ $contentActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgContent', this)">
+                    <i class="fas fa-pen-nib group-icon" style="font-size:0.8rem;width:14px;"></i> <span class="group-label">Content</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $contentActive ? 'open' : '' }}" id="sgContent">
+                    <a href="{{ route('admin.blog.index') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.blog.index') ? 'active' : '' }}"><i class="fas fa-list"></i> All Posts</a>
+                    <a href="{{ route('admin.blog.create') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.blog.create') ? 'active' : '' }}"><i class="fas fa-plus-circle"></i> New Post</a>
+                    <a href="{{ route('admin.blog.comments') }}" class="sidebar-sub-link sidebar-sub-sub-link"><i class="fas fa-comments"></i> Comments</a>
+                    <a href="{{ route('admin.forum.index') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.forum*') ? 'active' : '' }}"><i class="fas fa-comments"></i> Forum</a>
+                </div>
+                @endif
+                {{-- Recruitment sub-group --}}
+                @if($canSee('recruitment'))
+                @php $jobsActive = request()->routeIs('admin.jobs*'); @endphp
+                <button class="sidebar-group-btn sidebar-sub-group-btn {{ $jobsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgJobs', this)">
+                    <i class="fas fa-briefcase group-icon" style="font-size:0.8rem;width:14px;"></i> <span class="group-label">Recruitment</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $jobsActive ? 'open' : '' }}" id="sgJobs">
+                    <a href="{{ route('admin.jobs.index') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.jobs.index') ? 'active' : '' }}"><i class="fas fa-list"></i> Job Listings</a>
+                    <a href="{{ route('admin.jobs.create') }}" class="sidebar-sub-link sidebar-sub-sub-link"><i class="fas fa-plus-circle"></i> Post a Job</a>
+                </div>
+                @endif
+                {{-- Newsletter & Calendar --}}
+                <a href="{{ route('admin.newsletter.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Newsletter</a>
+                <a href="{{ route('admin.calendar.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.calendar*') ? 'active' : '' }}"><i class="fas fa-calendar-alt"></i> Calendar &amp; Notes</a>
             </div>
             @endif
         </nav>
