@@ -663,10 +663,32 @@
             </button>
             <div class="sidebar-group-panel {{ $ecommerceActive ? 'open' : '' }}" id="sgEcommerce">
                 <a href="{{ route('admin.ecommerce.dashboard') }}" class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.dashboard') ? 'active' : '' }}"><i class="fas fa-chart-bar"></i> Dashboard</a>
-                <a href="{{ route('admin.ecommerce.categories') }}" class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.categories*') ? 'active' : '' }}"><i class="fas fa-tags"></i> Categories</a>
-                <a href="{{ route('admin.ecommerce.products') }}" class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.products*') ? 'active' : '' }}"><i class="fas fa-box"></i> Products</a>
-                <a href="{{ route('admin.ecommerce.products.create') }}" class="sidebar-sub-link"><i class="fas fa-plus-circle"></i> Add Product</a>
-                <a href="{{ route('admin.ecommerce.reviews') }}" class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.reviews*') ? 'active' : '' }}"><i class="fas fa-star"></i> Reviews</a>
+
+                {{-- Products Sub-Group --}}
+                @php $ecomProductsActive = request()->routeIs('admin.ecommerce.products*') || request()->routeIs('admin.ecommerce.categories*') || request()->routeIs('admin.ecommerce.reviews*'); @endphp
+                <button class="sidebar-sub-group-btn {{ $ecomProductsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgEcomProducts', this)">
+                    <i class="fas fa-box-open group-icon" style="font-size:0.8rem;width:14px;"></i>
+                    <span class="group-label">Products</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $ecomProductsActive ? 'open' : '' }}" id="sgEcomProducts">
+                    <a href="{{ route('admin.ecommerce.products') }}"
+                       class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.ecommerce.products') || (request()->routeIs('admin.ecommerce.products*') && !request()->routeIs('admin.ecommerce.products.create')) ? 'active' : '' }}">
+                        <i class="fas fa-list"></i> All Products
+                    </a>
+                    <a href="{{ route('admin.ecommerce.products.create') }}"
+                       class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.ecommerce.products.create') ? 'active' : '' }}">
+                        <i class="fas fa-plus-circle"></i> Add Product
+                    </a>
+                    <a href="{{ route('admin.ecommerce.categories') }}"
+                       class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.ecommerce.categories*') ? 'active' : '' }}">
+                        <i class="fas fa-tags"></i> Categories
+                    </a>
+                    <a href="{{ route('admin.ecommerce.reviews') }}"
+                       class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.ecommerce.reviews*') ? 'active' : '' }}">
+                        <i class="fas fa-star"></i> Reviews
+                    </a>
+                </div>
                 {{-- Integrations --}}
                 @php $ecomIntegrationsActive = request()->routeIs('admin.ecommerce.integrations.*'); @endphp
                 <button class="sidebar-sub-group-btn {{ $ecomIntegrationsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgEcomIntegrations', this)">
