@@ -14,9 +14,9 @@
       <tbody>
         @forelse($items as $item)
         <tr>
-          <td><strong>{{ $item->title }}</strong></td>
-          <td>{{ $item->account_name ?? '—' }}</td>
-          <td>{{ $item->total_amount ? '₹'.number_format($item->total_amount,0) : '—' }}</td>
+          <td><strong>{{ $item->subject }}</strong></td>
+          <td>{{ $item->account ? $item->account->name : null ?? '—' }}</td>
+          <td>{{ $item->grand_total ? '₹'.number_format($item->grand_total,0) : '—' }}</td>
           <td><span class="crm2-badge status-{{ $item->status ?? 'new' }}">{{ ucfirst($item->status ?? 'Draft') }}</span></td>
           <td>{{ $item->created_at->format('d M Y') }}</td>
           <td class="actions-cell">
