@@ -18,6 +18,7 @@ use App\Models\CrmActivity;
 use App\Models\CrmForecast;
 use App\Models\CrmVendor;
 use App\Models\CrmPriceBook;
+use App\Models\CrmPriceBookAttachment;
 use App\Models\CrmQuote;
 use App\Models\CrmSalesOrder;
 use App\Models\CrmPurchaseOrder;
@@ -546,8 +547,145 @@ class CrmModuleController extends Controller
     // INVENTORY SHOW METHODS
     // ══════════════════════════════════════════════════════════════
     public function inventoryPriceBooksShow($id) {
+        $tid = auth()->id();
+        $item = CrmPriceBook::where('user_id', $tid)->findOrFail($id);
+        $notes = CrmNote::where('notable_type', 'price_book')->where('notable_id', $id)->with('user')->latest()->get();
+        $priceBookProducts = $item->products()->get();
+        $allProducts = CrmProduct::where('user_id', $tid)->orderBy('name')->get();
+        $attachments = CrmPriceBookAttachment::where('price_book_id', $id)->latest()->get();
+        return view('admin.crm2.inventory.view-price-book', compact('item', 'notes', 'priceBookProducts', 'allProducts', 'attachments'));
+    }
+
+    // ─── PRICE BOOK NOTES ─────────────────────────────────────────────────────
+    public function priceBookNotesStore(Request $request, $id)
+    {
+        $request->validate(['content' => 'required|string|max:5000']);
         $item = CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
-        return view('admin.crm2.inventory.view-price-book', compact('item'));
+        CrmNote::create([
+            'user_id'      => auth()->id(),
+            'notable_type' => 'price_book',
+            'notable_id'   => $id,
+            'content'      => $request->content,
+        ]);
+        return redirect()->route('admin.crm2.inventory.price-books.show', $id)->with('success', 'Note added.');
+    }
+
+    // ─── PRICE BOOK PRODUCTS ──────────────────────────────────────────────────
+    public function priceBookProductsAdd(Request $request, $id)
+    {
+        $item = CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
+        $productId = $request->input('product_id');
+        if (!$item->products()->where('product_id', $productId)->exists()) {
+            $item->products()->attach($productId);
+        }
+        $count = $item->products()->count();
+        $product = CrmProduct::find($productId);
+        return response()->json(['success' => true, 'count' => $count, 'product' => $product]);
+    }
+
+    public function priceBookProductsRemove(Request $request, $id)
+    {
+        $item = CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
+        $productId = $request->input('product_id');
+        $item->products()->detach($productId);
+        $count = $item->products()->count();
+        return response()->json(['success' => true, 'count' => $count]);
+    }
+
+    public function priceBookProductsUpdateAll(Request $request, $id)
+    {
+        $item = CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
+        $products = $request->input('products', []);
+        foreach ($products as $productId => $data) {
+            $item->products()->updateExistingPivot($productId, [
+                'unit_price'          => $data['unit_price'] ?? null,
+                'list_price'          => $data['list_price'] ?? null,
+                'discount_percentage' => $data['discount_percentage'] ?? 0,
+            ]);
+        }
+        return redirect()->route('admin.crm2.inventory.price-books.show', $id)->with('success', 'Product prices updated.');
+    }
+
+    public function priceBookImportTemplate($id)
+    {
+        $item = CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
+        $products = $item->products()->get();
+        $csv = "product_code,product_name,unit_price,list_price,discount_percentage\n";
+        foreach ($products as $p) {
+            $csv .= implode(',', [
+                $p->product_code ?? '',
+                '"' . str_replace('"', '""', $p->name) . '"',
+                $p->pivot->unit_price ?? $p->unit_price ?? '',
+                $p->pivot->list_price ?? '',
+                $p->pivot->discount_percentage ?? '0',
+            ]) . "\n";
+        }
+        return response($csv, 200, [
+            'Content-Type'        => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="price-book-' . $item->id . '-template.csv"',
+        ]);
+    }
+
+    public function priceBookImport(Request $request, $id)
+    {
+        $request->validate(['csv_file' => 'required|file|mimes:csv,txt,xlsx']);
+        $item = CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
+        $file = $request->file('csv_file');
+        $rows = array_map('str_getcsv', file($file->getRealPath()));
+        $header = array_map('trim', array_shift($rows));
+        $codeIdx = array_search('product_code', $header);
+        $listIdx = array_search('list_price', $header);
+        $discIdx = array_search('discount_percentage', $header);
+        $unitIdx = array_search('unit_price', $header);
+        $updated = 0;
+        foreach ($rows as $row) {
+            if (empty($row[$codeIdx ?? 0])) continue;
+            $product = CrmProduct::where('user_id', auth()->id())->where('product_code', trim($row[$codeIdx]))->first();
+            if ($product && $item->products()->where('product_id', $product->id)->exists()) {
+                $pivotData = [];
+                if ($listIdx !== false && isset($row[$listIdx])) $pivotData['list_price'] = (float) $row[$listIdx];
+                if ($discIdx !== false && isset($row[$discIdx])) $pivotData['discount_percentage'] = (float) $row[$discIdx];
+                if ($unitIdx !== false && isset($row[$unitIdx])) $pivotData['unit_price'] = (float) $row[$unitIdx];
+                if ($pivotData) { $item->products()->updateExistingPivot($product->id, $pivotData); $updated++; }
+            }
+        }
+        return redirect()->route('admin.crm2.inventory.price-books.show', $id)->with('success', "Imported: {$updated} product prices updated.");
+    }
+
+    // ─── PRICE BOOK ATTACHMENTS ───────────────────────────────────────────────
+    public function priceBookAttachmentsStore(Request $request, $id)
+    {
+        $request->validate(['attachment' => 'required|file|max:10240']);
+        $item = CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
+        $file = $request->file('attachment');
+        $stored = $file->store('crm/price-book-attachments', 'public');
+        CrmPriceBookAttachment::create([
+            'price_book_id' => $id,
+            'user_id'       => auth()->id(),
+            'original_name' => $file->getClientOriginalName(),
+            'stored_name'   => $stored,
+            'mime_type'     => $file->getMimeType(),
+            'file_size'     => $file->getSize(),
+        ]);
+        return redirect()->route('admin.crm2.inventory.price-books.show', $id)->with('success', 'File uploaded successfully.');
+    }
+
+    public function priceBookAttachmentsDownload($id, $attId)
+    {
+        $item = CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
+        $att = CrmPriceBookAttachment::where('price_book_id', $id)->findOrFail($attId);
+        $path = storage_path('app/public/' . $att->stored_name);
+        if (!file_exists($path)) abort(404);
+        return response()->download($path, $att->original_name);
+    }
+
+    public function priceBookAttachmentsDestroy(Request $request, $id, $attId)
+    {
+        $item = CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
+        $att = CrmPriceBookAttachment::where('price_book_id', $id)->findOrFail($attId);
+        \Storage::disk('public')->delete($att->stored_name);
+        $att->delete();
+        return response()->json(['success' => true]);
     }
     public function inventoryQuotesShow($id) {
         $tid = auth()->id();

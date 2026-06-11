@@ -449,6 +449,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::delete('/inventory/products/{id}',      [$ctrl, 'inventoryProductsDestroy'])->name('inventory.products.destroy');
         // Inventory show routes
         Route::get('/inventory/price-books/{id}',      [$ctrl, 'inventoryPriceBooksShow'])->name('inventory.price-books.show');
+        // Price Book sub-routes
+        Route::post('/inventory/price-books/{id}/notes',                     [$ctrl, 'priceBookNotesStore'])->name('inventory.price-books.notes.store');
+        Route::post('/inventory/price-books/{id}/products/add',              [$ctrl, 'priceBookProductsAdd'])->name('inventory.price-books.products.add');
+        Route::post('/inventory/price-books/{id}/products/remove',           [$ctrl, 'priceBookProductsRemove'])->name('inventory.price-books.products.remove');
+        Route::put('/inventory/price-books/{id}/products/update-all',        [$ctrl, 'priceBookProductsUpdateAll'])->name('inventory.price-books.products.update-all');
+        Route::get('/inventory/price-books/{id}/import-template',            [$ctrl, 'priceBookImportTemplate'])->name('inventory.price-books.import-template');
+        Route::post('/inventory/price-books/{id}/import',                    [$ctrl, 'priceBookImport'])->name('inventory.price-books.import');
+        Route::post('/inventory/price-books/{id}/attachments',               [$ctrl, 'priceBookAttachmentsStore'])->name('inventory.price-books.attachments.store');
+        Route::get('/inventory/price-books/{id}/attachments/{attId}/download', [$ctrl, 'priceBookAttachmentsDownload'])->name('inventory.price-books.attachments.download');
+        Route::delete('/inventory/price-books/{id}/attachments/{attId}',     [$ctrl, 'priceBookAttachmentsDestroy'])->name('inventory.price-books.attachments.destroy');
         Route::get('/inventory/quotes/{id}',           [$ctrl, 'inventoryQuotesShow'])->name('inventory.quotes.show');
         Route::get('/inventory/sales-orders/{id}',     [$ctrl, 'inventorySalesOrdersShow'])->name('inventory.sales-orders.show');
         Route::get('/inventory/purchase-orders/{id}',  [$ctrl, 'inventoryPurchaseOrdersShow'])->name('inventory.purchase-orders.show');
