@@ -33,7 +33,11 @@ class CrmPurchaseOrder extends Model
     public function owner()   { return $this->belongsTo(User::class, 'owner_id'); }
     public function vendor()  { return $this->belongsTo(CrmVendor::class, 'vendor_id'); }
     public function contact() { return $this->belongsTo(CrmContact::class, 'contact_id'); }
-    public function items()   { return $this->morphMany(CrmInventoryItem::class, 'itemable'); }
+    public function items()           { return $this->morphMany(CrmInventoryItem::class, 'itemable'); }
+    public function poNotes()         { return $this->morphMany(CrmNote::class, 'notable', 'notable_type', 'notable_id')->where('notable_type','purchase_order'); }
+    public function attachments()     { return $this->hasMany(CrmPoAttachment::class, 'purchase_order_id'); }
+    public function openActivities()  { return $this->morphMany(CrmActivity::class, 'related', 'related_type', 'related_id')->where('related_type','purchase_order')->where('status','open'); }
+    public function closedActivities(){ return $this->morphMany(CrmActivity::class, 'related', 'related_type', 'related_id')->where('related_type','purchase_order')->where('status','closed'); }
 
     public static function generateNumber(int $userId): string
     {

@@ -1033,11 +1033,147 @@ class CrmModuleController extends Controller
             return back()->with('error','Failed to send email: '.$e->getMessage());
         }
     }
-    public function inventoryPurchaseOrdersShow($id) {
+        public function inventoryPurchaseOrdersShow($id) {
         $tid = auth()->id();
         $item = CrmPurchaseOrder::where('user_id', $tid)->findOrFail($id);
-        $vendors_list = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
-        return view('admin.crm2.inventory.view-purchase-order', compact('item', 'vendors_list'));
+
+        // Notes (polymorphic)
+        $notes = \App\Models\CrmNote::where('notable_type','purchase_order')
+            ->where('notable_id', $id)
+            ->where('user_id', $tid)
+            ->with('user')
+            ->latest()->get();
+
+        // Attachments
+        $attachments = \App\Models\CrmPoAttachment::where('user_id', $tid)
+            ->where('purchase_order_id', $id)
+            ->latest()->get();
+
+        // Activities
+        $openActivities = \App\Models\CrmActivity::where('related_type','purchase_order')
+            ->where('related_id', $id)
+            ->where('user_id', $tid)
+            ->where('status','open')
+            ->orderBy('due_at')->get();
+
+        $closedActivities = \App\Models\CrmActivity::where('related_type','purchase_order')
+            ->where('related_id', $id)
+            ->where('user_id', $tid)
+            ->where('status','closed')
+            ->latest('completed_at')->get();
+
+        // Mail config & templates
+        $mailConfig    = \App\Models\CrmMailConfig::where('user_id', $tid)->where('is_active', 1)->first();
+        $mailTemplates = \App\Models\CrmMailTemplate::where('user_id', $tid)->get();
+
+        return view('admin.crm2.inventory.view-purchase-order', compact(
+            'item','notes','attachments',
+            'openActivities','closedActivities','mailConfig','mailTemplates'
+        ));
+    }
+
+    // ── PO Notes ──────────────────────────────────────────────────
+    public function poNotesStore(Request $request, $id) {
+        $tid = auth()->id();
+        CrmPurchaseOrder::where('user_id',$tid)->findOrFail($id);
+        \App\Models\CrmNote::create([
+            'user_id'      => $tid,
+            'notable_type' => 'purchase_order',
+            'notable_id'   => $id,
+            'content'      => $request->input('content'),
+        ]);
+        return back()->with('success','Note added.');
+    }
+
+    // ── PO Activities ─────────────────────────────────────────────
+    public function poActivitiesStore(Request $request, $id) {
+        $tid = auth()->id();
+        CrmPurchaseOrder::where('user_id',$tid)->findOrFail($id);
+        \App\Models\CrmActivity::create([
+            'user_id'      => $tid,
+            'related_type' => 'purchase_order',
+            'related_id'   => $id,
+            'type'         => $request->input('type'),
+            'subject'      => $request->input('subject'),
+            'description'  => $request->input('description'),
+            'due_at'       => $request->input('due_at') ?: null,
+            'status'       => 'open',
+        ]);
+        return back()->with('success','Activity added.');
+    }
+
+    public function poActivitiesComplete(Request $request, $id, $actId) {
+        $tid = auth()->id();
+        $act = \App\Models\CrmActivity::where('user_id',$tid)->where('related_type','purchase_order')->where('related_id',$id)->findOrFail($actId);
+        $act->update(['status'=>'closed','completed_at'=>now()]);
+        return response()->json(['success'=>true]);
+    }
+
+    public function poActivitiesDestroy(Request $request, $id, $actId) {
+        $tid = auth()->id();
+        $act = \App\Models\CrmActivity::where('user_id',$tid)->where('related_type','purchase_order')->where('related_id',$id)->findOrFail($actId);
+        $act->delete();
+        return response()->json(['success'=>true]);
+    }
+
+    // ── PO Attachments ────────────────────────────────────────────
+    public function poAttachmentsStore(Request $request, $id) {
+        $tid = auth()->id();
+        CrmPurchaseOrder::where('user_id',$tid)->findOrFail($id);
+        $request->validate(['attachment'=>'required|file|max:10240']);
+        $file = $request->file('attachment');
+        $stored = $file->store('crm/po-attachments','public');
+        \App\Models\CrmPoAttachment::create([
+            'user_id'           => $tid,
+            'purchase_order_id' => $id,
+            'original_name'     => $file->getClientOriginalName(),
+            'stored_name'       => $stored,
+            'mime_type'         => $file->getMimeType(),
+            'file_size'         => $file->getSize(),
+        ]);
+        return back()->with('success','Attachment uploaded.');
+    }
+
+    public function poAttachmentsDownload(Request $request, $id, $attId) {
+        $tid = auth()->id();
+        $att = \App\Models\CrmPoAttachment::where('user_id',$tid)->where('purchase_order_id',$id)->findOrFail($attId);
+        $path = storage_path('app/public/'.$att->stored_name);
+        if (!file_exists($path)) abort(404);
+        return response()->download($path, $att->original_name);
+    }
+
+    public function poAttachmentsDestroy(Request $request, $id, $attId) {
+        $tid = auth()->id();
+        $att = \App\Models\CrmPoAttachment::where('user_id',$tid)->where('purchase_order_id',$id)->findOrFail($attId);
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($att->stored_name);
+        $att->delete();
+        return response()->json(['success'=>true]);
+    }
+
+    // ── PO Send Mail ──────────────────────────────────────────────
+    public function poSendMail(Request $request, $id) {
+        $tid = auth()->id();
+        $item = CrmPurchaseOrder::where('user_id',$tid)->findOrFail($id);
+        $config = \App\Models\CrmMailConfig::where('user_id',$tid)->where('is_active',1)->first();
+        if (!$config) return back()->with('error','No active mail configuration.');
+        try {
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.host',     $config->smtp_host);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.port',     $config->smtp_port);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.username', $config->smtp_user);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.password', $config->smtp_pass);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.encryption',$config->smtp_encryption ?? 'tls');
+            \Illuminate\Support\Facades\Config::set('mail.from.address', $config->from_email);
+            \Illuminate\Support\Facades\Config::set('mail.from.name',    $config->from_name ?? 'CRM');
+            \Illuminate\Support\Facades\Mail::html($request->input('body_html'), function($msg) use ($request) {
+                $msg->to($request->input('to_email'))
+                    ->subject($request->input('subject'));
+                if ($request->filled('cc_email'))  $msg->cc($request->input('cc_email'));
+                if ($request->filled('bcc_email')) $msg->bcc($request->input('bcc_email'));
+            });
+            return back()->with('success','Email sent successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error','Failed to send email: '.$e->getMessage());
+        }
     }
     public function inventoryInvoicesShow($id) {
         $tid = auth()->id();
