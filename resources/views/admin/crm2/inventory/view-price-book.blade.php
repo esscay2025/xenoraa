@@ -88,7 +88,7 @@
 .av-attach-name { font-size:.84rem; font-weight:600; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .av-attach-meta { font-size:.72rem; color:var(--text-muted); }
 .av-attach-del { background:none; border:none; cursor:pointer; color:var(--text-muted); padding:.25rem; border-radius:6px; display:flex; align-items:center; }
-.av-attach-del:hover { color:#dc2626; background:#fee2e2; }
+.av-attach-del:hover { color:#f87171; background:rgba(220,38,38,.12); }
 /* ── Product Slider ── */
 .av-slider-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; opacity:0; pointer-events:none; transition:opacity .25s; }
 .av-slider-overlay.open { opacity:1; pointer-events:all; }
