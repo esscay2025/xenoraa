@@ -180,7 +180,7 @@ function serializeLineItems(tableId, fieldId) {
                         <input type="text" name="category" value="{{ old('category') }}" placeholder="e.g. Electronics"></div>
                     <div class="cf-field"><label>Vendor</label>
                         <select name="vendor_id"><option value="">-- Select Vendor --</option>
-                        @foreach($vendors as $v)<option value="{{ $v->id }}">{{ $v->name }}</option>@endforeach</select>
+                        @foreach($vendors_list as $v)<option value="{{ $v->id }}">{{ $v->name }}</option>@endforeach</select>
                     </div>
                     <div class="cf-field"><label>Active</label>
                         <select name="is_active"><option value="1" selected>Yes</option><option value="0">No</option></select>

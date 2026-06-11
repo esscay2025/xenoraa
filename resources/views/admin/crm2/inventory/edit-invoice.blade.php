@@ -494,7 +494,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
                     <div>
                         <h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Billing Address</h4>
-                        <button type="button" class="copy-addr-btn" onclick="copyBillingToShipping()">&#x2398; Copy Billing to Shipping</button>
                         <div class="cf-grid">
                             <div class="cf-field cf-field-full"><label>Country / Region</label><select name="bill_country" id="bill_country" class="addr-select" data-val="{{ old('bill_country', $item->bill_country) }}"><option value="">-- Select Country --</option></select></div>
                             <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="bill_building" value="{{ old('bill_building', $item->bill_building) }}"></div>
@@ -505,7 +504,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     <div>
-                        <h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Shipping Address</h4>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem"><h4 style="color:var(--cf-accent);margin:0;font-size:.85rem">Shipping Address</h4><button type="button" class="copy-addr-btn" onclick="copyBillingToShipping()"><h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Shipping Address</h4>#x2398; Copy Billing to Shipping</button></div>
                         <div class="cf-grid">
                             <div class="cf-field cf-field-full"><label>Country / Region</label><select name="ship_country" id="ship_country" class="addr-select" data-val="{{ old('ship_country', $item->ship_country) }}"><option value="">-- Select Country --</option></select></div>
                             <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="ship_building" value="{{ old('ship_building', $item->ship_building) }}"></div>

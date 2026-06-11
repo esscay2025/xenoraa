@@ -613,9 +613,9 @@ class CrmModuleController extends Controller
         $tid = auth()->id();
         $item = CrmProduct::where('user_id', $tid)->findOrFail($id);
         $staff = \App\Models\User::where('id', $tid)->get();
-        $vendors = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
+        $vendors_list = CrmVendor::where("user_id", $tid)->orderBy("name")->get();
         $price_books = CrmPriceBook::where('user_id', $tid)->orderBy('name')->get();
-        return view('admin.crm2.inventory.edit-product', compact('item', 'staff', 'vendors', 'price_books'));
+        return view('admin.crm2.inventory.edit-product', compact('item', 'staff', 'vendors_list', 'price_books'));
     }
     public function inventoryProductsUpdate(Request $request, $id) {
         $tid = $this->tenantId();
@@ -627,7 +627,7 @@ class CrmModuleController extends Controller
             $data['image'] = $request->file('product_image')->store('crm/products', 'public');
         }
         $item->update($data);
-        return redirect()->route('admin.newcrm.inventory.products')->with('success', 'Product updated successfully.');
+        return redirect()->route('admin.crm2.inventory.products')->with('success', 'Product updated successfully.');
     }
     public function inventoryProductsDestroy($id) {
         $tid = $this->tenantId();
@@ -1436,7 +1436,7 @@ class CrmModuleController extends Controller
         $tid = auth()->id();
         $item = CrmPurchaseOrder::where('user_id', $tid)->findOrFail($id);
         $staff = \App\Models\User::where('id', $tid)->get();
-        $vendors = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
+        $vendors_list = CrmVendor::where("user_id", $tid)->orderBy("name")->get();
         $contacts = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
         return view('admin.crm2.inventory.edit-purchase-order', compact('item', 'staff', 'vendors', 'contacts'));
     }

@@ -494,10 +494,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h3>Address Information</h3><span class="cf-chevron">&#9660;</span>
             </div>
             <div class="cf-section-body">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start">
                     <div>
-                                                <h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Billing Address</h4>
-                        <button type="button" class="copy-addr-btn" onclick="copyBillingToShipping()">&#x2398; Copy Billing to Shipping</button>
+                        <h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Billing Address</h4>
                         <div class="cf-grid">
                             <div class="cf-field cf-field-full"><label>Country / Region</label><select name="bill_country" id="bill_country" class="addr-select" onchange="populateStates('bill_country','bill_state','bill_city','','')"><option value="">-- Select Country --</option></select></div>
                             <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="bill_building" value="{{ old('bill_building') }}"></div>
@@ -506,7 +505,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="cf-field"><label>State / Province</label><select name="bill_state" id="bill_state" class="addr-select" onchange="populateCities('bill_country','bill_state','bill_city','')"><option value="">-- Select State --</option></select></div>
                             <div class="cf-field"><label>Zip / Postal Code</label><input type="text" name="bill_zip" id="bill_zip" value="{{ old('bill_zip') }}"></div>
                         </div>
-                        <h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Shipping Address</h4>
+                    </div>
+                    <div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+                            <h4 style="color:var(--cf-accent);margin:0;font-size:.85rem">Shipping Address</h4>
+                            <button type="button" class="copy-addr-btn" onclick="copyBillingToShipping()">&#x2398; Copy Billing to Shipping</button>
+                        </div>
                         <div class="cf-grid">
                             <div class="cf-field cf-field-full"><label>Country / Region</label><select name="ship_country" id="ship_country" class="addr-select" onchange="populateStates('ship_country','ship_state','ship_city','','')"><option value="">-- Select Country --</option></select></div>
                             <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="ship_building" value="{{ old('ship_building') }}"></div>
