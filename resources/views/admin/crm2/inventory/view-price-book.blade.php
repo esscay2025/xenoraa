@@ -4,16 +4,7 @@
 /* ══════════════════════════════════════════════════════
    Price Book View — mirrors Accounts View style
 ══════════════════════════════════════════════════════ */
-:root {
-  --accent: var(--accent, #6366f1);
-  --accent-rgb: 99,102,241;
-  --bg-primary: var(--bg-primary, #f8fafc);
-  --bg-card: var(--bg-card, #ffffff);
-  --border: var(--border, #e2e8f0);
-  --text-primary: var(--text-primary, #1e293b);
-  --text-secondary: var(--text-secondary, #64748b);
-  --text-muted: var(--text-muted, #94a3b8);
-}
+/* theme variables inherited from global admin layout */
 /* ── Layout ── */
 .av-layout { display:flex; gap:1.5rem; padding:1.5rem; align-items:flex-start; max-width:1400px; margin:0 auto; }
 .av-main { flex:1; min-width:0; }
@@ -31,11 +22,11 @@
 .av-name { font-size:1.25rem; font-weight:700; color:var(--text-primary); }
 .av-meta { display:flex; gap:.4rem; flex-wrap:wrap; margin-top:.3rem; }
 .av-badge { display:inline-flex; align-items:center; padding:.15rem .6rem; border-radius:20px; font-size:.72rem; font-weight:600; }
-.av-badge.blue { background:#dbeafe; color:#2563eb; }
-.av-badge.green { background:#dcfce7; color:#16a34a; }
-.av-badge.gray { background:#f3f4f6; color:#6b7280; }
-.av-badge.orange { background:#ffedd5; color:#ea580c; }
-.av-badge.red { background:#fee2e2; color:#dc2626; }
+.av-badge.blue { background:rgba(37,99,235,.15); color:#60a5fa; }
+.av-badge.green { background:rgba(22,163,74,.15); color:#4ade80; }
+.av-badge.gray { background:var(--bg-hover); color:var(--text-secondary); }
+.av-badge.orange { background:rgba(234,88,12,.15); color:#fb923c; }
+.av-badge.red { background:rgba(220,38,38,.15); color:#f87171; }
 /* ── Buttons ── */
 .av-actions { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
 .av-btn { display:inline-flex; align-items:center; gap:.4rem; padding:.5rem 1rem; border-radius:8px; font-size:.82rem; font-weight:600; cursor:pointer; border:none; text-decoration:none; transition:all .15s; white-space:nowrap; }
@@ -43,8 +34,8 @@
 .av-btn.primary:hover { opacity:.88; }
 .av-btn.outline { background:transparent; color:var(--text-primary); border:1.5px solid var(--border); }
 .av-btn.outline:hover { border-color:var(--accent); color:var(--accent); }
-.av-btn.danger { background:#fee2e2; color:#dc2626; border:1.5px solid #fca5a5; }
-.av-btn.danger:hover { background:#dc2626; color:#fff; }
+.av-btn.danger { background:rgba(220,38,38,.12); color:#f87171; border:1.5px solid rgba(220,38,38,.3); }
+.av-btn.danger:hover { background:#dc2626; color:#fff; border-color:#dc2626; }
 .av-btn.sm { padding:.35rem .75rem; font-size:.78rem; }
 /* ── Sections ── */
 .av-section { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; margin-bottom:1.25rem; overflow:hidden; }
@@ -77,11 +68,11 @@
 .av-empty svg { display:block; margin:0 auto .5rem; opacity:.3; }
 /* ── Status badges ── */
 .st { display:inline-flex; align-items:center; padding:.15rem .55rem; border-radius:20px; font-size:.72rem; font-weight:600; }
-.st-green { background:#dcfce7; color:#16a34a; }
-.st-blue { background:#dbeafe; color:#2563eb; }
-.st-orange { background:#ffedd5; color:#ea580c; }
-.st-gray { background:#f3f4f6; color:#6b7280; }
-.st-red { background:#fee2e2; color:#dc2626; }
+.st-green { background:rgba(22,163,74,.15); color:#4ade80; }
+.st-blue { background:rgba(37,99,235,.15); color:#60a5fa; }
+.st-orange { background:rgba(234,88,12,.15); color:#fb923c; }
+.st-gray { background:var(--bg-hover); color:var(--text-secondary); }
+.st-red { background:rgba(220,38,38,.15); color:#f87171; }
 /* ── Attachments ── */
 .av-attach-drop { border:2px dashed var(--border); border-radius:10px; padding:2rem; text-align:center; cursor:pointer; transition:border-color .15s; background:var(--bg-primary); margin-bottom:1rem; }
 .av-attach-drop:hover, .av-attach-drop.dragover { border-color:var(--accent); background:rgba(var(--accent-rgb,99,102,241),.04); }
