@@ -1059,7 +1059,6 @@ HTML;
         return $this->emailWrapper($accent, $bg, 'General', $body);
     }
 
-}
     // ─── Store Config ──────────────────────────────────────────────────────────
 
     /**
