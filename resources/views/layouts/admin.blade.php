@@ -724,31 +724,13 @@
                 <a href="{{ route('admin.site.domain') }}" class="sidebar-sub-link {{ request()->routeIs('admin.site.domain*') ? 'active' : '' }}"><i class="fas fa-globe"></i> Domain Config</a>
                 <a href="{{ route('admin.settings.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.settings*') ? 'active' : '' }}"><i class="fas fa-sliders-h"></i> Site Settings</a>
                 <div class="sidebar-divider"></div>
-                {{-- Content sub-group --}}
+                {{-- Content single link --}}
                 @if($canSee('content'))
-                @php $contentActive = request()->routeIs('admin.blog*') || request()->routeIs('admin.forum*'); @endphp
-                <button class="sidebar-group-btn sidebar-sub-group-btn {{ $contentActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgContent', this)">
-                    <i class="fas fa-pen-nib group-icon" style="font-size:0.8rem;width:14px;"></i> <span class="group-label">Content</span>
-                    <i class="fas fa-chevron-down group-chevron"></i>
-                </button>
-                <div class="sidebar-group-panel {{ $contentActive ? 'open' : '' }}" id="sgContent">
-                    <a href="{{ route('admin.blog.index') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.blog.index') ? 'active' : '' }}"><i class="fas fa-list"></i> All Posts</a>
-                    <a href="{{ route('admin.blog.create') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.blog.create') ? 'active' : '' }}"><i class="fas fa-plus-circle"></i> New Post</a>
-                    <a href="{{ route('admin.blog.comments') }}" class="sidebar-sub-link sidebar-sub-sub-link"><i class="fas fa-comments"></i> Comments</a>
-                    <a href="{{ route('admin.forum.index') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.forum*') ? 'active' : '' }}"><i class="fas fa-comments"></i> Forum</a>
-                </div>
+                <a href="{{ route('admin.blog.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.blog*') || request()->routeIs('admin.forum*') ? 'active' : '' }}"><i class="fas fa-pen-nib"></i> Content</a>
                 @endif
-                {{-- Recruitment sub-group --}}
+                {{-- Recruitment single link --}}
                 @if($canSee('recruitment'))
-                @php $jobsActive = request()->routeIs('admin.jobs*'); @endphp
-                <button class="sidebar-group-btn sidebar-sub-group-btn {{ $jobsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgJobs', this)">
-                    <i class="fas fa-briefcase group-icon" style="font-size:0.8rem;width:14px;"></i> <span class="group-label">Recruitment</span>
-                    <i class="fas fa-chevron-down group-chevron"></i>
-                </button>
-                <div class="sidebar-group-panel {{ $jobsActive ? 'open' : '' }}" id="sgJobs">
-                    <a href="{{ route('admin.jobs.index') }}" class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.jobs.index') ? 'active' : '' }}"><i class="fas fa-list"></i> Job Listings</a>
-                    <a href="{{ route('admin.jobs.create') }}" class="sidebar-sub-link sidebar-sub-sub-link"><i class="fas fa-plus-circle"></i> Post a Job</a>
-                </div>
+                <a href="{{ route('admin.jobs.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.jobs*') ? 'active' : '' }}"><i class="fas fa-briefcase"></i> Recruitment</a>
                 @endif
                 {{-- Newsletter & Calendar --}}
                 <a href="{{ route('admin.newsletter.index') }}" class="sidebar-sub-link {{ request()->routeIs('admin.newsletter*') ? 'active' : '' }}"><i class="fas fa-envelope"></i> Newsletter</a>

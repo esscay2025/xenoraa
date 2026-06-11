@@ -20,15 +20,24 @@ class JobController extends Controller
      */
     public function index(Request $request)
     {
+        $tab = $request->get('tab', 'listings');
+
+        // Job listings
         $query = Job::withCount('applications')
             ->where('user_id', $this->tenantId());
-
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
+        $jobs = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
-        $jobs = $query->orderBy('created_at', 'desc')->paginate(15);
-        return view('admin.jobs.index', compact('jobs'));
+        // All applications across all jobs for this tenant
+        $tenantJobIds = Job::where('user_id', $this->tenantId())->pluck('id');
+        $applications = JobApplication::with(['job'])
+            ->whereIn('job_id', $tenantJobIds)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20)->withQueryString();
+
+        return view('admin.jobs.index', compact('jobs', 'applications', 'tab'));
     }
 
     /**

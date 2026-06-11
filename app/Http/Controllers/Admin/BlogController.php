@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\BlogCategory;
 use App\Models\BlogComment;
 use App\Models\BlogPost;
+use App\Models\ForumTopic;
+use App\Models\ForumReply;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -24,15 +26,40 @@ class BlogController extends Controller
      */
     public function index(Request $request)
     {
-        $query = BlogPost::with(['author', 'category'])
+        $tab = $request->get('tab', 'posts');
+
+        // Blog posts
+        $postQuery = BlogPost::with(['author', 'category'])
             ->where('user_id', $this->tenantId());
-
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $postQuery->where('status', $request->status);
         }
+        $posts = $postQuery->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
-        $posts = $query->orderBy('created_at', 'desc')->paginate(15);
-        return view('admin.blog.index', compact('posts'));
+        // Comments
+        $tenantPostIds = BlogPost::where('user_id', $this->tenantId())->pluck('id');
+        $comments = BlogComment::with(['post', 'user'])
+            ->whereIn('blog_post_id', $tenantPostIds)
+            ->orderBy('created_at', 'desc')
+            ->paginate(20)->withQueryString();
+
+        // Forum topics
+        $topicQuery = ForumTopic::with(['user'])->withCount('replies');
+        if ($request->filled('category')) {
+            $topicQuery->where('category', $request->category);
+        }
+        if ($request->filled('search')) {
+            $topicQuery->where('title', 'like', '%' . $request->search . '%');
+        }
+        $topics = $topicQuery->orderByDesc('is_pinned')->orderByDesc('created_at')->paginate(20)->withQueryString();
+        $forumStats = [
+            'total_topics'  => ForumTopic::count(),
+            'total_replies' => ForumReply::where('is_deleted', false)->count(),
+            'pinned'        => ForumTopic::where('is_pinned', true)->count(),
+            'locked'        => ForumTopic::where('is_locked', true)->count(),
+        ];
+
+        return view('admin.blog.index', compact('posts', 'comments', 'topics', 'forumStats', 'tab'));
     }
 
     /**
