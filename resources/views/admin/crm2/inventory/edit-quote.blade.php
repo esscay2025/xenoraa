@@ -50,7 +50,15 @@
 .cf-btn-primary:hover { opacity: .88; }
         /* Cascading address dropdowns */
         .addr-select { width:100%; padding:.45rem .6rem; border-radius:6px; border:1px solid var(--cf-border,#444); background:var(--cf-input-bg,#1e1e2e); color:var(--cf-text,#e0e0e0); font-size:.85rem; }
-        .copy-addr-btn { margin:.5rem 0 1rem; padding:.4rem 1rem; background:var(--cf-accent,#6c63ff); color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:.82rem; }
+        /* Address two-column parallel layout */
+        .addr-two-col { display:grid; grid-template-columns:1fr auto 1fr; gap:0; align-items:stretch; }
+        .addr-panel { padding:0 1.5rem; }
+        .addr-panel:first-child { padding-left:0; padding-right:1.5rem; }
+        .addr-panel:last-child { padding-left:1.5rem; padding-right:0; }
+        .addr-panel-title { color:var(--cf-accent); margin:0 0 .75rem; font-size:.85rem; font-weight:600; line-height:2rem; }
+        .addr-divider { display:flex; flex-direction:column; align-items:center; gap:.5rem; padding:0 .75rem; }
+        .addr-divider-line { flex:1; width:1px; background:var(--cf-border,#444); min-height:1rem; }
+        .copy-addr-btn { padding:.5rem .65rem; background:var(--cf-accent,#6c63ff); color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:1rem; line-height:1; flex-shrink:0; }
         .copy-addr-btn:hover { opacity:.85; }
 
 .cf-btn-secondary { background: transparent; color: var(--cf-accent);
@@ -546,9 +554,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 <h3>Address Information</h3><span class="cf-chevron">&#9660;</span>
             </div>
             <div class="cf-section-body">
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start">
-                    <div>
-                        <h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Billing Address</h4>
+                <div class="addr-two-col">
+                    <div class="addr-panel">
+                        <h4 class="addr-panel-title">Billing Address</h4>
                         <div class="cf-grid">
                             <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="bill_building" value="{{ old('bill_building', $item->bill_building) }}"></div>
                             <div class="cf-field cf-field-full"><label>Street Address</label><input type="text" name="bill_street" value="{{ old('bill_street', $item->bill_street) }}"></div>
@@ -558,11 +566,13 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="cf-field"><label>Zip / Postal Code</label><input type="text" name="bill_zip" id="bill_zip" value="{{ old('bill_zip', $item->bill_zip) }}"></div>
                         </div>
                     </div>
-                    <div>
-                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
-                            <h4 style="color:var(--cf-accent);margin:0;font-size:.85rem">Shipping Address</h4>
-                            <button type="button" class="copy-addr-btn" onclick="copyBillingToShipping()">&#x2398; Copy Billing to Shipping</button>
-                        </div>
+                    <div class="addr-divider">
+                        <div class="addr-divider-line"></div>
+                        <button type="button" class="copy-addr-btn" onclick="copyBillingToShipping()" title="Copy Billing to Shipping">&#x2398;</button>
+                        <div class="addr-divider-line"></div>
+                    </div>
+                    <div class="addr-panel">
+                        <h4 class="addr-panel-title">Shipping Address</h4>
                         <div class="cf-grid">
                             <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="ship_building" value="{{ old('ship_building', $item->ship_building) }}"></div>
                             <div class="cf-field cf-field-full"><label>Street Address</label><input type="text" name="ship_street" value="{{ old('ship_street', $item->ship_street) }}"></div>
