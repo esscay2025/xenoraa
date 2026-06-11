@@ -667,6 +667,33 @@
                 <a href="{{ route('admin.ecommerce.products') }}" class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.products*') ? 'active' : '' }}"><i class="fas fa-box"></i> Products</a>
                 <a href="{{ route('admin.ecommerce.products.create') }}" class="sidebar-sub-link"><i class="fas fa-plus-circle"></i> Add Product</a>
                 <a href="{{ route('admin.ecommerce.reviews') }}" class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.reviews*') ? 'active' : '' }}"><i class="fas fa-star"></i> Reviews</a>
+                {{-- Integrations --}}
+                @php $ecomIntegrationsActive = request()->routeIs('admin.ecommerce.integrations.*'); @endphp
+                <button class="sidebar-sub-group-btn {{ $ecomIntegrationsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgEcomIntegrations', this)">
+                    <i class="fas fa-plug group-icon" style="font-size:0.8rem;width:14px;"></i>
+                    <span class="group-label">Integrations</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $ecomIntegrationsActive ? 'open' : '' }}" id="sgEcomIntegrations">
+                    <a href="{{ route('admin.ecommerce.integrations.mail-config') }}"
+                       class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.ecommerce.integrations.*') ? 'active' : '' }}">
+                        <i class="fas fa-envelope-open-text"></i> Mail Config
+                    </a>
+                </div>
+
+                {{-- Settings --}}
+                @php $ecomSettingsActive = request()->routeIs('admin.ecommerce.settings.*'); @endphp
+                <button class="sidebar-sub-group-btn {{ $ecomSettingsActive ? 'open' : '' }}" onclick="toggleSidebarGroup('sgEcomSettings', this)">
+                    <i class="fas fa-cog group-icon" style="font-size:0.8rem;width:14px;"></i>
+                    <span class="group-label">Settings</span>
+                    <i class="fas fa-chevron-down group-chevron"></i>
+                </button>
+                <div class="sidebar-group-panel {{ $ecomSettingsActive ? 'open' : '' }}" id="sgEcomSettings">
+                    <a href="{{ route('admin.ecommerce.settings.mail-templates') }}"
+                       class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.ecommerce.settings.*') ? 'active' : '' }}">
+                        <i class="fas fa-file-alt"></i> Mail Templates
+                    </a>
+                </div>
             </div>
             @endif
 
@@ -684,6 +711,7 @@
                 <a href="{{ route('admin.pos.dashboard') }}" class="sidebar-sub-link {{ request()->routeIs('admin.pos.dashboard') ? 'active' : '' }}"><i class="fas fa-chart-line"></i> POS Reports</a>
                 <a href="{{ route('admin.pos.settings') }}" class="sidebar-sub-link {{ request()->routeIs('admin.pos.settings*') ? 'active' : '' }}"><i class="fas fa-cog"></i> POS Settings</a>
             </div>
+            
             @endif
 
             {{-- Site Builder Group --}}
@@ -708,37 +736,7 @@
                 <i class="fas fa-chevron-left" id="sidebarCollapseIcon"></i>
                 <span class="sidebar-collapse-label">Collapse</span>
             </button>
-        </div>
-                        {{-- Integrations --}}
-                        <div class="sidebar-sub-group">
-                            <div class="sidebar-sub-group-header" onclick="toggleSubGroup(this)">
-                                <i class="fas fa-plug"></i>
-                                <span>Integrations</span>
-                                <i class="fas fa-chevron-right sidebar-sub-chevron"></i>
-                            </div>
-                            <div class="sidebar-sub-group-items">
-                                <a href="{{ route('admin.ecommerce.integrations.mail-config') }}"
-                                   class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.ecommerce.integrations.*') ? 'active' : '' }}">
-                                    <i class="fas fa-envelope-open-text"></i> Mail Config
-                                </a>
-                            </div>
-                        </div>
-
-                        {{-- Settings --}}
-                        <div class="sidebar-sub-group">
-                            <div class="sidebar-sub-group-header" onclick="toggleSubGroup(this)">
-                                <i class="fas fa-cog"></i>
-                                <span>Settings</span>
-                                <i class="fas fa-chevron-right sidebar-sub-chevron"></i>
-                            </div>
-                            <div class="sidebar-sub-group-items">
-                                <a href="{{ route('admin.ecommerce.settings.mail-templates') }}"
-                                   class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.ecommerce.settings.*') ? 'active' : '' }}">
-                                    <i class="fas fa-file-alt"></i> Mail Templates
-                                </a>
-                            </div>
-                        </div>
-    </aside>
+        </div></aside>
     {{-- Flyout container (shared, positioned dynamically by JS) --}}
     <div id="sidebarFlyout" class="sidebar-flyout"></div>
 
