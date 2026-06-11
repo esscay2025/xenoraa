@@ -357,8 +357,11 @@
         @if($notes->count())
           <div class="sov-note-list">
             @foreach($notes as $note)
-              <div class="sov-note-item">
-                <div class="sov-note-meta">{{ $note->user?->name ?? 'System' }} &bull; {{ $note->created_at->diffForHumans() }}</div>
+              <div class="sov-note-item" id="note-item-{{ $note->id }}">
+                <div class="sov-note-meta" style="display:flex;justify-content:space-between;align-items:center;">
+                  <span>{{ $note->user?->name ?? 'System' }} &bull; {{ $note->created_at->diffForHumans() }}</span>
+                  <button onclick="sovDeleteNote({{ $note->id }})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:.8rem;padding:.1rem .3rem;" title="Delete note">&#10006;</button>
+                </div>
                 <div class="sov-note-content">{{ $note->content }}</div>
               </div>
             @endforeach
@@ -740,6 +743,12 @@ dz.addEventListener('drop', e => {
     document.getElementById('sov-attach-file').files = e.dataTransfer.files;
     document.getElementById('sov-attach-form').submit();
 });
+function sovDeleteNote(noteId) {
+    if (!confirm('Delete this note?')) return;
+    fetch('{{ route("admin.crm2.inventory.sales-orders.notes.destroy", [$item->id, "__ID__"]) }}'.replace('__ID__', noteId), {
+        method:'DELETE', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}
+    }).then(r=>r.json()).then(d=>{ if(d.success) document.getElementById('note-item-'+noteId)?.remove(); });
+}
 function sovDeleteAttachment(attId) {
     if (!confirm('Delete this attachment?')) return;
     fetch('{{ route("admin.crm2.inventory.sales-orders.attachments.destroy", [$item->id, "__ID__"]) }}'.replace('__ID__', attId), {

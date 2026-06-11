@@ -259,10 +259,11 @@
         </form>
         <div class="av-note-list">
           @forelse($notes as $note)
-          <div class="av-note-item">
+          <div class="av-note-item" id="note-item-{{ $note->id }}">
             <div class="note-text">{{ $note->content }}</div>
-            <div class="note-meta">
-              {{ $note->user ? $note->user->name : 'Unknown' }} &middot; {{ $note->created_at->diffForHumans() }}
+            <div class="note-meta" style="display:flex;justify-content:space-between;align-items:center;">
+              <span>{{ $note->user ? $note->user->name : 'Unknown' }} &middot; {{ $note->created_at->diffForHumans() }}</span>
+              <button onclick="deleteNote({{ $note->id }}, {{ $item->id }})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:.8rem;padding:.1rem .3rem;" title="Delete note">&#10006;</button>
             </div>
           </div>
           @empty
@@ -727,6 +728,23 @@ function submitAttachmentForm(input) {
   const form = document.getElementById('attach-upload-form');
   showToast('Uploading...', 'success');
   form.submit();
+}
+
+/* ── Delete note (AJAX) ── */
+function deleteNote(noteId, pbId) {
+  if (!confirm('Delete this note?')) return;
+  fetch(`/{{ auth()->user()->username ?? 'admin' }}/crm2/inventory/price-books/${pbId}/notes/${noteId}`, {
+    method: 'DELETE',
+    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      document.getElementById('note-item-' + noteId)?.remove();
+      showToast('Note deleted.');
+    } else { showToast('Could not delete note.', 'error'); }
+  })
+  .catch(() => showToast('Network error.', 'error'));
 }
 
 /* ── Delete attachment (AJAX) ── */

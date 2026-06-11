@@ -347,8 +347,11 @@
         @if($notes->count())
           <div class="qv-note-list">
             @foreach($notes as $note)
-              <div class="qv-note-item">
-                <div class="qv-note-meta">{{ $note->user?->name ?? 'System' }} &bull; {{ $note->created_at->diffForHumans() }}</div>
+              <div class="qv-note-item" id="note-item-{{ $note->id }}">
+                <div class="qv-note-meta" style="display:flex;justify-content:space-between;align-items:center;">
+                  <span>{{ $note->user?->name ?? 'System' }} &bull; {{ $note->created_at->diffForHumans() }}</span>
+                  <button onclick="deleteNote({{ $note->id }})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:.8rem;padding:.1rem .3rem;" title="Delete note">&#10006;</button>
+                </div>
                 <div class="qv-note-content">{{ $note->content }}</div>
               </div>
             @endforeach
@@ -753,6 +756,16 @@ function deleteAttachment(attId) {
     fetch('{{ route("admin.crm2.inventory.quotes.attachments.destroy", [$item->id, "__ID__"]) }}'.replace('__ID__', attId), {
         method:'DELETE', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}
     }).then(r => r.json()).then(d => { if(d.success) location.reload(); });
+}
+
+// ── Delete note ──
+function deleteNote(noteId) {
+    if (!confirm('Delete this note?')) return;
+    fetch('{{ route("admin.crm2.inventory.quotes.notes.destroy", [$item->id, "__ID__"]) }}'.replace('__ID__', noteId), {
+        method:'DELETE', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}
+    }).then(r => r.json()).then(d => {
+        if(d.success) { document.getElementById('note-item-' + noteId)?.remove(); }
+    });
 }
 
 // ── Complete activity ──

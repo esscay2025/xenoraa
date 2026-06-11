@@ -221,8 +221,11 @@
         @if($notes->count())
           <div class="vv-note-list">
             @foreach($notes as $note)
-              <div class="vv-note-item">
-                <div class="vv-note-meta">{{ $note->user?->name ?? 'System' }} &bull; {{ $note->created_at->diffForHumans() }}</div>
+              <div class="vv-note-item" id="note-item-{{ $note->id }}">
+                <div class="vv-note-meta" style="display:flex;justify-content:space-between;align-items:center;">
+                  <span>{{ $note->user?->name ?? 'System' }} &bull; {{ $note->created_at->diffForHumans() }}</span>
+                  <button onclick="vvDeleteNote({{ $note->id }})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:.8rem;padding:.1rem .3rem;" title="Delete note">&#10006;</button>
+                </div>
                 <div class="vv-note-content">{{ $note->content }}</div>
               </div>
             @endforeach
@@ -378,7 +381,7 @@
                 <td>{{ $contact->phone ?: '—' }}</td>
                 <td>
                   <div class="vv-table-actions">
-                    <a href="{{ route('admin.crm2.contacts.edit', $contact->id) }}" class="vv-btn secondary sm">&#9998; Edit</a>
+                    <a href="{{ route('admin.newcrm.contacts.edit', $contact->id) }}" class="vv-btn secondary sm">&#9998; Edit</a>
                     <button class="vv-btn danger sm" onclick="vvUnassignContact({{ $contact->id }})">&#10006; Unlink</button>
                   </div>
                 </td>
@@ -690,6 +693,12 @@ vvDz.addEventListener('drop', e => {
     document.getElementById('vv-attach-file').files = e.dataTransfer.files;
     document.getElementById('vv-attach-form').submit();
 });
+function vvDeleteNote(noteId) {
+    if (!confirm('Delete this note?')) return;
+    fetch('{{ route("admin.crm2.inventory.vendors.notes.destroy", [$item->id, "__ID__"]) }}'.replace('__ID__', noteId), {
+        method:'DELETE', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}
+    }).then(r=>r.json()).then(d=>{ if(d.success) document.getElementById('note-item-'+noteId)?.remove(); });
+}
 function vvDeleteAttachment(attId) {
     if (!confirm('Delete this attachment?')) return;
     fetch('{{ route("admin.crm2.inventory.vendors.attachments.destroy", [$item->id, "__ID__"]) }}'.replace('__ID__', attId), {

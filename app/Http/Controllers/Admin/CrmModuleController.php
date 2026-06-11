@@ -831,13 +831,13 @@ class CrmModuleController extends Controller
         }
         try {
             $transport = new \Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport(
-                $cfg->smtp_host, $cfg->smtp_port, $cfg->smtp_encryption === 'ssl'
+                $cfg->mail_host, $cfg->mail_port, $cfg->mail_encryption === 'ssl'
             );
-            $transport->setUsername($cfg->smtp_username);
-            $transport->setPassword($cfg->smtp_password);
+            $transport->setUsername($cfg->mail_username);
+            $transport->setPassword($cfg->mail_password);
             $mailer  = new \Symfony\Component\Mailer\Mailer($transport);
             $email   = (new \Symfony\Component\Mime\Email())
-                ->from(new \Symfony\Component\Mime\Address($cfg->from_email, $cfg->from_name ?? $cfg->from_email))
+                ->from(new \Symfony\Component\Mime\Address($cfg->from_address, $cfg->from_name ?? $cfg->from_address))
                 ->to($request->to_email)
                 ->subject($request->subject)
                 ->html($request->body_html);
@@ -855,7 +855,7 @@ class CrmModuleController extends Controller
                     'subject'    => $request->subject,
                     'body_html'  => $request->body_html,
                     'from_name'  => $cfg->from_name,
-                    'from_email' => $cfg->from_email,
+                    'from_email' => $cfg->from_address,
                     'status'     => 'sent',
                     'sent_at'    => now(),
                 ]);
@@ -1015,12 +1015,12 @@ class CrmModuleController extends Controller
         $config = \App\Models\CrmMailConfig::where('user_id',$tid)->where('is_active',1)->first();
         if (!$config) return back()->with('error','No active mail configuration.');
         try {
-            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.host',     $config->smtp_host);
-            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.port',     $config->smtp_port);
-            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.username', $config->smtp_user);
-            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.password', $config->smtp_pass);
-            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.encryption',$config->smtp_encryption ?? 'tls');
-            \Illuminate\Support\Facades\Config::set('mail.from.address', $config->from_email);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.host',     $config->mail_host);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.port',     $config->mail_port);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.username', $config->mail_username);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.password', $config->mail_password);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.encryption',$config->mail_encryption ?? 'tls');
+            \Illuminate\Support\Facades\Config::set('mail.from.address', $config->from_address);
             \Illuminate\Support\Facades\Config::set('mail.from.name',    $config->from_name ?? 'CRM');
             \Illuminate\Support\Facades\Mail::html($request->input('body_html'), function($msg) use ($request, $config) {
                 $msg->to($request->input('to_email'))
@@ -1033,7 +1033,7 @@ class CrmModuleController extends Controller
             return back()->with('error','Failed to send email: '.$e->getMessage());
         }
     }
-        public function inventoryPurchaseOrdersShow($id) {
+    public function inventoryPurchaseOrdersShow($id) {
         $tid = auth()->id();
         $item = CrmPurchaseOrder::where('user_id', $tid)->findOrFail($id);
 
@@ -1157,12 +1157,12 @@ class CrmModuleController extends Controller
         $config = \App\Models\CrmMailConfig::where('user_id',$tid)->where('is_active',1)->first();
         if (!$config) return back()->with('error','No active mail configuration.');
         try {
-            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.host',     $config->smtp_host);
-            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.port',     $config->smtp_port);
-            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.username', $config->smtp_user);
-            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.password', $config->smtp_pass);
-            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.encryption',$config->smtp_encryption ?? 'tls');
-            \Illuminate\Support\Facades\Config::set('mail.from.address', $config->from_email);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.host',     $config->mail_host);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.port',     $config->mail_port);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.username', $config->mail_username);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.password', $config->mail_password);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.encryption',$config->mail_encryption ?? 'tls');
+            \Illuminate\Support\Facades\Config::set('mail.from.address', $config->from_address);
             \Illuminate\Support\Facades\Config::set('mail.from.name',    $config->from_name ?? 'CRM');
             \Illuminate\Support\Facades\Mail::html($request->input('body_html'), function($msg) use ($request) {
                 $msg->to($request->input('to_email'))
@@ -1257,8 +1257,15 @@ class CrmModuleController extends Controller
         $cfg  = \App\Models\CrmMailConfig::where('user_id',$tid)->where('is_active',1)->first();
         if (!$cfg) return back()->with('error','No active mail configuration.');
         try {
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.host',     $cfg->mail_host);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.port',     $cfg->mail_port);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.username', $cfg->mail_username);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.password', $cfg->mail_password);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.encryption',$cfg->mail_encryption ?? 'tls');
+            \Illuminate\Support\Facades\Config::set('mail.from.address', $cfg->from_address);
+            \Illuminate\Support\Facades\Config::set('mail.from.name',    $cfg->from_name ?? 'CRM');
             \Mail::send([], [], function($msg) use ($request, $cfg, $item) {
-                $msg->from($cfg->from_email, $cfg->from_name ?? 'Xenoraa CRM')
+                $msg->from($cfg->from_address, $cfg->from_name ?? 'Xenoraa CRM')
                     ->to($request->input('to_email'))
                     ->subject($request->input('subject'))
                     ->html($request->input('body_html'));
@@ -1396,8 +1403,15 @@ class CrmModuleController extends Controller
         $cfg  = \App\Models\CrmMailConfig::where('user_id',$tid)->where('is_active',1)->first();
         if (!$cfg) return back()->with('error','No active mail configuration.');
         try {
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.host',     $cfg->mail_host);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.port',     $cfg->mail_port);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.username', $cfg->mail_username);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.password', $cfg->mail_password);
+            \Illuminate\Support\Facades\Config::set('mail.mailers.smtp.encryption',$cfg->mail_encryption ?? 'tls');
+            \Illuminate\Support\Facades\Config::set('mail.from.address', $cfg->from_address);
+            \Illuminate\Support\Facades\Config::set('mail.from.name',    $cfg->from_name ?? 'CRM');
             \Mail::send([], [], function($msg) use ($request, $cfg) {
-                $msg->from($cfg->from_email, $cfg->from_name ?? 'Xenoraa CRM')
+                $msg->from($cfg->from_address, $cfg->from_name ?? 'Xenoraa CRM')
                     ->to($request->input('to_email'))
                     ->subject($request->input('subject'))
                     ->html($request->input('body_html'));
@@ -3326,6 +3340,66 @@ class CrmModuleController extends Controller
                 'subject' => $template->subject,
             ],
         ]);
+    }
+
+    // ── Price Book Note Destroy ────────────────────────────────────────────────
+    public function priceBookNoteDestroy(Request $request, $id, $noteId)
+    {
+        $tid = auth()->id();
+        CrmPriceBook::where('user_id', $tid)->findOrFail($id);
+        $note = \App\Models\CrmNote::where('notable_type','price_book')->where('notable_id',$id)->where('user_id',$tid)->findOrFail($noteId);
+        $note->delete();
+        return response()->json(['success'=>true]);
+    }
+
+    // ── Quote Note Destroy ────────────────────────────────────────────────────
+    public function quoteNoteDestroy(Request $request, $id, $noteId)
+    {
+        $tid = auth()->id();
+        CrmQuote::where('user_id', $tid)->findOrFail($id);
+        $note = \App\Models\CrmNote::where('notable_type','quote')->where('notable_id',$id)->where('user_id',$tid)->findOrFail($noteId);
+        $note->delete();
+        return response()->json(['success'=>true]);
+    }
+
+    // ── Sales Order Note Destroy ──────────────────────────────────────────────
+    public function soNoteDestroy(Request $request, $id, $noteId)
+    {
+        $tid = auth()->id();
+        CrmSalesOrder::where('user_id', $tid)->findOrFail($id);
+        $note = \App\Models\CrmNote::where('notable_type','sales_order')->where('notable_id',$id)->where('user_id',$tid)->findOrFail($noteId);
+        $note->delete();
+        return response()->json(['success'=>true]);
+    }
+
+    // ── Purchase Order Note Destroy ───────────────────────────────────────────
+    public function poNoteDestroy(Request $request, $id, $noteId)
+    {
+        $tid = auth()->id();
+        CrmPurchaseOrder::where('user_id', $tid)->findOrFail($id);
+        $note = \App\Models\CrmNote::where('notable_type','purchase_order')->where('notable_id',$id)->where('user_id',$tid)->findOrFail($noteId);
+        $note->delete();
+        return response()->json(['success'=>true]);
+    }
+
+    // ── Invoice Note Destroy ──────────────────────────────────────────────────
+    public function invoiceNoteDestroy(Request $request, $id, $noteId)
+    {
+        $tid = auth()->id();
+        CrmInvoice::where('user_id', $tid)->findOrFail($id);
+        $note = \App\Models\CrmNote::where('notable_type','invoice')->where('notable_id',$id)->where('user_id',$tid)->findOrFail($noteId);
+        $note->delete();
+        return response()->json(['success'=>true]);
+    }
+
+    // ── Vendor Note Destroy ───────────────────────────────────────────────────
+    public function vendorNoteDestroy(Request $request, $id, $noteId)
+    {
+        $tid = auth()->id();
+        CrmVendor::where('user_id', $tid)->findOrFail($id);
+        $note = \App\Models\CrmNote::where('notable_type','vendor')->where('notable_id',$id)->where('user_id',$tid)->findOrFail($noteId);
+        $note->delete();
+        return response()->json(['success'=>true]);
     }
 
     // ─── ACCOUNT EMAILS: UPDATE DRAFT ─────────────────────────────────────────────

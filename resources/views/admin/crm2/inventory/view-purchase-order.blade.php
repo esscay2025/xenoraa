@@ -346,8 +346,11 @@
         @if($notes->count())
           <div class="pov-note-list">
             @foreach($notes as $note)
-              <div class="pov-note-item">
-                <div class="pov-note-meta">{{ $note->user?->name ?? 'System' }} &bull; {{ $note->created_at->diffForHumans() }}</div>
+              <div class="pov-note-item" id="note-item-{{ $note->id }}">
+                <div class="pov-note-meta" style="display:flex;justify-content:space-between;align-items:center;">
+                  <span>{{ $note->user?->name ?? 'System' }} &bull; {{ $note->created_at->diffForHumans() }}</span>
+                  <button onclick="povDeleteNote({{ $note->id }})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:.8rem;padding:.1rem .3rem;" title="Delete note">&#10006;</button>
+                </div>
                 <div class="pov-note-content">{{ $note->content }}</div>
               </div>
             @endforeach
@@ -633,6 +636,12 @@ povDz.addEventListener('drop', e => {
     document.getElementById('pov-attach-file').files = e.dataTransfer.files;
     document.getElementById('pov-attach-form').submit();
 });
+function povDeleteNote(noteId) {
+    if (!confirm('Delete this note?')) return;
+    fetch('{{ route("admin.crm2.inventory.purchase-orders.notes.destroy", [$item->id, "__ID__"]) }}'.replace('__ID__', noteId), {
+        method:'DELETE', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}
+    }).then(r=>r.json()).then(d=>{ if(d.success) document.getElementById('note-item-'+noteId)?.remove(); });
+}
 function povDeleteAttachment(attId) {
     if (!confirm('Delete this attachment?')) return;
     fetch('{{ route("admin.crm2.inventory.purchase-orders.attachments.destroy", [$item->id, "__ID__"]) }}'.replace('__ID__', attId), {

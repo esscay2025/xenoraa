@@ -451,6 +451,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/price-books/{id}',      [$ctrl, 'inventoryPriceBooksShow'])->name('inventory.price-books.show');
         // Price Book sub-routes
         Route::post('/inventory/price-books/{id}/notes',                     [$ctrl, 'priceBookNotesStore'])->name('inventory.price-books.notes.store');
+        Route::delete('/inventory/price-books/{id}/notes/{noteId}',           [$ctrl, 'priceBookNoteDestroy'])->name('inventory.price-books.notes.destroy');
         Route::post('/inventory/price-books/{id}/products/add',              [$ctrl, 'priceBookProductsAdd'])->name('inventory.price-books.products.add');
         Route::post('/inventory/price-books/{id}/products/remove',           [$ctrl, 'priceBookProductsRemove'])->name('inventory.price-books.products.remove');
         Route::put('/inventory/price-books/{id}/products/update-all',        [$ctrl, 'priceBookProductsUpdateAll'])->name('inventory.price-books.products.update-all');
@@ -462,6 +463,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/quotes/{id}',           [$ctrl, 'inventoryQuotesShow'])->name('inventory.quotes.show');
         // Quote sub-routes
         Route::post('/inventory/quotes/{id}/notes',                       [$ctrl, 'quoteNotesStore'])->name('inventory.quotes.notes.store');
+        Route::delete('/inventory/quotes/{id}/notes/{noteId}',            [$ctrl, 'quoteNoteDestroy'])->name('inventory.quotes.notes.destroy');
         Route::post('/inventory/quotes/{id}/activities',                  [$ctrl, 'quoteActivitiesStore'])->name('inventory.quotes.activities.store');
         Route::patch('/inventory/quotes/{id}/activities/{actId}/complete',[$ctrl, 'quoteActivitiesComplete'])->name('inventory.quotes.activities.complete');
         Route::delete('/inventory/quotes/{id}/activities/{actId}',        [$ctrl, 'quoteActivitiesDestroy'])->name('inventory.quotes.activities.destroy');
@@ -474,6 +476,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/sales-orders/{id}',     [$ctrl, 'inventorySalesOrdersShow'])->name('inventory.sales-orders.show');
         // ── Sales Order View sub-routes ──────────────────────────────
         Route::post('/inventory/sales-orders/{id}/notes',                    [$ctrl, 'soNotesStore'])->name('inventory.sales-orders.notes.store');
+        Route::delete('/inventory/sales-orders/{id}/notes/{noteId}',          [$ctrl, 'soNoteDestroy'])->name('inventory.sales-orders.notes.destroy');
         Route::post('/inventory/sales-orders/{id}/activities',               [$ctrl, 'soActivitiesStore'])->name('inventory.sales-orders.activities.store');
         Route::patch('/inventory/sales-orders/{id}/activities/{actId}/complete', [$ctrl, 'soActivitiesComplete'])->name('inventory.sales-orders.activities.complete');
         Route::delete('/inventory/sales-orders/{id}/activities/{actId}',     [$ctrl, 'soActivitiesDestroy'])->name('inventory.sales-orders.activities.destroy');
@@ -486,6 +489,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/purchase-orders/{id}',  [$ctrl, 'inventoryPurchaseOrdersShow'])->name('inventory.purchase-orders.show');
         // ── Purchase Order View sub-routes ───────────────────────────
         Route::post('/inventory/purchase-orders/{id}/notes',                    [$ctrl, 'poNotesStore'])->name('inventory.purchase-orders.notes.store');
+        Route::delete('/inventory/purchase-orders/{id}/notes/{noteId}',          [$ctrl, 'poNoteDestroy'])->name('inventory.purchase-orders.notes.destroy');
         Route::post('/inventory/purchase-orders/{id}/activities',               [$ctrl, 'poActivitiesStore'])->name('inventory.purchase-orders.activities.store');
         Route::patch('/inventory/purchase-orders/{id}/activities/{actId}/complete', [$ctrl, 'poActivitiesComplete'])->name('inventory.purchase-orders.activities.complete');
         Route::delete('/inventory/purchase-orders/{id}/activities/{actId}',     [$ctrl, 'poActivitiesDestroy'])->name('inventory.purchase-orders.activities.destroy');
@@ -496,6 +500,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/invoices/{id}',         [$ctrl, 'inventoryInvoicesShow'])->name('inventory.invoices.show');
         // ── Invoice View sub-routes ───────────────────────────────────────
         Route::post('/inventory/invoices/{id}/notes',                    [$ctrl, 'invoiceNotesStore'])->name('inventory.invoices.notes.store');
+        Route::delete('/inventory/invoices/{id}/notes/{noteId}',          [$ctrl, 'invoiceNoteDestroy'])->name('inventory.invoices.notes.destroy');
         Route::post('/inventory/invoices/{id}/activities',               [$ctrl, 'invoiceActivitiesStore'])->name('inventory.invoices.activities.store');
         Route::patch('/inventory/invoices/{id}/activities/{actId}/complete', [$ctrl, 'invoiceActivitiesComplete'])->name('inventory.invoices.activities.complete');
         Route::delete('/inventory/invoices/{id}/activities/{actId}',     [$ctrl, 'invoiceActivitiesDestroy'])->name('inventory.invoices.activities.destroy');
@@ -506,6 +511,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/vendors/{id}',          [$ctrl, 'inventoryVendorsShow'])->name('inventory.vendors.show');
         // ── Vendor View sub-routes ────────────────────────────────────────
         Route::post('/inventory/vendors/{id}/notes',                        [$ctrl, 'vendorNotesStore'])->name('inventory.vendors.notes.store');
+        Route::delete('/inventory/vendors/{id}/notes/{noteId}',              [$ctrl, 'vendorNoteDestroy'])->name('inventory.vendors.notes.destroy');
         Route::post('/inventory/vendors/{id}/activities',                   [$ctrl, 'vendorActivitiesStore'])->name('inventory.vendors.activities.store');
         Route::patch('/inventory/vendors/{id}/activities/{actId}/complete', [$ctrl, 'vendorActivitiesComplete'])->name('inventory.vendors.activities.complete');
         Route::delete('/inventory/vendors/{id}/activities/{actId}',         [$ctrl, 'vendorActivitiesDestroy'])->name('inventory.vendors.activities.destroy');
