@@ -487,7 +487,7 @@ class CrmModuleController extends Controller
                 break;
             case 'quote':
                 CrmQuote::create(array_merge(
-                    $request->only(['subject','account_id','contact_id','deal_id','stage','valid_until','terms','notes','team','carrier',
+                    $request->only(['subject','owner_id','account_id','contact_id','deal_id','stage','valid_until','terms','notes','team','carrier',
                         'bill_country','bill_building','bill_street','bill_city','bill_state','bill_zip',
                         'ship_country','ship_building','ship_street','ship_city','ship_state','ship_zip']),
                     $common,
@@ -496,7 +496,7 @@ class CrmModuleController extends Controller
                 break;
             case 'sales_order':
                 CrmSalesOrder::create(array_merge(
-                    $request->only(['subject','account_id','contact_id','deal_id','quote_id','status','delivery_date','terms','notes',
+                    $request->only(['subject','owner_id','account_id','contact_id','deal_id','quote_id','status','delivery_date','terms','notes',
                         'bill_country','bill_building','bill_street','bill_city','bill_state','bill_zip',
                         'ship_country','ship_building','ship_street','ship_city','ship_state','ship_zip']),
                     $common,
@@ -505,7 +505,7 @@ class CrmModuleController extends Controller
                 break;
             case 'purchase_order':
                 CrmPurchaseOrder::create(array_merge(
-                    $request->only(['subject','vendor_id','contact_id','status','expected_delivery','terms','notes','requisition_no',
+                    $request->only(['subject','owner_id','vendor_id','contact_id','status','expected_delivery','terms','notes','requisition_no',
                         'bill_country','bill_building','bill_street','bill_city','bill_state','bill_zip',
                         'ship_country','ship_building','ship_street','ship_city','ship_state','ship_zip']),
                     $common,
@@ -514,7 +514,7 @@ class CrmModuleController extends Controller
                 break;
             case 'invoice':
                 $inv = array_merge(
-                    $request->only(['subject','account_id','contact_id','deal_id','sales_order_id','status','due_date','amount_paid','terms','notes',
+                    $request->only(['subject','owner_id','account_id','contact_id','deal_id','sales_order_id','status','due_date','amount_paid','terms','notes',
                         'bill_country','bill_building','bill_street','bill_city','bill_state','bill_zip',
                         'ship_country','ship_building','ship_street','ship_city','ship_state','ship_zip']),
                     $common,
@@ -524,7 +524,8 @@ class CrmModuleController extends Controller
                 CrmInvoice::create($inv);
                 break;
             case 'vendor':
-                CrmVendor::create(array_merge($request->only(['name','email','phone','mobile','fax','website','category','status','address','description','billing_street','billing_city','billing_state','billing_code','billing_country','shipping_street','shipping_city','shipping_state','shipping_code','shipping_country']), ['user_id' => $tid]));
+                CrmVendor::create(array_merge($request->only(['name','owner_id','email','phone','fax','gl_account','email_opt_out','website','category','status','address','description',
+                    'bill_country','bill_building','bill_street','bill_city','bill_state','bill_zip']), ['user_id' => $tid]));
                 break;
         }
 
