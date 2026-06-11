@@ -134,10 +134,6 @@ function removeLineItem(btn, tableId) {
         });
         recalcTotals(tableId);
     }
-});
-        recalcTotals(tableId);
-    }
-}
 }
 function recalcTotals(tableId) {
     const tbody = document.getElementById(tableId).querySelector('tbody');
@@ -556,9 +552,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="cf-grid">
                             <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="bill_building" value="{{ old('bill_building', $item->bill_building) }}"></div>
                             <div class="cf-field cf-field-full"><label>Street Address</label><input type="text" name="bill_street" value="{{ old('bill_street', $item->bill_street) }}"></div>
-                            <div class="cf-field"><label>City</label><select name="bill_city" id="bill_city" class="addr-select" data-val="{{ old('bill_city', $item->bill_city) }}"><option value="">-- Select City --</option></select></div>
-                            <div class="cf-field"><label>State / Province</label><select name="bill_state" id="bill_state" class="addr-select" data-val="{{ old('bill_state', $item->bill_state) }}" onchange="populateCities('bill_country','bill_state','bill_city','')"><option value="">-- Select State --</option></select></div>
                             <div class="cf-field cf-field-full"><label>Country / Region</label><select name="bill_country" id="bill_country" class="addr-select" data-val="{{ old('bill_country', $item->bill_country) }}" onchange="populateStates('bill_country','bill_state','bill_city','','')"><option value="">-- Select Country --</option></select></div>
+                            <div class="cf-field"><label>State / Province</label><select name="bill_state" id="bill_state" class="addr-select" data-val="{{ old('bill_state', $item->bill_state) }}" onchange="populateCities('bill_country','bill_state','bill_city','')"><option value="">-- Select State --</option></select></div>
+                            <div class="cf-field"><label>City</label><select name="bill_city" id="bill_city" class="addr-select" data-val="{{ old('bill_city', $item->bill_city) }}"><option value="">-- Select City --</option></select></div>
                             <div class="cf-field"><label>Zip / Postal Code</label><input type="text" name="bill_zip" id="bill_zip" value="{{ old('bill_zip', $item->bill_zip) }}"></div>
                         </div>
                     </div>
@@ -570,9 +566,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         <div class="cf-grid">
                             <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="ship_building" value="{{ old('ship_building', $item->ship_building) }}"></div>
                             <div class="cf-field cf-field-full"><label>Street Address</label><input type="text" name="ship_street" value="{{ old('ship_street', $item->ship_street) }}"></div>
-                            <div class="cf-field"><label>City</label><select name="ship_city" id="ship_city" class="addr-select" data-val="{{ old('ship_city', $item->ship_city) }}"><option value="">-- Select City --</option></select></div>
-                            <div class="cf-field"><label>State / Province</label><select name="ship_state" id="ship_state" class="addr-select" data-val="{{ old('ship_state', $item->ship_state) }}" onchange="populateCities('ship_country','ship_state','ship_city','')"><option value="">-- Select State --</option></select></div>
                             <div class="cf-field cf-field-full"><label>Country / Region</label><select name="ship_country" id="ship_country" class="addr-select" data-val="{{ old('ship_country', $item->ship_country) }}" onchange="populateStates('ship_country','ship_state','ship_city','','')"><option value="">-- Select Country --</option></select></div>
+                            <div class="cf-field"><label>State / Province</label><select name="ship_state" id="ship_state" class="addr-select" data-val="{{ old('ship_state', $item->ship_state) }}" onchange="populateCities('ship_country','ship_state','ship_city','')"><option value="">-- Select State --</option></select></div>
+                            <div class="cf-field"><label>City</label><select name="ship_city" id="ship_city" class="addr-select" data-val="{{ old('ship_city', $item->ship_city) }}"><option value="">-- Select City --</option></select></div>
                             <div class="cf-field"><label>Zip / Postal Code</label><input type="text" name="ship_zip" id="ship_zip" value="{{ old('ship_zip', $item->ship_zip) }}"></div>
                         </div>
                     </div>
