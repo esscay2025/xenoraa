@@ -419,6 +419,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const shipCity    = document.getElementById('ship_city')?.getAttribute('data-val') || '';
         buildCountrySelect('ship_country', shipCountry);
         if (shipCountry) populateStates('ship_country','ship_state','ship_city', shipState, shipCity);
+        // Wire up change events via addEventListener for reliability
+        const bc = document.getElementById('bill_country');
+        const bs = document.getElementById('bill_state');
+        const sc = document.getElementById('ship_country');
+        const ss = document.getElementById('ship_state');
+        if (bc) bc.addEventListener('change', () => populateStates('bill_country','bill_state','bill_city','',''));
+        if (bs) bs.addEventListener('change', () => populateCities('bill_country','bill_state','bill_city',''));
+        if (sc) sc.addEventListener('change', () => populateStates('ship_country','ship_state','ship_city','',''));
+        if (ss) ss.addEventListener('change', () => populateCities('ship_country','ship_state','ship_city',''));
     });
     /* ===== End Address JS ===== */
 
@@ -498,13 +507,13 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="cf-field"><label>Zip / Postal Code</label><input type="text" name="bill_zip" id="bill_zip" value="{{ old('bill_zip') }}"></div>
                         </div>
                         <h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Shipping Address</h4>
-                        <div class="cf-grid" style="grid-template-columns:1fr 1fr">
-                            <div class="cf-field cf-field-full"><label>Country</label><input type="text" name="ship_country" value="{{ old('ship_country') }}"></div>
-                            <div class="cf-field cf-field-full"><label>Building</label><input type="text" name="ship_building" value="{{ old('ship_building') }}"></div>
-                            <div class="cf-field cf-field-full"><label>Street</label><input type="text" name="ship_street" value="{{ old('ship_street') }}"></div>
-                            <div class="cf-field"><label>City</label><input type="text" name="ship_city" value="{{ old('ship_city') }}"></div>
-                            <div class="cf-field"><label>State</label><input type="text" name="ship_state" value="{{ old('ship_state') }}"></div>
-                            <div class="cf-field"><label>Zip</label><input type="text" name="ship_zip" value="{{ old('ship_zip') }}"></div>
+                        <div class="cf-grid">
+                            <div class="cf-field cf-field-full"><label>Country / Region</label><select name="ship_country" id="ship_country" class="addr-select" onchange="populateStates('ship_country','ship_state','ship_city','','')"><option value="">-- Select Country --</option></select></div>
+                            <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="ship_building" value="{{ old('ship_building') }}"></div>
+                            <div class="cf-field cf-field-full"><label>Street Address</label><input type="text" name="ship_street" value="{{ old('ship_street') }}"></div>
+                            <div class="cf-field"><label>City</label><select name="ship_city" id="ship_city" class="addr-select"><option value="">-- Select City --</option></select></div>
+                            <div class="cf-field"><label>State / Province</label><select name="ship_state" id="ship_state" class="addr-select" onchange="populateCities('ship_country','ship_state','ship_city','')"><option value="">-- Select State --</option></select></div>
+                            <div class="cf-field"><label>Zip / Postal Code</label><input type="text" name="ship_zip" id="ship_zip" value="{{ old('ship_zip') }}"></div>
                         </div>
                     </div>
                 </div>

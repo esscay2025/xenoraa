@@ -419,6 +419,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const shipCity    = document.getElementById('ship_city')?.getAttribute('data-val') || '';
         buildCountrySelect('ship_country', shipCountry);
         if (shipCountry) populateStates('ship_country','ship_state','ship_city', shipState, shipCity);
+        // Wire up change events via addEventListener for reliability
+        const bc = document.getElementById('bill_country');
+        const bs = document.getElementById('bill_state');
+        const sc = document.getElementById('ship_country');
+        const ss = document.getElementById('ship_state');
+        if (bc) bc.addEventListener('change', () => populateStates('bill_country','bill_state','bill_city','',''));
+        if (bs) bs.addEventListener('change', () => populateCities('bill_country','bill_state','bill_city',''));
+        if (sc) sc.addEventListener('change', () => populateStates('ship_country','ship_state','ship_city','',''));
+        if (ss) ss.addEventListener('change', () => populateCities('ship_country','ship_state','ship_city',''));
     });
     /* ===== End Address JS ===== */
 
@@ -472,6 +481,38 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
 
+        <div class="cf-section">
+            <div class="cf-section-header" onclick="toggleSection(this)">
+                <h3>Address Information</h3><span class="cf-chevron">&#9660;</span>
+            </div>
+            <div class="cf-section-body">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
+                    <div>
+                        <h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Billing Address</h4>
+                        <button type="button" class="copy-addr-btn" onclick="copyBillingToShipping()">&#x2398; Copy Billing to Shipping</button>
+                        <div class="cf-grid">
+                            <div class="cf-field cf-field-full"><label>Country / Region</label><select name="bill_country" id="bill_country" class="addr-select" data-val="{{ old('bill_country', $item->bill_country) }}"><option value="">-- Select Country --</option></select></div>
+                            <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="bill_building" value="{{ old('bill_building', $item->bill_building) }}"></div>
+                            <div class="cf-field cf-field-full"><label>Street Address</label><input type="text" name="bill_street" value="{{ old('bill_street', $item->bill_street) }}"></div>
+                            <div class="cf-field"><label>City</label><select name="bill_city" id="bill_city" class="addr-select" data-val="{{ old('bill_city', $item->bill_city) }}"><option value="">-- Select City --</option></select></div>
+                            <div class="cf-field"><label>State / Province</label><select name="bill_state" id="bill_state" class="addr-select" data-val="{{ old('bill_state', $item->bill_state) }}"><option value="">-- Select State --</option></select></div>
+                            <div class="cf-field"><label>Zip / Postal Code</label><input type="text" name="bill_zip" id="bill_zip" value="{{ old('bill_zip', $item->bill_zip) }}"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Shipping Address</h4>
+                        <div class="cf-grid">
+                            <div class="cf-field cf-field-full"><label>Country / Region</label><select name="ship_country" id="ship_country" class="addr-select" data-val="{{ old('ship_country', $item->ship_country) }}"><option value="">-- Select Country --</option></select></div>
+                            <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="ship_building" value="{{ old('ship_building', $item->ship_building) }}"></div>
+                            <div class="cf-field cf-field-full"><label>Street Address</label><input type="text" name="ship_street" value="{{ old('ship_street', $item->ship_street) }}"></div>
+                            <div class="cf-field"><label>City</label><select name="ship_city" id="ship_city" class="addr-select" data-val="{{ old('ship_city', $item->ship_city) }}"><option value="">-- Select City --</option></select></div>
+                            <div class="cf-field"><label>State / Province</label><select name="ship_state" id="ship_state" class="addr-select" data-val="{{ old('ship_state', $item->ship_state) }}"><option value="">-- Select State --</option></select></div>
+                            <div class="cf-field"><label>Zip / Postal Code</label><input type="text" name="ship_zip" id="ship_zip" value="{{ old('ship_zip', $item->ship_zip) }}"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="cf-section">
             <div class="cf-section-header" onclick="toggleSection(this)">
                 <h3>Invoice Items</h3><span class="cf-chevron">&#9660;</span>
