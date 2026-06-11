@@ -379,7 +379,7 @@
         .sidebar-sub-link {
             display: flex; align-items: center; gap: 0.75rem;
             padding: 0.5rem 1.5rem 0.5rem 3rem;
-            color: var(--text-muted); text-decoration: none;
+            color: var(--text-secondary); text-decoration: none;
             font-size: 0.825rem; font-weight: 500; transition: all 0.15s;
             border-left: 3px solid transparent;
         }

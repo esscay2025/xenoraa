@@ -24,11 +24,11 @@
     {{-- KPI Stats --}}
     <div class="ec-stats-grid">
         @foreach([
-            ['label'=>'Total Products','value'=>$totalProducts,'icon'=>'fa-box','color'=>'var(--ec-primary)','link'=>route('admin.ecommerce.products')],
-            ['label'=>'Categories','value'=>$totalCategories,'icon'=>'fa-tags','color'=>'var(--ec-sky)','link'=>route('admin.ecommerce.categories')],
-            ['label'=>'Featured','value'=>$featuredProducts,'icon'=>'fa-star','color'=>'var(--ec-amber)','link'=>route('admin.ecommerce.products')],
-            ['label'=>'Low Stock','value'=>$lowStockProducts,'icon'=>'fa-exclamation-triangle','color'=>'var(--ec-red)','link'=>route('admin.ecommerce.products')],
-            ['label'=>'Reviews','value'=>$totalReviews,'icon'=>'fa-comment-alt','color'=>'var(--ec-green)','link'=>route('admin.ecommerce.reviews')],
+            ['label'=>'Total Products','value'=>$stats['total_products'],'icon'=>'fa-box','color'=>'var(--ec-primary)','link'=>route('admin.ecommerce.products')],
+            ['label'=>'Categories','value'=>$stats['total_categories'],'icon'=>'fa-tags','color'=>'var(--ec-sky)','link'=>route('admin.ecommerce.categories')],
+            ['label'=>'Featured','value'=>$stats['featured_products'],'icon'=>'fa-star','color'=>'var(--ec-amber)','link'=>route('admin.ecommerce.products')],
+            ['label'=>'Out of Stock','value'=>$stats['out_of_stock'],'icon'=>'fa-exclamation-triangle','color'=>'var(--ec-red)','link'=>route('admin.ecommerce.products')],
+            ['label'=>'Reviews','value'=>$stats['pending_reviews'],'icon'=>'fa-comment-alt','color'=>'var(--ec-green)','link'=>route('admin.ecommerce.reviews')],
         ] as $stat)
         <a href="{{ $stat['link'] }}" class="ec-stat-card">
             <i class="fas {{ $stat['icon'] }}" style="color:{{ $stat['color'] }};"></i>
