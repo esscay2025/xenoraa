@@ -709,6 +709,35 @@
                 <span class="sidebar-collapse-label">Collapse</span>
             </button>
         </div>
+                        {{-- Integrations --}}
+                        <div class="sidebar-sub-group">
+                            <div class="sidebar-sub-group-header" onclick="toggleSubGroup(this)">
+                                <i class="fas fa-plug"></i>
+                                <span>Integrations</span>
+                                <i class="fas fa-chevron-right sidebar-sub-chevron"></i>
+                            </div>
+                            <div class="sidebar-sub-group-items">
+                                <a href="{{ route('admin.ecommerce.integrations.mail-config') }}"
+                                   class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.ecommerce.integrations.*') ? 'active' : '' }}">
+                                    <i class="fas fa-envelope-open-text"></i> Mail Config
+                                </a>
+                            </div>
+                        </div>
+
+                        {{-- Settings --}}
+                        <div class="sidebar-sub-group">
+                            <div class="sidebar-sub-group-header" onclick="toggleSubGroup(this)">
+                                <i class="fas fa-cog"></i>
+                                <span>Settings</span>
+                                <i class="fas fa-chevron-right sidebar-sub-chevron"></i>
+                            </div>
+                            <div class="sidebar-sub-group-items">
+                                <a href="{{ route('admin.ecommerce.settings.mail-templates') }}"
+                                   class="sidebar-sub-link sidebar-sub-sub-link {{ request()->routeIs('admin.ecommerce.settings.*') ? 'active' : '' }}">
+                                    <i class="fas fa-file-alt"></i> Mail Templates
+                                </a>
+                            </div>
+                        </div>
     </aside>
     {{-- Flyout container (shared, positioned dynamically by JS) --}}
     <div id="sidebarFlyout" class="sidebar-flyout"></div>

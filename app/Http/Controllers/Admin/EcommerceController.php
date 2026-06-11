@@ -6,7 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use App\Models\ProductReview;
+use App\Models\EcomMailConfig;
+use App\Models\EcomMailTemplate;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class EcommerceController extends Controller
@@ -489,4 +494,569 @@ class EcommerceController extends Controller
         }
         return redirect()->route('admin.ecommerce.products')->with('success', $msg);
     }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // INTEGRATIONS — MAIL CONFIG
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    public function mailConfigIndex()
+    {
+        $uid    = $this->tenantId();
+        $config = EcomMailConfig::where('user_id', $uid)->first();
+        return view('admin.ecommerce.integrations.mail-config', compact('config'));
+    }
+
+    public function mailConfigSave(Request $request)
+    {
+        $uid = $this->tenantId();
+        $data = $request->validate([
+            'mail_driver'     => 'required|in:smtp,sendmail,mailgun,ses',
+            'mail_host'       => 'nullable|string|max:255',
+            'mail_port'       => 'required|integer|min:1|max:65535',
+            'mail_username'   => 'nullable|string|max:255',
+            'mail_password'   => 'nullable|string|max:500',
+            'mail_encryption' => 'required|in:tls,ssl,none',
+            'from_address'    => 'required|email|max:255',
+            'from_name'       => 'required|string|max:255',
+            'reply_to'        => 'nullable|email|max:255',
+            'is_active'       => 'sometimes|boolean',
+        ]);
+
+        $config = EcomMailConfig::firstOrNew(['user_id' => $uid]);
+        $config->user_id        = $uid;
+        $config->mail_driver    = $data['mail_driver'];
+        $config->mail_host      = $data['mail_host'] ?? null;
+        $config->mail_port      = $data['mail_port'];
+        $config->mail_username  = $data['mail_username'] ?? null;
+        $config->mail_encryption = $data['mail_encryption'];
+        $config->from_address   = $data['from_address'];
+        $config->from_name      = $data['from_name'];
+        $config->reply_to       = $data['reply_to'] ?? null;
+        $config->is_active      = $request->boolean('is_active');
+
+        if (!empty($data['mail_password'])) {
+            $config->mail_password = $data['mail_password'];
+        }
+        $config->save();
+
+        return redirect()->route('admin.ecommerce.integrations.mail-config')
+            ->with('success', 'Mail configuration saved successfully.');
+    }
+
+    public function mailConfigTest(Request $request)
+    {
+        $uid    = $this->tenantId();
+        $config = EcomMailConfig::where('user_id', $uid)->first();
+
+        if (!$config || !$config->is_active) {
+            return response()->json(['success' => false, 'message' => 'No active mail configuration found.']);
+        }
+
+        try {
+            $transport = new \Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport(
+                $config->mail_host,
+                $config->mail_port,
+                $config->mail_encryption === 'ssl'
+            );
+            $transport->setUsername($config->mail_username);
+            $transport->setPassword($config->mail_password);
+
+            $mailer = new \Symfony\Component\Mailer\Mailer($transport);
+            $email  = (new \Symfony\Component\Mime\Email())
+                ->from(new \Symfony\Component\Mime\Address($config->from_address, $config->from_name))
+                ->to($config->from_address)
+                ->subject('E-commerce Mail Config Test — ' . config('app.name'))
+                ->html('<p>Your E-commerce mail configuration is working correctly.</p><p>Sent from: ' . config('app.url') . '</p>');
+
+            $mailer->send($email);
+
+            $config->update(['verified_at' => now(), 'last_error' => null]);
+            return response()->json(['success' => true, 'message' => 'Test email sent successfully to ' . $config->from_address]);
+        } catch (\Exception $e) {
+            $config->update(['last_error' => $e->getMessage()]);
+            return response()->json(['success' => false, 'message' => 'Failed: ' . $e->getMessage()]);
+        }
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // SETTINGS — MAIL TEMPLATES
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    public function mailTemplatesIndex()
+    {
+        $uid       = $this->tenantId();
+        $templates = EcomMailTemplate::where('user_id', $uid)->orderBy('type')->orderBy('name')->get();
+        $types     = EcomMailTemplate::$types;
+        return view('admin.ecommerce.settings.mail-templates', compact('templates', 'types'));
+    }
+
+    public function mailTemplateCreate()
+    {
+        $types = EcomMailTemplate::$types;
+        return view('admin.ecommerce.settings.create-mail-template', compact('types'));
+    }
+
+    public function mailTemplateStore(Request $request)
+    {
+        $uid  = $this->tenantId();
+        $data = $request->validate([
+            'name'            => 'required|string|max:255',
+            'type'            => 'required|string',
+            'subject'         => 'required|string|max:500',
+            'body_html'       => 'required|string',
+            'primary_color'   => 'nullable|string|max:20',
+            'secondary_color' => 'nullable|string|max:20',
+            'font_family'     => 'nullable|string|max:100',
+            'is_default'      => 'sometimes|boolean',
+            'is_active'       => 'sometimes|boolean',
+            'logo'            => 'nullable|image|max:2048',
+        ]);
+
+        $logoPath = null;
+        if ($request->hasFile('logo')) {
+            $logoPath = $request->file('logo')->store('ecom/mail-logos', 'public');
+        }
+
+        if ($request->boolean('is_default')) {
+            EcomMailTemplate::where('user_id', $uid)->where('type', $data['type'])->update(['is_default' => false]);
+        }
+
+        EcomMailTemplate::create([
+            'user_id'         => $uid,
+            'name'            => $data['name'],
+            'type'            => $data['type'],
+            'subject'         => $data['subject'],
+            'body_html'       => $data['body_html'],
+            'logo_path'       => $logoPath,
+            'primary_color'   => $data['primary_color'] ?? '#6366f1',
+            'secondary_color' => $data['secondary_color'] ?? '#f8fafc',
+            'font_family'     => $data['font_family'] ?? 'Inter, Arial, sans-serif',
+            'is_default'      => $request->boolean('is_default'),
+            'is_active'       => $request->boolean('is_active', true),
+        ]);
+
+        return redirect()->route('admin.ecommerce.settings.mail-templates')
+            ->with('success', 'Mail template created successfully.');
+    }
+
+    public function mailTemplateShow($id)
+    {
+        $uid      = $this->tenantId();
+        $template = EcomMailTemplate::where('user_id', $uid)->findOrFail($id);
+        return view('admin.ecommerce.settings.view-mail-template', compact('template'));
+    }
+
+    public function mailTemplateEdit($id)
+    {
+        $uid      = $this->tenantId();
+        $template = EcomMailTemplate::where('user_id', $uid)->findOrFail($id);
+        $types    = EcomMailTemplate::$types;
+        return view('admin.ecommerce.settings.edit-mail-template', compact('template', 'types'));
+    }
+
+    public function mailTemplateUpdate(Request $request, $id)
+    {
+        $uid      = $this->tenantId();
+        $template = EcomMailTemplate::where('user_id', $uid)->findOrFail($id);
+
+        $data = $request->validate([
+            'name'            => 'required|string|max:255',
+            'type'            => 'required|string',
+            'subject'         => 'required|string|max:500',
+            'body_html'       => 'required|string',
+            'primary_color'   => 'nullable|string|max:20',
+            'secondary_color' => 'nullable|string|max:20',
+            'font_family'     => 'nullable|string|max:100',
+            'is_default'      => 'sometimes|boolean',
+            'is_active'       => 'sometimes|boolean',
+            'logo'            => 'nullable|image|max:2048',
+        ]);
+
+        if ($request->hasFile('logo')) {
+            if ($template->logo_path) Storage::disk('public')->delete($template->logo_path);
+            $data['logo_path'] = $request->file('logo')->store('ecom/mail-logos', 'public');
+        }
+
+        if ($request->boolean('is_default')) {
+            EcomMailTemplate::where('user_id', $uid)->where('type', $data['type'])
+                ->where('id', '!=', $id)->update(['is_default' => false]);
+        }
+
+        $template->update([
+            'name'            => $data['name'],
+            'type'            => $data['type'],
+            'subject'         => $data['subject'],
+            'body_html'       => $data['body_html'],
+            'logo_path'       => $data['logo_path'] ?? $template->logo_path,
+            'primary_color'   => $data['primary_color'] ?? $template->primary_color,
+            'secondary_color' => $data['secondary_color'] ?? $template->secondary_color,
+            'font_family'     => $data['font_family'] ?? $template->font_family,
+            'is_default'      => $request->boolean('is_default'),
+            'is_active'       => $request->boolean('is_active', true),
+        ]);
+
+        return redirect()->route('admin.ecommerce.settings.mail-templates')
+            ->with('success', 'Mail template updated successfully.');
+    }
+
+    public function mailTemplateDestroy($id)
+    {
+        $uid      = $this->tenantId();
+        $template = EcomMailTemplate::where('user_id', $uid)->findOrFail($id);
+        if ($template->logo_path) Storage::disk('public')->delete($template->logo_path);
+        $template->delete();
+        return redirect()->route('admin.ecommerce.settings.mail-templates')
+            ->with('success', 'Template deleted.');
+    }
+
+    public function mailTemplatePreview($id)
+    {
+        $uid      = $this->tenantId();
+        $template = EcomMailTemplate::where('user_id', $uid)->findOrFail($id);
+        return view('admin.ecommerce.settings.preview-mail-template', compact('template'));
+    }
+
+    public function mailTemplateToggle($id)
+    {
+        $uid      = $this->tenantId();
+        $template = EcomMailTemplate::where('user_id', $uid)->findOrFail($id);
+        $template->update(['is_active' => !$template->is_active]);
+        return response()->json(['success' => true, 'is_active' => $template->is_active]);
+    }
+
+    public function mailTemplateLoadDefaults()
+    {
+        $uid = $this->tenantId();
+        $existing = EcomMailTemplate::where('user_id', $uid)->pluck('type')->toArray();
+
+        $defaults = $this->getDefaultEcomTemplates();
+        $loaded   = 0;
+
+        foreach ($defaults as $tpl) {
+            if (!in_array($tpl['type'], $existing)) {
+                EcomMailTemplate::create(array_merge($tpl, ['user_id' => $uid, 'is_default' => true, 'is_active' => true]));
+                $loaded++;
+            }
+        }
+
+        return redirect()->route('admin.ecommerce.settings.mail-templates')
+            ->with('success', "Loaded {$loaded} default template(s) successfully.");
+    }
+
+    private function getDefaultEcomTemplates(): array
+    {
+        $accent = '#6366f1';
+        $bg     = '#f8fafc';
+
+        return [
+            [
+                'name'            => 'Order Confirmation',
+                'type'            => 'order_confirmation',
+                'subject'         => 'Your Order #{{order_number}} is Confirmed!',
+                'primary_color'   => $accent,
+                'secondary_color' => $bg,
+                'font_family'     => 'Inter, Arial, sans-serif',
+                'body_html'       => $this->tplOrderConfirmation($accent, $bg),
+            ],
+            [
+                'name'            => 'Order Shipped',
+                'type'            => 'order_shipped',
+                'subject'         => 'Your Order #{{order_number}} Has Been Shipped!',
+                'primary_color'   => '#0ea5e9',
+                'secondary_color' => $bg,
+                'font_family'     => 'Inter, Arial, sans-serif',
+                'body_html'       => $this->tplOrderShipped('#0ea5e9', $bg),
+            ],
+            [
+                'name'            => 'Order Delivered',
+                'type'            => 'order_delivered',
+                'subject'         => 'Your Order #{{order_number}} Has Been Delivered!',
+                'primary_color'   => '#10b981',
+                'secondary_color' => $bg,
+                'font_family'     => 'Inter, Arial, sans-serif',
+                'body_html'       => $this->tplOrderDelivered('#10b981', $bg),
+            ],
+            [
+                'name'            => 'Order Cancelled',
+                'type'            => 'order_cancelled',
+                'subject'         => 'Your Order #{{order_number}} Has Been Cancelled',
+                'primary_color'   => '#ef4444',
+                'secondary_color' => $bg,
+                'font_family'     => 'Inter, Arial, sans-serif',
+                'body_html'       => $this->tplOrderCancelled('#ef4444', $bg),
+            ],
+            [
+                'name'            => 'Payment Received',
+                'type'            => 'payment_received',
+                'subject'         => 'Payment Received for Order #{{order_number}}',
+                'primary_color'   => '#10b981',
+                'secondary_color' => $bg,
+                'font_family'     => 'Inter, Arial, sans-serif',
+                'body_html'       => $this->tplPaymentReceived('#10b981', $bg),
+            ],
+            [
+                'name'            => 'Refund Processed',
+                'type'            => 'refund_processed',
+                'subject'         => 'Refund Processed for Order #{{order_number}}',
+                'primary_color'   => '#f59e0b',
+                'secondary_color' => $bg,
+                'font_family'     => 'Inter, Arial, sans-serif',
+                'body_html'       => $this->tplRefundProcessed('#f59e0b', $bg),
+            ],
+            [
+                'name'            => 'Abandoned Cart Reminder',
+                'type'            => 'cart_abandoned',
+                'subject'         => 'You left something behind, {{customer_name}}!',
+                'primary_color'   => '#f59e0b',
+                'secondary_color' => $bg,
+                'font_family'     => 'Inter, Arial, sans-serif',
+                'body_html'       => $this->tplAbandonedCart('#f59e0b', $bg),
+            ],
+            [
+                'name'            => 'Review Request',
+                'type'            => 'review_request',
+                'subject'         => 'How was your order? Share your experience!',
+                'primary_color'   => $accent,
+                'secondary_color' => $bg,
+                'font_family'     => 'Inter, Arial, sans-serif',
+                'body_html'       => $this->tplReviewRequest($accent, $bg),
+            ],
+            [
+                'name'            => 'Welcome Email',
+                'type'            => 'welcome',
+                'subject'         => 'Welcome to {{store_name}}, {{customer_name}}!',
+                'primary_color'   => $accent,
+                'secondary_color' => $bg,
+                'font_family'     => 'Inter, Arial, sans-serif',
+                'body_html'       => $this->tplWelcome($accent, $bg),
+            ],
+            [
+                'name'            => 'General Notification',
+                'type'            => 'general',
+                'subject'         => '{{subject}}',
+                'primary_color'   => $accent,
+                'secondary_color' => $bg,
+                'font_family'     => 'Inter, Arial, sans-serif',
+                'body_html'       => $this->tplGeneral($accent, $bg),
+            ],
+        ];
+    }
+
+    // ─── Template HTML Generators ─────────────────────────────────────────────
+
+    private function emailWrapper(string $accent, string $bg, string $title, string $body): string
+    {
+        return <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{$title}</title>
+</head>
+<body style="margin:0;padding:0;background:#f1f5f9;font-family:Inter,Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f1f5f9;padding:32px 0;">
+  <tr><td align="center">
+    <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,.08);">
+      <!-- Header -->
+      <tr><td style="background:{$accent};padding:28px 40px;text-align:center;">
+        {{#if logo_path}}<img src="{{logo_url}}" alt="{{store_name}}" style="max-height:48px;margin-bottom:8px;display:block;margin-left:auto;margin-right:auto;">{{/if}}
+        <h1 style="margin:0;color:#ffffff;font-size:22px;font-weight:700;letter-spacing:-.3px;">{{store_name}}</h1>
+      </td></tr>
+      <!-- Body -->
+      <tr><td style="padding:36px 40px;color:#1e293b;">
+        {$body}
+      </td></tr>
+      <!-- Footer -->
+      <tr><td style="background:{$bg};padding:20px 40px;text-align:center;border-top:1px solid #e2e8f0;">
+        <p style="margin:0;font-size:12px;color:#94a3b8;">© {{year}} {{store_name}}. All rights reserved.</p>
+        <p style="margin:4px 0 0;font-size:12px;color:#94a3b8;">{{store_address}}</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>
+HTML;
+    }
+
+    private function tplOrderConfirmation(string $accent, string $bg): string
+    {
+        $body = <<<HTML
+<h2 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Thank you for your order! 🎉</h2>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">Hi {{customer_name}}, your order has been confirmed and is being processed.</p>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:8px;padding:16px;margin-bottom:24px;">
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Order Number:</td><td style="padding:4px 0;font-size:14px;font-weight:600;color:#1e293b;text-align:right;">#{{order_number}}</td></tr>
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Order Date:</td><td style="padding:4px 0;font-size:14px;color:#1e293b;text-align:right;">{{order_date}}</td></tr>
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Payment Method:</td><td style="padding:4px 0;font-size:14px;color:#1e293b;text-align:right;">{{payment_method}}</td></tr>
+  <tr><td style="padding:4px 0;font-size:14px;font-weight:700;color:#1e293b;">Total Amount:</td><td style="padding:4px 0;font-size:16px;font-weight:700;color:{$accent};text-align:right;">{{total_amount}}</td></tr>
+</table>
+<h3 style="margin:0 0 12px;font-size:15px;color:#1e293b;">Items Ordered</h3>
+{{line_items}}
+<div style="margin-top:24px;padding-top:16px;border-top:1px solid #e2e8f0;">
+  <p style="margin:0;font-size:14px;color:#475569;">Shipping to: <strong>{{shipping_address}}</strong></p>
+</div>
+<div style="margin-top:24px;text-align:center;">
+  <a href="{{order_url}}" style="background:{$accent};color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:600;display:inline-block;">View Order Details</a>
+</div>
+HTML;
+        return $this->emailWrapper($accent, $bg, 'Order Confirmation', $body);
+    }
+
+    private function tplOrderShipped(string $accent, string $bg): string
+    {
+        $body = <<<HTML
+<h2 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Your order is on its way! 🚚</h2>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">Hi {{customer_name}}, great news! Your order #{{order_number}} has been shipped.</p>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:8px;padding:16px;margin-bottom:24px;">
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Tracking Number:</td><td style="padding:4px 0;font-size:14px;font-weight:600;color:#1e293b;text-align:right;">{{tracking_number}}</td></tr>
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Carrier:</td><td style="padding:4px 0;font-size:14px;color:#1e293b;text-align:right;">{{carrier}}</td></tr>
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Estimated Delivery:</td><td style="padding:4px 0;font-size:14px;color:#1e293b;text-align:right;">{{estimated_delivery}}</td></tr>
+</table>
+<div style="margin-top:24px;text-align:center;">
+  <a href="{{tracking_url}}" style="background:{$accent};color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:600;display:inline-block;">Track Your Package</a>
+</div>
+HTML;
+        return $this->emailWrapper($accent, $bg, 'Order Shipped', $body);
+    }
+
+    private function tplOrderDelivered(string $accent, string $bg): string
+    {
+        $body = <<<HTML
+<h2 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Your order has been delivered! ✅</h2>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">Hi {{customer_name}}, your order #{{order_number}} was delivered on {{delivery_date}}.</p>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">We hope you love your purchase! If you have any issues, please contact our support team.</p>
+<div style="margin-top:24px;text-align:center;">
+  <a href="{{review_url}}" style="background:{$accent};color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:600;display:inline-block;">Leave a Review</a>
+</div>
+HTML;
+        return $this->emailWrapper($accent, $bg, 'Order Delivered', $body);
+    }
+
+    private function tplOrderCancelled(string $accent, string $bg): string
+    {
+        $body = <<<HTML
+<h2 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Your order has been cancelled</h2>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">Hi {{customer_name}}, your order #{{order_number}} has been cancelled.</p>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#fef2f2;border-radius:8px;padding:16px;margin-bottom:24px;border:1px solid #fecaca;">
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Cancellation Reason:</td></tr>
+  <tr><td style="padding:4px 0;font-size:14px;color:#1e293b;">{{cancellation_reason}}</td></tr>
+</table>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">If a payment was made, a refund will be processed within 5–7 business days.</p>
+<div style="margin-top:24px;text-align:center;">
+  <a href="{{shop_url}}" style="background:{$accent};color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:600;display:inline-block;">Continue Shopping</a>
+</div>
+HTML;
+        return $this->emailWrapper($accent, $bg, 'Order Cancelled', $body);
+    }
+
+    private function tplPaymentReceived(string $accent, string $bg): string
+    {
+        $body = <<<HTML
+<h2 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Payment Confirmed 💳</h2>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">Hi {{customer_name}}, we have received your payment for order #{{order_number}}.</p>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0fdf4;border-radius:8px;padding:16px;margin-bottom:24px;border:1px solid #bbf7d0;">
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Transaction ID:</td><td style="padding:4px 0;font-size:14px;font-weight:600;color:#1e293b;text-align:right;">{{transaction_id}}</td></tr>
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Amount Paid:</td><td style="padding:4px 0;font-size:16px;font-weight:700;color:{$accent};text-align:right;">{{amount_paid}}</td></tr>
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Payment Date:</td><td style="padding:4px 0;font-size:14px;color:#1e293b;text-align:right;">{{payment_date}}</td></tr>
+</table>
+<div style="margin-top:24px;text-align:center;">
+  <a href="{{order_url}}" style="background:{$accent};color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:600;display:inline-block;">View Order</a>
+</div>
+HTML;
+        return $this->emailWrapper($accent, $bg, 'Payment Received', $body);
+    }
+
+    private function tplRefundProcessed(string $accent, string $bg): string
+    {
+        $body = <<<HTML
+<h2 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Refund Processed 💰</h2>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">Hi {{customer_name}}, your refund for order #{{order_number}} has been processed.</p>
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbeb;border-radius:8px;padding:16px;margin-bottom:24px;border:1px solid #fde68a;">
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Refund Amount:</td><td style="padding:4px 0;font-size:16px;font-weight:700;color:{$accent};text-align:right;">{{refund_amount}}</td></tr>
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Refund Method:</td><td style="padding:4px 0;font-size:14px;color:#1e293b;text-align:right;">{{refund_method}}</td></tr>
+  <tr><td style="padding:4px 0;font-size:14px;color:#64748b;">Processing Time:</td><td style="padding:4px 0;font-size:14px;color:#1e293b;text-align:right;">5–7 business days</td></tr>
+</table>
+<p style="margin:0;color:#475569;font-size:14px;">If you have any questions about your refund, please contact our support team.</p>
+HTML;
+        return $this->emailWrapper($accent, $bg, 'Refund Processed', $body);
+    }
+
+    private function tplAbandonedCart(string $accent, string $bg): string
+    {
+        $body = <<<HTML
+<h2 style="margin:0 0 8px;font-size:20px;color:#1e293b;">You left something behind! 🛒</h2>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">Hi {{customer_name}}, you have items waiting in your cart. Don't let them slip away!</p>
+{{cart_items}}
+<p style="margin:16px 0 20px;color:#475569;font-size:14px;">Complete your purchase before items sell out.</p>
+<div style="margin-top:24px;text-align:center;">
+  <a href="{{cart_url}}" style="background:{$accent};color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;display:inline-block;">Complete Your Purchase</a>
+</div>
+HTML;
+        return $this->emailWrapper($accent, $bg, 'Abandoned Cart', $body);
+    }
+
+    private function tplReviewRequest(string $accent, string $bg): string
+    {
+        $body = <<<HTML
+<h2 style="margin:0 0 8px;font-size:20px;color:#1e293b;">How was your experience? ⭐</h2>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">Hi {{customer_name}}, we hope you're enjoying your recent purchase from order #{{order_number}}!</p>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">Your feedback helps us improve and helps other shoppers make informed decisions. It only takes a minute!</p>
+<div style="margin-top:24px;text-align:center;">
+  <a href="{{review_url}}" style="background:{$accent};color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;display:inline-block;">Write a Review</a>
+</div>
+HTML;
+        return $this->emailWrapper($accent, $bg, 'Review Request', $body);
+    }
+
+    private function tplWelcome(string $accent, string $bg): string
+    {
+        $body = <<<HTML
+<h2 style="margin:0 0 8px;font-size:20px;color:#1e293b;">Welcome to {{store_name}}! 🎉</h2>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">Hi {{customer_name}}, thank you for creating an account with us. We're thrilled to have you!</p>
+<table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+  <tr>
+    <td width="33%" style="padding:12px;text-align:center;background:#f8fafc;border-radius:8px;margin:4px;">
+      <div style="font-size:24px;margin-bottom:4px;">🛍️</div>
+      <div style="font-size:13px;font-weight:600;color:#1e293b;">Shop Anytime</div>
+      <div style="font-size:12px;color:#64748b;">Browse our full catalogue</div>
+    </td>
+    <td width="4%"></td>
+    <td width="33%" style="padding:12px;text-align:center;background:#f8fafc;border-radius:8px;">
+      <div style="font-size:24px;margin-bottom:4px;">📦</div>
+      <div style="font-size:13px;font-weight:600;color:#1e293b;">Track Orders</div>
+      <div style="font-size:12px;color:#64748b;">Real-time order updates</div>
+    </td>
+    <td width="4%"></td>
+    <td width="33%" style="padding:12px;text-align:center;background:#f8fafc;border-radius:8px;">
+      <div style="font-size:24px;margin-bottom:4px;">💬</div>
+      <div style="font-size:13px;font-weight:600;color:#1e293b;">24/7 Support</div>
+      <div style="font-size:12px;color:#64748b;">We're always here to help</div>
+    </td>
+  </tr>
+</table>
+<div style="margin-top:24px;text-align:center;">
+  <a href="{{shop_url}}" style="background:{$accent};color:#fff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:700;display:inline-block;">Start Shopping</a>
+</div>
+HTML;
+        return $this->emailWrapper($accent, $bg, 'Welcome', $body);
+    }
+
+    private function tplGeneral(string $accent, string $bg): string
+    {
+        $body = <<<HTML
+<h2 style="margin:0 0 8px;font-size:20px;color:#1e293b;">{{heading}}</h2>
+<p style="margin:0 0 20px;color:#475569;font-size:15px;">Hi {{customer_name}},</p>
+<div style="color:#475569;font-size:15px;line-height:1.7;">
+  {{message_body}}
+</div>
+{{#if cta_text}}
+<div style="margin-top:28px;text-align:center;">
+  <a href="{{cta_url}}" style="background:{$accent};color:#fff;text-decoration:none;padding:12px 28px;border-radius:8px;font-size:14px;font-weight:600;display:inline-block;">{{cta_text}}</a>
+</div>
+{{/if}}
+HTML;
+        return $this->emailWrapper($accent, $bg, 'General', $body);
+    }
+
 }

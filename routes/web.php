@@ -568,6 +568,23 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/reviews', [\App\Http\Controllers\Admin\EcommerceController::class, 'reviewsIndex'])->name('reviews');
         Route::patch('/reviews/{review}/approve', [\App\Http\Controllers\Admin\EcommerceController::class, 'reviewApprove'])->name('review.approve');
         Route::delete('/reviews/{review}', [\App\Http\Controllers\Admin\EcommerceController::class, 'reviewDestroy'])->name('review.destroy');
+        // ── Integrations ──────────────────────────────────────────────────────
+        Route::get('/integrations/mail-config',        [\App\Http\Controllers\Admin\EcommerceController::class, 'mailConfigIndex'])->name('integrations.mail-config');
+        Route::post('/integrations/mail-config',       [\App\Http\Controllers\Admin\EcommerceController::class, 'mailConfigSave'])->name('integrations.mail-config.save');
+        Route::post('/integrations/mail-config/test',  [\App\Http\Controllers\Admin\EcommerceController::class, 'mailConfigTest'])->name('integrations.mail-config.test');
+
+        // ── Settings — Mail Templates ─────────────────────────────────────────
+        Route::get('/settings/mail-templates',                    [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplatesIndex'])->name('settings.mail-templates');
+        Route::get('/settings/mail-templates/create',             [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplateCreate'])->name('settings.mail-templates.create');
+        Route::post('/settings/mail-templates',                   [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplateStore'])->name('settings.mail-templates.store');
+        Route::post('/settings/mail-templates/load-defaults',     [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplateLoadDefaults'])->name('settings.mail-templates.load-defaults');
+        Route::get('/settings/mail-templates/{id}',               [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplateShow'])->name('settings.mail-templates.show');
+        Route::get('/settings/mail-templates/{id}/edit',          [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplateEdit'])->name('settings.mail-templates.edit');
+        Route::put('/settings/mail-templates/{id}',               [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplateUpdate'])->name('settings.mail-templates.update');
+        Route::delete('/settings/mail-templates/{id}',            [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplateDestroy'])->name('settings.mail-templates.destroy');
+        Route::get('/settings/mail-templates/{id}/preview',       [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplatePreview'])->name('settings.mail-templates.preview');
+        Route::post('/settings/mail-templates/{id}/toggle',       [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplateToggle'])->name('settings.mail-templates.toggle');
+
     });
 
     // ─── POS Module ───────────────────────────────────────────────────────────
@@ -742,6 +759,9 @@ Route::middleware(['auth', 'subscribed'])->prefix('onboarding')->name('onboardin
     Route::get('/profile', [OnboardingController::class, 'profile'])->name('profile');
     Route::post('/profile', [OnboardingController::class, 'saveProfile'])->name('profile.save');
     Route::get('/complete', [OnboardingController::class, 'complete'])->name('complete');
+
+
+
 });
 
 // =============================================
