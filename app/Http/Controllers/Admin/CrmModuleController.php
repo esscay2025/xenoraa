@@ -18,6 +18,7 @@ use App\Models\CrmActivity;
 use App\Models\CrmForecast;
 use App\Models\CrmVendor;
 use App\Models\CrmPriceBook;
+use App\Models\CrmQuoteAttachment;
 use App\Models\CrmPriceBookAttachment;
 use App\Models\CrmQuote;
 use App\Models\CrmSalesOrder;
@@ -689,9 +690,180 @@ class CrmModuleController extends Controller
     }
     public function inventoryQuotesShow($id) {
         $tid = auth()->id();
-        $item = CrmQuote::where('user_id', $tid)->findOrFail($id);
-        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
-        return view('admin.crm2.inventory.view-quote', compact('item', 'accounts_list'));
+        $item            = CrmQuote::where('user_id', $tid)->findOrFail($id);
+        $notes           = CrmNote::where('notable_type', 'quote')->where('notable_id', $id)->with('user')->latest()->get();
+        $salesOrders     = CrmSalesOrder::where('user_id', $tid)->where('quote_id', $id)->get();
+        $allSalesOrders  = CrmSalesOrder::where('user_id', $tid)->get();
+        $attachments     = CrmQuoteAttachment::where('quote_id', $id)->latest()->get();
+        $openActivities  = CrmActivity::where('user_id', $tid)->where('related_type', 'quote')->where('related_id', $id)->whereNotIn('status', ['Completed', 'completed'])->get();
+        $closedActivities= CrmActivity::where('user_id', $tid)->where('related_type', 'quote')->where('related_id', $id)->whereIn('status', ['Completed', 'completed'])->get();
+        $mailTemplates   = CrmMailTemplate::where('user_id', $tid)->where('is_active', true)->get();
+        $mailConfig      = CrmMailConfig::where('user_id', $tid)->where('is_active', true)->first();
+        $accounts_list   = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $contacts_list   = CrmContact::where('user_id', $tid)->orderBy('first_name')->get();
+        return view('admin.crm2.inventory.view-quote', compact(
+            'item', 'notes', 'salesOrders', 'allSalesOrders', 'attachments',
+            'openActivities', 'closedActivities', 'mailTemplates', 'mailConfig',
+            'accounts_list', 'contacts_list'
+        ));
+    }
+
+    // ─── QUOTE NOTES ──────────────────────────────────────────────────────────
+    public function quoteNotesStore(Request $request, $id)
+    {
+        $request->validate(['content' => 'required|string|max:5000']);
+        CrmQuote::where('user_id', auth()->id())->findOrFail($id);
+        CrmNote::create([
+            'user_id'      => auth()->id(),
+            'notable_type' => 'quote',
+            'notable_id'   => $id,
+            'content'      => $request->content,
+        ]);
+        return redirect()->route('admin.crm2.inventory.quotes.show', $id)->with('success', 'Note added.');
+    }
+
+    // ─── QUOTE ACTIVITIES ─────────────────────────────────────────────────────
+    public function quoteActivitiesStore(Request $request, $id)
+    {
+        $request->validate([
+            'type'        => 'required|string',
+            'subject'     => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'due_at'      => 'nullable|date',
+        ]);
+        CrmQuote::where('user_id', auth()->id())->findOrFail($id);
+        CrmActivity::create([
+            'user_id'      => auth()->id(),
+            'type'         => $request->type,
+            'subject'      => $request->subject,
+            'description'  => $request->description,
+            'related_type' => 'quote',
+            'related_id'   => $id,
+            'due_at'       => $request->due_at,
+            'status'       => 'pending',
+        ]);
+        return redirect()->route('admin.crm2.inventory.quotes.show', $id)->with('success', 'Activity added.');
+    }
+
+    public function quoteActivitiesComplete(Request $request, $id, $actId)
+    {
+        CrmQuote::where('user_id', auth()->id())->findOrFail($id);
+        $act = CrmActivity::where('user_id', auth()->id())->where('related_type', 'quote')->where('related_id', $id)->findOrFail($actId);
+        $act->update(['status' => 'completed', 'completed_at' => now()]);
+        return response()->json(['success' => true]);
+    }
+
+    public function quoteActivitiesDestroy(Request $request, $id, $actId)
+    {
+        CrmQuote::where('user_id', auth()->id())->findOrFail($id);
+        $act = CrmActivity::where('user_id', auth()->id())->where('related_type', 'quote')->where('related_id', $id)->findOrFail($actId);
+        $act->delete();
+        return response()->json(['success' => true]);
+    }
+
+    // ─── QUOTE ATTACHMENTS ────────────────────────────────────────────────────
+    public function quoteAttachmentsStore(Request $request, $id)
+    {
+        $request->validate(['attachment' => 'required|file|max:10240']);
+        CrmQuote::where('user_id', auth()->id())->findOrFail($id);
+        $file   = $request->file('attachment');
+        $stored = $file->store('crm/quote-attachments', 'public');
+        CrmQuoteAttachment::create([
+            'quote_id'      => $id,
+            'user_id'       => auth()->id(),
+            'original_name' => $file->getClientOriginalName(),
+            'stored_name'   => $stored,
+            'mime_type'     => $file->getMimeType(),
+            'file_size'     => $file->getSize(),
+        ]);
+        return redirect()->route('admin.crm2.inventory.quotes.show', $id)->with('success', 'File uploaded.');
+    }
+
+    public function quoteAttachmentsDownload($id, $attId)
+    {
+        CrmQuote::where('user_id', auth()->id())->findOrFail($id);
+        $att  = CrmQuoteAttachment::where('quote_id', $id)->findOrFail($attId);
+        $path = storage_path('app/public/' . $att->stored_name);
+        if (!file_exists($path)) abort(404);
+        return response()->download($path, $att->original_name);
+    }
+
+    public function quoteAttachmentsDestroy(Request $request, $id, $attId)
+    {
+        CrmQuote::where('user_id', auth()->id())->findOrFail($id);
+        $att = CrmQuoteAttachment::where('quote_id', $id)->findOrFail($attId);
+        \Storage::disk('public')->delete($att->stored_name);
+        $att->delete();
+        return response()->json(['success' => true]);
+    }
+
+    // ─── QUOTE SALES ORDERS ───────────────────────────────────────────────────
+    public function quoteSalesOrdersAssign(Request $request, $id)
+    {
+        $request->validate(['sales_order_id' => 'required|exists:crm_sales_orders,id']);
+        $quote = CrmQuote::where('user_id', auth()->id())->findOrFail($id);
+        $so    = CrmSalesOrder::where('user_id', auth()->id())->findOrFail($request->sales_order_id);
+        $so->update(['quote_id' => $id]);
+        return redirect()->route('admin.crm2.inventory.quotes.show', $id)->with('success', 'Sales Order assigned.');
+    }
+
+    public function quoteSalesOrdersUnassign(Request $request, $id, $soId)
+    {
+        CrmQuote::where('user_id', auth()->id())->findOrFail($id);
+        $so = CrmSalesOrder::where('user_id', auth()->id())->where('quote_id', $id)->findOrFail($soId);
+        $so->update(['quote_id' => null]);
+        return response()->json(['success' => true]);
+    }
+
+    // ─── QUOTE SEND EMAIL ─────────────────────────────────────────────────────
+    public function quoteSendMail(Request $request, $id)
+    {
+        $request->validate([
+            'to_email'    => 'required|email',
+            'subject'     => 'required|string|max:255',
+            'body_html'   => 'required|string',
+        ]);
+        $uid   = auth()->id();
+        $quote = CrmQuote::where('user_id', $uid)->findOrFail($id);
+        $cfg   = CrmMailConfig::where('user_id', $uid)->where('is_active', true)->first();
+        if (!$cfg) {
+            return redirect()->route('admin.crm2.inventory.quotes.show', $id)->with('error', 'No active mail configuration found.');
+        }
+        try {
+            $transport = new \Symfony\Component\Mailer\Transport\Smtp\EsmtpTransport(
+                $cfg->smtp_host, $cfg->smtp_port, $cfg->smtp_encryption === 'ssl'
+            );
+            $transport->setUsername($cfg->smtp_username);
+            $transport->setPassword($cfg->smtp_password);
+            $mailer  = new \Symfony\Component\Mailer\Mailer($transport);
+            $email   = (new \Symfony\Component\Mime\Email())
+                ->from(new \Symfony\Component\Mime\Address($cfg->from_email, $cfg->from_name ?? $cfg->from_email))
+                ->to($request->to_email)
+                ->subject($request->subject)
+                ->html($request->body_html);
+            if ($request->cc_email)  $email->cc($request->cc_email);
+            if ($request->bcc_email) $email->bcc($request->bcc_email);
+            $mailer->send($email);
+            // Log the email using crm_account_emails if account exists
+            if ($quote->account_id) {
+                \App\Models\CrmAccountEmail::create([
+                    'user_id'    => $uid,
+                    'account_id' => $quote->account_id,
+                    'to_email'   => $request->to_email,
+                    'cc_email'   => $request->cc_email,
+                    'bcc_email'  => $request->bcc_email,
+                    'subject'    => $request->subject,
+                    'body_html'  => $request->body_html,
+                    'from_name'  => $cfg->from_name,
+                    'from_email' => $cfg->from_email,
+                    'status'     => 'sent',
+                    'sent_at'    => now(),
+                ]);
+            }
+            return redirect()->route('admin.crm2.inventory.quotes.show', $id)->with('success', 'Email sent successfully.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.crm2.inventory.quotes.show', $id)->with('error', 'Email failed: ' . $e->getMessage());
+        }
     }
     public function inventorySalesOrdersShow($id) {
         $tid = auth()->id();

@@ -1,7 +1,6 @@
 <?php
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
-
 class CrmQuote extends Model
 {
     protected $table = 'crm_quotes';
@@ -23,16 +22,18 @@ class CrmQuote extends Model
         'total'           => 'decimal:2',
         'line_items'      => 'array',
     ];
-
     const STAGES = ['draft' => 'Draft', 'negotiation' => 'Negotiation', 'delivered' => 'Delivered', 'accepted' => 'Accepted', 'declined' => 'Declined'];
-
-    public function tenant()  { return $this->belongsTo(User::class, 'user_id'); }
-    public function owner()   { return $this->belongsTo(User::class, 'owner_id'); }
-    public function account() { return $this->belongsTo(CrmAccount::class, 'account_id'); }
-    public function contact() { return $this->belongsTo(CrmContact::class, 'contact_id'); }
-    public function deal()    { return $this->belongsTo(CrmDeal::class, 'deal_id'); }
-    public function items()   { return $this->morphMany(CrmInventoryItem::class, 'itemable'); }
-
+    public function tenant()      { return $this->belongsTo(User::class, 'user_id'); }
+    public function owner()       { return $this->belongsTo(User::class, 'owner_id'); }
+    public function account()     { return $this->belongsTo(CrmAccount::class, 'account_id'); }
+    public function contact()     { return $this->belongsTo(CrmContact::class, 'contact_id'); }
+    public function deal()        { return $this->belongsTo(CrmDeal::class, 'deal_id'); }
+    public function items()       { return $this->morphMany(CrmInventoryItem::class, 'itemable'); }
+    public function salesOrders() { return $this->hasMany(CrmSalesOrder::class, 'quote_id'); }
+    public function quoteNotes()  { return $this->hasMany(CrmNote::class, 'notable_id')->where('notable_type', 'quote'); }
+    public function attachments() { return $this->hasMany(CrmQuoteAttachment::class, 'quote_id')->latest(); }
+    public function openActivities()   { return $this->hasMany(CrmActivity::class, 'related_id')->where('related_type','quote')->whereNotIn('status',['Completed','completed']); }
+    public function closedActivities() { return $this->hasMany(CrmActivity::class, 'related_id')->where('related_type','quote')->whereIn('status',['Completed','completed']); }
     public static function generateNumber(int $userId): string
     {
         $count = static::where('user_id', $userId)->count() + 1;

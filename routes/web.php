@@ -460,6 +460,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/price-books/{id}/attachments/{attId}/download', [$ctrl, 'priceBookAttachmentsDownload'])->name('inventory.price-books.attachments.download');
         Route::delete('/inventory/price-books/{id}/attachments/{attId}',     [$ctrl, 'priceBookAttachmentsDestroy'])->name('inventory.price-books.attachments.destroy');
         Route::get('/inventory/quotes/{id}',           [$ctrl, 'inventoryQuotesShow'])->name('inventory.quotes.show');
+        // Quote sub-routes
+        Route::post('/inventory/quotes/{id}/notes',                       [$ctrl, 'quoteNotesStore'])->name('inventory.quotes.notes.store');
+        Route::post('/inventory/quotes/{id}/activities',                  [$ctrl, 'quoteActivitiesStore'])->name('inventory.quotes.activities.store');
+        Route::patch('/inventory/quotes/{id}/activities/{actId}/complete',[$ctrl, 'quoteActivitiesComplete'])->name('inventory.quotes.activities.complete');
+        Route::delete('/inventory/quotes/{id}/activities/{actId}',        [$ctrl, 'quoteActivitiesDestroy'])->name('inventory.quotes.activities.destroy');
+        Route::post('/inventory/quotes/{id}/attachments',                 [$ctrl, 'quoteAttachmentsStore'])->name('inventory.quotes.attachments.store');
+        Route::get('/inventory/quotes/{id}/attachments/{attId}/download', [$ctrl, 'quoteAttachmentsDownload'])->name('inventory.quotes.attachments.download');
+        Route::delete('/inventory/quotes/{id}/attachments/{attId}',       [$ctrl, 'quoteAttachmentsDestroy'])->name('inventory.quotes.attachments.destroy');
+        Route::post('/inventory/quotes/{id}/sales-orders/assign',         [$ctrl, 'quoteSalesOrdersAssign'])->name('inventory.quotes.sales-orders.assign');
+        Route::delete('/inventory/quotes/{id}/sales-orders/{soId}/unassign', [$ctrl, 'quoteSalesOrdersUnassign'])->name('inventory.quotes.sales-orders.unassign');
+        Route::post('/inventory/quotes/{id}/send-mail',                   [$ctrl, 'quoteSendMail'])->name('inventory.quotes.send-mail');
         Route::get('/inventory/sales-orders/{id}',     [$ctrl, 'inventorySalesOrdersShow'])->name('inventory.sales-orders.show');
         Route::get('/inventory/purchase-orders/{id}',  [$ctrl, 'inventoryPurchaseOrdersShow'])->name('inventory.purchase-orders.show');
         Route::get('/inventory/invoices/{id}',         [$ctrl, 'inventoryInvoicesShow'])->name('inventory.invoices.show');
