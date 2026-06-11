@@ -1,0 +1,467 @@
+/* ============================================================
+   ecommerce.css  —  E-commerce module theme
+   All colours bridge to dashboard CSS variables so this
+   automatically follows dark / light theme switching.
+   ============================================================ */
+
+/* ── Variables ─────────────────────────────────────────────── */
+:root {
+    --ec-bg:        var(--bg-primary,   #0f172a);
+    --ec-surface:   var(--bg-card,      #1e293b);
+    --ec-surface2:  var(--bg-secondary, #263347);
+    --ec-border:    var(--border,       rgba(99,102,241,0.15));
+    --ec-text:      var(--text-primary, #e2e8f0);
+    --ec-secondary: var(--text-secondary,#cbd5e1);
+    --ec-muted:     var(--text-muted,   #94a3b8);
+    --ec-primary:   var(--accent,       #6366f1);
+    --ec-sky:       #0ea5e9;
+    --ec-green:     #10b981;
+    --ec-amber:     #f59e0b;
+    --ec-red:       #ef4444;
+    --ec-radius:    12px;
+    --ec-radius-sm: 8px;
+    --ec-shadow:    0 4px 24px rgba(0,0,0,0.18);
+}
+
+/* Light-mode overrides */
+[data-theme="light"] {
+    --ec-bg:        var(--bg-primary,   #f1f5f9);
+    --ec-surface:   var(--bg-card,      #ffffff);
+    --ec-surface2:  var(--bg-secondary, #f8fafc);
+    --ec-border:    var(--border,       #e2e8f0);
+    --ec-text:      var(--text-primary, #0f172a);
+    --ec-secondary: var(--text-secondary,#475569);
+    --ec-muted:     var(--text-muted,   #94a3b8);
+    --ec-shadow:    0 2px 12px rgba(0,0,0,0.08);
+}
+
+/* ── Page Wrapper ───────────────────────────────────────────── */
+.ec-page {
+    padding: 1.75rem 2rem;
+    min-height: 100%;
+    background: var(--ec-bg);
+    color: var(--ec-text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Header ─────────────────────────────────────────────────── */
+.ec-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+}
+.ec-breadcrumb {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--ec-muted);
+    text-decoration: none;
+    margin-bottom: 6px;
+    transition: color 0.2s;
+}
+.ec-breadcrumb:hover { color: var(--ec-primary); }
+.ec-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ec-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.ec-title i { color: var(--ec-primary); }
+.ec-subtitle {
+    font-size: 0.875rem;
+    color: var(--ec-muted);
+    margin: 4px 0 0;
+}
+.ec-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ── Cards ──────────────────────────────────────────────────── */
+.ec-card {
+    background: var(--ec-surface);
+    border: 1px solid var(--ec-border);
+    border-radius: var(--ec-radius);
+    overflow: hidden;
+    margin-bottom: 1.25rem;
+    transition: box-shadow 0.2s;
+}
+.ec-card:hover { box-shadow: var(--ec-shadow); }
+.ec-card-header {
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--ec-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+.ec-card-header h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ec-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ec-card-header h3 i { color: var(--ec-primary); }
+.ec-card-body { padding: 1.25rem; }
+
+/* ── Buttons ────────────────────────────────────────────────── */
+.ec-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.55rem 1.1rem;
+    border-radius: var(--ec-radius-sm);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.ec-btn-primary {
+    background: var(--ec-primary);
+    color: #fff;
+}
+.ec-btn-primary:hover { opacity: 0.88; color: #fff; }
+.ec-btn-secondary {
+    background: var(--ec-surface2);
+    border: 1px solid var(--ec-border);
+    color: var(--ec-text);
+}
+.ec-btn-secondary:hover { border-color: var(--ec-primary); color: var(--ec-primary); }
+.ec-btn-danger {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: var(--ec-red);
+}
+.ec-btn-danger:hover { background: rgba(239,68,68,0.18); }
+.ec-btn-sm {
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+}
+.ec-btn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    background: var(--ec-surface2);
+    border: 1px solid var(--ec-border);
+    color: var(--ec-secondary);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+.ec-btn-icon:hover { border-color: var(--ec-primary); color: var(--ec-primary); }
+.ec-btn-icon.danger:hover { border-color: var(--ec-red); color: var(--ec-red); }
+
+/* ── Forms ──────────────────────────────────────────────────── */
+.ec-form-group { margin-bottom: 1rem; }
+.ec-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ec-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+.ec-label .required { color: var(--ec-red); }
+.ec-input,
+.ec-select,
+.ec-textarea {
+    width: 100%;
+    background: var(--ec-surface2);
+    border: 1px solid var(--ec-border);
+    border-radius: var(--ec-radius-sm);
+    padding: 0.6rem 0.9rem;
+    font-size: 0.875rem;
+    color: var(--ec-text);
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+.ec-input:focus,
+.ec-select:focus,
+.ec-textarea:focus { border-color: var(--ec-primary); }
+.ec-textarea { resize: vertical; min-height: 80px; }
+[data-theme="light"] .ec-input,
+[data-theme="light"] .ec-select,
+[data-theme="light"] .ec-textarea {
+    background: #fff;
+    color: #0f172a;
+}
+
+/* Toggle switch */
+.ec-toggle { position: relative; display: inline-block; width: 44px; height: 24px; flex-shrink: 0; }
+.ec-toggle input { opacity: 0; width: 0; height: 0; }
+.ec-toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background: #475569;
+    border-radius: 24px;
+    transition: 0.3s;
+}
+.ec-toggle-slider:before {
+    content: "";
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+.ec-toggle input:checked + .ec-toggle-slider { background: var(--ec-primary); }
+.ec-toggle input:checked + .ec-toggle-slider:before { transform: translateX(20px); }
+
+/* ── Tables ─────────────────────────────────────────────────── */
+.ec-table-wrap { overflow-x: auto; }
+.ec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+}
+.ec-table thead tr {
+    background: var(--ec-surface2);
+    border-bottom: 1px solid var(--ec-border);
+}
+.ec-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ec-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+}
+.ec-table tbody tr {
+    border-bottom: 1px solid var(--ec-border);
+    transition: background 0.15s;
+}
+.ec-table tbody tr:hover { background: var(--ec-surface2); }
+.ec-table td { padding: 0.75rem 1rem; color: var(--ec-secondary); vertical-align: middle; }
+
+/* ── Badges ─────────────────────────────────────────────────── */
+.ec-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.ec-badge-primary  { background: rgba(99,102,241,0.15); color: var(--ec-primary); }
+.ec-badge-success  { background: rgba(16,185,129,0.15); color: var(--ec-green); }
+.ec-badge-warning  { background: rgba(245,158,11,0.15); color: var(--ec-amber); }
+.ec-badge-danger   { background: rgba(239,68,68,0.15);  color: var(--ec-red); }
+.ec-badge-info     { background: rgba(14,165,233,0.15); color: var(--ec-sky); }
+.ec-badge-muted    { background: var(--ec-surface2); color: var(--ec-muted); border: 1px solid var(--ec-border); }
+
+/* ── Alerts ─────────────────────────────────────────────────── */
+.ec-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 0.75rem 1rem;
+    border-radius: var(--ec-radius-sm);
+    margin-bottom: 1.25rem;
+    font-size: 0.875rem;
+}
+.ec-alert-success { background: rgba(16,185,129,0.1);  border: 1px solid rgba(16,185,129,0.3);  color: var(--ec-green); }
+.ec-alert-danger  { background: rgba(239,68,68,0.1);   border: 1px solid rgba(239,68,68,0.3);   color: var(--ec-red); }
+.ec-alert-info    { background: rgba(14,165,233,0.1);  border: 1px solid rgba(14,165,233,0.3);  color: var(--ec-sky); }
+.ec-alert-warning { background: rgba(245,158,11,0.1);  border: 1px solid rgba(245,158,11,0.3);  color: var(--ec-amber); }
+
+/* ── Stats Grid ─────────────────────────────────────────────── */
+.ec-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+.ec-stat-card {
+    background: var(--ec-surface);
+    border: 1px solid var(--ec-border);
+    border-radius: var(--ec-radius);
+    padding: 1.25rem;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ec-stat-card:hover { border-color: var(--ec-primary); box-shadow: var(--ec-shadow); }
+.ec-stat-card i { font-size: 1.5rem; margin-bottom: 8px; display: block; }
+.ec-stat-value { font-size: 1.75rem; font-weight: 700; color: var(--ec-text); }
+.ec-stat-label { font-size: 0.75rem; color: var(--ec-muted); margin-top: 4px; }
+
+/* ── List Items (dashboard cards) ───────────────────────────── */
+.ec-list-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--ec-border);
+    transition: background 0.15s;
+}
+.ec-list-item:last-child { border-bottom: none; }
+.ec-list-item:hover { background: var(--ec-surface2); }
+.ec-list-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--ec-surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    color: var(--ec-primary);
+}
+.ec-list-item-icon img { width: 100%; height: 100%; object-fit: cover; }
+.ec-list-item-title { font-size: 0.875rem; font-weight: 500; color: var(--ec-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ec-list-item-sub   { font-size: 0.75rem; color: var(--ec-muted); }
+.ec-list-item-right { text-align: right; flex-shrink: 0; }
+.ec-price { color: var(--ec-green); font-weight: 600; font-size: 0.875rem; }
+
+/* ── Product Table Specific ─────────────────────────────────── */
+.ec-product-info { display: flex; align-items: center; gap: 10px; }
+.ec-product-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--ec-surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+    color: var(--ec-primary);
+}
+.ec-product-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.ec-product-name { font-size: 0.875rem; font-weight: 500; color: var(--ec-text); }
+
+/* ── Category Items ─────────────────────────────────────────── */
+.ec-cat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--ec-border);
+    transition: background 0.15s;
+}
+.ec-cat-item:last-child { border-bottom: none; }
+.ec-cat-item:hover { background: var(--ec-surface2); }
+.ec-cat-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--ec-surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--ec-primary);
+}
+.ec-cat-name { font-size: 0.875rem; font-weight: 500; color: var(--ec-text); }
+.ec-cat-meta { font-size: 0.75rem; color: var(--ec-muted); }
+.ec-cat-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* ── Avatar ─────────────────────────────────────────────────── */
+.ec-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--ec-primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* ── Stars ──────────────────────────────────────────────────── */
+.ec-stars { color: var(--ec-amber); font-size: 0.75rem; }
+
+/* ── Filter Bar ─────────────────────────────────────────────── */
+.ec-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--ec-border);
+    flex-wrap: wrap;
+}
+.ec-search-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+}
+.ec-search-wrap i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ec-muted);
+    font-size: 0.8rem;
+}
+.ec-search-wrap .ec-input { padding-left: 32px; }
+
+/* ── Empty State ────────────────────────────────────────────── */
+.ec-empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--ec-muted);
+}
+.ec-empty i { font-size: 2.5rem; opacity: 0.3; display: block; margin-bottom: 12px; }
+.ec-empty p { margin: 0 0 16px; font-size: 0.875rem; }
+
+/* ── Pagination ─────────────────────────────────────────────── */
+.ec-count { padding: 1rem 1.25rem; }
+
+/* ── Grids ──────────────────────────────────────────────────── */
+.ec-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+}
+.ec-grid-main-side {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 1.25rem;
+    align-items: start;
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media (max-width: 900px) {
+    .ec-grid-main-side { grid-template-columns: 1fr; }
+    .ec-grid-2 { grid-template-columns: 1fr; }
+    .ec-stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+    .ec-page { padding: 1rem; }
+    .ec-stats-grid { grid-template-columns: 1fr 1fr; }
+    .ec-header { flex-direction: column; align-items: flex-start; }
+}

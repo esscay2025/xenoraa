@@ -6,15 +6,31 @@
     $ecommerceActive = true; $siteActive = false;
 @endphp
 @section('content')
-<div style="padding:2rem;max-width:900px;">
-    <div style="margin-bottom:2rem;">
-        <a href="{{ route('admin.ecommerce.products') }}" style="color:#6366f1;text-decoration:none;font-size:0.875rem;display:block;margin-bottom:0.5rem;"><i class="fas fa-arrow-left"></i> Products</a>
-        <h1 style="font-size:1.75rem;font-weight:700;color:#fff;margin:0;">{{ isset($product) ? 'Edit Product' : 'Add New Product' }}</h1>
+<div class="ec-page" style="max-width:1100px;">
+
+    {{-- Header --}}
+    <div class="ec-header">
+        <div>
+            <a href="{{ route('admin.ecommerce.products') }}" class="ec-breadcrumb"><i class="fas fa-arrow-left"></i> All Products</a>
+            <h1 class="ec-title">
+                <i class="fas {{ isset($product) ? 'fa-edit' : 'fa-plus-circle' }}"></i>
+                {{ isset($product) ? 'Edit Product' : 'Add New Product' }}
+            </h1>
+        </div>
+        @if(isset($product))
+        <div class="ec-header-actions">
+            <form method="POST" action="{{ route('admin.ecommerce.products.destroy', $product) }}" onsubmit="return confirm('Delete this product?')">
+                @csrf @method('DELETE')
+                <button type="submit" class="ec-btn ec-btn-danger ec-btn-sm"><i class="fas fa-trash"></i> Delete</button>
+            </form>
+        </div>
+        @endif
     </div>
 
     @if($errors->any())
-        <div style="background:#450a0a;border:1px solid #ef4444;color:#fca5a5;padding:0.75rem 1rem;border-radius:8px;margin-bottom:1.5rem;">
-            @foreach($errors->all() as $error)<div>• {{ $error }}</div>@endforeach
+        <div class="ec-alert ec-alert-danger">
+            <i class="fas fa-exclamation-circle"></i>
+            <div>@foreach($errors->all() as $error)<div>• {{ $error }}</div>@endforeach</div>
         </div>
     @endif
 
@@ -22,160 +38,190 @@
         @csrf
         @if(isset($product)) @method('PUT') @endif
 
-        <div style="display:grid;grid-template-columns:1fr 300px;gap:1.5rem;align-items:start;">
+        <div class="ec-grid-main-side">
 
-            {{-- Left Column --}}
-            <div style="display:flex;flex-direction:column;gap:1.5rem;">
-
+            {{-- Left: Main Fields --}}
+            <div>
                 {{-- Basic Info --}}
-                <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.5rem;">
-                    <h3 style="color:#fff;font-size:1rem;font-weight:600;margin:0 0 1.25rem;">Product Information</h3>
-
-                    <div style="margin-bottom:1rem;">
-                        <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Product Name *</label>
-                        <input type="text" name="name" value="{{ old('name', $product->name ?? '') }}" required style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;box-sizing:border-box;">
+                <div class="ec-card">
+                    <div class="ec-card-header">
+                        <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
                     </div>
-
-                    <div style="margin-bottom:1rem;">
-                        <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Short Description</label>
-                        <input type="text" name="short_description" value="{{ old('short_description', $product->short_description ?? '') }}" maxlength="500" placeholder="One-line summary..." style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;box-sizing:border-box;">
-                    </div>
-
-                    <div>
-                        <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Full Description</label>
-                        <textarea name="description" rows="8" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;resize:vertical;box-sizing:border-box;">{{ old('description', $product->description ?? '') }}</textarea>
+                    <div class="ec-card-body">
+                        <div class="ec-form-group">
+                            <label class="ec-label">Product Name <span class="required">*</span></label>
+                            <input type="text" name="name" value="{{ old('name', $product->name ?? '') }}" class="ec-input" required placeholder="Enter product name">
+                        </div>
+                        <div class="ec-form-group">
+                            <label class="ec-label">Description</label>
+                            <textarea name="description" class="ec-textarea" rows="5" placeholder="Describe your product…">{{ old('description', $product->description ?? '') }}</textarea>
+                        </div>
+                        <div class="ec-grid-2" style="gap:12px;">
+                            <div class="ec-form-group">
+                                <label class="ec-label">SKU</label>
+                                <input type="text" name="sku" value="{{ old('sku', $product->sku ?? '') }}" class="ec-input" placeholder="e.g. PROD-001">
+                            </div>
+                            <div class="ec-form-group">
+                                <label class="ec-label">Barcode</label>
+                                <input type="text" name="barcode" value="{{ old('barcode', $product->barcode ?? '') }}" class="ec-input" placeholder="EAN / UPC">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {{-- Pricing --}}
-                <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.5rem;">
-                    <h3 style="color:#fff;font-size:1rem;font-weight:600;margin:0 0 1.25rem;">Pricing</h3>
-                    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;">
-                        <div>
-                            <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Regular Price (₹) *</label>
-                            <input type="number" name="price" value="{{ old('price', $product->price ?? '0') }}" step="0.01" min="0" required style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;box-sizing:border-box;">
-                        </div>
-                        <div>
-                            <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Sale Price (₹)</label>
-                            <input type="number" name="sale_price" value="{{ old('sale_price', $product->sale_price ?? '') }}" step="0.01" min="0" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;box-sizing:border-box;">
-                        </div>
-                        <div>
-                            <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Cost Price (₹)</label>
-                            <input type="number" name="cost_price" value="{{ old('cost_price', $product->cost_price ?? '') }}" step="0.01" min="0" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;box-sizing:border-box;">
+                <div class="ec-card">
+                    <div class="ec-card-header">
+                        <h3><i class="fas fa-rupee-sign"></i> Pricing</h3>
+                    </div>
+                    <div class="ec-card-body">
+                        <div class="ec-grid-2" style="gap:12px;">
+                            <div class="ec-form-group">
+                                <label class="ec-label">Price <span class="required">*</span></label>
+                                <input type="number" name="price" value="{{ old('price', $product->price ?? '') }}" class="ec-input" step="0.01" min="0" required placeholder="0.00">
+                            </div>
+                            <div class="ec-form-group">
+                                <label class="ec-label">Compare Price</label>
+                                <input type="number" name="compare_price" value="{{ old('compare_price', $product->compare_price ?? '') }}" class="ec-input" step="0.01" min="0" placeholder="Original / MRP">
+                            </div>
+                            <div class="ec-form-group">
+                                <label class="ec-label">Cost Price</label>
+                                <input type="number" name="cost_price" value="{{ old('cost_price', $product->cost_price ?? '') }}" class="ec-input" step="0.01" min="0" placeholder="Your cost">
+                            </div>
+                            <div class="ec-form-group">
+                                <label class="ec-label">Tax Rate (%)</label>
+                                <input type="number" name="tax_rate" value="{{ old('tax_rate', $product->tax_rate ?? '') }}" class="ec-input" step="0.01" min="0" max="100" placeholder="e.g. 18">
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {{-- Inventory --}}
-                <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.5rem;">
-                    <h3 style="color:#fff;font-size:1rem;font-weight:600;margin:0 0 1.25rem;">Inventory</h3>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
-                        <div>
-                            <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">SKU</label>
-                            <input type="text" name="sku" value="{{ old('sku', $product->sku ?? '') }}" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;box-sizing:border-box;">
+                <div class="ec-card">
+                    <div class="ec-card-header">
+                        <h3><i class="fas fa-warehouse"></i> Inventory</h3>
+                    </div>
+                    <div class="ec-card-body">
+                        <div class="ec-form-group" style="display:flex;align-items:center;gap:12px;">
+                            <label class="ec-toggle">
+                                <input type="checkbox" name="track_inventory" value="1" {{ old('track_inventory', $product->track_inventory ?? false) ? 'checked' : '' }}>
+                                <span class="ec-toggle-slider"></span>
+                            </label>
+                            <span style="font-size:0.875rem;color:var(--ec-text);">Track inventory for this product</span>
                         </div>
-                        <div>
-                            <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Stock Status *</label>
-                            <select name="stock_status" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;">
-                                <option value="in_stock" {{ old('stock_status', $product->stock_status ?? 'in_stock')==='in_stock'?'selected':'' }}>In Stock</option>
+                        <div class="ec-grid-2" style="gap:12px;">
+                            <div class="ec-form-group">
+                                <label class="ec-label">Stock Quantity</label>
+                                <input type="number" name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity ?? 0) }}" class="ec-input" min="0">
+                            </div>
+                            <div class="ec-form-group">
+                                <label class="ec-label">Low Stock Alert</label>
+                                <input type="number" name="low_stock_threshold" value="{{ old('low_stock_threshold', $product->low_stock_threshold ?? 5) }}" class="ec-input" min="0">
+                            </div>
+                        </div>
+                        <div class="ec-form-group">
+                            <label class="ec-label">Stock Status</label>
+                            <select name="stock_status" class="ec-select">
+                                <option value="in_stock"     {{ old('stock_status', $product->stock_status ?? 'in_stock')==='in_stock'?'selected':'' }}>In Stock</option>
                                 <option value="out_of_stock" {{ old('stock_status', $product->stock_status ?? '')==='out_of_stock'?'selected':'' }}>Out of Stock</option>
-                                <option value="pre_order" {{ old('stock_status', $product->stock_status ?? '')==='pre_order'?'selected':'' }}>Pre-order</option>
+                                <option value="on_backorder" {{ old('stock_status', $product->stock_status ?? '')==='on_backorder'?'selected':'' }}>On Backorder</option>
                             </select>
                         </div>
                     </div>
-                    <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
-                        <input type="checkbox" name="manage_stock" id="manage_stock" value="1" {{ old('manage_stock', $product->manage_stock ?? false) ? 'checked' : '' }} style="width:16px;height:16px;">
-                        <label for="manage_stock" style="color:#e2e8f0;font-size:0.875rem;">Track stock quantity</label>
-                    </div>
-                    <div>
-                        <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Stock Quantity</label>
-                        <input type="number" name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity ?? '0') }}" min="0" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;box-sizing:border-box;">
-                    </div>
-                </div>
-
-                {{-- SEO --}}
-                <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.5rem;">
-                    <h3 style="color:#fff;font-size:1rem;font-weight:600;margin:0 0 1.25rem;">SEO</h3>
-                    <div style="margin-bottom:1rem;">
-                        <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Meta Title</label>
-                        <input type="text" name="meta_title" value="{{ old('meta_title', $product->meta_title ?? '') }}" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;box-sizing:border-box;">
-                    </div>
-                    <div>
-                        <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Meta Description</label>
-                        <textarea name="meta_description" rows="2" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;resize:vertical;box-sizing:border-box;">{{ old('meta_description', $product->meta_description ?? '') }}</textarea>
-                    </div>
                 </div>
             </div>
 
-            {{-- Right Column --}}
-            <div style="display:flex;flex-direction:column;gap:1.5rem;position:sticky;top:1.5rem;">
-
+            {{-- Right: Sidebar --}}
+            <div>
                 {{-- Publish --}}
-                <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.25rem;">
-                    <h3 style="color:#fff;font-size:0.95rem;font-weight:600;margin:0 0 1rem;">Publish</h3>
-                    <div style="display:flex;flex-direction:column;gap:0.75rem;margin-bottom:1.25rem;">
-                        <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
-                            <input type="checkbox" name="is_active" value="1" {{ old('is_active', $product->is_active ?? true) ? 'checked' : '' }} style="width:16px;height:16px;">
-                            <span style="color:#e2e8f0;font-size:0.875rem;">Active (visible in shop)</span>
-                        </label>
-                        <label style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
-                            <input type="checkbox" name="is_featured" value="1" {{ old('is_featured', $product->is_featured ?? false) ? 'checked' : '' }} style="width:16px;height:16px;">
-                            <span style="color:#e2e8f0;font-size:0.875rem;">Featured product</span>
-                        </label>
+                <div class="ec-card">
+                    <div class="ec-card-header">
+                        <h3><i class="fas fa-rocket"></i> Publish</h3>
                     </div>
-                    <button type="submit" style="width:100%;background:#6366f1;color:#fff;padding:0.7rem;border-radius:8px;border:none;cursor:pointer;font-weight:600;font-size:0.875rem;">
-                        <i class="fas fa-save"></i> {{ isset($product) ? 'Update Product' : 'Create Product' }}
-                    </button>
+                    <div class="ec-card-body">
+                        <div class="ec-form-group">
+                            <label class="ec-label">Visibility</label>
+                            <select name="is_active" class="ec-select">
+                                <option value="1" {{ old('is_active', $product->is_active ?? 1) == 1 ? 'selected' : '' }}>Active (visible)</option>
+                                <option value="0" {{ old('is_active', $product->is_active ?? 1) == 0 ? 'selected' : '' }}>Inactive (hidden)</option>
+                            </select>
+                        </div>
+                        <div class="ec-form-group" style="display:flex;align-items:center;gap:12px;">
+                            <label class="ec-toggle">
+                                <input type="checkbox" name="is_featured" value="1" {{ old('is_featured', $product->is_featured ?? false) ? 'checked' : '' }}>
+                                <span class="ec-toggle-slider"></span>
+                            </label>
+                            <span style="font-size:0.875rem;color:var(--ec-text);">Featured product</span>
+                        </div>
+                        <button type="submit" class="ec-btn ec-btn-primary" style="width:100%;justify-content:center;">
+                            <i class="fas fa-save"></i> {{ isset($product) ? 'Update Product' : 'Create Product' }}
+                        </button>
+                    </div>
                 </div>
 
                 {{-- Category & Type --}}
-                <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.25rem;">
-                    <h3 style="color:#fff;font-size:0.95rem;font-weight:600;margin:0 0 1rem;">Category & Type</h3>
-                    <div style="margin-bottom:1rem;">
-                        <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Category</label>
-                        <select name="category_id" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;">
-                            <option value="">— Select Category —</option>
-                            @foreach($categories as $cat)
-                                <option value="{{ $cat->id }}" {{ old('category_id', $product->category_id ?? '')==$cat->id?'selected':'' }}>{{ $cat->name }}</option>
-                                @foreach($cat->children as $sub)
-                                    <option value="{{ $sub->id }}" {{ old('category_id', $product->category_id ?? '')==$sub->id?'selected':'' }}>&nbsp;&nbsp;↳ {{ $sub->name }}</option>
+                <div class="ec-card">
+                    <div class="ec-card-header">
+                        <h3><i class="fas fa-tags"></i> Category & Type</h3>
+                    </div>
+                    <div class="ec-card-body">
+                        <div class="ec-form-group">
+                            <label class="ec-label">Category</label>
+                            <select name="category_id" class="ec-select">
+                                <option value="">— Select Category —</option>
+                                @foreach($categories as $cat)
+                                    <option value="{{ $cat->id }}" {{ old('category_id', $product->category_id ?? '')==$cat->id?'selected':'' }}>{{ $cat->name }}</option>
+                                    @foreach($cat->children as $sub)
+                                        <option value="{{ $sub->id }}" {{ old('category_id', $product->category_id ?? '')==$sub->id?'selected':'' }}>&nbsp;&nbsp;↳ {{ $sub->name }}</option>
+                                    @endforeach
                                 @endforeach
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Product Type *</label>
-                        <select name="type" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;">
-                            <option value="simple"  {{ old('type', $product->type ?? 'simple')==='simple'?'selected':'' }}>Simple Product</option>
-                            <option value="digital" {{ old('type', $product->type ?? '')==='digital'?'selected':'' }}>Digital Download</option>
-                            <option value="service" {{ old('type', $product->type ?? '')==='service'?'selected':'' }}>Service</option>
-                        </select>
+                            </select>
+                        </div>
+                        <div class="ec-form-group">
+                            <label class="ec-label">Product Type <span class="required">*</span></label>
+                            <select name="type" class="ec-select">
+                                <option value="simple"  {{ old('type', $product->type ?? 'simple')==='simple'?'selected':'' }}>Simple Product</option>
+                                <option value="digital" {{ old('type', $product->type ?? '')==='digital'?'selected':'' }}>Digital Download</option>
+                                <option value="service" {{ old('type', $product->type ?? '')==='service'?'selected':'' }}>Service</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
-                {{-- Image --}}
-                <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.25rem;">
-                    <h3 style="color:#fff;font-size:0.95rem;font-weight:600;margin:0 0 1rem;">Featured Image</h3>
-                    @if(isset($product) && $product->featured_image)
-                        <img src="{{ $product->featured_image }}" style="width:100%;border-radius:8px;margin-bottom:0.75rem;object-fit:cover;max-height:160px;" onerror="this.style.display='none'">
-                    @endif
-                    <input type="text" name="featured_image" value="{{ old('featured_image', $product->featured_image ?? '') }}" placeholder="https://... image URL" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.8rem;box-sizing:border-box;">
-                    <p style="color:#9ca3af;font-size:0.7rem;margin:0.4rem 0 0;">Enter a direct image URL</p>
+                {{-- Featured Image --}}
+                <div class="ec-card">
+                    <div class="ec-card-header">
+                        <h3><i class="fas fa-image"></i> Featured Image</h3>
+                    </div>
+                    <div class="ec-card-body">
+                        @if(isset($product) && $product->featured_image)
+                            <img src="{{ $product->featured_image }}" style="width:100%;border-radius:8px;margin-bottom:12px;object-fit:cover;max-height:160px;" onerror="this.style.display='none'">
+                        @endif
+                        <div class="ec-form-group">
+                            <input type="text" name="featured_image" value="{{ old('featured_image', $product->featured_image ?? '') }}" class="ec-input" placeholder="https://… image URL">
+                            <p style="font-size:0.72rem;color:var(--ec-muted);margin:4px 0 0;">Enter a direct image URL</p>
+                        </div>
+                    </div>
                 </div>
 
-                {{-- Physical --}}
-                <div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.25rem;">
-                    <h3 style="color:#fff;font-size:0.95rem;font-weight:600;margin:0 0 1rem;">Shipping (optional)</h3>
-                    <div style="margin-bottom:0.75rem;">
-                        <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Weight (kg)</label>
-                        <input type="number" name="weight" value="{{ old('weight', $product->weight ?? '') }}" step="0.01" min="0" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;box-sizing:border-box;">
+                {{-- Shipping --}}
+                <div class="ec-card">
+                    <div class="ec-card-header">
+                        <h3><i class="fas fa-shipping-fast"></i> Shipping</h3>
                     </div>
-                    <div>
-                        <label style="display:block;font-size:0.75rem;color:#9ca3af;margin-bottom:0.4rem;">Dimensions (L×W×H)</label>
-                        <input type="text" name="dimensions" value="{{ old('dimensions', $product->dimensions ?? '') }}" placeholder="e.g. 20×15×10 cm" style="width:100%;background:#0f172a;border:1px solid #334155;color:#fff;padding:0.6rem 0.75rem;border-radius:8px;font-size:0.875rem;box-sizing:border-box;">
+                    <div class="ec-card-body">
+                        <div class="ec-form-group">
+                            <label class="ec-label">Weight (kg)</label>
+                            <input type="number" name="weight" value="{{ old('weight', $product->weight ?? '') }}" class="ec-input" step="0.01" min="0" placeholder="0.00">
+                        </div>
+                        <div class="ec-form-group">
+                            <label class="ec-label">Dimensions (L×W×H)</label>
+                            <input type="text" name="dimensions" value="{{ old('dimensions', $product->dimensions ?? '') }}" class="ec-input" placeholder="e.g. 20×15×10 cm">
+                        </div>
                     </div>
                 </div>
             </div>
+
         </div>
     </form>
 </div>

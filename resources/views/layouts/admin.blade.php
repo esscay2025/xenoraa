@@ -26,6 +26,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @if(request()->routeIs('admin.crm2*'))
     <link rel="stylesheet" href="{{ asset('css/crm2.css') }}?v={{ filemtime(public_path('css/crm2.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/ecommerce.css') }}?v={{ filemtime(public_path('css/ecommerce.css')) }}">
     @endif
     <style>
         /* ── Dark mode (default) ─────────────────── */
