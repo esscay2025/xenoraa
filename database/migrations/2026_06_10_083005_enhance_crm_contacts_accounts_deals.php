@@ -11,95 +11,95 @@ return new class extends Migration
         // ── CONTACTS ──────────────────────────────────────────────
         // Existing: id, user_id, account_id, first_name, last_name, email, phone, job_title, department, city, country, source, notes, status
         Schema::table('crm_contacts', function (Blueprint $table) {
-            $table->string('contact_image')->nullable()->after('id');
-            $table->unsignedBigInteger('owner_id')->nullable()->after('contact_image');
-            $table->unsignedBigInteger('reporting_to')->nullable()->after('last_name');
-            $table->unsignedBigInteger('vendor_id')->nullable()->after('account_id');
-            $table->string('title')->nullable()->after('vendor_id');
-            $table->string('mobile')->nullable()->after('phone');
-            $table->string('secondary_email')->nullable()->after('email');
-            $table->string('other_phone')->nullable()->after('mobile');
-            $table->string('home_phone')->nullable()->after('other_phone');
-            $table->string('fax')->nullable()->after('home_phone');
-            $table->boolean('email_opt_out')->default(false)->after('fax');
-            $table->string('lead_source')->nullable()->after('email_opt_out');
-            $table->string('assistant')->nullable()->after('lead_source');
-            $table->string('assistant_phone')->nullable()->after('assistant');
-            $table->date('date_of_birth')->nullable()->after('assistant_phone');
-            $table->string('skype_id')->nullable()->after('date_of_birth');
-            $table->string('twitter')->nullable()->after('skype_id');
+            $table->string('contact_image')->nullable();
+            $table->unsignedBigInteger('owner_id')->nullable();
+            $table->unsignedBigInteger('reporting_to')->nullable();
+            $table->unsignedBigInteger('vendor_id')->nullable();
+            $table->string('title')->nullable();
+            $table->string('mobile')->nullable();
+            $table->string('secondary_email')->nullable();
+            $table->string('other_phone')->nullable();
+            $table->string('home_phone')->nullable();
+            $table->string('fax')->nullable();
+            $table->boolean('email_opt_out')->default(false);
+            $table->string('lead_source')->nullable();
+            $table->string('assistant')->nullable();
+            $table->string('assistant_phone')->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->string('skype_id')->nullable();
+            $table->string('twitter')->nullable();
             // Mailing Address
-            $table->string('mailing_country')->nullable()->after('twitter');
-            $table->string('mailing_building')->nullable()->after('mailing_country');
-            $table->string('mailing_street')->nullable()->after('mailing_building');
-            $table->string('mailing_city')->nullable()->after('mailing_street');
-            $table->string('mailing_state')->nullable()->after('mailing_city');
-            $table->string('mailing_zip')->nullable()->after('mailing_state');
-            $table->decimal('mailing_lat', 10, 7)->nullable()->after('mailing_zip');
-            $table->decimal('mailing_lng', 10, 7)->nullable()->after('mailing_lat');
+            $table->string('mailing_country')->nullable();
+            $table->string('mailing_building')->nullable();
+            $table->string('mailing_street')->nullable();
+            $table->string('mailing_city')->nullable();
+            $table->string('mailing_state')->nullable();
+            $table->string('mailing_zip')->nullable();
+            $table->decimal('mailing_lat', 10, 7)->nullable();
+            $table->decimal('mailing_lng', 10, 7)->nullable();
             // Other Address
-            $table->string('other_country')->nullable()->after('mailing_lng');
-            $table->string('other_building')->nullable()->after('other_country');
-            $table->string('other_street')->nullable()->after('other_building');
-            $table->string('other_city')->nullable()->after('other_street');
-            $table->string('other_state')->nullable()->after('other_city');
-            $table->string('other_zip')->nullable()->after('other_state');
-            $table->decimal('other_lat', 10, 7)->nullable()->after('other_zip');
-            $table->decimal('other_lng', 10, 7)->nullable()->after('other_lat');
-            $table->text('description')->nullable()->after('other_lng');
-            $table->string('attachments')->nullable()->after('description');
+            $table->string('other_country')->nullable();
+            $table->string('other_building')->nullable();
+            $table->string('other_street')->nullable();
+            $table->string('other_city')->nullable();
+            $table->string('other_state')->nullable();
+            $table->string('other_zip')->nullable();
+            $table->decimal('other_lat', 10, 7)->nullable();
+            $table->decimal('other_lng', 10, 7)->nullable();
+            $table->text('description')->nullable();
+            $table->string('attachments')->nullable();
         });
 
         // ── ACCOUNTS ──────────────────────────────────────────────
         // Existing: id, user_id, name, type, industry, website, phone, email, address, city, country, annual_revenue, employees, notes, status
         Schema::table('crm_accounts', function (Blueprint $table) {
-            $table->string('account_image')->nullable()->after('id');
-            $table->unsignedBigInteger('owner_id')->nullable()->after('account_image');
-            $table->string('account_number')->nullable()->after('name');
-            $table->string('account_type')->nullable()->after('account_number');
-            $table->string('rating')->nullable()->after('account_type');
-            $table->unsignedBigInteger('parent_account_id')->nullable()->after('rating');
-            $table->string('account_site')->nullable()->after('parent_account_id');
-            $table->string('ownership')->nullable()->after('industry');
-            $table->string('sic_code')->nullable()->after('ownership');
-            $table->string('ticker_symbol')->nullable()->after('sic_code');
-            $table->string('fax')->nullable()->after('phone');
+            $table->string('account_image')->nullable();
+            $table->unsignedBigInteger('owner_id')->nullable();
+            $table->string('account_number')->nullable();
+            $table->string('account_type')->nullable();
+            $table->string('rating')->nullable();
+            $table->unsignedBigInteger('parent_account_id')->nullable();
+            $table->string('account_site')->nullable();
+            $table->string('ownership')->nullable();
+            $table->string('sic_code')->nullable();
+            $table->string('ticker_symbol')->nullable();
+            $table->string('fax')->nullable();
             // Billing Address
-            $table->string('billing_country')->nullable()->after('ticker_symbol');
-            $table->string('billing_building')->nullable()->after('billing_country');
-            $table->string('billing_street')->nullable()->after('billing_building');
-            $table->string('billing_city')->nullable()->after('billing_street');
-            $table->string('billing_state')->nullable()->after('billing_city');
-            $table->string('billing_zip')->nullable()->after('billing_state');
-            $table->decimal('billing_lat', 10, 7)->nullable()->after('billing_zip');
-            $table->decimal('billing_lng', 10, 7)->nullable()->after('billing_lat');
+            $table->string('billing_country')->nullable();
+            $table->string('billing_building')->nullable();
+            $table->string('billing_street')->nullable();
+            $table->string('billing_city')->nullable();
+            $table->string('billing_state')->nullable();
+            $table->string('billing_zip')->nullable();
+            $table->decimal('billing_lat', 10, 7)->nullable();
+            $table->decimal('billing_lng', 10, 7)->nullable();
             // Shipping Address
-            $table->string('shipping_country')->nullable()->after('billing_lng');
-            $table->string('shipping_building')->nullable()->after('shipping_country');
-            $table->string('shipping_street')->nullable()->after('shipping_building');
-            $table->string('shipping_city')->nullable()->after('shipping_street');
-            $table->string('shipping_state')->nullable()->after('shipping_city');
-            $table->string('shipping_zip')->nullable()->after('shipping_state');
-            $table->decimal('shipping_lat', 10, 7)->nullable()->after('shipping_zip');
-            $table->decimal('shipping_lng', 10, 7)->nullable()->after('shipping_lat');
-            $table->decimal('outstanding_amount', 15, 2)->default(0)->after('shipping_lng');
-            $table->text('description')->nullable()->after('outstanding_amount');
+            $table->string('shipping_country')->nullable();
+            $table->string('shipping_building')->nullable();
+            $table->string('shipping_street')->nullable();
+            $table->string('shipping_city')->nullable();
+            $table->string('shipping_state')->nullable();
+            $table->string('shipping_zip')->nullable();
+            $table->decimal('shipping_lat', 10, 7)->nullable();
+            $table->decimal('shipping_lng', 10, 7)->nullable();
+            $table->decimal('outstanding_amount', 15, 2)->default(0);
+            $table->text('description')->nullable();
         });
 
         // ── DEALS ──────────────────────────────────────────────────
         // Existing: id, user_id, account_id, contact_id, lead_id, title, value, currency, stage, probability, expected_close, closed_at, notes, lost_reason
         Schema::table('crm_deals', function (Blueprint $table) {
-            $table->unsignedBigInteger('owner_id')->nullable()->after('id');
-            $table->string('name')->nullable()->after('owner_id'); // Deal Name
-            $table->string('type')->nullable()->after('name');
-            $table->string('next_step')->nullable()->after('type');
-            $table->string('lead_source')->nullable()->after('next_step');
-            $table->string('qualification')->nullable()->after('stage');
-            $table->decimal('expected_revenue', 15, 2)->nullable()->after('probability');
-            $table->string('campaign_source')->nullable()->after('expected_revenue');
-            $table->decimal('amount', 15, 2)->nullable()->after('campaign_source'); // alias for value
-            $table->date('closing_date')->nullable()->after('amount'); // alias for expected_close
-            $table->text('description')->nullable()->after('closing_date');
+            $table->unsignedBigInteger('owner_id')->nullable();
+            $table->string('name')->nullable(); // Deal Name
+            $table->string('type')->nullable();
+            $table->string('next_step')->nullable();
+            $table->string('lead_source')->nullable();
+            $table->string('qualification')->nullable();
+            $table->decimal('expected_revenue', 15, 2)->nullable();
+            $table->string('campaign_source')->nullable();
+            $table->decimal('amount', 15, 2)->nullable(); // alias for value
+            $table->date('closing_date')->nullable(); // alias for expected_close
+            $table->text('description')->nullable();
         });
     }
 

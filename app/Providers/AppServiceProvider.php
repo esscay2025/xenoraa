@@ -48,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
                 // Normalise: strip leading www. for DB lookup
                 $bareHost = preg_replace('/^www\./', '', $host);
 
+                try {
                 // Check if this host belongs to a tenant (match bare or www variant)
                 $tenant = User::where('custom_domain', $host)
                     ->orWhere('custom_domain', 'www.' . $bareHost)
@@ -57,6 +58,9 @@ class AppServiceProvider extends ServiceProvider
                 if ($tenant) {
                     // Force all route() and url() calls to use this custom domain
                     URL::forceRootUrl('https://' . $host);
+                }
+                } catch (\Exception $e) {
+                    // Table may not exist yet (e.g., during migrate:fresh)
                 }
             }
         });

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('custom_pages', function (Blueprint $table) {
             if (!Schema::hasColumn('custom_pages', 'page_type')) {
-                $table->string('page_type')->nullable()->after('slug');
+                $table->string('page_type')->nullable();
             }
         });
     }

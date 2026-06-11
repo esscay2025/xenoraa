@@ -7,61 +7,61 @@ return new class extends Migration {
     public function up(): void {
         Schema::table('crm_leads', function (Blueprint $table) {
             // 1. Lead Profile
-            $table->string('lead_image')->nullable()->after('id');
-            $table->unsignedBigInteger('owner_id')->nullable()->after('lead_image'); // staff assignment
-            $table->string('lead_status')->nullable()->default('Not Contacted')->after('owner_id');
-            $table->string('rating')->nullable()->after('lead_status');
+            $table->string('lead_image')->nullable();
+            $table->unsignedBigInteger('owner_id')->nullable(); // staff assignment
+            $table->string('lead_status')->nullable()->default('Not Contacted');
+            $table->string('rating')->nullable();
 
             // 2. Personal Information
-            $table->string('salutation')->nullable()->after('rating');
-            $table->string('first_name')->nullable()->after('salutation');
-            $table->string('last_name')->nullable()->after('first_name');
-            $table->string('title')->nullable()->after('last_name');
-            $table->string('industry')->nullable()->after('title');
+            $table->string('salutation')->nullable();
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('title')->nullable();
+            $table->string('industry')->nullable();
 
             // 3. Contact Information
-            $table->string('secondary_email')->nullable()->after('email');
-            $table->string('phone')->nullable()->after('secondary_email');
-            $table->string('fax')->nullable()->after('phone');
-            $table->string('website')->nullable()->after('fax');
-            $table->string('twitter')->nullable()->after('website');
-            $table->string('linkedin')->nullable()->after('twitter');
-            $table->string('facebook')->nullable()->after('linkedin');
-            $table->string('instagram')->nullable()->after('facebook');
-            $table->boolean('email_opt_out')->default(false)->after('instagram');
+            $table->string('secondary_email')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('fax')->nullable();
+            $table->string('website')->nullable();
+            $table->string('twitter')->nullable();
+            $table->string('linkedin')->nullable();
+            $table->string('facebook')->nullable();
+            $table->string('instagram')->nullable();
+            $table->boolean('email_opt_out')->default(false);
 
             // 4. Address Information
-            $table->string('country')->nullable()->after('email_opt_out');
-            $table->string('flat_no')->nullable()->after('country');
-            $table->string('street')->nullable()->after('flat_no');
-            $table->string('city')->nullable()->after('street');
-            $table->string('state')->nullable()->after('city');
-            $table->string('zip')->nullable()->after('state');
+            $table->string('country')->nullable();
+            $table->string('flat_no')->nullable();
+            $table->string('street')->nullable();
+            $table->string('city')->nullable();
+            $table->string('state')->nullable();
+            $table->string('zip')->nullable();
 
             // 5. Business Information
-            $table->decimal('annual_revenue', 15, 2)->nullable()->after('zip');
-            $table->integer('no_of_employees')->nullable()->after('annual_revenue');
+            $table->decimal('annual_revenue', 15, 2)->nullable();
+            $table->integer('no_of_employees')->nullable();
 
             // 6. Lead Qualification
-            $table->decimal('budget', 15, 2)->nullable()->after('no_of_employees');
-            $table->text('requirement')->nullable()->after('budget');
-            $table->date('expected_purchase_date')->nullable()->after('requirement');
-            $table->string('decision_maker')->nullable()->after('expected_purchase_date');
-            $table->string('competitor')->nullable()->after('decision_maker');
-            $table->string('interest_level')->nullable()->after('competitor');
-            $table->date('follow_up_date')->nullable()->after('interest_level');
+            $table->decimal('budget', 15, 2)->nullable();
+            $table->text('requirement')->nullable();
+            $table->date('expected_purchase_date')->nullable();
+            $table->string('decision_maker')->nullable();
+            $table->string('competitor')->nullable();
+            $table->string('interest_level')->nullable();
+            $table->date('follow_up_date')->nullable();
 
             // 7. Lead Tracking
-            $table->string('campaign_source')->nullable()->after('follow_up_date');
-            $table->string('campaign_name')->nullable()->after('campaign_source');
-            $table->string('referral_source')->nullable()->after('campaign_name');
-            $table->timestamp('last_activity_date')->nullable()->after('referral_source');
-            $table->timestamp('converted_date')->nullable()->after('last_activity_date');
-            $table->boolean('is_converted')->default(false)->after('converted_date');
+            $table->string('campaign_source')->nullable();
+            $table->string('campaign_name')->nullable();
+            $table->string('referral_source')->nullable();
+            $table->timestamp('last_activity_date')->nullable();
+            $table->timestamp('converted_date')->nullable();
+            $table->boolean('is_converted')->default(false);
 
             // 8. Description & Notes
-            $table->text('description')->nullable()->after('is_converted');
-            $table->text('internal_notes')->nullable()->after('description');
+            $table->text('description')->nullable();
+            $table->text('internal_notes')->nullable();
         });
     }
 

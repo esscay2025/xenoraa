@@ -11,9 +11,9 @@ return new class extends Migration
         // Add modules JSON column to roles (default modules for this role)
         if (!Schema::hasColumn('roles', 'modules')) {
             Schema::table('roles', function (Blueprint $table) {
-                $table->json('modules')->nullable()->after('description')
+                $table->json('modules')->nullable()
                       ->comment('Default module list for this role');
-                $table->unsignedBigInteger('tenant_owner_id')->nullable()->after('modules')
+                $table->unsignedBigInteger('tenant_owner_id')->nullable()
                       ->comment('NULL = system role, set = tenant-created role');
                 $table->index('tenant_owner_id');
             });
@@ -22,7 +22,7 @@ return new class extends Migration
         // Add module_permissions JSON column to users (individual overrides)
         if (!Schema::hasColumn('users', 'module_permissions')) {
             Schema::table('users', function (Blueprint $table) {
-                $table->json('module_permissions')->nullable()->after('status')
+                $table->json('module_permissions')->nullable()
                       ->comment('Per-user module access overrides (null = use role defaults)');
             });
         }

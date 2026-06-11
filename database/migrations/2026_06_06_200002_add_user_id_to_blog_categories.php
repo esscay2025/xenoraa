@@ -9,7 +9,7 @@ return new class extends Migration
     {
         if (!Schema::hasColumn('blog_categories', 'user_id')) {
             Schema::table('blog_categories', function (Blueprint $table) {
-                $table->unsignedBigInteger('user_id')->nullable()->after('id')->index();
+                $table->unsignedBigInteger('user_id')->nullable()->index();
             });
         }
     }

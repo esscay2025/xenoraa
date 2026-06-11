@@ -10,16 +10,16 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             if (!Schema::hasColumn('users', 'city')) {
-                $table->string('city', 100)->nullable()->after('phone');
+                $table->string('city', 100)->nullable();
             }
             if (!Schema::hasColumn('users', 'state')) {
-                $table->string('state', 100)->nullable()->after('city');
+                $table->string('state', 100)->nullable();
             }
             if (!Schema::hasColumn('users', 'country')) {
-                $table->string('country', 100)->nullable()->after('state');
+                $table->string('country', 100)->nullable();
             }
             if (!Schema::hasColumn('users', 'website')) {
-                $table->string('website', 255)->nullable()->after('country');
+                $table->string('website', 255)->nullable();
             }
         });
     }

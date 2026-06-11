@@ -11,19 +11,19 @@ return new class extends Migration
         Schema::table('users', function (Blueprint $table) {
             // Subscription billing cycle (monthly / yearly)
             if (!Schema::hasColumn('users', 'plan_billing')) {
-                $table->string('plan_billing', 20)->nullable()->after('plan');
+                $table->string('plan_billing', 20)->nullable();
             }
             // Razorpay payment ID for the most recent successful payment
             if (!Schema::hasColumn('users', 'payment_id')) {
-                $table->string('payment_id', 100)->nullable()->after('plan_billing');
+                $table->string('payment_id', 100)->nullable();
             }
             // Raw business information provided during onboarding
             if (!Schema::hasColumn('users', 'business_info')) {
-                $table->text('business_info')->nullable()->after('payment_id');
+                $table->text('business_info')->nullable();
             }
             // AI-generated content JSON stored after onboarding AI generation
             if (!Schema::hasColumn('users', 'business_info_ai')) {
-                $table->mediumText('business_info_ai')->nullable()->after('business_info');
+                $table->mediumText('business_info_ai')->nullable();
             }
         });
     }

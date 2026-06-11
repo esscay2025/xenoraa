@@ -24,10 +24,10 @@ return new class extends Migration
         if (Schema::hasTable('users')) {
             Schema::table('users', function (Blueprint $table) {
                 if (!Schema::hasColumn('users', 'role_id')) {
-                    $table->foreignId('role_id')->nullable()->after('id')->constrained('roles')->onDelete('set null');
+                    $table->foreignId('role_id')->nullable()->constrained('roles')->onDelete('set null');
                 }
                 if (!Schema::hasColumn('users', 'status')) {
-                    $table->string('status')->default('active')->after('email'); // active, inactive
+                    $table->string('status')->default('active'); // active, inactive
                 }
             });
         }

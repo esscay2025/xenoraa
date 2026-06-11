@@ -10,37 +10,37 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             if (!Schema::hasColumn('users', 'username')) {
-                $table->string('username', 50)->nullable()->unique()->after('name');
+                $table->string('username', 50)->nullable()->unique();
             }
             if (!Schema::hasColumn('users', 'plan')) {
-                $table->enum('plan', ['starter', 'professional', 'business'])->default('starter')->after('status');
+                $table->enum('plan', ['starter', 'professional', 'business'])->default('starter');
             }
             if (!Schema::hasColumn('users', 'custom_domain')) {
-                $table->string('custom_domain')->nullable()->unique()->after('plan');
+                $table->string('custom_domain')->nullable()->unique();
             }
             if (!Schema::hasColumn('users', 'profession')) {
-                $table->string('profession')->nullable()->after('custom_domain');
+                $table->string('profession')->nullable();
             }
             if (!Schema::hasColumn('users', 'site_title')) {
-                $table->string('site_title')->nullable()->after('profession');
+                $table->string('site_title')->nullable();
             }
             if (!Schema::hasColumn('users', 'bio')) {
-                $table->text('bio')->nullable()->after('site_title');
+                $table->text('bio')->nullable();
             }
             if (!Schema::hasColumn('users', 'avatar')) {
-                $table->string('avatar')->nullable()->after('bio');
+                $table->string('avatar')->nullable();
             }
             if (!Schema::hasColumn('users', 'trial_ends_at')) {
-                $table->timestamp('trial_ends_at')->nullable()->after('avatar');
+                $table->timestamp('trial_ends_at')->nullable();
             }
             if (!Schema::hasColumn('users', 'plan_expires_at')) {
-                $table->timestamp('plan_expires_at')->nullable()->after('trial_ends_at');
+                $table->timestamp('plan_expires_at')->nullable();
             }
             if (!Schema::hasColumn('users', 'profile_template')) {
-                $table->string('profile_template', 50)->nullable()->after('profession');
+                $table->string('profile_template', 50)->nullable();
             }
             if (!Schema::hasColumn('users', 'onboarding_completed')) {
-                $table->boolean('onboarding_completed')->default(false)->after('profile_template');
+                $table->boolean('onboarding_completed')->default(false);
             }
         });
     }

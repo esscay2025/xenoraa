@@ -437,7 +437,7 @@ SELECT
     STDDEV(monthly_sales) as demand_variability,
     -- AI would add: predicted_next_month, confidence_interval
 FROM material_sales
-WHERE sale_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+WHERE sale_date >= NOW() - INTERVAL '12 months'
 GROUP BY material_name;</code></pre>
 
 <h2>Digital Twin Technology</h2>

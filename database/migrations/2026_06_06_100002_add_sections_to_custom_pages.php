@@ -10,7 +10,7 @@ return new class extends Migration
     {
         if (!Schema::hasColumn('custom_pages', 'sections')) {
             Schema::table('custom_pages', function (Blueprint $table) {
-                $table->json('sections')->nullable()->after('content')
+                $table->json('sections')->nullable()
                     ->comment('JSON array of section configs: [{key, enabled, data:{...}}]');
             });
         }

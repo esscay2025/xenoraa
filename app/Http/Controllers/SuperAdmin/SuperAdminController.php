@@ -343,7 +343,7 @@ class SuperAdminController extends Controller
      */
     public function analytics()
     {
-        $signupsByMonth = User::selectRaw('MONTH(created_at) as month, YEAR(created_at) as year, COUNT(*) as count')
+        $signupsByMonth = User::selectRaw('EXTRACT(MONTH FROM created_at) as month, EXTRACT(YEAR FROM created_at) as year, COUNT(*) as count')
             ->whereYear('created_at', now()->year)
             ->groupBy('year', 'month')
             ->orderBy('month')

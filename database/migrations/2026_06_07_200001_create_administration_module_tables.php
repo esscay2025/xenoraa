@@ -22,8 +22,8 @@ return new class extends Migration
         // ── 2. Super-admin users (staff + agents share the users table, distinguished by sa_role_id) ──
         // We add columns to the users table
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedBigInteger('sa_role_id')->nullable()->after('role_id');
-            $table->unsignedBigInteger('created_by_sa')->nullable()->after('sa_role_id'); // which superadmin/staff created this user
+            $table->unsignedBigInteger('sa_role_id')->nullable();
+            $table->unsignedBigInteger('created_by_sa')->nullable(); // which superadmin/staff created this user
             $table->foreign('sa_role_id')->references('id')->on('sa_roles')->nullOnDelete();
         });
 

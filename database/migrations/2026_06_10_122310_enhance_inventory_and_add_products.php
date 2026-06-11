@@ -11,19 +11,19 @@ return new class extends Migration
         // ── crm_price_books ──────────────────────────────────────────────
         Schema::table('crm_price_books', function (Blueprint $table) {
             if (!Schema::hasColumn('crm_price_books', 'pricing_model'))
-                $table->string('pricing_model')->nullable()->after('pricing_percentage');
+                $table->string('pricing_model')->nullable();
             if (!Schema::hasColumn('crm_price_books', 'currency'))
-                $table->string('currency', 10)->nullable()->after('pricing_model');
+                $table->string('currency', 10)->nullable();
         });
 
         // ── crm_quotes ───────────────────────────────────────────────────
         Schema::table('crm_quotes', function (Blueprint $table) {
             if (!Schema::hasColumn('crm_quotes', 'owner_id'))
-                $table->unsignedBigInteger('owner_id')->nullable()->after('user_id');
+                $table->unsignedBigInteger('owner_id')->nullable();
             if (!Schema::hasColumn('crm_quotes', 'team'))
-                $table->string('team')->nullable()->after('stage');
+                $table->string('team')->nullable();
             if (!Schema::hasColumn('crm_quotes', 'carrier'))
-                $table->string('carrier')->nullable()->after('team');
+                $table->string('carrier')->nullable();
             if (!Schema::hasColumn('crm_quotes', 'bill_country'))
                 $table->string('bill_country')->nullable();
             if (!Schema::hasColumn('crm_quotes', 'bill_building'))
@@ -49,21 +49,21 @@ return new class extends Migration
             if (!Schema::hasColumn('crm_quotes', 'ship_zip'))
                 $table->string('ship_zip')->nullable();
             if (!Schema::hasColumn('crm_quotes', 'adjustment'))
-                $table->decimal('adjustment', 12, 2)->default(0)->after('tax_amount');
+                $table->decimal('adjustment', 12, 2)->default(0);
             if (!Schema::hasColumn('crm_quotes', 'grand_total'))
-                $table->decimal('grand_total', 12, 2)->default(0)->after('adjustment');
+                $table->decimal('grand_total', 12, 2)->default(0);
             if (!Schema::hasColumn('crm_quotes', 'line_items'))
-                $table->json('line_items')->nullable()->after('grand_total');
+                $table->json('line_items')->nullable();
         });
 
         // ── crm_sales_orders ─────────────────────────────────────────────
         Schema::table('crm_sales_orders', function (Blueprint $table) {
             if (!Schema::hasColumn('crm_sales_orders', 'owner_id'))
-                $table->unsignedBigInteger('owner_id')->nullable()->after('user_id');
+                $table->unsignedBigInteger('owner_id')->nullable();
             if (!Schema::hasColumn('crm_sales_orders', 'deal_id'))
-                $table->unsignedBigInteger('deal_id')->nullable()->after('quote_id');
+                $table->unsignedBigInteger('deal_id')->nullable();
             if (!Schema::hasColumn('crm_sales_orders', 'customer_no'))
-                $table->string('customer_no')->nullable()->after('so_number');
+                $table->string('customer_no')->nullable();
             if (!Schema::hasColumn('crm_sales_orders', 'purchase_order'))
                 $table->string('purchase_order')->nullable();
             if (!Schema::hasColumn('crm_sales_orders', 'carrier'))
@@ -109,9 +109,9 @@ return new class extends Migration
         // ── crm_purchase_orders ──────────────────────────────────────────
         Schema::table('crm_purchase_orders', function (Blueprint $table) {
             if (!Schema::hasColumn('crm_purchase_orders', 'owner_id'))
-                $table->unsignedBigInteger('owner_id')->nullable()->after('user_id');
+                $table->unsignedBigInteger('owner_id')->nullable();
             if (!Schema::hasColumn('crm_purchase_orders', 'contact_id'))
-                $table->unsignedBigInteger('contact_id')->nullable()->after('vendor_id');
+                $table->unsignedBigInteger('contact_id')->nullable();
             if (!Schema::hasColumn('crm_purchase_orders', 'requisition_no'))
                 $table->string('requisition_no')->nullable();
             if (!Schema::hasColumn('crm_purchase_orders', 'tracking_no'))
@@ -159,9 +159,9 @@ return new class extends Migration
         // ── crm_invoices ─────────────────────────────────────────────────
         Schema::table('crm_invoices', function (Blueprint $table) {
             if (!Schema::hasColumn('crm_invoices', 'owner_id'))
-                $table->unsignedBigInteger('owner_id')->nullable()->after('user_id');
+                $table->unsignedBigInteger('owner_id')->nullable();
             if (!Schema::hasColumn('crm_invoices', 'deal_id'))
-                $table->unsignedBigInteger('deal_id')->nullable()->after('contact_id');
+                $table->unsignedBigInteger('deal_id')->nullable();
             if (!Schema::hasColumn('crm_invoices', 'purchase_order_id'))
                 $table->unsignedBigInteger('purchase_order_id')->nullable();
             if (!Schema::hasColumn('crm_invoices', 'invoice_date'))
@@ -205,13 +205,13 @@ return new class extends Migration
         // ── crm_vendors ──────────────────────────────────────────────────
         Schema::table('crm_vendors', function (Blueprint $table) {
             if (!Schema::hasColumn('crm_vendors', 'owner_id'))
-                $table->unsignedBigInteger('owner_id')->nullable()->after('user_id');
+                $table->unsignedBigInteger('owner_id')->nullable();
             if (!Schema::hasColumn('crm_vendors', 'fax'))
-                $table->string('fax')->nullable()->after('phone');
+                $table->string('fax')->nullable();
             if (!Schema::hasColumn('crm_vendors', 'gl_account'))
-                $table->string('gl_account')->nullable()->after('email');
+                $table->string('gl_account')->nullable();
             if (!Schema::hasColumn('crm_vendors', 'email_opt_out'))
-                $table->boolean('email_opt_out')->default(false)->after('gl_account');
+                $table->boolean('email_opt_out')->default(false);
             if (!Schema::hasColumn('crm_vendors', 'bill_country'))
                 $table->string('bill_country')->nullable();
             if (!Schema::hasColumn('crm_vendors', 'bill_building'))
