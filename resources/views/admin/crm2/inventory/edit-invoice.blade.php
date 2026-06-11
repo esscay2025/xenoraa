@@ -48,6 +48,11 @@
           display: inline-flex; align-items: center; gap: .4rem; }
 .cf-btn-primary { background: var(--cf-accent); color: #fff; }
 .cf-btn-primary:hover { opacity: .88; }
+        /* Cascading address dropdowns */
+        .addr-select { width:100%; padding:.45rem .6rem; border-radius:6px; border:1px solid var(--cf-border,#444); background:var(--cf-input-bg,#1e1e2e); color:var(--cf-text,#e0e0e0); font-size:.85rem; }
+        .copy-addr-btn { margin:.5rem 0 1rem; padding:.4rem 1rem; background:var(--cf-accent,#6c63ff); color:#fff; border:none; border-radius:6px; cursor:pointer; font-size:.82rem; }
+        .copy-addr-btn:hover { opacity:.85; }
+
 .cf-btn-secondary { background: transparent; color: var(--cf-accent);
                     border: 1px solid var(--cf-accent); }
 .cf-btn-secondary:hover { background: var(--cf-accent); color: #fff; }
@@ -220,7 +225,204 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-</script>
+
+    /* ===== Cascading Country / State / City + Copy Address ===== */
+    const GEO_DATA = {
+        "India": {
+            "Andhra Pradesh": ["Visakhapatnam","Vijayawada","Guntur","Nellore","Kurnool","Tirupati","Kakinada","Rajahmundry","Kadapa","Anantapur"],
+            "Arunachal Pradesh": ["Itanagar","Naharlagun","Pasighat","Tawang","Ziro"],
+            "Assam": ["Guwahati","Silchar","Dibrugarh","Jorhat","Nagaon","Tinsukia","Tezpur"],
+            "Bihar": ["Patna","Gaya","Bhagalpur","Muzaffarpur","Purnia","Darbhanga","Bihar Sharif","Arrah"],
+            "Chhattisgarh": ["Raipur","Bhilai","Bilaspur","Korba","Durg","Rajnandgaon"],
+            "Goa": ["Panaji","Margao","Vasco da Gama","Mapusa","Ponda"],
+            "Gujarat": ["Ahmedabad","Surat","Vadodara","Rajkot","Bhavnagar","Jamnagar","Gandhinagar","Junagadh","Anand"],
+            "Haryana": ["Faridabad","Gurugram","Panipat","Ambala","Yamunanagar","Rohtak","Hisar","Karnal","Sonipat"],
+            "Himachal Pradesh": ["Shimla","Dharamshala","Solan","Mandi","Kullu","Manali"],
+            "Jharkhand": ["Ranchi","Jamshedpur","Dhanbad","Bokaro","Deoghar","Hazaribagh"],
+            "Karnataka": ["Bengaluru","Mysuru","Hubli","Mangaluru","Belagavi","Kalaburagi","Davangere","Ballari","Tumkur","Shivamogga"],
+            "Kerala": ["Thiruvananthapuram","Kochi","Kozhikode","Thrissur","Kollam","Palakkad","Alappuzha","Kannur","Kottayam"],
+            "Madhya Pradesh": ["Bhopal","Indore","Jabalpur","Gwalior","Ujjain","Sagar","Dewas","Satna","Ratlam"],
+            "Maharashtra": ["Mumbai","Pune","Nagpur","Nashik","Aurangabad","Solapur","Amravati","Kolhapur","Thane","Navi Mumbai"],
+            "Manipur": ["Imphal","Thoubal","Bishnupur","Churachandpur"],
+            "Meghalaya": ["Shillong","Tura","Jowai"],
+            "Mizoram": ["Aizawl","Lunglei","Champhai"],
+            "Nagaland": ["Kohima","Dimapur","Mokokchung"],
+            "Odisha": ["Bhubaneswar","Cuttack","Rourkela","Berhampur","Sambalpur","Puri","Balasore"],
+            "Punjab": ["Ludhiana","Amritsar","Jalandhar","Patiala","Bathinda","Mohali","Firozpur","Hoshiarpur"],
+            "Rajasthan": ["Jaipur","Jodhpur","Udaipur","Kota","Bikaner","Ajmer","Bhilwara","Alwar","Bharatpur"],
+            "Sikkim": ["Gangtok","Namchi","Gyalshing"],
+            "Tamil Nadu": ["Chennai","Coimbatore","Madurai","Tiruchirappalli","Salem","Tirunelveli","Tiruppur","Vellore","Erode","Thoothukudi","Thanjavur"],
+            "Telangana": ["Hyderabad","Warangal","Nizamabad","Karimnagar","Khammam","Ramagundam","Mahbubnagar"],
+            "Tripura": ["Agartala","Dharmanagar","Udaipur"],
+            "Uttar Pradesh": ["Lucknow","Kanpur","Agra","Varanasi","Meerut","Allahabad","Ghaziabad","Noida","Bareilly","Aligarh","Moradabad","Saharanpur"],
+            "Uttarakhand": ["Dehradun","Haridwar","Roorkee","Haldwani","Rudrapur","Kashipur","Rishikesh"],
+            "West Bengal": ["Kolkata","Asansol","Siliguri","Durgapur","Bardhaman","Malda","Barasat","Krishnanagar"],
+            "Delhi": ["New Delhi","North Delhi","South Delhi","East Delhi","West Delhi","Central Delhi","Dwarka","Rohini","Janakpuri"],
+            "Jammu and Kashmir": ["Srinagar","Jammu","Anantnag","Baramulla","Sopore"],
+            "Ladakh": ["Leh","Kargil"],
+            "Chandigarh": ["Chandigarh"],
+            "Puducherry": ["Puducherry","Karaikal","Mahe","Yanam"],
+            "Andaman and Nicobar Islands": ["Port Blair"],
+            "Dadra and Nagar Haveli and Daman and Diu": ["Daman","Diu","Silvassa"],
+            "Lakshadweep": ["Kavaratti"]
+        },
+        "United States": {
+            "California": ["Los Angeles","San Francisco","San Diego","San Jose","Sacramento","Fresno","Long Beach","Oakland","Bakersfield","Anaheim"],
+            "New York": ["New York City","Buffalo","Rochester","Yonkers","Syracuse","Albany","New Rochelle","Mount Vernon","Schenectady"],
+            "Texas": ["Houston","San Antonio","Dallas","Austin","Fort Worth","El Paso","Arlington","Corpus Christi","Plano","Lubbock"],
+            "Florida": ["Jacksonville","Miami","Tampa","Orlando","St. Petersburg","Hialeah","Tallahassee","Fort Lauderdale","Port St. Lucie"],
+            "Illinois": ["Chicago","Aurora","Joliet","Naperville","Rockford","Springfield","Elgin","Peoria","Champaign"],
+            "Pennsylvania": ["Philadelphia","Pittsburgh","Allentown","Erie","Reading","Scranton","Bethlehem","Lancaster"],
+            "Ohio": ["Columbus","Cleveland","Cincinnati","Toledo","Akron","Dayton","Parma","Canton","Youngstown"],
+            "Georgia": ["Atlanta","Augusta","Columbus","Macon","Savannah","Athens","Sandy Springs","Roswell"],
+            "North Carolina": ["Charlotte","Raleigh","Greensboro","Durham","Winston-Salem","Fayetteville","Cary","Wilmington"],
+            "Michigan": ["Detroit","Grand Rapids","Warren","Sterling Heights","Ann Arbor","Lansing","Flint","Dearborn"]
+        },
+        "United Kingdom": {
+            "England": ["London","Birmingham","Manchester","Leeds","Sheffield","Liverpool","Bristol","Leicester","Coventry","Bradford","Nottingham"],
+            "Scotland": ["Glasgow","Edinburgh","Aberdeen","Dundee","Inverness","Stirling","Perth"],
+            "Wales": ["Cardiff","Swansea","Newport","Wrexham","Barry","Neath"],
+            "Northern Ireland": ["Belfast","Derry","Lisburn","Newry","Armagh","Ballymena"]
+        },
+        "Canada": {
+            "Ontario": ["Toronto","Ottawa","Mississauga","Brampton","Hamilton","London","Markham","Vaughan","Kitchener","Windsor"],
+            "Quebec": ["Montreal","Quebec City","Laval","Gatineau","Longueuil","Sherbrooke","Saguenay","Levis","Trois-Rivieres"],
+            "British Columbia": ["Vancouver","Surrey","Burnaby","Richmond","Kelowna","Abbotsford","Coquitlam","Langley","Saanich"],
+            "Alberta": ["Calgary","Edmonton","Red Deer","Lethbridge","St. Albert","Medicine Hat","Grande Prairie","Airdrie"],
+            "Manitoba": ["Winnipeg","Brandon","Steinbach","Thompson","Portage la Prairie"],
+            "Saskatchewan": ["Saskatoon","Regina","Prince Albert","Moose Jaw","Swift Current"]
+        },
+        "Australia": {
+            "New South Wales": ["Sydney","Newcastle","Wollongong","Maitland","Coffs Harbour","Wagga Wagga","Albury","Port Macquarie"],
+            "Victoria": ["Melbourne","Geelong","Ballarat","Bendigo","Shepparton","Melton","Mildura","Wodonga"],
+            "Queensland": ["Brisbane","Gold Coast","Sunshine Coast","Townsville","Cairns","Toowoomba","Mackay","Rockhampton"],
+            "Western Australia": ["Perth","Bunbury","Geraldton","Kalgoorlie","Mandurah","Albany","Broome"],
+            "South Australia": ["Adelaide","Mount Gambier","Whyalla","Murray Bridge","Port Augusta","Port Pirie"],
+            "Tasmania": ["Hobart","Launceston","Devonport","Burnie"]
+        },
+        "Germany": {
+            "Bavaria": ["Munich","Nuremberg","Augsburg","Regensburg","Ingolstadt","Wurzburg","Fürth","Erlangen"],
+            "North Rhine-Westphalia": ["Cologne","Düsseldorf","Dortmund","Essen","Duisburg","Bochum","Wuppertal","Bielefeld","Bonn","Münster"],
+            "Baden-Württemberg": ["Stuttgart","Mannheim","Karlsruhe","Freiburg","Heidelberg","Heilbronn","Ulm","Pforzheim"],
+            "Berlin": ["Berlin"],
+            "Hamburg": ["Hamburg"],
+            "Hesse": ["Frankfurt","Wiesbaden","Kassel","Darmstadt","Offenbach","Hanau"],
+            "Saxony": ["Leipzig","Dresden","Chemnitz","Zwickau","Plauen"],
+            "Lower Saxony": ["Hanover","Braunschweig","Osnabrück","Oldenburg","Wolfsburg","Göttingen"]
+        },
+        "France": {
+            "Île-de-France": ["Paris","Boulogne-Billancourt","Saint-Denis","Argenteuil","Montreuil","Versailles","Nanterre","Créteil"],
+            "Auvergne-Rhône-Alpes": ["Lyon","Grenoble","Clermont-Ferrand","Saint-Étienne","Annecy","Chambéry","Valence"],
+            "Provence-Alpes-Côte d'Azur": ["Marseille","Nice","Toulon","Aix-en-Provence","Avignon","Cannes","Antibes"],
+            "Nouvelle-Aquitaine": ["Bordeaux","Limoges","Poitiers","Pau","Bayonne","La Rochelle","Périgueux"],
+            "Occitanie": ["Toulouse","Montpellier","Nîmes","Perpignan","Béziers","Narbonne","Albi"]
+        },
+        "Singapore": {
+            "Central Region": ["Downtown Core","Marina Bay","Orchard","Novena","Toa Payoh","Bishan","Ang Mo Kio"],
+            "East Region": ["Tampines","Pasir Ris","Bedok","Geylang","Kallang","Marine Parade"],
+            "North Region": ["Woodlands","Sembawang","Yishun","Mandai"],
+            "North-East Region": ["Sengkang","Punggol","Hougang","Serangoon","Buangkok"],
+            "West Region": ["Jurong East","Jurong West","Clementi","Bukit Batok","Choa Chu Kang","Bukit Panjang","Tengah"]
+        },
+        "UAE": {
+            "Dubai": ["Dubai","Deira","Bur Dubai","Jumeirah","Al Quoz","Business Bay","Downtown Dubai","Dubai Marina","JLT","Palm Jumeirah"],
+            "Abu Dhabi": ["Abu Dhabi","Al Ain","Al Dhafra","Khalifa City","Masdar City","Yas Island"],
+            "Sharjah": ["Sharjah","Khor Fakkan","Kalba","Dibba Al Hisn"],
+            "Ajman": ["Ajman","Masfout"],
+            "Ras Al Khaimah": ["Ras Al Khaimah","Al Jazirah Al Hamra"],
+            "Fujairah": ["Fujairah","Dibba Al Fujairah"],
+            "Umm Al Quwain": ["Umm Al Quwain"]
+        },
+        "Malaysia": {
+            "Selangor": ["Shah Alam","Petaling Jaya","Subang Jaya","Klang","Ampang","Sepang","Rawang"],
+            "Kuala Lumpur": ["Kuala Lumpur","Chow Kit","Brickfields","Bangsar","Mont Kiara","Kepong","Setapak"],
+            "Johor": ["Johor Bahru","Muar","Batu Pahat","Kluang","Segamat","Pontian"],
+            "Penang": ["George Town","Butterworth","Bukit Mertajam","Bayan Lepas","Nibong Tebal"],
+            "Perak": ["Ipoh","Taiping","Teluk Intan","Manjung","Kuala Kangsar"],
+            "Sabah": ["Kota Kinabalu","Sandakan","Tawau","Lahad Datu","Keningau"],
+            "Sarawak": ["Kuching","Miri","Sibu","Bintulu","Limbang"]
+        }
+    };
+
+    function populateStates(countrySelectId, stateSelectId, citySelectId, selectedState, selectedCity) {
+        const country = document.getElementById(countrySelectId)?.value || '';
+        const stateEl = document.getElementById(stateSelectId);
+        const cityEl = document.getElementById(citySelectId);
+        if (!stateEl || !cityEl) return;
+        stateEl.innerHTML = '<option value="">-- Select State --</option>';
+        cityEl.innerHTML = '<option value="">-- Select City --</option>';
+        const states = GEO_DATA[country] ? Object.keys(GEO_DATA[country]) : [];
+        states.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s; opt.textContent = s;
+            if (s === selectedState) opt.selected = true;
+            stateEl.appendChild(opt);
+        });
+        if (selectedState) populateCities(countrySelectId, stateSelectId, citySelectId, selectedCity);
+    }
+
+    function populateCities(countrySelectId, stateSelectId, citySelectId, selectedCity) {
+        const country = document.getElementById(countrySelectId)?.value || '';
+        const state = document.getElementById(stateSelectId)?.value || '';
+        const cityEl = document.getElementById(citySelectId);
+        if (!cityEl) return;
+        cityEl.innerHTML = '<option value="">-- Select City --</option>';
+        const cities = (GEO_DATA[country] && GEO_DATA[country][state]) ? GEO_DATA[country][state] : [];
+        cities.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c; opt.textContent = c;
+            if (c === selectedCity) opt.selected = true;
+            cityEl.appendChild(opt);
+        });
+    }
+
+    function buildCountrySelect(id, selectedVal) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const countries = Object.keys(GEO_DATA);
+        // Sort: India first, then alphabetical
+        countries.sort((a,b) => a === 'India' ? -1 : b === 'India' ? 1 : a.localeCompare(b));
+        let html = '<option value="">-- Select Country --</option>';
+        countries.forEach(c => {
+            html += `<option value="${c}"${c === selectedVal ? ' selected' : ''}>${c}</option>`;
+        });
+        el.innerHTML = html;
+    }
+
+    function copyBillingToShipping(prefix) {
+        const fields = ['country','state','city','building','street','zip'];
+        fields.forEach(f => {
+            const src = document.getElementById('bill_'+f);
+            const dst = document.getElementById('ship_'+f);
+            if (src && dst) dst.value = src.value;
+        });
+        // Also trigger state/city repopulation for shipping
+        const country = document.getElementById('ship_country')?.value || '';
+        const state = document.getElementById('ship_state')?.value || '';
+        const city = document.getElementById('ship_city')?.value || '';
+        buildCountrySelect('ship_country', country);
+        populateStates('ship_country','ship_state','ship_city', state, city);
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Billing
+        const billCountry = document.getElementById('bill_country')?.getAttribute('data-val') || '';
+        const billState   = document.getElementById('bill_state')?.getAttribute('data-val') || '';
+        const billCity    = document.getElementById('bill_city')?.getAttribute('data-val') || '';
+        buildCountrySelect('bill_country', billCountry);
+        if (billCountry) populateStates('bill_country','bill_state','bill_city', billState, billCity);
+
+        // Shipping
+        const shipCountry = document.getElementById('ship_country')?.getAttribute('data-val') || '';
+        const shipState   = document.getElementById('ship_state')?.getAttribute('data-val') || '';
+        const shipCity    = document.getElementById('ship_city')?.getAttribute('data-val') || '';
+        buildCountrySelect('ship_country', shipCountry);
+        if (shipCountry) populateStates('ship_country','ship_state','ship_city', shipState, shipCity);
+    });
+    /* ===== End Address JS ===== */
+
+    </script>
 
 <div class="cf-page">
     <div class="cf-header">
