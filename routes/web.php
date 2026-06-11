@@ -584,6 +584,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::delete('/settings/mail-templates/{id}',            [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplateDestroy'])->name('settings.mail-templates.destroy');
         Route::get('/settings/mail-templates/{id}/preview',       [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplatePreview'])->name('settings.mail-templates.preview');
         Route::post('/settings/mail-templates/{id}/toggle',       [\App\Http\Controllers\Admin\EcommerceController::class, 'mailTemplateToggle'])->name('settings.mail-templates.toggle');
+        // ── Store Config ──────────────────────────────────────────────────────
+        Route::get('/store-config',  [\App\Http\Controllers\Admin\EcommerceController::class, 'storeConfigIndex'])->name('store-config');
+        Route::post('/store-config', [\App\Http\Controllers\Admin\EcommerceController::class, 'storeConfigSave'])->name('store-config.save');
 
     });
 

@@ -717,6 +717,11 @@
                         <i class="fas fa-file-alt"></i> Mail Templates
                     </a>
                 </div>
+                {{-- Store Config --}}
+                <a href="{{ route('admin.ecommerce.store-config') }}"
+                   class="sidebar-sub-link {{ request()->routeIs('admin.ecommerce.store-config*') ? 'active' : '' }}">
+                    <i class="fas fa-store"></i> Store Config
+                </a>
             </div>
             @endif
 

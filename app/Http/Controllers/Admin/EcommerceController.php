@@ -1060,3 +1060,120 @@ HTML;
     }
 
 }
+    // ─── Store Config ──────────────────────────────────────────────────────────
+
+    /**
+     * Show the Store Config page (all 8 tabs on one page).
+     */
+    public function storeConfigIndex(Request $request)
+    {
+        $tid    = $this->tenantId();
+        $tab    = $request->get('tab', 'general');
+        $config = \App\Models\EcomStoreConfig::firstOrCreate(
+            ['user_id' => $tid],
+            ['store_name' => auth()->user()->name ?? 'My Store']
+        );
+        return view('admin.ecommerce.store-config', compact('config', 'tab'));
+    }
+
+    /**
+     * Save settings for a specific tab.
+     */
+    public function storeConfigSave(Request $request)
+    {
+        $tid    = $this->tenantId();
+        $tab    = $request->input('tab', 'general');
+        $config = \App\Models\EcomStoreConfig::firstOrCreate(['user_id' => $tid]);
+
+        $tabFields = [
+            'general' => [
+                'store_name', 'store_description', 'store_address_line1', 'store_address_line2',
+                'store_city', 'store_state', 'store_postcode', 'store_country',
+                'store_email', 'store_phone', 'currency', 'currency_position',
+                'thousand_separator', 'decimal_separator', 'decimal_places',
+            ],
+            'products' => [
+                'weight_unit', 'dimension_unit', 'enable_reviews', 'reviews_verified_only',
+                'enable_ratings', 'shop_page_display', 'products_per_page',
+                'default_product_sorting', 'enable_ajax_add_to_cart', 'enable_wishlist', 'enable_compare',
+            ],
+            'shipping' => [
+                'enable_shipping', 'shipping_calculation', 'hide_shipping_until_address',
+                'enable_free_shipping', 'free_shipping_min_amount', 'enable_flat_rate',
+                'flat_rate_cost', 'enable_local_pickup', 'local_pickup_address',
+            ],
+            'payments' => [
+                'enable_cod', 'cod_title', 'cod_description',
+                'enable_razorpay', 'razorpay_key_id', 'razorpay_key_secret', 'razorpay_test_mode',
+                'enable_stripe', 'stripe_publishable_key', 'stripe_secret_key', 'stripe_test_mode',
+                'enable_paypal', 'paypal_email', 'paypal_sandbox',
+                'enable_bank_transfer', 'bank_transfer_details',
+                'enable_upi', 'upi_id',
+            ],
+            'accounts' => [
+                'allow_guest_checkout', 'allow_account_creation_checkout', 'allow_account_creation_shop',
+                'auto_generate_username', 'auto_generate_password',
+                'erasure_request_removes_orders', 'erasure_request_removes_downloads',
+                'allow_bulk_remove_personal_data', 'privacy_policy_text',
+                'checkout_privacy_policy_text', 'registration_privacy_policy_text',
+            ],
+            'visibility' => [
+                'catalog_visibility', 'hide_out_of_stock', 'stock_display_format',
+                'enable_breadcrumbs', 'enable_lightbox', 'enable_zoom', 'enable_gallery_slider',
+                'redirect_add_to_cart', 'cart_redirect_after_add',
+            ],
+            'pos' => [
+                'pos_store_name', 'pos_receipt_header', 'pos_receipt_footer', 'pos_tax_number',
+                'pos_print_receipt_auto', 'pos_enable_barcode', 'pos_barcode_field',
+                'pos_enable_customer_display', 'pos_default_customer', 'pos_tax_display',
+            ],
+            'advanced' => [
+                'enable_coupons', 'calc_discounts_sequentially', 'enable_order_notes',
+                'hold_stock_minutes', 'notify_low_stock', 'low_stock_threshold',
+                'notify_no_stock', 'no_stock_threshold', 'hide_out_of_stock_items', 'stock_format',
+                'enable_taxes', 'tax_based_on', 'shipping_tax_class', 'prices_include_tax',
+                'display_cart_taxes_inline', 'force_ssl_checkout', 'unforce_ssl_checkout',
+                'custom_css', 'custom_js',
+            ],
+        ];
+
+        $fields = $tabFields[$tab] ?? [];
+
+        $booleanFields = [
+            'enable_reviews', 'reviews_verified_only', 'enable_ratings', 'enable_ajax_add_to_cart',
+            'enable_wishlist', 'enable_compare', 'enable_shipping', 'hide_shipping_until_address',
+            'enable_free_shipping', 'enable_flat_rate', 'enable_local_pickup',
+            'enable_cod', 'enable_razorpay', 'razorpay_test_mode', 'enable_stripe', 'stripe_test_mode',
+            'enable_paypal', 'paypal_sandbox', 'enable_bank_transfer', 'enable_upi',
+            'allow_guest_checkout', 'allow_account_creation_checkout', 'allow_account_creation_shop',
+            'auto_generate_username', 'auto_generate_password',
+            'erasure_request_removes_orders', 'erasure_request_removes_downloads',
+            'allow_bulk_remove_personal_data', 'hide_out_of_stock', 'enable_breadcrumbs',
+            'enable_lightbox', 'enable_zoom', 'enable_gallery_slider', 'redirect_add_to_cart',
+            'pos_print_receipt_auto', 'pos_enable_barcode', 'pos_enable_customer_display',
+            'enable_coupons', 'calc_discounts_sequentially', 'enable_order_notes',
+            'notify_low_stock', 'notify_no_stock', 'hide_out_of_stock_items',
+            'enable_taxes', 'prices_include_tax', 'display_cart_taxes_inline',
+            'force_ssl_checkout', 'unforce_ssl_checkout',
+        ];
+
+        $data = [];
+        foreach ($fields as $field) {
+            if (in_array($field, $booleanFields)) {
+                $data[$field] = $request->boolean($field);
+            } else {
+                $data[$field] = $request->input($field);
+            }
+        }
+
+        if ($tab === 'pos' && $request->hasFile('pos_receipt_logo')) {
+            $path = $request->file('pos_receipt_logo')->store('ecom/pos-logos', 'public');
+            $data['pos_receipt_logo'] = $path;
+        }
+
+        $config->update($data);
+
+        return redirect()->route('admin.ecommerce.store-config', ['tab' => $tab])
+                         ->with('success', 'Store settings saved successfully.');
+    }
+}
