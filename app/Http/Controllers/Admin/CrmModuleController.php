@@ -670,6 +670,74 @@ class CrmModuleController extends Controller
         return back()->with('success', ucwords(str_replace('_', ' ', $type)) . ' deleted.');
     }
 
+    public function inventorySendMail(Request $request, string $type, int $id)
+    {
+        $tid = $this->tenantId();
+        $item = match ($type) {
+            'quote'          => CrmQuote::where('id', $id)->where('user_id', $tid)->firstOrFail(),
+            'sales_order'    => CrmSalesOrder::where('id', $id)->where('user_id', $tid)->firstOrFail(),
+            'purchase_order' => CrmPurchaseOrder::where('id', $id)->where('user_id', $tid)->firstOrFail(),
+            'invoice'        => CrmInvoice::where('id', $id)->where('user_id', $tid)->firstOrFail(),
+            default          => abort(404),
+        };
+        $to      = $request->input('to');
+        $subject = $request->input('subject', ucwords(str_replace('_', ' ', $type)) . ' #' . $id);
+        $body    = $request->input('body', '');
+        if (!$to) return back()->with('error', 'Recipient email is required.');
+
+        // Generate PDF using FPDF
+        $pdfPath = null;
+        try {
+            $pdf = new \FPDF();
+            $pdf->AddPage();
+            $pdf->SetFont('Arial', 'B', 16);
+            $pdf->Cell(0, 10, ucwords(str_replace('_', ' ', $type)) . ' #' . $id, 0, 1, 'C');
+            $pdf->SetFont('Arial', '', 11);
+            $pdf->Ln(4);
+            $fields = $item->toArray();
+            foreach ($fields as $key => $val) {
+                if (in_array($key, ['id','user_id','created_at','updated_at','line_items'])) continue;
+                if (is_array($val)) continue;
+                $pdf->Cell(60, 7, ucwords(str_replace('_', ' ', $key)) . ':', 0, 0);
+                $pdf->MultiCell(0, 7, (string)($val ?? ''));
+            }
+            if (!empty($item->line_items)) {
+                $lines = is_string($item->line_items) ? json_decode($item->line_items, true) : $item->line_items;
+                if (is_array($lines) && count($lines)) {
+                    $pdf->Ln(4);
+                    $pdf->SetFont('Arial', 'B', 11);
+                    $pdf->Cell(0, 7, 'Line Items:', 0, 1);
+                    $pdf->SetFont('Arial', '', 10);
+                    foreach ($lines as $i => $li) {
+                        $pdf->Cell(0, 6, ($i+1) . '. ' . ($li['product'] ?? '') . '  Qty: ' . ($li['qty'] ?? '') . '  Price: ' . ($li['price'] ?? '') . '  Total: ' . ($li['total'] ?? ''), 0, 1);
+                    }
+                }
+            }
+            $pdfPath = storage_path('app/temp_inv_' . $type . '_' . $id . '_' . time() . '.pdf');
+            $pdf->Output('F', $pdfPath);
+        } catch (\Throwable $e) {
+            $pdfPath = null;
+        }
+
+        try {
+            \Illuminate\Support\Facades\Mail::send([], [], function ($message) use ($to, $subject, $body, $pdfPath, $type, $id) {
+                $message->to($to)
+                    ->subject($subject)
+                    ->html(nl2br(htmlspecialchars($body)) ?: '<p>' . $subject . '</p>');
+                if ($pdfPath && file_exists($pdfPath)) {
+                    $message->attach($pdfPath, ['as' => ucwords(str_replace('_', ' ', $type)) . '_' . $id . '.pdf', 'mime' => 'application/pdf']);
+                }
+            });
+            if ($pdfPath && file_exists($pdfPath)) @unlink($pdfPath);
+            return back()->with('success', 'Email sent successfully to ' . $to);
+        } catch (\Throwable $e) {
+            if ($pdfPath && file_exists($pdfPath)) @unlink($pdfPath);
+            return back()->with('error', 'Failed to send email: ' . $e->getMessage());
+        }
+    }
+
+
+
     // ══════════════════════════════════════════════════════════════
     // SUPPORT (Cases, Solutions)
     // ══════════════════════════════════════════════════════════════
@@ -1625,6 +1693,7 @@ class CrmModuleController extends Controller
         $allProducts      = CrmProduct::where('user_id',$uid)->get();
         $quotes           = CrmQuote::where('user_id',$uid)->where('account_id',$id)->get();
         $salesOrders      = CrmSalesOrder::where('user_id',$uid)->where('account_id',$id)->get();
+        $purchaseOrders   = CrmPurchaseOrder::where('user_id',$uid)->where('account_id',$id)->get();
         $invoices         = CrmInvoice::where('user_id',$uid)->where('account_id',$id)->get();
         $allDeals         = CrmDeal::where('user_id',$uid)->get();
         $allContacts      = CrmContact::where('user_id',$uid)->get();
@@ -1639,7 +1708,7 @@ class CrmModuleController extends Controller
         $scheduledEmails  = CrmAccountEmail::where('user_id',$uid)->where('account_id',$id)->where('status','scheduled')->latest()->get();
         return view('admin.crm2.sales.view-account', compact(
             'account','notes','deals','contacts','openActivities','closedActivities',
-            'accountProducts','allProducts','quotes','salesOrders','invoices',
+            'accountProducts','allProducts','quotes','salesOrders','purchaseOrders','invoices',
             'allDeals','allContacts','allQuotes','allSalesOrders','allInvoices','leads',
             'mailTemplates','mailConfig','sentEmails','draftEmails','scheduledEmails'
         ));

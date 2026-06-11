@@ -455,6 +455,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/invoices/{id}',         [$ctrl, 'inventoryInvoicesShow'])->name('inventory.invoices.show');
         Route::get('/inventory/vendors/{id}',          [$ctrl, 'inventoryVendorsShow'])->name('inventory.vendors.show');
         Route::delete('/inventory/{type}/{id}',     [$ctrl, 'inventoryDestroy'])->name('inventory.destroy');
+        Route::post('/inventory/{type}/{id}/send-mail', [$ctrl, 'inventorySendMail'])->name('inventory.send-mail');
         // Legacy redirect
         Route::get('/inventory',                    [$ctrl, 'inventoryPriceBooks'])->name('inventory');
 

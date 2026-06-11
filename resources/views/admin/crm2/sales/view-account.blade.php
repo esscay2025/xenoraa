@@ -744,6 +744,37 @@
       </div>
     </div>
 
+
+    {{-- ─── SECTION: Purchase Orders ─── --}}
+    <div class="av-section" id="sec-purchase-orders">
+      <div class="av-section-header">
+        <div class="av-section-title">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          Purchase Orders <span style="margin-left:.4rem;background:var(--accent);color:#fff;border-radius:20px;padding:.1rem .5rem;font-size:.72rem">{{ $purchaseOrders->count() }}</span>
+        </div>
+        <div class="av-section-actions">
+          <a href="{{ route('admin.crm2.inventory.purchase-orders.create') }}?account_id={{ $account->id }}" class="av-btn primary sm">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Purchase Order
+          </a>
+        </div>
+      </div>
+      <div class="av-section-body" style="padding:0">
+        @if($purchaseOrders->count())
+        <table class="av-table">
+          <thead><tr><th>PO #</th><th>Subject</th><th>Status</th><th>Total</th><th>Due Date</th></tr></thead>
+          <tbody>@foreach($purchaseOrders as $po)<tr>
+            <td><a href="{{ route('admin.crm2.inventory.purchase-orders.show', $po->id) }}" style="color:var(--accent);font-weight:600">{{ $po->po_number ?: '#'.$po->id }}</a></td>
+            <td>{{ $po->subject ?: '—' }}</td>
+            <td><span class="st st-orange">{{ $po->status ?: '—' }}</span></td>
+            <td>{{ $po->grand_total ? number_format($po->grand_total,2) : '—' }}</td>
+            <td>{{ $po->due_date ? \Carbon\Carbon::parse($po->due_date)->format('d M Y') : '—' }}</td>
+          </tr>@endforeach</tbody>
+        </table>
+        @else<div class="av-empty">No purchase orders linked to this account.</div>@endif
+      </div>
+    </div>
+
     {{-- ─── SECTION 10: Invoices ─── --}}
     <div class="av-section" id="sec-invoices">
       <div class="av-section-header">
@@ -824,6 +855,10 @@
       <a class="av-nav-item" href="#sec-sales-orders" onclick="setActive(this)">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
         Sales Orders
+      </a>
+      <a class="av-nav-item" href="#sec-purchase-orders" onclick="setActive(this)">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        Purchase Orders
       </a>
       <a class="av-nav-item" href="#sec-invoices" onclick="setActive(this)">
         <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>

@@ -389,20 +389,22 @@ document.addEventListener('DOMContentLoaded', function() {
         el.innerHTML = html;
     }
 
-    function copyBillingToShipping(prefix) {
-        const fields = ['country','state','city','building','street','zip'];
-        fields.forEach(f => {
-            const src = document.getElementById('bill_'+f);
-            const dst = document.getElementById('ship_'+f);
-            if (src && dst) dst.value = src.value;
-        });
-        // Also trigger state/city repopulation for shipping
-        const country = document.getElementById('ship_country')?.value || '';
-        const state = document.getElementById('ship_state')?.value || '';
-        const city = document.getElementById('ship_city')?.value || '';
-        buildCountrySelect('ship_country', country);
-        populateStates('ship_country','ship_state','ship_city', state, city);
+    function copyBillingToShipping() {
+    // Copy text fields
+    ['building','street','zip'].forEach(f => {
+        const src = document.querySelector('[name="bill_'+f+'"]');
+        const dst = document.querySelector('[name="ship_'+f+'"]');
+        if (src && dst) dst.value = src.value;
+    });
+    // Copy cascading dropdowns
+    const billCountry = document.getElementById('bill_country')?.value || '';
+    const billState   = document.getElementById('bill_state')?.value || '';
+    const billCity    = document.getElementById('bill_city')?.value || '';
+    if (billCountry) {
+        buildCountrySelect('ship_country', billCountry);
+        populateStates('ship_country','ship_state','ship_city', billState, billCity);
     }
+}
 
     // Initialize address dropdowns reliably regardless of DOM state
     function initAddressDropdowns() {
@@ -537,11 +539,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div>
                         <h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Billing Address</h4>
                         <div class="cf-grid">
-                            <div class="cf-field cf-field-full"><label>Country / Region</label><select name="bill_country" id="bill_country" class="addr-select" onchange="populateStates('bill_country','bill_state','bill_city','','')"><option value="">-- Select Country --</option></select></div>
                             <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="bill_building" value="{{ old('bill_building') }}"></div>
                             <div class="cf-field cf-field-full"><label>Street Address</label><input type="text" name="bill_street" value="{{ old('bill_street') }}"></div>
                             <div class="cf-field"><label>City</label><select name="bill_city" id="bill_city" class="addr-select"><option value="">-- Select City --</option></select></div>
                             <div class="cf-field"><label>State / Province</label><select name="bill_state" id="bill_state" class="addr-select" onchange="populateCities('bill_country','bill_state','bill_city','')"><option value="">-- Select State --</option></select></div>
+                            <div class="cf-field cf-field-full"><label>Country / Region</label><select name="bill_country" id="bill_country" class="addr-select" onchange="populateStates('bill_country','bill_state','bill_city','','')"><option value="">-- Select Country --</option></select></div>
                             <div class="cf-field"><label>Zip / Postal Code</label><input type="text" name="bill_zip" id="bill_zip" value="{{ old('bill_zip') }}"></div>
                         </div>
                     </div>
@@ -551,11 +553,11 @@ document.addEventListener('DOMContentLoaded', function() {
                             <button type="button" class="copy-addr-btn" onclick="copyBillingToShipping()">&#x2398; Copy Billing to Shipping</button>
                         </div>
                         <div class="cf-grid">
-                            <div class="cf-field cf-field-full"><label>Country / Region</label><select name="ship_country" id="ship_country" class="addr-select" onchange="populateStates('ship_country','ship_state','ship_city','','')"><option value="">-- Select Country --</option></select></div>
                             <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="ship_building" value="{{ old('ship_building') }}"></div>
                             <div class="cf-field cf-field-full"><label>Street Address</label><input type="text" name="ship_street" value="{{ old('ship_street') }}"></div>
                             <div class="cf-field"><label>City</label><select name="ship_city" id="ship_city" class="addr-select"><option value="">-- Select City --</option></select></div>
                             <div class="cf-field"><label>State / Province</label><select name="ship_state" id="ship_state" class="addr-select" onchange="populateCities('ship_country','ship_state','ship_city','')"><option value="">-- Select State --</option></select></div>
+                            <div class="cf-field cf-field-full"><label>Country / Region</label><select name="ship_country" id="ship_country" class="addr-select" onchange="populateStates('ship_country','ship_state','ship_city','','')"><option value="">-- Select Country --</option></select></div>
                             <div class="cf-field"><label>Zip / Postal Code</label><input type="text" name="ship_zip" id="ship_zip" value="{{ old('ship_zip') }}"></div>
                         </div>
                     </div>

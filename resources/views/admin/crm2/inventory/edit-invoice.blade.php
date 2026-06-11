@@ -108,14 +108,36 @@ function toggleSection(el) {
 }
 function addLineItem(tableId) {
     const tbody = document.getElementById(tableId).querySelector('tbody');
-    const row = tbody.rows[0].cloneNode(true);
-    row.querySelectorAll('input').forEach(i => i.value = '');
-    tbody.appendChild(row);
+    const rowNum = tbody.rows.length + 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="li-num">${rowNum}</td>
+        <td><input type="text" class="li-product" placeholder="Search product..." autocomplete="off"></td>
+        <td><input type="number" class="li-qty" value="1" min="1" style="width:60px" oninput="recalcTotals('${tableId}')"></td>
+        <td><input type="number" class="li-price" step="0.01" value="0" style="width:90px" oninput="recalcTotals('${tableId}')"></td>
+        <td><input type="number" class="li-amt" step="0.01" value="0" style="width:90px" readonly></td>
+        <td><input type="number" class="li-disc" step="0.01" value="0" style="width:80px" oninput="recalcTotals('${tableId}')"></td>
+        <td><input type="number" class="li-tax" step="0.01" value="0" style="width:80px" oninput="recalcTotals('${tableId}')"></td>
+        <td><input type="number" class="li-total" step="0.01" value="0" style="width:90px" readonly></td>
+        <td><button type="button" class="li-remove-btn" onclick="removeLineItem(this,'${tableId}')">&#10005;</button></td>`;
+    tbody.appendChild(tr);
+    // Attach product search to the new row
+    attachProductSearch(tr.querySelector('.li-product'), tableId);
     recalcTotals(tableId);
 }
 function removeLineItem(btn, tableId) {
     const tbody = document.getElementById(tableId).querySelector('tbody');
-    if (tbody.rows.length > 1) { btn.closest('tr').remove(); recalcTotals(tableId); }
+    if (tbody.rows.length > 1) {
+        btn.closest('tr').remove();
+        tbody.querySelectorAll('tr').forEach((r, i) => {
+            const numCell = r.querySelector('.li-num');
+            if (numCell) numCell.textContent = i + 1;
+        });
+        recalcTotals(tableId);
+    }
+});
+        recalcTotals(tableId);
+    }
+}
 }
 function recalcTotals(tableId) {
     const tbody = document.getElementById(tableId).querySelector('tbody');
@@ -389,20 +411,22 @@ document.addEventListener('DOMContentLoaded', function() {
         el.innerHTML = html;
     }
 
-    function copyBillingToShipping(prefix) {
-        const fields = ['country','state','city','building','street','zip'];
-        fields.forEach(f => {
-            const src = document.getElementById('bill_'+f);
-            const dst = document.getElementById('ship_'+f);
-            if (src && dst) dst.value = src.value;
-        });
-        // Also trigger state/city repopulation for shipping
-        const country = document.getElementById('ship_country')?.value || '';
-        const state = document.getElementById('ship_state')?.value || '';
-        const city = document.getElementById('ship_city')?.value || '';
-        buildCountrySelect('ship_country', country);
-        populateStates('ship_country','ship_state','ship_city', state, city);
+    function copyBillingToShipping() {
+    // Copy text fields
+    ['building','street','zip'].forEach(f => {
+        const src = document.querySelector('[name="bill_'+f+'"]');
+        const dst = document.querySelector('[name="ship_'+f+'"]');
+        if (src && dst) dst.value = src.value;
+    });
+    // Copy cascading dropdowns
+    const billCountry = document.getElementById('bill_country')?.value || '';
+    const billState   = document.getElementById('bill_state')?.value || '';
+    const billCity    = document.getElementById('bill_city')?.value || '';
+    if (billCountry) {
+        buildCountrySelect('ship_country', billCountry);
+        populateStates('ship_country','ship_state','ship_city', billState, billCity);
     }
+}
 
     // Initialize address dropdowns reliably regardless of DOM state
     function initAddressDropdowns() {
@@ -495,22 +519,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div>
                         <h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Billing Address</h4>
                         <div class="cf-grid">
-                            <div class="cf-field cf-field-full"><label>Country / Region</label><select name="bill_country" id="bill_country" class="addr-select" data-val="{{ old('bill_country', $item->bill_country) }}"><option value="">-- Select Country --</option></select></div>
                             <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="bill_building" value="{{ old('bill_building', $item->bill_building) }}"></div>
                             <div class="cf-field cf-field-full"><label>Street Address</label><input type="text" name="bill_street" value="{{ old('bill_street', $item->bill_street) }}"></div>
                             <div class="cf-field"><label>City</label><select name="bill_city" id="bill_city" class="addr-select" data-val="{{ old('bill_city', $item->bill_city) }}"><option value="">-- Select City --</option></select></div>
                             <div class="cf-field"><label>State / Province</label><select name="bill_state" id="bill_state" class="addr-select" data-val="{{ old('bill_state', $item->bill_state) }}"><option value="">-- Select State --</option></select></div>
+                            <div class="cf-field cf-field-full"><label>Country / Region</label><select name="bill_country" id="bill_country" class="addr-select" data-val="{{ old('bill_country', $item->bill_country) }}"><option value="">-- Select Country --</option></select></div>
                             <div class="cf-field"><label>Zip / Postal Code</label><input type="text" name="bill_zip" id="bill_zip" value="{{ old('bill_zip', $item->bill_zip) }}"></div>
                         </div>
                     </div>
                     <div>
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem"><h4 style="color:var(--cf-accent);margin:0;font-size:.85rem">Shipping Address</h4><button type="button" class="copy-addr-btn" onclick="copyBillingToShipping()"><h4 style="color:var(--cf-accent);margin:0 0 .75rem;font-size:.85rem">Shipping Address</h4>#x2398; Copy Billing to Shipping</button></div>
                         <div class="cf-grid">
-                            <div class="cf-field cf-field-full"><label>Country / Region</label><select name="ship_country" id="ship_country" class="addr-select" data-val="{{ old('ship_country', $item->ship_country) }}"><option value="">-- Select Country --</option></select></div>
                             <div class="cf-field cf-field-full"><label>Building / Apartment</label><input type="text" name="ship_building" value="{{ old('ship_building', $item->ship_building) }}"></div>
                             <div class="cf-field cf-field-full"><label>Street Address</label><input type="text" name="ship_street" value="{{ old('ship_street', $item->ship_street) }}"></div>
                             <div class="cf-field"><label>City</label><select name="ship_city" id="ship_city" class="addr-select" data-val="{{ old('ship_city', $item->ship_city) }}"><option value="">-- Select City --</option></select></div>
                             <div class="cf-field"><label>State / Province</label><select name="ship_state" id="ship_state" class="addr-select" data-val="{{ old('ship_state', $item->ship_state) }}"><option value="">-- Select State --</option></select></div>
+                            <div class="cf-field cf-field-full"><label>Country / Region</label><select name="ship_country" id="ship_country" class="addr-select" data-val="{{ old('ship_country', $item->ship_country) }}"><option value="">-- Select Country --</option></select></div>
                             <div class="cf-field"><label>Zip / Postal Code</label><input type="text" name="ship_zip" id="ship_zip" value="{{ old('ship_zip', $item->ship_zip) }}"></div>
                         </div>
                     </div>
@@ -529,7 +553,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         @php $lineItems = is_string($item->line_items) ? json_decode($item->line_items, true) : ($item->line_items ?? []); @endphp
                         @if(!empty($lineItems))
                             @foreach($lineItems as $li)
-                            <tr><td>{{ $loop->iteration }}</td><td><input type="text" class="li-product" value="{{ $li['product'] ?? '' }}"></td><td><input type="number" class="li-qty" value="{{ $li['qty'] ?? 1 }}" min="1" style="width:60px" oninput="recalcTotals('inv_items')"></td><td><input type="number" class="li-price" step="0.01" value="{{ $li['price'] ?? 0 }}" style="width:90px" oninput="recalcTotals('inv_items')"></td><td><input type="number" class="li-amt" step="0.01" value="{{ $li['amount'] ?? 0 }}" style="width:90px" readonly></td><td><input type="number" class="li-disc" step="0.01" value="{{ $li['discount'] ?? 0 }}" style="width:80px" oninput="recalcTotals('inv_items')"></td><td><input type="number" class="li-tax" step="0.01" value="{{ $li['tax'] ?? 0 }}" style="width:80px" oninput="recalcTotals('inv_items')"></td><td><input type="number" class="li-total" step="0.01" value="{{ $li['total'] ?? 0 }}" style="width:90px" readonly></td><td><button type="button" class="li-remove-btn" onclick="removeLineItem(this,'inv_items')">&#10005;</button></td></tr>
+                            <tr><td class="li-num">{{ $loop->iteration }}</td><td><input type="text" class="li-product" value="{{ $li['product'] ?? '' }}"></td><td><input type="number" class="li-qty" value="{{ $li['qty'] ?? 1 }}" min="1" style="width:60px" oninput="recalcTotals('inv_items')"></td><td><input type="number" class="li-price" step="0.01" value="{{ $li['price'] ?? 0 }}" style="width:90px" oninput="recalcTotals('inv_items')"></td><td><input type="number" class="li-amt" step="0.01" value="{{ $li['amount'] ?? 0 }}" style="width:90px" readonly></td><td><input type="number" class="li-disc" step="0.01" value="{{ $li['discount'] ?? 0 }}" style="width:80px" oninput="recalcTotals('inv_items')"></td><td><input type="number" class="li-tax" step="0.01" value="{{ $li['tax'] ?? 0 }}" style="width:80px" oninput="recalcTotals('inv_items')"></td><td><input type="number" class="li-total" step="0.01" value="{{ $li['total'] ?? 0 }}" style="width:90px" readonly></td><td><button type="button" class="li-remove-btn" onclick="removeLineItem(this,'inv_items')">&#10005;</button></td></tr>
                             @endforeach
                         @else
                         <tr><td>1</td><td><input type="text" class="li-product"></td><td><input type="number" class="li-qty" value="1" style="width:60px" oninput="recalcTotals('inv_items')"></td><td><input type="number" class="li-price" step="0.01" value="0" style="width:90px" oninput="recalcTotals('inv_items')"></td><td><input type="number" class="li-amt" step="0.01" value="0" style="width:90px" readonly></td><td><input type="number" class="li-disc" step="0.01" value="0" style="width:80px" oninput="recalcTotals('inv_items')"></td><td><input type="number" class="li-tax" step="0.01" value="0" style="width:80px" oninput="recalcTotals('inv_items')"></td><td><input type="number" class="li-total" step="0.01" value="0" style="width:90px" readonly></td><td><button type="button" class="li-remove-btn" onclick="removeLineItem(this,'inv_items')">&#10005;</button></td></tr>

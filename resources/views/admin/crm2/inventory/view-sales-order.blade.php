@@ -93,6 +93,68 @@
 .li-summary-row input { width: 140px; padding: .35rem .6rem; border: 1px solid var(--cf-border);
                         border-radius: 5px; background: var(--cf-bg); color: var(--cf-text); font-size: .88rem; }
 .li-grand-total { font-size: 1rem; font-weight: 700; color: var(--cf-accent); }
+
+/* ─── Print / PDF Styles ─── */
+@media print {
+    .cv-header .cv-actions, .no-print { display: none !important; }
+    .cv-page { padding: 0; background: #fff; }
+    .cv-section { border: 1px solid #ccc; box-shadow: none; page-break-inside: avoid; }
+    .cv-section-header { background: #4f46e5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body { font-size: 12px; }
+    .li-table th { background: #4f46e5 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .send-mail-overlay, .send-mail-panel { display: none !important; }
+}
+/* ─── Send Mail Slider Panel ─── */
+.send-mail-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 1000;
+    transition: opacity .25s;
+}
+.send-mail-overlay.active { display: block; }
+.send-mail-panel {
+    position: fixed; top: 0; right: -520px; width: 480px; max-width: 96vw; height: 100vh;
+    background: var(--cf-card, #fff); box-shadow: -4px 0 24px rgba(0,0,0,.18);
+    z-index: 1001; transition: right .3s cubic-bezier(.4,0,.2,1);
+    display: flex; flex-direction: column; overflow: hidden;
+}
+.send-mail-panel.active { right: 0; }
+.send-mail-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1rem 1.25rem; background: var(--cf-accent, #6366f1); color: #fff;
+    flex-shrink: 0;
+}
+.send-mail-panel-header h3 { margin: 0; font-size: 1rem; font-weight: 700; }
+.send-mail-close { background: none; border: none; color: #fff; font-size: 1.4rem;
+                   cursor: pointer; line-height: 1; padding: 0; }
+.send-mail-body { flex: 1; overflow-y: auto; padding: 1.25rem; }
+.send-mail-field { margin-bottom: 1rem; }
+.send-mail-field label { display: block; font-size: .78rem; font-weight: 600;
+                          color: var(--cf-label, #64748b); text-transform: uppercase;
+                          letter-spacing: .04em; margin-bottom: .3rem; }
+.send-mail-field input, .send-mail-field textarea {
+    width: 100%; padding: .55rem .75rem; border: 1px solid var(--cf-border, #e2e8f0);
+    border-radius: 6px; font-size: .88rem; color: var(--cf-text, #1e293b);
+    background: var(--cf-bg, #f8fafc); box-sizing: border-box;
+}
+.send-mail-field textarea { min-height: 140px; resize: vertical; }
+.send-mail-field input:focus, .send-mail-field textarea:focus {
+    outline: none; border-color: var(--cf-accent, #6366f1);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+}
+.send-mail-attach-note {
+    font-size: .78rem; color: var(--cf-muted, #94a3b8); margin-bottom: 1rem;
+    padding: .5rem .75rem; background: #f0f4ff; border-radius: 6px;
+    border-left: 3px solid var(--cf-accent, #6366f1);
+}
+.send-mail-footer { padding: 1rem 1.25rem; border-top: 1px solid var(--cf-border, #e2e8f0);
+                    display: flex; gap: .75rem; flex-shrink: 0; }
+.btn-send-mail { background: var(--cf-accent, #6366f1); color: #fff; border: none;
+                 padding: .6rem 1.5rem; border-radius: 7px; font-size: .9rem;
+                 font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: .4rem; }
+.btn-send-mail:hover { opacity: .88; }
+.btn-cancel-mail { background: transparent; color: var(--cf-accent, #6366f1);
+                   border: 1px solid var(--cf-accent, #6366f1); padding: .6rem 1.2rem;
+                   border-radius: 7px; font-size: .9rem; font-weight: 600; cursor: pointer; }
+
 </style>
 <script>
 function toggleSection(el) {
@@ -167,6 +229,8 @@ function serializeLineItems(tableId, fieldId) {
                 @csrf @method('DELETE')
                 <button type="submit" class="cf-btn cf-btn-danger">&#128465; Delete</button>
             </form>
+            <button type="button" class="cf-btn cf-btn-secondary no-print" onclick="window.print()">&#128424; Print / PDF</button>
+            <button type="button" class="cf-btn cf-btn-secondary no-print" onclick="openSendMail()">&#9993; Send Mail</button>
         </div>
     </div>
 
@@ -224,4 +288,66 @@ function serializeLineItems(tableId, fieldId) {
         </div>
     </div>
 </div>
+
+<!-- Send Mail Overlay & Slider Panel -->
+<div class="send-mail-overlay no-print" id="sendMailOverlay" onclick="closeSendMail()"></div>
+<div class="send-mail-panel no-print" id="sendMailPanel">
+    <div class="send-mail-panel-header">
+        <h3>&#9993; Send Sales Order via Email</h3>
+        <button class="send-mail-close" onclick="closeSendMail()">&#10005;</button>
+    </div>
+    <div class="send-mail-body">
+        <div class="send-mail-attach-note">
+            &#128206; A PDF copy of this Sales Order will be automatically attached to the email.
+        </div>
+        <form method="POST" action="{{ route('admin.crm2.inventory.send-mail', ['type'=>'sales-order','id'=>$item->id]) }}">
+            @csrf
+            <div class="send-mail-field">
+                <label>To (Email Address)</label>
+                <input type="email" name="to_email" required placeholder="recipient@example.com"
+                       value="{{ $item->contact?->email ?? $item->account?->email ?? '' }}">
+            </div>
+            <div class="send-mail-field">
+                <label>CC (optional)</label>
+                <input type="email" name="cc_email" placeholder="cc@example.com">
+            </div>
+            <div class="send-mail-field">
+                <label>Subject</label>
+                <input type="text" name="subject" required
+                       value="{{ $item->subject ?: 'Sales Order #' . $item->id }}">
+            </div>
+            <div class="send-mail-field">
+                <label>Message</label>
+                <textarea name="body" placeholder="Write your message here...">Dear {{ $item->contact ? $item->contact->first_name : 'Sir/Madam' }},
+
+Please find attached the Sales Order for your reference.
+
+Grand Total: ₹{{ number_format($item->grand_total ?? 0, 2) }}
+
+Please feel free to reach out if you have any questions.
+
+Regards,
+{{ auth()->user()->name }}</textarea>
+            </div>
+    </div>
+    <div class="send-mail-footer">
+        <button type="submit" class="btn-send-mail">&#9993; Send Email</button>
+        <button type="button" class="btn-cancel-mail" onclick="closeSendMail()">Cancel</button>
+    </div>
+        </form>
+</div>
+
+<script>
+
+function openSendMail() {
+    document.getElementById('sendMailOverlay').classList.add('active');
+    document.getElementById('sendMailPanel').classList.add('active');
+}
+function closeSendMail() {
+    document.getElementById('sendMailOverlay').classList.remove('active');
+    document.getElementById('sendMailPanel').classList.remove('active');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSendMail(); });
+
+</script>
 @endsection
