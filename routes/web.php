@@ -494,6 +494,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::delete('/inventory/purchase-orders/{id}/attachments/{attId}',    [$ctrl, 'poAttachmentsDestroy'])->name('inventory.purchase-orders.attachments.destroy');
         Route::post('/inventory/purchase-orders/{id}/send-mail',                [$ctrl, 'poSendMail'])->name('inventory.purchase-orders.send-mail');
         Route::get('/inventory/invoices/{id}',         [$ctrl, 'inventoryInvoicesShow'])->name('inventory.invoices.show');
+        // ── Invoice View sub-routes ───────────────────────────────────────
+        Route::post('/inventory/invoices/{id}/notes',                    [$ctrl, 'invoiceNotesStore'])->name('inventory.invoices.notes.store');
+        Route::post('/inventory/invoices/{id}/activities',               [$ctrl, 'invoiceActivitiesStore'])->name('inventory.invoices.activities.store');
+        Route::patch('/inventory/invoices/{id}/activities/{actId}/complete', [$ctrl, 'invoiceActivitiesComplete'])->name('inventory.invoices.activities.complete');
+        Route::delete('/inventory/invoices/{id}/activities/{actId}',     [$ctrl, 'invoiceActivitiesDestroy'])->name('inventory.invoices.activities.destroy');
+        Route::post('/inventory/invoices/{id}/attachments',              [$ctrl, 'invoiceAttachmentsStore'])->name('inventory.invoices.attachments.store');
+        Route::get('/inventory/invoices/{id}/attachments/{attId}/download', [$ctrl, 'invoiceAttachmentsDownload'])->name('inventory.invoices.attachments.download');
+        Route::delete('/inventory/invoices/{id}/attachments/{attId}',    [$ctrl, 'invoiceAttachmentsDestroy'])->name('inventory.invoices.attachments.destroy');
+        Route::post('/inventory/invoices/{id}/send-mail',                [$ctrl, 'invoiceSendMail'])->name('inventory.invoices.send-mail');
         Route::get('/inventory/vendors/{id}',          [$ctrl, 'inventoryVendorsShow'])->name('inventory.vendors.show');
         Route::delete('/inventory/{type}/{id}',     [$ctrl, 'inventoryDestroy'])->name('inventory.destroy');
         Route::post('/inventory/{type}/{id}/send-mail', [$ctrl, 'inventorySendMail'])->name('inventory.send-mail');

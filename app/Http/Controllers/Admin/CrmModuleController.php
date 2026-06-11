@@ -1176,10 +1176,99 @@ class CrmModuleController extends Controller
         }
     }
     public function inventoryInvoicesShow($id) {
-        $tid = auth()->id();
+        $tid  = auth()->id();
         $item = CrmInvoice::where('user_id', $tid)->findOrFail($id);
-        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
-        return view('admin.crm2.inventory.view-invoice', compact('item', 'accounts_list'));
+        $notes           = CrmNote::where('notable_type','invoice')->where('notable_id',$id)->with('user')->latest()->get();
+        $openActivities  = CrmActivity::where('related_type','invoice')->where('related_id',$id)->where('status','open')->with('user')->latest()->get();
+        $closedActivities= CrmActivity::where('related_type','invoice')->where('related_id',$id)->where('status','closed')->with('user')->latest()->get();
+        $attachments     = \App\Models\CrmInvoiceAttachment::where('invoice_id',$id)->latest()->get();
+        $mailConfig      = \App\Models\CrmMailConfig::where('user_id',$tid)->where('is_active',1)->first();
+        $mailTemplates   = \App\Models\CrmMailTemplate::where('user_id',$tid)->get();
+        return view('admin.crm2.inventory.view-invoice', compact(
+            'item','notes','openActivities','closedActivities','attachments','mailConfig','mailTemplates'
+        ));
+    }
+
+    // ── Invoice Notes ─────────────────────────────────────────────────────
+    public function invoiceNotesStore(Request $request, $id) {
+        $tid  = auth()->id();
+        $item = CrmInvoice::where('user_id',$tid)->findOrFail($id);
+        CrmNote::create(['notable_type'=>'invoice','notable_id'=>$id,'user_id'=>$tid,'content'=>$request->input('content')]);
+        return back()->with('success','Note added.');
+    }
+
+    // ── Invoice Activities ────────────────────────────────────────────────
+    public function invoiceActivitiesStore(Request $request, $id) {
+        $tid  = auth()->id();
+        $item = CrmInvoice::where('user_id',$tid)->findOrFail($id);
+        CrmActivity::create([
+            'related_type'=>'invoice','related_id'=>$id,'user_id'=>$tid,
+            'type'=>$request->input('type'),'subject'=>$request->input('subject'),
+            'description'=>$request->input('description'),'due_at'=>$request->input('due_at'),
+            'status'=>'open',
+        ]);
+        return back()->with('success','Activity added.');
+    }
+    public function invoiceActivitiesComplete(Request $request, $id, $actId) {
+        $tid = auth()->id();
+        $act = CrmActivity::where('related_type','invoice')->where('related_id',$id)->findOrFail($actId);
+        $act->update(['status'=>'closed','completed_at'=>now()]);
+        return response()->json(['success'=>true]);
+    }
+    public function invoiceActivitiesDestroy(Request $request, $id, $actId) {
+        $tid = auth()->id();
+        $act = CrmActivity::where('related_type','invoice')->where('related_id',$id)->findOrFail($actId);
+        $act->delete();
+        return response()->json(['success'=>true]);
+    }
+
+    // ── Invoice Attachments ───────────────────────────────────────────────
+    public function invoiceAttachmentsStore(Request $request, $id) {
+        $tid  = auth()->id();
+        $item = CrmInvoice::where('user_id',$tid)->findOrFail($id);
+        $request->validate(['attachment'=>'required|file|max:10240']);
+        $file = $request->file('attachment');
+        $stored = $file->store('crm/invoice-attachments','public');
+        \App\Models\CrmInvoiceAttachment::create([
+            'invoice_id'=>$id,'user_id'=>$tid,
+            'original_name'=>$file->getClientOriginalName(),
+            'stored_name'=>$stored,'mime_type'=>$file->getMimeType(),
+            'file_size'=>$file->getSize(),
+        ]);
+        return back()->with('success','Attachment uploaded.');
+    }
+    public function invoiceAttachmentsDownload(Request $request, $id, $attId) {
+        $tid = auth()->id();
+        $att = \App\Models\CrmInvoiceAttachment::where('invoice_id',$id)->findOrFail($attId);
+        return \Storage::disk('public')->download($att->stored_name, $att->original_name);
+    }
+    public function invoiceAttachmentsDestroy(Request $request, $id, $attId) {
+        $tid = auth()->id();
+        $att = \App\Models\CrmInvoiceAttachment::where('invoice_id',$id)->findOrFail($attId);
+        \Storage::disk('public')->delete($att->stored_name);
+        $att->delete();
+        return response()->json(['success'=>true]);
+    }
+
+    // ── Invoice Send Mail ─────────────────────────────────────────────────
+    public function invoiceSendMail(Request $request, $id) {
+        $tid  = auth()->id();
+        $item = CrmInvoice::where('user_id',$tid)->findOrFail($id);
+        $cfg  = \App\Models\CrmMailConfig::where('user_id',$tid)->where('is_active',1)->first();
+        if (!$cfg) return back()->with('error','No active mail configuration.');
+        try {
+            \Mail::send([], [], function($msg) use ($request, $cfg, $item) {
+                $msg->from($cfg->from_email, $cfg->from_name ?? 'Xenoraa CRM')
+                    ->to($request->input('to_email'))
+                    ->subject($request->input('subject'))
+                    ->html($request->input('body_html'));
+                if ($request->input('cc_email'))  $msg->cc($request->input('cc_email'));
+                if ($request->input('bcc_email')) $msg->bcc($request->input('bcc_email'));
+            });
+            return back()->with('success','Email sent successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error','Failed to send email: '.$e->getMessage());
+        }
     }
     public function inventoryVendorsShow($id) {
         $item = CrmVendor::where('user_id', auth()->id())->findOrFail($id);

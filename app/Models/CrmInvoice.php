@@ -1,6 +1,9 @@
 <?php
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\CrmInvoiceAttachment;
+use App\Models\CrmNote;
+use App\Models\CrmActivity;
 
 class CrmInvoice extends Model
 {
@@ -50,4 +53,8 @@ class CrmInvoice extends Model
         $count = static::where('user_id', $userId)->count() + 1;
         return 'INV-' . date('Y') . '-' . str_pad($count, 4, '0', STR_PAD_LEFT);
     }
+
+    public function notes()       { return $this->morphMany(CrmNote::class, 'notable'); }
+    public function activities()  { return $this->morphMany(CrmActivity::class, 'related'); }
+    public function attachments() { return $this->hasMany(CrmInvoiceAttachment::class, 'invoice_id'); }
 }
