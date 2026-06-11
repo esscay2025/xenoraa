@@ -504,6 +504,21 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::delete('/inventory/invoices/{id}/attachments/{attId}',    [$ctrl, 'invoiceAttachmentsDestroy'])->name('inventory.invoices.attachments.destroy');
         Route::post('/inventory/invoices/{id}/send-mail',                [$ctrl, 'invoiceSendMail'])->name('inventory.invoices.send-mail');
         Route::get('/inventory/vendors/{id}',          [$ctrl, 'inventoryVendorsShow'])->name('inventory.vendors.show');
+        // ── Vendor View sub-routes ────────────────────────────────────────
+        Route::post('/inventory/vendors/{id}/notes',                        [$ctrl, 'vendorNotesStore'])->name('inventory.vendors.notes.store');
+        Route::post('/inventory/vendors/{id}/activities',                   [$ctrl, 'vendorActivitiesStore'])->name('inventory.vendors.activities.store');
+        Route::patch('/inventory/vendors/{id}/activities/{actId}/complete', [$ctrl, 'vendorActivitiesComplete'])->name('inventory.vendors.activities.complete');
+        Route::delete('/inventory/vendors/{id}/activities/{actId}',         [$ctrl, 'vendorActivitiesDestroy'])->name('inventory.vendors.activities.destroy');
+        Route::post('/inventory/vendors/{id}/attachments',                  [$ctrl, 'vendorAttachmentsStore'])->name('inventory.vendors.attachments.store');
+        Route::get('/inventory/vendors/{id}/attachments/{attId}/download',  [$ctrl, 'vendorAttachmentsDownload'])->name('inventory.vendors.attachments.download');
+        Route::delete('/inventory/vendors/{id}/attachments/{attId}',        [$ctrl, 'vendorAttachmentsDestroy'])->name('inventory.vendors.attachments.destroy');
+        Route::post('/inventory/vendors/{id}/products/assign',              [$ctrl, 'vendorProductsAssign'])->name('inventory.vendors.products.assign');
+        Route::delete('/inventory/vendors/{id}/products/{productId}',       [$ctrl, 'vendorProductsUnassign'])->name('inventory.vendors.products.unassign');
+        Route::post('/inventory/vendors/{id}/purchase-orders/assign',       [$ctrl, 'vendorPurchaseOrdersAssign'])->name('inventory.vendors.pos.assign');
+        Route::delete('/inventory/vendors/{id}/purchase-orders/{poId}',     [$ctrl, 'vendorPurchaseOrdersUnassign'])->name('inventory.vendors.pos.unassign');
+        Route::post('/inventory/vendors/{id}/contacts/assign',              [$ctrl, 'vendorContactsAssign'])->name('inventory.vendors.contacts.assign');
+        Route::delete('/inventory/vendors/{id}/contacts/{contactId}',       [$ctrl, 'vendorContactsUnassign'])->name('inventory.vendors.contacts.unassign');
+        Route::post('/inventory/vendors/{id}/send-mail',                    [$ctrl, 'vendorSendMail'])->name('inventory.vendors.send-mail');
         Route::delete('/inventory/{type}/{id}',     [$ctrl, 'inventoryDestroy'])->name('inventory.destroy');
         Route::post('/inventory/{type}/{id}/send-mail', [$ctrl, 'inventorySendMail'])->name('inventory.send-mail');
         // Legacy redirect

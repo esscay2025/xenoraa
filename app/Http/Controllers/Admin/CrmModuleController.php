@@ -1271,8 +1271,143 @@ class CrmModuleController extends Controller
         }
     }
     public function inventoryVendorsShow($id) {
-        $item = CrmVendor::where('user_id', auth()->id())->findOrFail($id);
-        return view('admin.crm2.inventory.view-vendor', compact('item'));
+        $tid  = auth()->id();
+        $item = CrmVendor::where('user_id', $tid)->findOrFail($id);
+        $notes            = CrmNote::where('notable_type','vendor')->where('notable_id',$id)->with('user')->latest()->get();
+        $openActivities   = CrmActivity::where('related_type','vendor')->where('related_id',$id)->where('status','open')->with('user')->latest()->get();
+        $closedActivities = CrmActivity::where('related_type','vendor')->where('related_id',$id)->where('status','closed')->with('user')->latest()->get();
+        $attachments      = \App\Models\CrmVendorAttachment::where('vendor_id',$id)->latest()->get();
+        $products         = CrmProduct::where('vendor_id',$id)->where('user_id',$tid)->orderBy('name')->get();
+        $purchaseOrders   = CrmPurchaseOrder::where('vendor_id',$id)->where('user_id',$tid)->latest()->get();
+        $contacts         = CrmContact::where('vendor_id',$id)->where('user_id',$tid)->orderBy('first_name')->get();
+        $allProducts      = CrmProduct::where('user_id',$tid)->orderBy('name')->get();
+        $allPurchaseOrders= CrmPurchaseOrder::where('user_id',$tid)->latest()->get();
+        $allContacts      = CrmContact::where('user_id',$tid)->orderBy('first_name')->get();
+        $mailConfig       = \App\Models\CrmMailConfig::where('user_id',$tid)->where('is_active',1)->first();
+        $mailTemplates    = \App\Models\CrmMailTemplate::where('user_id',$tid)->get();
+        return view('admin.crm2.inventory.view-vendor', compact(
+            'item','notes','openActivities','closedActivities','attachments',
+            'products','purchaseOrders','contacts',
+            'allProducts','allPurchaseOrders','allContacts',
+            'mailConfig','mailTemplates'
+        ));
+    }
+
+    // ── Vendor Notes ──────────────────────────────────────────────────────
+    public function vendorNotesStore(Request $request, $id) {
+        $tid  = auth()->id();
+        $item = CrmVendor::where('user_id',$tid)->findOrFail($id);
+        CrmNote::create(['notable_type'=>'vendor','notable_id'=>$id,'user_id'=>$tid,'content'=>$request->input('content')]);
+        return back()->with('success','Note added.');
+    }
+
+    // ── Vendor Activities ─────────────────────────────────────────────────
+    public function vendorActivitiesStore(Request $request, $id) {
+        $tid  = auth()->id();
+        CrmVendor::where('user_id',$tid)->findOrFail($id);
+        CrmActivity::create([
+            'related_type'=>'vendor','related_id'=>$id,'user_id'=>$tid,
+            'type'=>$request->input('type'),'subject'=>$request->input('subject'),
+            'description'=>$request->input('description'),'due_at'=>$request->input('due_at'),
+            'status'=>'open',
+        ]);
+        return back()->with('success','Activity added.');
+    }
+    public function vendorActivitiesComplete(Request $request, $id, $actId) {
+        $act = CrmActivity::where('related_type','vendor')->where('related_id',$id)->findOrFail($actId);
+        $act->update(['status'=>'closed','completed_at'=>now()]);
+        return response()->json(['success'=>true]);
+    }
+    public function vendorActivitiesDestroy(Request $request, $id, $actId) {
+        $act = CrmActivity::where('related_type','vendor')->where('related_id',$id)->findOrFail($actId);
+        $act->delete();
+        return response()->json(['success'=>true]);
+    }
+
+    // ── Vendor Attachments ────────────────────────────────────────────────
+    public function vendorAttachmentsStore(Request $request, $id) {
+        $tid  = auth()->id();
+        CrmVendor::where('user_id',$tid)->findOrFail($id);
+        $request->validate(['attachment'=>'required|file|max:10240']);
+        $file = $request->file('attachment');
+        $stored = $file->store('crm/vendor-attachments','public');
+        \App\Models\CrmVendorAttachment::create([
+            'vendor_id'=>$id,'user_id'=>$tid,
+            'original_name'=>$file->getClientOriginalName(),
+            'stored_name'=>$stored,'mime_type'=>$file->getMimeType(),
+            'file_size'=>$file->getSize(),
+        ]);
+        return back()->with('success','Attachment uploaded.');
+    }
+    public function vendorAttachmentsDownload(Request $request, $id, $attId) {
+        $att = \App\Models\CrmVendorAttachment::where('vendor_id',$id)->findOrFail($attId);
+        return \Storage::disk('public')->download($att->stored_name, $att->original_name);
+    }
+    public function vendorAttachmentsDestroy(Request $request, $id, $attId) {
+        $att = \App\Models\CrmVendorAttachment::where('vendor_id',$id)->findOrFail($attId);
+        \Storage::disk('public')->delete($att->stored_name);
+        $att->delete();
+        return response()->json(['success'=>true]);
+    }
+
+    // ── Vendor Products ───────────────────────────────────────────────────
+    public function vendorProductsAssign(Request $request, $id) {
+        $tid = auth()->id();
+        CrmVendor::where('user_id',$tid)->findOrFail($id);
+        CrmProduct::where('user_id',$tid)->where('id',$request->input('product_id'))->update(['vendor_id'=>$id]);
+        return back()->with('success','Product assigned to vendor.');
+    }
+    public function vendorProductsUnassign(Request $request, $id, $productId) {
+        $tid = auth()->id();
+        CrmProduct::where('user_id',$tid)->where('id',$productId)->where('vendor_id',$id)->update(['vendor_id'=>null]);
+        return response()->json(['success'=>true]);
+    }
+
+    // ── Vendor Purchase Orders ────────────────────────────────────────────
+    public function vendorPurchaseOrdersAssign(Request $request, $id) {
+        $tid = auth()->id();
+        CrmVendor::where('user_id',$tid)->findOrFail($id);
+        CrmPurchaseOrder::where('user_id',$tid)->where('id',$request->input('po_id'))->update(['vendor_id'=>$id]);
+        return back()->with('success','Purchase Order assigned to vendor.');
+    }
+    public function vendorPurchaseOrdersUnassign(Request $request, $id, $poId) {
+        $tid = auth()->id();
+        CrmPurchaseOrder::where('user_id',$tid)->where('id',$poId)->where('vendor_id',$id)->update(['vendor_id'=>null]);
+        return response()->json(['success'=>true]);
+    }
+
+    // ── Vendor Contacts ───────────────────────────────────────────────────
+    public function vendorContactsAssign(Request $request, $id) {
+        $tid = auth()->id();
+        CrmVendor::where('user_id',$tid)->findOrFail($id);
+        CrmContact::where('user_id',$tid)->where('id',$request->input('contact_id'))->update(['vendor_id'=>$id]);
+        return back()->with('success','Contact assigned to vendor.');
+    }
+    public function vendorContactsUnassign(Request $request, $id, $contactId) {
+        $tid = auth()->id();
+        CrmContact::where('user_id',$tid)->where('id',$contactId)->where('vendor_id',$id)->update(['vendor_id'=>null]);
+        return response()->json(['success'=>true]);
+    }
+
+    // ── Vendor Send Mail ──────────────────────────────────────────────────
+    public function vendorSendMail(Request $request, $id) {
+        $tid  = auth()->id();
+        $item = CrmVendor::where('user_id',$tid)->findOrFail($id);
+        $cfg  = \App\Models\CrmMailConfig::where('user_id',$tid)->where('is_active',1)->first();
+        if (!$cfg) return back()->with('error','No active mail configuration.');
+        try {
+            \Mail::send([], [], function($msg) use ($request, $cfg) {
+                $msg->from($cfg->from_email, $cfg->from_name ?? 'Xenoraa CRM')
+                    ->to($request->input('to_email'))
+                    ->subject($request->input('subject'))
+                    ->html($request->input('body_html'));
+                if ($request->input('cc_email'))  $msg->cc($request->input('cc_email'));
+                if ($request->input('bcc_email')) $msg->bcc($request->input('bcc_email'));
+            });
+            return back()->with('success','Email sent successfully.');
+        } catch (\Exception $e) {
+            return back()->with('error','Failed to send email: '.$e->getMessage());
+        }
     }
 
     // ══════════════════════════════════════════════════════════════
