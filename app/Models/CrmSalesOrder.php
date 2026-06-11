@@ -34,7 +34,11 @@ class CrmSalesOrder extends Model
     public function deal()    { return $this->belongsTo(CrmDeal::class, 'deal_id'); }
     public function quote()   { return $this->belongsTo(CrmQuote::class, 'quote_id'); }
     public function items()   { return $this->morphMany(CrmInventoryItem::class, 'itemable'); }
-    public function invoices(){ return $this->hasMany(CrmInvoice::class, 'sales_order_id'); }
+    public function invoices()       { return $this->hasMany(CrmInvoice::class, 'sales_order_id'); }
+    public function soNotes()        { return $this->morphMany(CrmNote::class, 'notable', 'notable_type', 'notable_id')->where('notable_type','sales_order'); }
+    public function attachments()    { return $this->hasMany(CrmSoAttachment::class, 'sales_order_id'); }
+    public function openActivities() { return $this->morphMany(CrmActivity::class, 'related', 'related_type', 'related_id')->where('related_type','sales_order')->where('status','open'); }
+    public function closedActivities(){ return $this->morphMany(CrmActivity::class, 'related', 'related_type', 'related_id')->where('related_type','sales_order')->where('status','closed'); }
 
     public static function generateNumber(int $userId): string
     {

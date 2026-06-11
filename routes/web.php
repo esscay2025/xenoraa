@@ -472,6 +472,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::delete('/inventory/quotes/{id}/sales-orders/{soId}/unassign', [$ctrl, 'quoteSalesOrdersUnassign'])->name('inventory.quotes.sales-orders.unassign');
         Route::post('/inventory/quotes/{id}/send-mail',                   [$ctrl, 'quoteSendMail'])->name('inventory.quotes.send-mail');
         Route::get('/inventory/sales-orders/{id}',     [$ctrl, 'inventorySalesOrdersShow'])->name('inventory.sales-orders.show');
+        // ── Sales Order View sub-routes ──────────────────────────────
+        Route::post('/inventory/sales-orders/{id}/notes',                    [$ctrl, 'soNotesStore'])->name('inventory.sales-orders.notes.store');
+        Route::post('/inventory/sales-orders/{id}/activities',               [$ctrl, 'soActivitiesStore'])->name('inventory.sales-orders.activities.store');
+        Route::patch('/inventory/sales-orders/{id}/activities/{actId}/complete', [$ctrl, 'soActivitiesComplete'])->name('inventory.sales-orders.activities.complete');
+        Route::delete('/inventory/sales-orders/{id}/activities/{actId}',     [$ctrl, 'soActivitiesDestroy'])->name('inventory.sales-orders.activities.destroy');
+        Route::post('/inventory/sales-orders/{id}/attachments',              [$ctrl, 'soAttachmentsStore'])->name('inventory.sales-orders.attachments.store');
+        Route::get('/inventory/sales-orders/{id}/attachments/{attId}/download', [$ctrl, 'soAttachmentsDownload'])->name('inventory.sales-orders.attachments.download');
+        Route::delete('/inventory/sales-orders/{id}/attachments/{attId}',    [$ctrl, 'soAttachmentsDestroy'])->name('inventory.sales-orders.attachments.destroy');
+        Route::post('/inventory/sales-orders/{id}/invoices/assign',          [$ctrl, 'soInvoicesAssign'])->name('inventory.sales-orders.invoices.assign');
+        Route::delete('/inventory/sales-orders/{id}/invoices/{invId}/unassign', [$ctrl, 'soInvoicesUnassign'])->name('inventory.sales-orders.invoices.unassign');
+        Route::post('/inventory/sales-orders/{id}/send-mail',                [$ctrl, 'soSendMail'])->name('inventory.sales-orders.send-mail');
         Route::get('/inventory/purchase-orders/{id}',  [$ctrl, 'inventoryPurchaseOrdersShow'])->name('inventory.purchase-orders.show');
         Route::get('/inventory/invoices/{id}',         [$ctrl, 'inventoryInvoicesShow'])->name('inventory.invoices.show');
         Route::get('/inventory/vendors/{id}',          [$ctrl, 'inventoryVendorsShow'])->name('inventory.vendors.show');
