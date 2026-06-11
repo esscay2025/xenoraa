@@ -232,3 +232,14 @@
   - ecommerce.css linked in admin.blade.php with cache-busting filemtime() version
   - Integrations/Settings views already used var(--bg-card) etc. - no changes needed there
   - Products sub-group sidebar fix: Items grouped under Products collapsible at top of E-commerce menu
+- v4.16.0 (2026-06-11): E-commerce Store Config Module
+  - New table: ecom_store_configs (migration: 2026_06_11_400001_create_ecom_store_configs_table.php)
+  - Model: app/Models/EcomStoreConfig.php (80+ fields, fillable, boolean/integer casts)
+  - Controller: storeConfigIndex() and storeConfigSave() methods added to EcommerceController.php
+  - Routes: GET/POST /admin/ecommerce/store-config added to routes/web.php
+  - View: resources/views/admin/ecommerce/store-config.blade.php (991 lines, 8 tabs)
+  - Sidebar: Store Config link (store icon) added to E-commerce panel in admin.blade.php
+  - 8 tabs: General (store info, currency), Products (reviews, sorting, display), Shipping (methods, free shipping, flat rate, local pickup), Payments (COD, Razorpay, Stripe, PayPal, Bank Transfer, UPI), Accounts & Privacy (guest checkout, GDPR), Site Visibility (catalog, breadcrumbs, lightbox), Point of Sale (receipt, barcode, customer display), Advanced (coupons, stock, taxes, custom CSS/JS)
+  - WooCommerce-style tab navigation with URL parameter (?tab=general etc.)
+  - All fields use ec- CSS classes for dark/light mode adaptive styling
+  - Deployed and verified working on production server at gopi.blog
