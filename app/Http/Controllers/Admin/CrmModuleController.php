@@ -906,7 +906,7 @@ class CrmModuleController extends Controller
 
         // Mail config & templates
         $mailConfig    = \App\Models\CrmMailConfig::where('user_id', $tid)->where('is_active', 1)->first();
-        $mailTemplates = \App\Models\CrmEmailTemplate::where('user_id', $tid)->get();
+        $mailTemplates = \App\Models\CrmMailTemplate::where('user_id', $tid)->get();
 
         return view('admin.crm2.inventory.view-sales-order', compact(
             'item','notes','invoices','allInvoices','attachments',
