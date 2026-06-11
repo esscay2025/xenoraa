@@ -214,3 +214,13 @@
     - Draft edit pre-fills compose slider
     - Email nav item in frozen right sidebar
   - Commit: 827838d
+
+- v4.14.0 (2026-06-11): E-commerce Integrations & Settings Modules
+  - New tables: ecom_mail_configs, ecom_mail_templates
+  - Models: EcomMailConfig, EcomMailTemplate (app/Models/)
+  - 13 routes under admin.ecommerce.integrations.* and admin.ecommerce.settings.*
+  - Views: resources/views/admin/ecommerce/integrations/mail-config.blade.php
+  - Views: resources/views/admin/ecommerce/settings/ (mail-templates, create, edit, view, preview)
+  - 6 default e-commerce templates seeded for user_id=1 (gopi@outlook.in)
+  - Sidebar: Integrations (plug icon) and Settings (cog icon) groups added after Point of Sale
+  - Controller: 13 new methods in EcommerceController for mail config and templates
