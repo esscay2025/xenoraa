@@ -590,7 +590,8 @@ class CrmModuleController extends Controller
         $tid = $this->tenantId();
         $vendors_list = CrmVendor::where('user_id', $tid)->orderBy('name')->get();
         $staff = \App\Models\User::where('id', $tid)->get();
-        return view('admin.crm2.inventory.create-product', compact('vendors_list', 'staff'));
+        $price_books = CrmPriceBook::where("user_id", $tid)->orderBy("name")->get();
+        return view("admin.crm2.inventory.create-product", compact("vendors_list", "staff", "price_books"));
     }
     public function inventoryProductsStore(Request $request) {
         $data = $request->except(['_token']);
