@@ -224,3 +224,11 @@
   - 6 default e-commerce templates seeded for user_id=1 (gopi@outlook.in)
   - Sidebar: Integrations (plug icon) and Settings (cog icon) groups added after Point of Sale
   - Controller: 13 new methods in EcommerceController for mail config and templates
+
+- v4.15.0 (2026-06-11): E-commerce Full Theme Integration
+  - Created public/css/ecommerce.css with ec- CSS class system bridging to dashboard CSS variables
+  - Rebuilt dashboard.blade.php, products.blade.php, categories.blade.php, reviews.blade.php, product-form.blade.php with ec- classes
+  - All hardcoded dark hex values (#0f172a, #1e293b, #334155, #e2e8f0, #9ca3af) replaced with CSS variables
+  - ecommerce.css linked in admin.blade.php with cache-busting filemtime() version
+  - Integrations/Settings views already used var(--bg-card) etc. - no changes needed there
+  - Products sub-group sidebar fix: Items grouped under Products collapsible at top of E-commerce menu
