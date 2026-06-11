@@ -37,8 +37,9 @@
 
 /* ── Page Wrapper ───────────────────────────────────────────── */
 .ec-page {
-    padding: 2rem;
+    padding: 1.75rem 2rem;
     min-height: 100%;
+    background: var(--ec-bg);
     color: var(--ec-text);
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
