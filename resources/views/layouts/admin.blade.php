@@ -128,6 +128,7 @@
             white-space: nowrap;
             pointer-events: none;
         }
+        .sidebar.collapsed .group-chevron { margin-left: 0; }
         .sidebar.collapsed .sidebar-header { padding: 1rem 0; justify-content: center; }
         .sidebar.collapsed .sidebar-brand { justify-content: center; }
         .sidebar.collapsed .sidebar-nav { overflow: visible; }
