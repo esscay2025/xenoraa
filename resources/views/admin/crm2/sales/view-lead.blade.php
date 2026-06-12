@@ -114,11 +114,29 @@
       <a href="{{ route('admin.crm2.sales.leads.edit', $lead->id) }}" class="btn-lv btn-lv-primary">
         <i class="fas fa-edit"></i> Edit
       </a>
-      <form method="POST" action="{{ route('admin.crm2.sales.destroy', ['type'=>'lead','id'=>$lead->id]) }}" onsubmit="return confirm('Delete this lead permanently?')" style="display:inline">
-        @csrf @method('DELETE')
-        <button type="submit" class="btn-lv btn-lv-danger"><i class="fas fa-trash"></i> Delete</button>
-      </form>
       <a href="{{ route('admin.crm2.sales.leads') }}" class="btn-lv btn-lv-ghost"><i class="fas fa-arrow-left"></i> Back</a>
+      {{-- 3-dot action menu --}}
+      <div style="position:relative;display:inline-block">
+        <button class="btn-lv btn-lv-ghost" id="lvActBtn" onclick="toggleLvMenu(event)" title="More actions" style="width:34px;padding:0;font-size:1.1rem">&#8942;</button>
+        <div id="lvActDrop" style="display:none;position:absolute;right:0;top:calc(100% + 4px);min-width:190px;background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.13);z-index:999;padding:5px 0">
+          <form method="POST" action="{{ route('admin.crm2.sales.leads.clone', $lead->id) }}" style="margin:0">
+            @csrf
+            <button type="submit" style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem;font-size:.84rem;color:var(--text-primary,#1a1a2e);cursor:pointer;border:none;background:none;width:100%;text-align:left" onmouseover="this.style.background='var(--bg-hover,#f1f5f9)'" onmouseout="this.style.background='none'">
+              <i class="fas fa-copy" style="width:16px;text-align:center;color:#6366f1"></i> Clone Lead
+            </button>
+          </form>
+          <button onclick="window.print()" style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem;font-size:.84rem;color:var(--text-primary,#1a1a2e);cursor:pointer;border:none;background:none;width:100%;text-align:left" onmouseover="this.style.background='var(--bg-hover,#f1f5f9)'" onmouseout="this.style.background='none'">
+            <i class="fas fa-print" style="width:16px;text-align:center;color:#10b981"></i> Print Preview
+          </button>
+          <div style="border-top:1px solid var(--border,#e2e8f0);margin:4px 0"></div>
+          <form method="POST" action="{{ route('admin.crm2.sales.destroy', ['type'=>'lead','id'=>$lead->id]) }}" onsubmit="return confirm('Delete this lead permanently?')" style="margin:0">
+            @csrf @method('DELETE')
+            <button type="submit" style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem;font-size:.84rem;color:#ef4444;cursor:pointer;border:none;background:none;width:100%;text-align:left" onmouseover="this.style.background='var(--bg-hover,#f1f5f9)'" onmouseout="this.style.background='none'">
+              <i class="fas fa-trash" style="width:16px;text-align:center"></i> Delete Lead
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -415,6 +433,15 @@ function setActivityType(type, btn) {
   btn.classList.remove('btn-lv-ghost');
   btn.classList.add('btn-lv-primary');
 }
-document.addEventListener('keydown', e => { if(e.key==='Escape') closeConvertModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') { closeConvertModal(); document.getElementById('lvActDrop').style.display='none'; } });
+function toggleLvMenu(e) {
+  e.stopPropagation();
+  const d = document.getElementById('lvActDrop');
+  d.style.display = d.style.display === 'block' ? 'none' : 'block';
+}
+document.addEventListener('click', function() {
+  const d = document.getElementById('lvActDrop');
+  if (d) d.style.display = 'none';
+});
 </script>
 @endsection
