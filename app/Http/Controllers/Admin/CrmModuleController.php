@@ -3418,4 +3418,106 @@ class CrmModuleController extends Controller
     }
 
 
+    // ══════════════════════════════════════════════════════════════
+    // QUOTE CONVERSION METHODS
+    // ══════════════════════════════════════════════════════════════
+
+    /**
+     * Convert a Quote into a Sales Order.
+     * All matching fields are copied; quote_id is set to the source quote's ID.
+     * Redirects to the new Sales Order's view page.
+     */
+    public function quoteConvertToSalesOrder($id)
+    {
+        $tid   = auth()->id();
+        $quote = CrmQuote::where('user_id', $tid)->findOrFail($id);
+
+        $so = CrmSalesOrder::create([
+            'user_id'         => $tid,
+            'quote_id'        => $quote->id,
+            'account_id'      => $quote->account_id,
+            'contact_id'      => $quote->contact_id,
+            'deal_id'         => $quote->deal_id,
+            'owner_id'        => $quote->owner_id,
+            'subject'         => $quote->subject,
+            'status'          => 'Created',
+            'carrier'         => $quote->carrier,
+            'terms'           => $quote->terms,
+            'notes'           => $quote->notes,
+            'subtotal'        => $quote->subtotal,
+            'discount_amount' => $quote->discount_amount,
+            'tax_amount'      => $quote->tax_amount,
+            'adjustment'      => $quote->adjustment,
+            'grand_total'     => $quote->grand_total,
+            'total'           => $quote->total,
+            'line_items'      => $quote->line_items,
+            'bill_country'    => $quote->bill_country,
+            'bill_building'   => $quote->bill_building,
+            'bill_street'     => $quote->bill_street,
+            'bill_city'       => $quote->bill_city,
+            'bill_state'      => $quote->bill_state,
+            'bill_zip'        => $quote->bill_zip,
+            'ship_country'    => $quote->ship_country,
+            'ship_building'   => $quote->ship_building,
+            'ship_street'     => $quote->ship_street,
+            'ship_city'       => $quote->ship_city,
+            'ship_state'      => $quote->ship_state,
+            'ship_zip'        => $quote->ship_zip,
+            'so_number'       => 'SO-' . strtoupper(Str::random(8)),
+        ]);
+
+        return redirect()
+            ->route('admin.crm2.inventory.sales-orders.show', $so->id)
+            ->with('success', 'Quote converted to Sales Order successfully.');
+    }
+
+    /**
+     * Convert a Quote directly into an Invoice.
+     * All matching fields are copied; sales_order_id is left null.
+     * Redirects to the new Invoice's view page.
+     */
+    public function quoteConvertToInvoice($id)
+    {
+        $tid   = auth()->id();
+        $quote = CrmQuote::where('user_id', $tid)->findOrFail($id);
+
+        $inv = CrmInvoice::create([
+            'user_id'         => $tid,
+            'sales_order_id'  => null,
+            'account_id'      => $quote->account_id,
+            'contact_id'      => $quote->contact_id,
+            'deal_id'         => $quote->deal_id,
+            'owner_id'        => $quote->owner_id,
+            'subject'         => $quote->subject,
+            'status'          => 'Draft',
+            'invoice_date'    => now()->toDateString(),
+            'terms'           => $quote->terms,
+            'notes'           => $quote->notes,
+            'subtotal'        => $quote->subtotal,
+            'discount_amount' => $quote->discount_amount,
+            'tax_amount'      => $quote->tax_amount,
+            'adjustment'      => $quote->adjustment,
+            'grand_total'     => $quote->grand_total,
+            'total'           => $quote->total,
+            'amount_paid'     => 0,
+            'line_items'      => $quote->line_items,
+            'bill_country'    => $quote->bill_country,
+            'bill_building'   => $quote->bill_building,
+            'bill_street'     => $quote->bill_street,
+            'bill_city'       => $quote->bill_city,
+            'bill_state'      => $quote->bill_state,
+            'bill_zip'        => $quote->bill_zip,
+            'ship_country'    => $quote->ship_country,
+            'ship_building'   => $quote->ship_building,
+            'ship_street'     => $quote->ship_street,
+            'ship_city'       => $quote->ship_city,
+            'ship_state'      => $quote->ship_state,
+            'ship_zip'        => $quote->ship_zip,
+            'invoice_number'  => 'INV-' . strtoupper(Str::random(8)),
+        ]);
+
+        return redirect()
+            ->route('admin.crm2.inventory.invoices.show', $inv->id)
+            ->with('success', 'Quote converted to Invoice successfully.');
+    }
 }

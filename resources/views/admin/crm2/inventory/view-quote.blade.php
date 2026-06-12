@@ -168,6 +168,27 @@
       <h1>{{ $item->quote_number }} &mdash; {{ $item->subject }}</h1>
       <span class="qv-stage stage-{{ $item->stage }}">{{ \App\Models\CrmQuote::STAGES[$item->stage] ?? ucfirst($item->stage) }}</span>
       <a href="{{ route('admin.crm2.inventory.quotes.edit', $item->id) }}" class="qv-btn primary">&#9998; Edit</a>
+      {{-- Convert Dropdown --}}
+      <div style="position:relative;display:inline-block;">
+        <button class="qv-btn" onclick="document.getElementById('qvConvertDrop').classList.toggle('visible')" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border-color:#059669;display:flex;align-items:center;gap:0.4rem;">
+          &#8644; Convert &nbsp;<span style="font-size:0.65rem;">&#9660;</span>
+        </button>
+        <div id="qvConvertDrop" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--bg-card);border:1px solid var(--border);border-radius:8px;min-width:210px;box-shadow:0 8px 24px rgba(0,0,0,0.35);z-index:999;overflow:hidden;">
+          <form method="POST" action="{{ route('admin.crm2.inventory.quotes.convert.sales-order', $item->id) }}">
+            @csrf
+            <button type="submit" style="display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1rem;font-size:0.82rem;color:var(--text-primary);background:transparent;border:none;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='rgba(99,102,241,0.12)'" onmouseout="this.style.background='transparent'">
+              <i class="fas fa-shopping-cart" style="width:16px;color:#6366f1;"></i> Convert to Sales Order
+            </button>
+          </form>
+          <div style="height:1px;background:var(--border);"></div>
+          <form method="POST" action="{{ route('admin.crm2.inventory.quotes.convert.invoice', $item->id) }}">
+            @csrf
+            <button type="submit" style="display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1rem;font-size:0.82rem;color:var(--text-primary);background:transparent;border:none;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='rgba(99,102,241,0.12)'" onmouseout="this.style.background='transparent'">
+              <i class="fas fa-file-invoice-dollar" style="width:16px;color:#f59e0b;"></i> Convert to Invoice
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
 
     {{-- ══ 1. QUOTE INFORMATION ══ --}}
@@ -790,6 +811,26 @@ function unassignSO(soId) {
         method:'DELETE', headers:{'X-CSRF-TOKEN':'{{ csrf_token() }}','Accept':'application/json'}
     }).then(r => r.json()).then(d => { if(d.success) location.reload(); });
 }
+
+// ── Convert dropdown toggle ──
+document.addEventListener('click', function(e) {
+    const drop = document.getElementById('qvConvertDrop');
+    if (!drop) return;
+    const btn = drop.previousElementSibling;
+    if (!btn.contains(e.target) && !drop.contains(e.target)) {
+        drop.style.display = 'none';
+        drop.classList.remove('visible');
+    }
+});
+document.getElementById('qvConvertDrop')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+});
+// Override toggle to use display style
+document.querySelector('[onclick*="qvConvertDrop"]')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const drop = document.getElementById('qvConvertDrop');
+    drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
+});
 
 // ── Highlight active nav on scroll ──
 const sections = ['sec-info','sec-notes','sec-so','sec-attach','sec-open-act','sec-closed-act','sec-emails'];

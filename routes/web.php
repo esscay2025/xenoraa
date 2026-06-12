@@ -461,6 +461,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/price-books/{id}/attachments/{attId}/download', [$ctrl, 'priceBookAttachmentsDownload'])->name('inventory.price-books.attachments.download');
         Route::delete('/inventory/price-books/{id}/attachments/{attId}',     [$ctrl, 'priceBookAttachmentsDestroy'])->name('inventory.price-books.attachments.destroy');
         Route::get('/inventory/quotes/{id}',           [$ctrl, 'inventoryQuotesShow'])->name('inventory.quotes.show');
+        Route::post('/inventory/quotes/{id}/convert/sales-order', [$ctrl, 'quoteConvertToSalesOrder'])->name('inventory.quotes.convert.sales-order');
+        Route::post('/inventory/quotes/{id}/convert/invoice',      [$ctrl, 'quoteConvertToInvoice'])->name('inventory.quotes.convert.invoice');
         // Quote sub-routes
         Route::post('/inventory/quotes/{id}/notes',                       [$ctrl, 'quoteNotesStore'])->name('inventory.quotes.notes.store');
         Route::delete('/inventory/quotes/{id}/notes/{noteId}',            [$ctrl, 'quoteNoteDestroy'])->name('inventory.quotes.notes.destroy');
