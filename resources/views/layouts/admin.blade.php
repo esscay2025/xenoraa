@@ -175,25 +175,6 @@
             background: var(--accent);
             border-radius: 0 3px 3px 0;
         }
-        /* Locked state — panel is pinned open by click */
-        .xn-rail-item.locked {
-            background: rgba(99,102,241,0.22);
-            color: var(--accent);
-            box-shadow: inset 0 0 0 2px var(--accent);
-        }
-        .xn-rail-item.locked::before {
-            content: '';
-            position: absolute;
-            left: -7px;
-            top: 50%; transform: translateY(-50%);
-            width: 3px; height: 28px;
-            background: var(--accent);
-            border-radius: 0 3px 3px 0;
-        }
-        /* Hover-open panel (preview, not locked) */
-        .xn-panel.hover-open {
-            transform: translateX(0);
-        }
         .xn-rail-item i {
             font-size: 1.05rem;
             line-height: 1;
@@ -606,7 +587,7 @@
         {{-- Administration --}}
         @if($isOwner)
         <button class="xn-rail-item {{ $activeModule === 'admin' ? 'active' : '' }}"
-                data-panel="panel-admin" onclick="xnOpenPanel('panel-admin', this)"
+                onclick="xnOpenPanel('panel-admin', this)"
                 title="Administration">
             <i class="fas fa-shield-alt"></i>
             <span class="xn-rail-label">Admin</span>
@@ -616,7 +597,7 @@
         {{-- CRM --}}
         @if($canSee('crm'))
         <button class="xn-rail-item {{ $activeModule === 'crm' ? 'active' : '' }}"
-                data-panel="panel-crm" onclick="xnOpenPanel('panel-crm', this)"
+                onclick="xnOpenPanel('panel-crm', this)"
                 title="CRM">
             <i class="fas fa-handshake"></i>
             <span class="xn-rail-label">CRM</span>
@@ -626,7 +607,7 @@
         {{-- E-Commerce --}}
         @if($canSee('ecommerce'))
         <button class="xn-rail-item {{ $activeModule === 'ecommerce' ? 'active' : '' }}"
-                data-panel="panel-ecommerce" onclick="xnOpenPanel('panel-ecommerce', this)"
+                onclick="xnOpenPanel('panel-ecommerce', this)"
                 title="E-Commerce">
             <i class="fas fa-shopping-cart"></i>
             <span class="xn-rail-label">Store</span>
@@ -636,7 +617,7 @@
         {{-- AI Hub --}}
         @if($canSee('ai'))
         <button class="xn-rail-item {{ $activeModule === 'ai' ? 'active' : '' }}"
-                data-panel="panel-ai" onclick="xnOpenPanel('panel-ai', this)"
+                onclick="xnOpenPanel('panel-ai', this)"
                 title="AI Hub">
             <i class="fas fa-robot"></i>
             <span class="xn-rail-label">AI Hub</span>
@@ -646,7 +627,7 @@
         {{-- Point of Sale --}}
         @if($canSee('pos'))
         <button class="xn-rail-item {{ $activeModule === 'pos' ? 'active' : '' }}"
-                data-panel="panel-pos" onclick="xnOpenPanel('panel-pos', this)"
+                onclick="xnOpenPanel('panel-pos', this)"
                 title="Point of Sale">
             <i class="fas fa-cash-register"></i>
             <span class="xn-rail-label">POS</span>
@@ -656,7 +637,7 @@
         {{-- Accounts (Finance) --}}
         @if(('accounts'))
         <button class="xn-rail-item {{ $activeModule === 'accounts' ? 'active' : '' }}"
-                data-panel="panel-accounts" onclick="xnOpenPanel('panel-accounts', this)"
+                onclick="xnOpenPanel('panel-accounts', this)"
                 title="Accounts">
             <i class="fas fa-chart-pie"></i>
             <span class="xn-rail-label">ACCTS</span>
@@ -666,7 +647,7 @@
         {{-- Site Builder --}}
         @if($canSee('site_builder'))
         <button class="xn-rail-item {{ $activeModule === 'site' ? 'active' : '' }}"
-                data-panel="panel-site" onclick="xnOpenPanel('panel-site', this)"
+                onclick="xnOpenPanel('panel-site', this)"
                 title="Site Builder">
             <i class="fas fa-paint-brush"></i>
             <span class="xn-rail-label">Site</span>
@@ -1120,131 +1101,69 @@
         if (_xnActivePanel) {
             _xnActivePanel.classList.remove('open');
         }
-    // ── Dual-Rail Panel Logic — Hover-Slide + Click-Lock ────────
-    let _xnLockedPanel  = null;   // panel pinned open by click
-    let _xnLockedBtn    = null;   // rail button that locked it
-    let _xnHoverPanel   = null;   // panel currently shown by hover
-    let _xnHoverBtn     = null;   // rail button being hovered
-    let _xnHoverTimer   = null;   // debounce timer for hover-close
-
-    /* ── Internal helpers ── */
-    function _xnShowPanel(panel, btn) {
-        if (_xnHoverPanel && _xnHoverPanel !== panel) {
-            _xnHoverPanel.classList.remove('hover-open');
-        }
-        panel.classList.add('hover-open');
-        document.body.classList.add('xn-panel-open');
-        _xnHoverPanel = panel;
-        _xnHoverBtn   = btn;
-    }
-    function _xnHideHover() {
-        if (_xnHoverPanel && _xnHoverPanel !== _xnLockedPanel) {
-            _xnHoverPanel.classList.remove('hover-open');
-            if (!_xnLockedPanel) {
-                document.body.classList.remove('xn-panel-open');
-            }
-        }
-        _xnHoverPanel = null;
-        _xnHoverBtn   = null;
-    }
-
-    /* ── Public API (called by onclick on rail buttons) ── */
-    function xnOpenPanel(panelId, railBtn) {
-        const panel = document.getElementById(panelId);
-        if (!panel) return;
-
-        // Toggle: clicking the already-locked panel → unlock + close
-        if (_xnLockedPanel === panel) {
-            _xnUnlock();
-            if (_xnHoverPanel !== panel) {
-                panel.classList.remove('hover-open');
-                document.body.classList.remove('xn-panel-open');
-                _xnHoverPanel = null;
-            }
-            return;
+        if (_xnActiveRailBtn) {
+            _xnActiveRailBtn.classList.remove('active');
         }
 
-        // Unlock previous
-        if (_xnLockedBtn)   _xnLockedBtn.classList.remove('locked');
-        if (_xnLockedPanel) _xnLockedPanel.classList.remove('open');
-
-        // Lock new panel
+        // Open new panel
         panel.classList.add('open');
-        panel.classList.add('hover-open');
         document.body.classList.add('xn-panel-open');
-        _xnLockedPanel = panel;
-        _xnLockedBtn   = railBtn;
-        _xnHoverPanel  = panel;
-        if (railBtn) railBtn.classList.add('locked');
+        _xnActivePanel = panel;
+        _xnActiveRailBtn = railBtn;
+        if (railBtn) railBtn.classList.add('active');
 
+        // Save to localStorage
         localStorage.setItem('xenoraa_active_panel', panelId);
     }
 
-    function _xnUnlock() {
-        if (_xnLockedPanel) _xnLockedPanel.classList.remove('open');
-        if (_xnLockedBtn)   _xnLockedBtn.classList.remove('locked');
-        _xnLockedPanel = null;
-        _xnLockedBtn   = null;
+    function xnClosePanel() {
+        if (_xnActivePanel) {
+            _xnActivePanel.classList.remove('open');
+        }
+        if (_xnActiveRailBtn) {
+            _xnActiveRailBtn.classList.remove('active');
+        }
+        document.body.classList.remove('xn-panel-open');
+        _xnActivePanel = null;
+        _xnActiveRailBtn = null;
         localStorage.removeItem('xenoraa_active_panel');
     }
 
-    function xnClosePanel() {
-        _xnUnlock();
-        _xnHideHover();
-        document.body.classList.remove('xn-panel-open');
-    }
-
-    /* ── Hover logic — wired up in DOMContentLoaded ── */
+    // Restore open panel on page load
     document.addEventListener('DOMContentLoaded', function() {
-        const rail = document.getElementById('xnRail');
-        if (!rail) return;
-
-        // Wire hover on each rail button that has data-panel
-        rail.querySelectorAll('.xn-rail-item[data-panel]').forEach(function(btn) {
-            const panelId = btn.getAttribute('data-panel');
-            const panel   = document.getElementById(panelId);
-            if (!panel) return;
-
-            btn.addEventListener('mouseenter', function() {
-                clearTimeout(_xnHoverTimer);
-                _xnShowPanel(panel, btn);
-            });
-            btn.addEventListener('mouseleave', function() {
-                _xnHoverTimer = setTimeout(function() {
-                    if (_xnHoverPanel === panel && _xnLockedPanel !== panel) {
-                        _xnHideHover();
-                    }
-                }, 120);
-            });
-
-            // Keep panel open while mouse is inside it
-            panel.addEventListener('mouseenter', function() {
-                clearTimeout(_xnHoverTimer);
-                if (_xnHoverPanel !== panel) _xnShowPanel(panel, btn);
-            });
-            panel.addEventListener('mouseleave', function() {
-                _xnHoverTimer = setTimeout(function() {
-                    if (_xnLockedPanel !== panel) _xnHideHover();
-                }, 120);
-            });
-        });
-
-        // Auto-lock active module panel on page load
-        const activeRailItem = document.querySelector('.xn-rail-item.active[data-panel]');
+        // Determine active module from PHP-set class on rail items
+        const activeRailItem = document.querySelector('.xn-rail-item.active[onclick]');
         if (activeRailItem) {
-            const panelId = activeRailItem.getAttribute('data-panel');
-            const panel   = document.getElementById(panelId);
-            if (panel) {
-                panel.classList.add('open');
-                panel.classList.add('hover-open');
-                document.body.classList.add('xn-panel-open');
-                _xnLockedPanel = panel;
-                _xnLockedBtn   = activeRailItem;
-                _xnHoverPanel  = panel;
-                activeRailItem.classList.add('locked');
+            const match = activeRailItem.getAttribute('onclick')?.match(/xnOpenPanel\('([^']+)'/);
+            if (match) {
+                const panel = document.getElementById(match[1]);
+                if (panel) {
+                    panel.classList.add('open');
+                    document.body.classList.add('xn-panel-open');
+                    _xnActivePanel = panel;
+                    _xnActiveRailBtn = activeRailItem;
+                }
             }
         }
     });
+
+    // ── Sub-group toggle inside panel ────────────────────────
+    function xnToggleGroup(groupId, btn) {
+        const panel = document.getElementById(groupId);
+        if (!panel) return;
+        const isOpen = panel.classList.contains('open');
+        panel.classList.toggle('open', !isOpen);
+        btn.classList.toggle('open', !isOpen);
+    }
+
+    // Legacy compatibility (some blades may still call toggleSidebarGroup)
+    function toggleSidebarGroup(panelId, btn) {
+        xnToggleGroup(panelId, btn);
+    }
+
+    // ── Mobile toggle ─────────────────────────────────────────
+    function xnMobileToggle() {
+        const rail = document.getElementById('xnRail');
         const overlay = document.getElementById('sidebarOverlay');
         const icon = document.getElementById('adminMenuIcon');
         rail.classList.toggle('open');
