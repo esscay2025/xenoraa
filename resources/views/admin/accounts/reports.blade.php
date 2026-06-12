@@ -4,17 +4,17 @@
 @push('styles')
 <style>
 .report-type-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; margin-bottom:1.5rem; }
-.report-type-card { background:var(--card-bg); border:2px solid var(--border-color); border-radius:12px; padding:1.1rem 1.3rem; cursor:pointer; transition:border-color .15s,box-shadow .15s; display:flex; flex-direction:column; gap:.4rem; }
+.report-type-card { background:var(--bg-card,#fff); border:2px solid var(--border,#e2e8f0); border-radius:12px; padding:1.1rem 1.3rem; cursor:pointer; transition:border-color .15s,box-shadow .15s; display:flex; flex-direction:column; gap:.4rem; }
 .report-type-card:hover, .report-type-card.active { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.12); }
 .report-type-card .icon { width:36px; height:36px; border-radius:8px; background:rgba(99,102,241,.12); display:flex; align-items:center; justify-content:center; color:#6366f1; font-size:.9rem; }
-.report-type-card .label { font-size:.85rem; font-weight:600; color:var(--text-primary); }
-.report-type-card .desc { font-size:.72rem; color:var(--text-muted); }
+.report-type-card .label { font-size:.85rem; font-weight:600; color:var(--text-primary,#1a1a2e); }
+.report-type-card .desc { font-size:.72rem; color:var(--text-muted,#64748b); }
 .report-section { margin-bottom:1.5rem; }
-.report-section-title { font-size:.82rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; padding:.5rem 0; border-bottom:1px solid var(--border-color); margin-bottom:.5rem; }
-.report-row { display:flex; align-items:center; padding:.45rem 0; border-bottom:1px solid var(--border-color); font-size:.83rem; }
+.report-section-title { font-size:.82rem; font-weight:700; color:var(--text-muted,#64748b); text-transform:uppercase; letter-spacing:.04em; padding:.5rem 0; border-bottom:1px solid var(--border,#e2e8f0); margin-bottom:.5rem; }
+.report-row { display:flex; align-items:center; padding:.45rem 0; border-bottom:1px solid var(--border,#e2e8f0); font-size:.83rem; }
 .report-row:last-child { border-bottom:none; }
-.report-row-label { flex:1; color:var(--text-primary); }
-.report-row-value { font-weight:600; color:var(--text-primary); min-width:120px; text-align:right; }
+.report-row-label { flex:1; color:var(--text-primary,#1a1a2e); }
+.report-row-value { font-weight:600; color:var(--text-primary,#1a1a2e); min-width:120px; text-align:right; }
 .report-row.total { background:var(--bg-secondary,rgba(99,102,241,.05)); border-radius:6px; padding:.5rem .6rem; font-weight:700; }
 .report-row.total .report-row-value { color:#6366f1; }
 </style>
@@ -24,7 +24,6 @@
   <div class="crm2-header">
     <div>
       <h1 class="crm2-title"><i class="fas fa-chart-bar"></i> Financial Reports</h1>
-      <p class="crm2-subtitle">Profit & Loss, Balance Sheet, Cash Flow and more.</p>
     </div>
     <div style="display:flex;gap:.6rem;">
       <button class="crm2-btn crm2-btn-secondary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
@@ -74,7 +73,7 @@
   <div class="crm2-card">
     <div class="crm2-card-body">
       @if($activeReport === 'pl')
-        <div style="font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:1rem;"><i class="fas fa-chart-line" style="color:#6366f1;"></i> Profit & Loss Statement</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--text-primary,#1a1a2e);margin-bottom:1rem;"><i class="fas fa-chart-line" style="color:#6366f1;"></i> Profit & Loss Statement</div>
         <div class="report-section">
           <div class="report-section-title">Income</div>
           @foreach($reportData['income_by_category'] ?? [] as $cat => $amt)
@@ -96,7 +95,7 @@
         </div>
 
       @elseif($activeReport === 'balance_sheet')
-        <div style="font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:1rem;"><i class="fas fa-balance-scale" style="color:#6366f1;"></i> Balance Sheet</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--text-primary,#1a1a2e);margin-bottom:1rem;"><i class="fas fa-balance-scale" style="color:#6366f1;"></i> Balance Sheet</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
           <div>
             <div class="report-section-title">Assets</div>
@@ -118,7 +117,7 @@
         </div>
 
       @elseif($activeReport === 'expense_summary')
-        <div style="font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:1rem;"><i class="fas fa-receipt" style="color:#6366f1;"></i> Expense Summary by Category</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--text-primary,#1a1a2e);margin-bottom:1rem;"><i class="fas fa-receipt" style="color:#6366f1;"></i> Expense Summary by Category</div>
         @foreach($reportData['expense_by_category'] ?? [] as $cat => $amt)
         <div class="report-row"><span class="report-row-label">{{ $cat }}</span><span class="report-row-value" style="color:#ef4444;">₹{{ number_format($amt,2) }}</span></div>
         @endforeach

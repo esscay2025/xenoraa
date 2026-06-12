@@ -29,7 +29,6 @@
   <div class="crm2-header">
     <div>
       <h1 class="crm2-title"><i class="fas fa-book"></i> Journal Entries</h1>
-      <p class="crm2-subtitle">Double-entry bookkeeping journal for your accounts.</p>
     </div>
     <button class="crm2-btn crm2-btn-primary" onclick="document.getElementById('addJournalModal').style.display='flex'"><i class="fas fa-plus"></i> New Entry</button>
   </div>
@@ -77,7 +76,7 @@
           @forelse($journalEntries as $entry)
           <tr>
             <td>{{ $entry->entry_date->format('d M Y') }}</td>
-            <td style="font-family:monospace;font-size:.78rem;color:var(--text-muted);">{{ $entry->reference_number }}</td>
+            <td style="font-family:monospace;font-size:.78rem;color:var(--text-muted,#64748b);">{{ $entry->reference_number }}</td>
             <td style="font-weight:500;">{{ $entry->description }}</td>
             <td>{{ $entry->lines->count() }}</td>
             <td>
@@ -133,7 +132,7 @@
     <div class="crm2-card-body">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <h3 class="crm2-title" style="font-size:1.1rem;margin:0;"><i class="fas fa-book"></i> New Journal Entry</h3>
-        <button onclick="document.getElementById('addJournalModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+        <button onclick="document.getElementById('addJournalModal').style.display='none'" style="background:none;border:none;color:var(--text-muted,#64748b);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
       </div>
       <form method="POST" action="{{ route('admin.accounts.journal.store') }}">
         @csrf
@@ -153,7 +152,7 @@
             <input type="text" name="description" class="crm2-input" required placeholder="e.g. Monthly rent payment">
           </div>
         </div>
-        <div style="font-size:.8rem;font-weight:600;color:var(--text-primary);margin-bottom:.5rem;">Journal Lines</div>
+        <div style="font-size:.8rem;font-weight:600;color:var(--text-primary,#1a1a2e);margin-bottom:.5rem;">Journal Lines</div>
         <div id="journalLines">
           <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:.5rem;margin-bottom:.4rem;" class="journal-line">
             <input type="text" name="lines[0][account_name]" class="crm2-input" placeholder="Account name" required>

@@ -4,13 +4,13 @@
 @push('styles')
 <style>
 .coa-type-header { display:flex; align-items:center; gap:.6rem; padding:.6rem .8rem; background:var(--bg-secondary,rgba(99,102,241,.06)); border-radius:8px; margin-bottom:.4rem; cursor:pointer; user-select:none; }
-.coa-type-label { font-size:.82rem; font-weight:700; color:var(--text-primary); flex:1; }
+.coa-type-label { font-size:.82rem; font-weight:700; color:var(--text-primary,#1a1a2e); flex:1; }
 .coa-type-total { font-size:.85rem; font-weight:700; color:var(--accent,#6366f1); }
-.coa-account-row { display:flex; align-items:center; gap:.6rem; padding:.5rem .8rem .5rem 2rem; border-bottom:1px solid var(--border-color); font-size:.82rem; }
+.coa-account-row { display:flex; align-items:center; gap:.6rem; padding:.5rem .8rem .5rem 2rem; border-bottom:1px solid var(--border,#e2e8f0); font-size:.82rem; }
 .coa-account-row:last-child { border-bottom:none; }
-.coa-account-code { font-family:monospace; color:var(--text-muted); min-width:60px; }
-.coa-account-name { flex:1; color:var(--text-primary); font-weight:500; }
-.coa-account-balance { font-weight:600; color:var(--text-primary); min-width:110px; text-align:right; }
+.coa-account-code { font-family:monospace; color:var(--text-muted,#64748b); min-width:60px; }
+.coa-account-name { flex:1; color:var(--text-primary,#1a1a2e); font-weight:500; }
+.coa-account-balance { font-weight:600; color:var(--text-primary,#1a1a2e); min-width:110px; text-align:right; }
 
 .crm2-table th { white-space: nowrap; }
 .crm2-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
@@ -22,7 +22,6 @@
   <div class="crm2-header">
     <div>
       <h1 class="crm2-title"><i class="fas fa-sitemap"></i> Chart of Accounts</h1>
-      <p class="crm2-subtitle">Structured account tree for your bookkeeping.</p>
     </div>
     <button class="crm2-btn crm2-btn-primary" onclick="document.getElementById('addCoaModal').style.display='flex'"><i class="fas fa-plus"></i> Add Account</button>
   </div>
@@ -41,14 +40,14 @@
         <span class="coa-type-label">{{ $type }}</span>
         <span class="crm2-badge" style="background:{{ $typeColors[$type] ?? '#6366f1' }}22;color:{{ $typeColors[$type] ?? '#6366f1' }};font-size:.7rem;">{{ $accounts->count() }} accounts</span>
         <span class="coa-type-total">₹{{ number_format($accounts->sum('balance'), 2) }}</span>
-        <i class="fas fa-chevron-down" style="color:var(--text-muted);font-size:.75rem;transition:.2s;"></i>
+        <i class="fas fa-chevron-down" style="color:var(--text-muted,#64748b);font-size:.75rem;transition:.2s;"></i>
       </div>
       <div id="coa-{{ Str::slug($type) }}">
         @foreach($accounts as $acc)
         <div class="coa-account-row">
           <span class="coa-account-code">{{ $acc->code }}</span>
           <span class="coa-account-name">{{ $acc->name }}</span>
-          @if($acc->description)<span style="font-size:.72rem;color:var(--text-muted);flex:1;">{{ $acc->description }}</span>@endif
+          @if($acc->description)<span style="font-size:.72rem;color:var(--text-muted,#64748b);flex:1;">{{ $acc->description }}</span>@endif
           <span class="crm2-badge status-{{ $acc->is_active ? 'won' : 'lost' }}" style="font-size:.68rem;">{{ $acc->is_active ? 'Active' : 'Inactive' }}</span>
           <span class="coa-account-balance">₹{{ number_format($acc->balance ?? 0, 2) }}</span>
           <div style="display:flex;gap:.3rem;">
@@ -72,7 +71,7 @@
     <div class="crm2-card-body">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <h3 class="crm2-title" style="font-size:1.1rem;margin:0;"><i class="fas fa-plus"></i> Add Account</h3>
-        <button onclick="document.getElementById('addCoaModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+        <button onclick="document.getElementById('addCoaModal').style.display='none'" style="background:none;border:none;color:var(--text-muted,#64748b);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
       </div>
       <form method="POST" action="{{ route('admin.accounts.coa.store') }}">
         @csrf
@@ -113,7 +112,7 @@
     <div class="crm2-card-body">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <h3 class="crm2-title" style="font-size:1.1rem;margin:0;"><i class="fas fa-edit"></i> Edit Account</h3>
-        <button onclick="document.getElementById('editCoaModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+        <button onclick="document.getElementById('editCoaModal').style.display='none'" style="background:none;border:none;color:var(--text-muted,#64748b);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
       </div>
       <form id="editCoaForm" method="POST">
         @csrf @method('PUT')

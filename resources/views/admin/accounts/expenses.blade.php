@@ -29,7 +29,6 @@
   <div class="crm2-header">
     <div>
       <h1 class="crm2-title"><i class="fas fa-arrow-circle-up" style="color:#ef4444;"></i> Expenses</h1>
-      <p class="crm2-subtitle">Track all your business expenses and outgoings.</p>
     </div>
     <div style="display:flex;align-items:center;gap:.6rem;">
       <button class="crm2-btn crm2-btn-primary" onclick="document.getElementById('addExpenseModal').style.display='flex'"><i class="fas fa-plus"></i> Add Expense</button>
@@ -92,7 +91,7 @@
             <td class="cb-col" onclick="event.stopPropagation()">
               <input type="checkbox" class="exp-cb" value="{{ $exp->id }}" onchange="updateSelection()">
             </td>
-            <td style="font-family:monospace;font-size:.78rem;color:var(--text-muted);">{{ $exp->reference_number }}</td>
+            <td style="font-family:monospace;font-size:.78rem;color:var(--text-muted,#64748b);">{{ $exp->reference_number }}</td>
             <td>{{ $exp->expense_date->format('d M Y') }}</td>
             <td style="font-weight:600;color:var(--accent,#6366f1);">{{ $exp->title }}</td>
             <td>{{ $exp->category ?? '—' }}</td>
@@ -130,7 +129,7 @@
     <div class="crm2-card-body">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <h3 class="crm2-title" style="font-size:1.1rem;margin:0;"><i class="fas fa-plus"></i> Add Expense</h3>
-        <button onclick="document.getElementById('addExpenseModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+        <button onclick="document.getElementById('addExpenseModal').style.display='none'" style="background:none;border:none;color:var(--text-muted,#64748b);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
       </div>
       <form method="POST" action="{{ route('admin.accounts.expenses.store') }}">
         @csrf

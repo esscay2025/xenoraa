@@ -29,7 +29,6 @@
   <div class="crm2-header">
     <div>
       <h1 class="crm2-title"><i class="fas fa-exchange-alt"></i> Transactions</h1>
-      <p class="crm2-subtitle">All income and expense transactions across your accounts.</p>
     </div>
   </div>
   @if(session('success'))<div class="crm2-alert success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>@endif
@@ -78,7 +77,7 @@
           @forelse($transactions as $txn)
           <tr>
             <td>{{ $txn->transaction_date->format('d M Y') }}</td>
-            <td style="font-family:monospace;font-size:.78rem;color:var(--text-muted);">{{ $txn->reference_number ?? '—' }}</td>
+            <td style="font-family:monospace;font-size:.78rem;color:var(--text-muted,#64748b);">{{ $txn->reference_number ?? '—' }}</td>
             <td>{{ $txn->description ?? '—' }}</td>
             <td>{{ $txn->bankAccount?->name ?? '—' }}</td>
             <td>{{ $txn->category ?? '—' }}</td>
