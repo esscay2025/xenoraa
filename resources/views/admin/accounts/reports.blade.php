@@ -4,19 +4,19 @@
 @push('styles')
 <style>
 .report-type-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; margin-bottom:1.5rem; }
-.report-type-card { background:var(--bg-card,#fff); border:2px solid var(--border,#e2e8f0); border-radius:12px; padding:1.1rem 1.3rem; cursor:pointer; transition:border-color .15s,box-shadow .15s; display:flex; flex-direction:column; gap:.4rem; }
-.report-type-card:hover, .report-type-card.active { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.12); }
-.report-type-card .icon { width:36px; height:36px; border-radius:8px; background:rgba(99,102,241,.12); display:flex; align-items:center; justify-content:center; color:#6366f1; font-size:.9rem; }
-.report-type-card .label { font-size:.85rem; font-weight:600; color:var(--text-primary,#1a1a2e); }
-.report-type-card .desc { font-size:.72rem; color:var(--text-muted,#64748b); }
+.report-type-card { background:var(--crm-surface); border:2px solid var(--crm-border); border-radius:12px; padding:1.1rem 1.3rem; cursor:pointer; transition:border-color .15s,box-shadow .15s; display:flex; flex-direction:column; gap:.4rem; }
+.report-type-card:hover, .report-type-card.active { border-color:var(--crm-primary); box-shadow:0 0 0 3px rgba(99,102,241,.12); }
+.report-type-card .icon { width:36px; height:36px; border-radius:8px; background:rgba(99,102,241,.12); display:flex; align-items:center; justify-content:center; color:var(--crm-primary); font-size:.9rem; }
+.report-type-card .label { font-size:.85rem; font-weight:600; color:var(--crm-text); }
+.report-type-card .desc { font-size:.72rem; color:var(--crm-secondary); }
 .report-section { margin-bottom:1.5rem; }
-.report-section-title { font-size:.82rem; font-weight:700; color:var(--text-muted,#64748b); text-transform:uppercase; letter-spacing:.04em; padding:.5rem 0; border-bottom:1px solid var(--border,#e2e8f0); margin-bottom:.5rem; }
-.report-row { display:flex; align-items:center; padding:.45rem 0; border-bottom:1px solid var(--border,#e2e8f0); font-size:.83rem; }
+.report-section-title { font-size:.82rem; font-weight:700; color:var(--crm-secondary); text-transform:uppercase; letter-spacing:.04em; padding:.5rem 0; border-bottom:1px solid var(--crm-border); margin-bottom:.5rem; }
+.report-row { display:flex; align-items:center; padding:.45rem 0; border-bottom:1px solid var(--crm-border); font-size:.83rem; }
 .report-row:last-child { border-bottom:none; }
-.report-row-label { flex:1; color:var(--text-primary,#1a1a2e); }
-.report-row-value { font-weight:600; color:var(--text-primary,#1a1a2e); min-width:120px; text-align:right; }
+.report-row-label { flex:1; color:var(--crm-text); }
+.report-row-value { font-weight:600; color:var(--crm-text); min-width:120px; text-align:right; }
 .report-row.total { background:var(--bg-secondary,rgba(99,102,241,.05)); border-radius:6px; padding:.5rem .6rem; font-weight:700; }
-.report-row.total .report-row-value { color:#6366f1; }
+.report-row.total .report-row-value { color:var(--crm-primary); }
 </style>
 @endpush
 @section('content')
@@ -58,8 +58,8 @@
     <div class="crm2-card-body">
       <form method="GET" class="crm2-filter-form">
         <input type="hidden" name="report" value="{{ $activeReport }}">
-          <input type="date" name="date_from" value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}" class="crm2-input">
-          <input type="date" name="date_to" value="{{ request('date_to', now()->format('Y-m-d')) }}" class="crm2-input">
+        <div class="filter-group"><input type="date" name="date_from" value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}" class="crm2-input"></div>
+        <div class="filter-group"><input type="date" name="date_to" value="{{ request('date_to', now()->format('Y-m-d')) }}" class="crm2-input"></div>
         <button type="submit" class="crm2-btn crm2-btn-secondary"><i class="fas fa-sync"></i> Generate</button>
         {{-- Quick range buttons --}}
         <a href="{{ route('admin.accounts.reports', ['report'=>$activeReport, 'date_from'=>now()->startOfMonth()->format('Y-m-d'), 'date_to'=>now()->format('Y-m-d')]) }}" class="crm2-btn crm2-btn-ghost" style="font-size:.78rem;">This Month</a>
@@ -73,20 +73,20 @@
   <div class="crm2-card">
     <div class="crm2-card-body">
       @if($activeReport === 'pl')
-        <div style="font-size:1rem;font-weight:700;color:var(--text-primary,#1a1a2e);margin-bottom:1rem;"><i class="fas fa-chart-line" style="color:#6366f1;"></i> Profit & Loss Statement</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--crm-text);margin-bottom:1rem;"><i class="fas fa-chart-line" style="color:var(--crm-primary);"></i> Profit & Loss Statement</div>
         <div class="report-section">
           <div class="report-section-title">Income</div>
           @foreach($reportData['income_by_category'] ?? [] as $cat => $amt)
-          <div class="report-row"><span class="report-row-label">{{ $cat }}</span><span class="report-row-value" style="color:#22c55e;">₹{{ number_format($amt,2) }}</span></div>
+          <div class="report-row"><span class="report-row-label">{{ $cat }}</span><span class="report-row-value" style="color:var(--crm-success);">₹{{ number_format($amt,2) }}</span></div>
           @endforeach
-          <div class="report-row total"><span class="report-row-label">Total Income</span><span class="report-row-value" style="color:#22c55e;">₹{{ number_format($reportData['total_income'] ?? 0, 2) }}</span></div>
+          <div class="report-row total"><span class="report-row-label">Total Income</span><span class="report-row-value" style="color:var(--crm-success);">₹{{ number_format($reportData['total_income'] ?? 0, 2) }}</span></div>
         </div>
         <div class="report-section">
           <div class="report-section-title">Expenses</div>
           @foreach($reportData['expense_by_category'] ?? [] as $cat => $amt)
-          <div class="report-row"><span class="report-row-label">{{ $cat }}</span><span class="report-row-value" style="color:#ef4444;">₹{{ number_format($amt,2) }}</span></div>
+          <div class="report-row"><span class="report-row-label">{{ $cat }}</span><span class="report-row-value" style="color:var(--crm-danger);">₹{{ number_format($amt,2) }}</span></div>
           @endforeach
-          <div class="report-row total"><span class="report-row-label">Total Expenses</span><span class="report-row-value" style="color:#ef4444;">₹{{ number_format($reportData['total_expenses'] ?? 0, 2) }}</span></div>
+          <div class="report-row total"><span class="report-row-label">Total Expenses</span><span class="report-row-value" style="color:var(--crm-danger);">₹{{ number_format($reportData['total_expenses'] ?? 0, 2) }}</span></div>
         </div>
         <div class="report-row total" style="margin-top:.5rem;">
           <span class="report-row-label" style="font-size:.95rem;">Net Profit / (Loss)</span>
@@ -95,7 +95,7 @@
         </div>
 
       @elseif($activeReport === 'balance_sheet')
-        <div style="font-size:1rem;font-weight:700;color:var(--text-primary,#1a1a2e);margin-bottom:1rem;"><i class="fas fa-balance-scale" style="color:#6366f1;"></i> Balance Sheet</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--crm-text);margin-bottom:1rem;"><i class="fas fa-balance-scale" style="color:var(--crm-primary);"></i> Balance Sheet</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
           <div>
             <div class="report-section-title">Assets</div>
@@ -117,9 +117,9 @@
         </div>
 
       @elseif($activeReport === 'expense_summary')
-        <div style="font-size:1rem;font-weight:700;color:var(--text-primary,#1a1a2e);margin-bottom:1rem;"><i class="fas fa-receipt" style="color:#6366f1;"></i> Expense Summary by Category</div>
+        <div style="font-size:1rem;font-weight:700;color:var(--crm-text);margin-bottom:1rem;"><i class="fas fa-receipt" style="color:var(--crm-primary);"></i> Expense Summary by Category</div>
         @foreach($reportData['expense_by_category'] ?? [] as $cat => $amt)
-        <div class="report-row"><span class="report-row-label">{{ $cat }}</span><span class="report-row-value" style="color:#ef4444;">₹{{ number_format($amt,2) }}</span></div>
+        <div class="report-row"><span class="report-row-label">{{ $cat }}</span><span class="report-row-value" style="color:var(--crm-danger);">₹{{ number_format($amt,2) }}</span></div>
         @endforeach
         <div class="report-row total"><span class="report-row-label">Total Expenses</span><span class="report-row-value">₹{{ number_format($reportData['total_expenses'] ?? 0, 2) }}</span></div>
 

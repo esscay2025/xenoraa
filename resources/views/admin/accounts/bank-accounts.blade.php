@@ -4,12 +4,12 @@
 @push('styles')
 <style>
 .acc-bank-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; margin-bottom:1.5rem; }
-.acc-bank-card { background:var(--bg-card,#fff); border:1px solid var(--border,#e2e8f0); border-radius:12px; padding:1.2rem 1.4rem; display:flex; flex-direction:column; gap:.5rem; position:relative; }
-.acc-bank-card-icon { width:42px; height:42px; border-radius:10px; background:rgba(99,102,241,.15); display:flex; align-items:center; justify-content:center; color:#6366f1; font-size:1.1rem; margin-bottom:.3rem; }
-.acc-bank-card-name { font-size:1rem; font-weight:700; color:var(--text-primary,#1a1a2e); }
-.acc-bank-card-meta { font-size:.75rem; color:var(--text-muted,#64748b); }
-.acc-bank-card-balance { font-size:1.4rem; font-weight:700; color:var(--text-primary,#1a1a2e); margin-top:.3rem; }
-.acc-bank-card-balance.neg { color:#ef4444; }
+.acc-bank-card { background:var(--crm-surface); border:1px solid var(--crm-border); border-radius:12px; padding:1.2rem 1.4rem; display:flex; flex-direction:column; gap:.5rem; position:relative; }
+.acc-bank-card-icon { width:42px; height:42px; border-radius:10px; background:rgba(99,102,241,.15); display:flex; align-items:center; justify-content:center; color:var(--crm-primary); font-size:1.1rem; margin-bottom:.3rem; }
+.acc-bank-card-name { font-size:1rem; font-weight:700; color:var(--crm-text); }
+.acc-bank-card-meta { font-size:.75rem; color:var(--crm-secondary); }
+.acc-bank-card-balance { font-size:1.4rem; font-weight:700; color:var(--crm-text); margin-top:.3rem; }
+.acc-bank-card-balance.neg { color:var(--crm-danger); }
 .acc-bank-card-actions { display:flex; gap:.5rem; margin-top:.5rem; }
 
 .crm2-table th { white-space: nowrap; }
@@ -32,12 +32,12 @@
   <div class="crm2-card mb-4">
     <div class="crm2-card-body" style="display:flex;gap:2rem;flex-wrap:wrap;align-items:center;">
       <div>
-        <div style="font-size:.72rem;color:var(--text-muted,#64748b);text-transform:uppercase;letter-spacing:.04em;">Total Cash Balance</div>
+        <div style="font-size:.72rem;color:var(--crm-secondary);text-transform:uppercase;letter-spacing:.04em;">Total Cash Balance</div>
         <div style="font-size:1.4rem;font-weight:700;color:#3b82f6;">₹{{ number_format($bankAccounts->sum('current_balance'), 2) }}</div>
       </div>
       <div>
-        <div style="font-size:.72rem;color:var(--text-muted,#64748b);text-transform:uppercase;letter-spacing:.04em;">Accounts</div>
-        <div style="font-size:1.4rem;font-weight:700;color:var(--text-primary,#1a1a2e);">{{ $bankAccounts->count() }}</div>
+        <div style="font-size:.72rem;color:var(--crm-secondary);text-transform:uppercase;letter-spacing:.04em;">Accounts</div>
+        <div style="font-size:1.4rem;font-weight:700;color:var(--crm-text);">{{ $bankAccounts->count() }}</div>
       </div>
     </div>
   </div>
@@ -56,7 +56,7 @@
         @if($ba->account_number) · ****{{ substr($ba->account_number,-4) }}@endif
       </div>
       <div class="acc-bank-card-balance {{ $ba->current_balance < 0 ? 'neg' : '' }}">₹{{ number_format($ba->current_balance, 2) }}</div>
-      @if($ba->description)<div style="font-size:.75rem;color:var(--text-muted,#64748b);">{{ $ba->description }}</div>@endif
+      @if($ba->description)<div style="font-size:.75rem;color:var(--crm-secondary);">{{ $ba->description }}</div>@endif
       <div class="acc-bank-card-actions">
         <button class="crm2-btn crm2-btn-secondary" style="font-size:.75rem;padding:.3rem .7rem;" onclick="editBank({{ $ba->id }}, '{{ addslashes($ba->name) }}', '{{ $ba->type }}', '{{ addslashes($ba->bank_name ?? '') }}', '{{ addslashes($ba->account_number ?? '') }}', {{ $ba->opening_balance }}, '{{ addslashes($ba->description ?? '') }}')"><i class="fas fa-edit"></i> Edit</button>
         <form method="POST" action="{{ route('admin.accounts.bank-accounts.delete', $ba->id) }}" onsubmit="return confirm('Delete this account?')" style="display:inline">
@@ -77,7 +77,7 @@
     <div class="crm2-card-body">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <h3 class="crm2-title" style="font-size:1.1rem;margin:0;"><i class="fas fa-university"></i> Add Bank Account</h3>
-        <button onclick="document.getElementById('addBankModal').style.display='none'" style="background:none;border:none;color:var(--text-muted,#64748b);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+        <button onclick="document.getElementById('addBankModal').style.display='none'" style="background:none;border:none;color:var(--crm-secondary);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
       </div>
       <form method="POST" action="{{ route('admin.accounts.bank-accounts.store') }}">
         @csrf
@@ -126,7 +126,7 @@
     <div class="crm2-card-body">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
         <h3 class="crm2-title" style="font-size:1.1rem;margin:0;"><i class="fas fa-edit"></i> Edit Bank Account</h3>
-        <button onclick="document.getElementById('editBankModal').style.display='none'" style="background:none;border:none;color:var(--text-muted,#64748b);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+        <button onclick="document.getElementById('editBankModal').style.display='none'" style="background:none;border:none;color:var(--crm-secondary);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
       </div>
       <form id="editBankForm" method="POST">
         @csrf @method('PUT')
