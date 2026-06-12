@@ -476,6 +476,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::delete('/inventory/quotes/{id}/sales-orders/{soId}/unassign', [$ctrl, 'quoteSalesOrdersUnassign'])->name('inventory.quotes.sales-orders.unassign');
         Route::post('/inventory/quotes/{id}/send-mail',                   [$ctrl, 'quoteSendMail'])->name('inventory.quotes.send-mail');
         Route::get('/inventory/sales-orders/{id}',     [$ctrl, 'inventorySalesOrdersShow'])->name('inventory.sales-orders.show');
+        Route::post('/inventory/sales-orders/{id}/convert/invoice', [$ctrl, 'soConvertToInvoice'])->name('inventory.sales-orders.convert.invoice');
         // ── Sales Order View sub-routes ──────────────────────────────
         Route::post('/inventory/sales-orders/{id}/notes',                    [$ctrl, 'soNotesStore'])->name('inventory.sales-orders.notes.store');
         Route::delete('/inventory/sales-orders/{id}/notes/{noteId}',          [$ctrl, 'soNoteDestroy'])->name('inventory.sales-orders.notes.destroy');

@@ -3520,4 +3520,58 @@ class CrmModuleController extends Controller
             ->route('admin.crm2.inventory.invoices.show', $inv->id)
             ->with('success', 'Quote converted to Invoice successfully.');
     }
+
+    // ══════════════════════════════════════════════════════════════
+    // SALES ORDER CONVERSION METHOD
+    // ══════════════════════════════════════════════════════════════
+
+    /**
+     * Convert a Sales Order into an Invoice.
+     * All matching fields are copied; sales_order_id is set to the source SO's ID.
+     * Redirects to the new Invoice's view page.
+     */
+    public function soConvertToInvoice($id)
+    {
+        $tid = auth()->id();
+        $so  = CrmSalesOrder::where('user_id', $tid)->findOrFail($id);
+
+        $inv = CrmInvoice::create([
+            'user_id'         => $tid,
+            'sales_order_id'  => $so->id,
+            'account_id'      => $so->account_id,
+            'contact_id'      => $so->contact_id,
+            'deal_id'         => $so->deal_id,
+            'owner_id'        => $so->owner_id,
+            'subject'         => $so->subject,
+            'status'          => 'Draft',
+            'invoice_date'    => now()->toDateString(),
+            'terms'           => $so->terms,
+            'notes'           => $so->notes,
+            'subtotal'        => $so->subtotal,
+            'discount_amount' => $so->discount_amount,
+            'tax_amount'      => $so->tax_amount,
+            'adjustment'      => $so->adjustment,
+            'grand_total'     => $so->grand_total,
+            'total'           => $so->total,
+            'amount_paid'     => 0,
+            'line_items'      => $so->line_items,
+            'bill_country'    => $so->bill_country,
+            'bill_building'   => $so->bill_building,
+            'bill_street'     => $so->bill_street,
+            'bill_city'       => $so->bill_city,
+            'bill_state'      => $so->bill_state,
+            'bill_zip'        => $so->bill_zip,
+            'ship_country'    => $so->ship_country,
+            'ship_building'   => $so->ship_building,
+            'ship_street'     => $so->ship_street,
+            'ship_city'       => $so->ship_city,
+            'ship_state'      => $so->ship_state,
+            'ship_zip'        => $so->ship_zip,
+            'invoice_number'  => 'INV-' . strtoupper(\Illuminate\Support\Str::random(8)),
+        ]);
+
+        return redirect()
+            ->route('admin.crm2.inventory.invoices.show', $inv->id)
+            ->with('success', 'Sales Order converted to Invoice successfully.');
+    }
 }
