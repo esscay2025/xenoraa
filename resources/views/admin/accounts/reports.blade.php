@@ -1,5 +1,6 @@
 @extends('layouts.admin')
 @section('title', 'Financial Reports')
+@section('page-title', 'Financial Reports')
 @push('styles')
 <style>
 .report-type-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; margin-bottom:1.5rem; }
@@ -58,14 +59,8 @@
     <div class="crm2-card-body">
       <form method="GET" class="crm2-filter-form">
         <input type="hidden" name="report" value="{{ $activeReport }}">
-        <div class="filter-group">
-          <label class="crm2-label" style="margin-bottom:.2rem;font-size:.72rem;">From</label>
           <input type="date" name="date_from" value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}" class="crm2-input">
-        </div>
-        <div class="filter-group">
-          <label class="crm2-label" style="margin-bottom:.2rem;font-size:.72rem;">To</label>
           <input type="date" name="date_to" value="{{ request('date_to', now()->format('Y-m-d')) }}" class="crm2-input">
-        </div>
         <button type="submit" class="crm2-btn crm2-btn-secondary"><i class="fas fa-sync"></i> Generate</button>
         {{-- Quick range buttons --}}
         <a href="{{ route('admin.accounts.reports', ['report'=>$activeReport, 'date_from'=>now()->startOfMonth()->format('Y-m-d'), 'date_to'=>now()->format('Y-m-d')]) }}" class="crm2-btn crm2-btn-ghost" style="font-size:.78rem;">This Month</a>

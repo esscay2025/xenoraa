@@ -1,5 +1,6 @@
 @extends('layouts.admin')
 @section('title', 'Accounts — Dashboard')
+@section('page-title', 'Accounts — Dashboard')
 @push('styles')
 <style>
 .acc-kpi-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:1rem; margin-bottom:1.5rem; }

@@ -877,7 +877,12 @@
 @endif
 
 {{-- ── Accounts (Finance) Panel ───────────────────────── --}}
-@if(('accounts'))
+@if($canSee('accounts'))
+@php
+    $accBankingActive    = request()->routeIs('admin.accounts.bank-accounts*') || request()->routeIs('admin.accounts.transactions*');
+    $accMoneyActive      = request()->routeIs('admin.accounts.income*') || request()->routeIs('admin.accounts.expenses*');
+    $accAccountingActive = request()->routeIs('admin.accounts.coa*') || request()->routeIs('admin.accounts.journal*') || request()->routeIs('admin.accounts.reports*');
+@endphp
 <div class="xn-panel" id="panel-accounts">
     <div class="xn-panel-header">
         <i class="fas fa-chart-pie"></i>
@@ -886,16 +891,31 @@
     </div>
     <div class="xn-panel-body">
         <a href="{{ route('admin.accounts.dashboard') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.dashboard') ? 'active' : '' }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-        <div class="xn-panel-section-label">Banking</div>
-        <a href="{{ route('admin.accounts.bank-accounts') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.bank-accounts*') ? 'active' : '' }}"><i class="fas fa-university"></i> Bank Accounts</a>
-        <a href="{{ route('admin.accounts.transactions') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.transactions*') ? 'active' : '' }}"><i class="fas fa-exchange-alt"></i> Transactions</a>
-        <div class="xn-panel-section-label">Money In / Out</div>
-        <a href="{{ route('admin.accounts.income') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.income*') ? 'active' : '' }}"><i class="fas fa-arrow-circle-down"></i> Income</a>
-        <a href="{{ route('admin.accounts.expenses') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.expenses*') ? 'active' : '' }}"><i class="fas fa-arrow-circle-up"></i> Expenses</a>
-        <div class="xn-panel-section-label">Accounting</div>
-        <a href="{{ route('admin.accounts.coa') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.coa*') ? 'active' : '' }}"><i class="fas fa-sitemap"></i> Chart of Accounts</a>
-        <a href="{{ route('admin.accounts.journal') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.journal*') ? 'active' : '' }}"><i class="fas fa-book"></i> Journal Entries</a>
-        <a href="{{ route('admin.accounts.reports') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.reports*') ? 'active' : '' }}"><i class="fas fa-file-invoice-dollar"></i> Reports</a>
+        {{-- Banking --}}
+        <button class="xn-panel-group-btn {{ $accBankingActive ? 'open' : '' }}" onclick="xnToggleGroup('xng-acc-banking', this)">
+            <i class="fas fa-university group-icon"></i> Banking <i class="fas fa-chevron-down xn-chevron"></i>
+        </button>
+        <div class="xn-panel-group-panel {{ $accBankingActive ? 'open' : '' }}" id="xng-acc-banking">
+            <a href="{{ route('admin.accounts.bank-accounts') }}" class="xn-panel-sub-link {{ request()->routeIs('admin.accounts.bank-accounts*') ? 'active' : '' }}"><i class="fas fa-university"></i> Bank Accounts</a>
+            <a href="{{ route('admin.accounts.transactions') }}" class="xn-panel-sub-link {{ request()->routeIs('admin.accounts.transactions*') ? 'active' : '' }}"><i class="fas fa-exchange-alt"></i> Transactions</a>
+        </div>
+        {{-- Money In / Out --}}
+        <button class="xn-panel-group-btn {{ $accMoneyActive ? 'open' : '' }}" onclick="xnToggleGroup('xng-acc-money', this)">
+            <i class="fas fa-wallet group-icon"></i> Money In / Out <i class="fas fa-chevron-down xn-chevron"></i>
+        </button>
+        <div class="xn-panel-group-panel {{ $accMoneyActive ? 'open' : '' }}" id="xng-acc-money">
+            <a href="{{ route('admin.accounts.income') }}" class="xn-panel-sub-link {{ request()->routeIs('admin.accounts.income*') ? 'active' : '' }}"><i class="fas fa-arrow-circle-down"></i> Income</a>
+            <a href="{{ route('admin.accounts.expenses') }}" class="xn-panel-sub-link {{ request()->routeIs('admin.accounts.expenses*') ? 'active' : '' }}"><i class="fas fa-arrow-circle-up"></i> Expenses</a>
+        </div>
+        {{-- Accounting --}}
+        <button class="xn-panel-group-btn {{ $accAccountingActive ? 'open' : '' }}" onclick="xnToggleGroup('xng-acc-accounting', this)">
+            <i class="fas fa-book group-icon"></i> Accounting <i class="fas fa-chevron-down xn-chevron"></i>
+        </button>
+        <div class="xn-panel-group-panel {{ $accAccountingActive ? 'open' : '' }}" id="xng-acc-accounting">
+            <a href="{{ route('admin.accounts.coa') }}" class="xn-panel-sub-link {{ request()->routeIs('admin.accounts.coa*') ? 'active' : '' }}"><i class="fas fa-sitemap"></i> Chart of Accounts</a>
+            <a href="{{ route('admin.accounts.journal') }}" class="xn-panel-sub-link {{ request()->routeIs('admin.accounts.journal*') ? 'active' : '' }}"><i class="fas fa-book"></i> Journal Entries</a>
+            <a href="{{ route('admin.accounts.reports') }}" class="xn-panel-sub-link {{ request()->routeIs('admin.accounts.reports*') ? 'active' : '' }}"><i class="fas fa-file-invoice-dollar"></i> Reports</a>
+        </div>
     </div>
 </div>
 @endif

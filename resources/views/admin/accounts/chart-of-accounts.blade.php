@@ -1,5 +1,6 @@
 @extends('layouts.admin')
 @section('title', 'Chart of Accounts')
+@section('page-title', 'Chart of Accounts')
 @push('styles')
 <style>
 .coa-type-header { display:flex; align-items:center; gap:.6rem; padding:.6rem .8rem; background:var(--bg-secondary,rgba(99,102,241,.06)); border-radius:8px; margin-bottom:.4rem; cursor:pointer; user-select:none; }
@@ -10,6 +11,10 @@
 .coa-account-code { font-family:monospace; color:var(--text-muted); min-width:60px; }
 .coa-account-name { flex:1; color:var(--text-primary); font-weight:500; }
 .coa-account-balance { font-weight:600; color:var(--text-primary); min-width:110px; text-align:right; }
+
+.crm2-table th { white-space: nowrap; }
+.crm2-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+.crm2-table td.wrap { white-space: normal; }
 </style>
 @endpush
 @section('content')

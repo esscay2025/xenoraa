@@ -1,5 +1,6 @@
 @extends('layouts.admin')
 @section('title', 'Bank Accounts')
+@section('page-title', 'Bank Accounts')
 @push('styles')
 <style>
 .acc-bank-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; margin-bottom:1.5rem; }
@@ -10,6 +11,10 @@
 .acc-bank-card-balance { font-size:1.4rem; font-weight:700; color:var(--text-primary); margin-top:.3rem; }
 .acc-bank-card-balance.neg { color:#ef4444; }
 .acc-bank-card-actions { display:flex; gap:.5rem; margin-top:.5rem; }
+
+.crm2-table th { white-space: nowrap; }
+.crm2-table td { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
+.crm2-table td.wrap { white-space: normal; }
 </style>
 @endpush
 @section('content')
