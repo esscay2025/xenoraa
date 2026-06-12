@@ -1,5 +1,50 @@
 @extends('layouts.admin')
 @section('title', 'Dashboard')
+@push('styles')
+<style>
+/* Dashboard-specific layout fixes */
+.xn-dashboard-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)) !important;
+    gap: 16px;
+    margin-bottom: 28px;
+    width: 100%;
+}
+.xn-dashboard-grid-2 {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important;
+    gap: 16px;
+    margin-bottom: 28px;
+    width: 100%;
+}
+.xn-charts-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px;
+    margin-bottom: 28px;
+    width: 100%;
+}
+.xn-recent-grid {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 20px;
+    margin-bottom: 28px;
+    width: 100%;
+}
+.xn-actions-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    gap: 12px;
+    width: 100%;
+}
+@media (max-width: 900px) {
+    .xn-charts-grid, .xn-recent-grid { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 600px) {
+    .xn-dashboard-grid, .xn-dashboard-grid-2 { grid-template-columns: 1fr 1fr !important; }
+}
+</style>
+@endpush
 @section('content')
 
 <div class="crm2-page">
@@ -29,7 +74,7 @@
     <div style="flex:1; height:1px; background:var(--crm-border);"></div>
     <a href="{{ route('admin.crm2.analysis') }}" style="font-size:0.75rem; color:var(--crm-primary); text-decoration:none; white-space:nowrap;">View Analysis <i class="fas fa-arrow-right" style="font-size:0.65rem;"></i></a>
   </div>
-  <div class="crm2-kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); margin-bottom:28px;">
+  <div class="xn-dashboard-grid">
     <a href="{{ route('admin.crm2.sales.accounts') }}" class="crm2-kpi-card indigo" style="text-decoration:none;">
       <div class="kpi-icon"><i class="fas fa-building"></i></div>
       <div class="kpi-body"><div class="kpi-value">{{ number_format($crmAccounts) }}</div><div class="kpi-label">Accounts</div></div>
@@ -76,7 +121,7 @@
     <div style="flex:1; height:1px; background:var(--crm-border);"></div>
     <a href="{{ route('admin.crm2.inventory') }}" style="font-size:0.75rem; color:var(--crm-primary); text-decoration:none; white-space:nowrap;">View All <i class="fas fa-arrow-right" style="font-size:0.65rem;"></i></a>
   </div>
-  <div class="crm2-kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); margin-bottom:28px;">
+  <div class="xn-dashboard-grid">
     <a href="{{ route('admin.crm2.inventory.quotes') }}" class="crm2-kpi-card indigo" style="text-decoration:none;">
       <div class="kpi-icon"><i class="fas fa-file-invoice"></i></div>
       <div class="kpi-body"><div class="kpi-value">{{ number_format($invQuotes) }}</div><div class="kpi-label">Quotes</div></div>
@@ -113,7 +158,7 @@
   </div>
 
   {{-- ── Charts Row ────────────────────────────────────────────────────────── --}}
-  <div class="crm2-charts-grid" style="margin-bottom:28px;">
+  <div class="xn-charts-grid">
     <div class="crm2-card chart-card">
       <div class="crm2-card-header">
         <h3><i class="fas fa-chart-area"></i> Invoice Revenue (Last 6 Months)</h3>
@@ -133,7 +178,7 @@
     <span style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--crm-secondary);">Other Modules</span>
     <div style="flex:1; height:1px; background:var(--crm-border);"></div>
   </div>
-  <div class="crm2-kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); margin-bottom:28px;">
+  <div class="xn-dashboard-grid">
     <a href="{{ route('admin.ecommerce.products') }}" class="crm2-kpi-card purple" style="text-decoration:none;">
       <div class="kpi-icon"><i class="fas fa-box-open"></i></div>
       <div class="kpi-body">
@@ -178,7 +223,7 @@
     <span style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--crm-secondary);">Recent Activity</span>
     <div style="flex:1; height:1px; background:var(--crm-border);"></div>
   </div>
-  <div class="crm2-charts-grid" style="margin-bottom:28px;">
+  <div class="xn-charts-grid">
 
     {{-- Recent Leads --}}
     <div class="crm2-card">
@@ -236,7 +281,7 @@
 
   </div>
 
-  <div class="crm2-charts-grid" style="margin-bottom:28px;">
+  <div class="xn-charts-grid">
 
     {{-- Recent Deals --}}
     <div class="crm2-card">
