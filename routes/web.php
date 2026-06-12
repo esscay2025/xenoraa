@@ -475,6 +475,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::post('/inventory/quotes/{id}/sales-orders/assign',         [$ctrl, 'quoteSalesOrdersAssign'])->name('inventory.quotes.sales-orders.assign');
         Route::delete('/inventory/quotes/{id}/sales-orders/{soId}/unassign', [$ctrl, 'quoteSalesOrdersUnassign'])->name('inventory.quotes.sales-orders.unassign');
         Route::post('/inventory/quotes/{id}/send-mail',                   [$ctrl, 'quoteSendMail'])->name('inventory.quotes.send-mail');
+        Route::delete('/inventory/quotes/bulk-delete',              [$ctrl, 'quotesBulkDelete'])->name('inventory.quotes.bulk-delete');
+        Route::post('/inventory/quotes/{id}/clone',                  [$ctrl, 'quoteClone'])->name('inventory.quotes.clone');
+        Route::delete('/inventory/quotes/{id}',                      [$ctrl, 'quoteDestroy'])->name('inventory.quotes.destroy');
+        Route::get('/inventory/quotes/{id}/export-pdf',              [$ctrl, 'quoteExportPdf'])->name('inventory.quotes.export-pdf');
         Route::get('/inventory/sales-orders/{id}',     [$ctrl, 'inventorySalesOrdersShow'])->name('inventory.sales-orders.show');
         Route::post('/inventory/sales-orders/{id}/convert/invoice', [$ctrl, 'soConvertToInvoice'])->name('inventory.sales-orders.convert.invoice');
         // ── Sales Order View sub-routes ──────────────────────────────

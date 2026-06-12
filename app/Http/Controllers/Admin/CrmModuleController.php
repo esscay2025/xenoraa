@@ -3574,4 +3574,158 @@ class CrmModuleController extends Controller
             ->route('admin.crm2.inventory.invoices.show', $inv->id)
             ->with('success', 'Sales Order converted to Invoice successfully.');
     }
+
+    // ══════════════════════════════════════════════════════════════
+    // QUOTE — BULK DELETE
+    // ══════════════════════════════════════════════════════════════
+    public function quotesBulkDelete(\Illuminate\Http\Request $request)
+    {
+        $tid = auth()->id();
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return redirect()->route('admin.crm2.inventory.quotes')
+                ->with('error', 'No quotes selected.');
+        }
+        $deleted = \App\Models\CrmQuote::where('user_id', $tid)
+            ->whereIn('id', $ids)
+            ->delete();
+        return redirect()->route('admin.crm2.inventory.quotes')
+            ->with('success', $deleted . ' quote(s) deleted successfully.');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // QUOTE — CLONE
+    // ══════════════════════════════════════════════════════════════
+    public function quoteClone(int $id)
+    {
+        $tid   = auth()->id();
+        $quote = \App\Models\CrmQuote::where('user_id', $tid)->findOrFail($id);
+
+        $clone = $quote->replicate();
+        $clone->quote_number = 'QT-' . strtoupper(\Illuminate\Support\Str::random(8));
+        $clone->stage        = 'draft';
+        $clone->created_at   = now();
+        $clone->updated_at   = now();
+        $clone->save();
+
+        return redirect()->route('admin.crm2.inventory.quotes.show', $clone->id)
+            ->with('success', 'Quote cloned successfully. You are now viewing the clone.');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // QUOTE — SINGLE DELETE (from view page)
+    // ══════════════════════════════════════════════════════════════
+    public function quoteDestroy(int $id)
+    {
+        $tid = auth()->id();
+        \App\Models\CrmQuote::where('user_id', $tid)->findOrFail($id)->delete();
+        return redirect()->route('admin.crm2.inventory.quotes')
+            ->with('success', 'Quote deleted successfully.');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // QUOTE — EXPORT TO PDF
+    // ══════════════════════════════════════════════════════════════
+    public function quoteExportPdf(int $id)
+    {
+        $tid   = auth()->id();
+        $quote = \App\Models\CrmQuote::with(['account','contact','owner'])
+            ->where('user_id', $tid)->findOrFail($id);
+
+        $lineItems = is_array($quote->line_items) ? $quote->line_items : json_decode($quote->line_items ?? '[]', true);
+
+        // Build HTML for PDF
+        $html  = '<!DOCTYPE html><html><head><meta charset="UTF-8">';
+        $html .= '<style>
+body{font-family:Arial,sans-serif;font-size:12px;color:#222;margin:0;padding:20px;}
+h1{font-size:20px;margin-bottom:4px;}
+.meta{color:#666;font-size:11px;margin-bottom:16px;}
+.section-title{font-size:13px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:4px;margin:16px 0 8px;}
+table{width:100%;border-collapse:collapse;margin-bottom:12px;}
+th{background:#f3f4f6;text-align:left;padding:6px 8px;font-size:11px;border:1px solid #e5e7eb;}
+td{padding:6px 8px;border:1px solid #e5e7eb;font-size:11px;}
+.totals{float:right;width:260px;}
+.totals td:first-child{font-weight:bold;}
+.grand{font-size:14px;font-weight:bold;background:#f3f4f6;}
+</style></head><body>';
+        $html .= '<h1>Quote: ' . htmlspecialchars($quote->quote_number) . '</h1>';
+        $html .= '<div class="meta">Subject: ' . htmlspecialchars($quote->subject ?? '') . ' &nbsp;|&nbsp; Stage: ' . ucfirst($quote->stage ?? '') . ' &nbsp;|&nbsp; Valid Until: ' . ($quote->valid_until ? $quote->valid_until->format('d M Y') : '—') . '</div>';
+
+        // Account / Contact
+        $html .= '<div class="section-title">Details</div>';
+        $html .= '<table><tr><th>Account</th><th>Contact</th><th>Owner</th><th>Carrier</th></tr>';
+        $html .= '<tr><td>' . htmlspecialchars($quote->account?->name ?? '—') . '</td>';
+        $html .= '<td>' . htmlspecialchars($quote->contact ? ($quote->contact->first_name . ' ' . $quote->contact->last_name) : '—') . '</td>';
+        $html .= '<td>' . htmlspecialchars($quote->owner?->name ?? '—') . '</td>';
+        $html .= '<td>' . htmlspecialchars($quote->carrier ?? '—') . '</td></tr></table>';
+
+        // Line items
+        $html .= '<div class="section-title">Line Items</div>';
+        $html .= '<table><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Discount</th><th>Tax %</th><th>Total</th></tr>';
+        foreach ($lineItems as $li) {
+            $html .= '<tr>';
+            $html .= '<td>' . htmlspecialchars($li['product'] ?? '') . '</td>';
+            $html .= '<td>' . htmlspecialchars($li['qty'] ?? '') . '</td>';
+            $html .= '<td>₹' . number_format((float)($li['price'] ?? 0), 2) . '</td>';
+            $html .= '<td>₹' . number_format((float)($li['discount'] ?? 0), 2) . '</td>';
+            $html .= '<td>' . htmlspecialchars($li['tax'] ?? '0') . '%</td>';
+            $html .= '<td>₹' . number_format((float)($li['total'] ?? 0), 2) . '</td>';
+            $html .= '</tr>';
+        }
+        $html .= '</table>';
+
+        // Totals
+        $html .= '<table class="totals"><tr><td>Subtotal</td><td>₹' . number_format((float)$quote->subtotal, 2) . '</td></tr>';
+        $html .= '<tr><td>Discount</td><td>₹' . number_format((float)$quote->discount_amount, 2) . '</td></tr>';
+        $html .= '<tr><td>Tax</td><td>₹' . number_format((float)$quote->tax_amount, 2) . '</td></tr>';
+        $html .= '<tr><td>Adjustment</td><td>₹' . number_format((float)$quote->adjustment, 2) . '</td></tr>';
+        $html .= '<tr class="grand"><td>Grand Total</td><td>₹' . number_format((float)$quote->grand_total, 2) . '</td></tr></table>';
+
+        if ($quote->terms) {
+            $html .= '<div class="section-title">Terms & Conditions</div><p>' . nl2br(htmlspecialchars($quote->terms)) . '</p>';
+        }
+        if ($quote->notes) {
+            $html .= '<div class="section-title">Notes</div><p>' . nl2br(htmlspecialchars($quote->notes)) . '</p>';
+        }
+        $html .= '</body></html>';
+
+        // Generate PDF using wkhtmltopdf or dompdf fallback
+        $filename = 'Quote_' . $quote->quote_number . '_' . date('Ymd') . '.pdf';
+        $tmpHtml  = sys_get_temp_dir() . '/' . uniqid('qt_') . '.html';
+        $tmpPdf   = sys_get_temp_dir() . '/' . uniqid('qt_') . '.pdf';
+        file_put_contents($tmpHtml, $html);
+
+        // Try wkhtmltopdf first
+        $wk = shell_exec('which wkhtmltopdf 2>/dev/null');
+        if ($wk) {
+            shell_exec('wkhtmltopdf --quiet --page-size A4 ' . escapeshellarg($tmpHtml) . ' ' . escapeshellarg($tmpPdf) . ' 2>/dev/null');
+        }
+
+        // Fallback: use manus-md-to-pdf via system call if wkhtmltopdf not available
+        if (!file_exists($tmpPdf) || filesize($tmpPdf) < 100) {
+            // Use PHP's built-in HTML→PDF via Dompdf if available
+            if (class_exists('\Dompdf\Dompdf')) {
+                $dompdf = new \Dompdf\Dompdf();
+                $dompdf->loadHtml($html);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+                file_put_contents($tmpPdf, $dompdf->output());
+            } else {
+                // Last resort: return HTML as download
+                return response($html, 200, [
+                    'Content-Type'        => 'text/html',
+                    'Content-Disposition' => 'attachment; filename="' . str_replace('.pdf', '.html', $filename) . '"',
+                ]);
+            }
+        }
+
+        $pdf = file_get_contents($tmpPdf);
+        @unlink($tmpHtml);
+        @unlink($tmpPdf);
+
+        return response($pdf, 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
 }

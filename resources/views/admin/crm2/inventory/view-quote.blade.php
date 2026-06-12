@@ -25,6 +25,28 @@
 .qv-btn.danger:hover { background:#dc2626; color:#fff; border-color:#dc2626; }
 .qv-btn.sm { font-size:.75rem; padding:.28rem .6rem; }
 
+/* ── 3-dot button ── */
+.qv-three-dot {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:34px; height:34px; border-radius:7px;
+    background:var(--bg-card); border:1.5px solid var(--border);
+    color:var(--text-secondary); font-size:1.2rem; cursor:pointer;
+    transition:all .15s; line-height:1;
+}
+.qv-three-dot:hover { background:var(--bg-hover); color:var(--text-primary); border-color:var(--accent); }
+
+/* ── Dropdown items (shared by Convert and Actions) ── */
+.qv-drop-item {
+    display:flex; align-items:center; gap:0.75rem;
+    padding:0.65rem 1rem; font-size:0.82rem;
+    color:var(--text-primary); background:transparent;
+    border:none; cursor:pointer; width:100%; text-align:left;
+    transition:background .12s;
+}
+.qv-drop-item:hover { background:var(--bg-hover); }
+.qv-drop-item.danger { color:#f87171; }
+.qv-drop-item.danger:hover { background:rgba(220,38,38,.12); }
+
 /* ── Stage badge ── */
 .qv-stage { display:inline-block; padding:.25rem .75rem; border-radius:20px; font-size:.75rem; font-weight:700; letter-spacing:.03em; }
 .stage-draft       { background:rgba(100,116,139,.15); color:#94a3b8; }
@@ -170,21 +192,57 @@
       <a href="{{ route('admin.crm2.inventory.quotes.edit', $item->id) }}" class="qv-btn primary">&#9998; Edit</a>
       {{-- Convert Dropdown --}}
       <div style="position:relative;display:inline-block;">
-        <button class="qv-btn" onclick="document.getElementById('qvConvertDrop').classList.toggle('visible')" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border-color:#059669;display:flex;align-items:center;gap:0.4rem;">
+        <button class="qv-btn" id="qvConvertBtn" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:1.5px solid #059669;display:flex;align-items:center;gap:0.4rem;">
           &#8644; Convert &nbsp;<span style="font-size:0.65rem;">&#9660;</span>
         </button>
         <div id="qvConvertDrop" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--bg-card);border:1px solid var(--border);border-radius:8px;min-width:210px;box-shadow:0 8px 24px rgba(0,0,0,0.35);z-index:999;overflow:hidden;">
           <form method="POST" action="{{ route('admin.crm2.inventory.quotes.convert.sales-order', $item->id) }}">
             @csrf
-            <button type="submit" style="display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1rem;font-size:0.82rem;color:var(--text-primary);background:transparent;border:none;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='rgba(99,102,241,0.12)'" onmouseout="this.style.background='transparent'">
+            <button type="submit" class="qv-drop-item">
               <i class="fas fa-shopping-cart" style="width:16px;color:#6366f1;"></i> Convert to Sales Order
             </button>
           </form>
           <div style="height:1px;background:var(--border);"></div>
           <form method="POST" action="{{ route('admin.crm2.inventory.quotes.convert.invoice', $item->id) }}">
             @csrf
-            <button type="submit" style="display:flex;align-items:center;gap:0.75rem;padding:0.7rem 1rem;font-size:0.82rem;color:var(--text-primary);background:transparent;border:none;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='rgba(99,102,241,0.12)'" onmouseout="this.style.background='transparent'">
+            <button type="submit" class="qv-drop-item">
               <i class="fas fa-file-invoice-dollar" style="width:16px;color:#f59e0b;"></i> Convert to Invoice
+            </button>
+          </form>
+        </div>
+      </div>
+
+      {{-- 3-dot Actions Menu --}}
+      <div style="position:relative;display:inline-block;">
+        <button class="qv-three-dot" id="qvActBtn" title="More actions">&#8942;</button>
+        <div id="qvActDrop" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--bg-card);border:1px solid var(--border);border-radius:8px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,0.35);z-index:999;overflow:hidden;">
+          {{-- Clone --}}
+          <form method="POST" action="{{ route('admin.crm2.inventory.quotes.clone', $item->id) }}">
+            @csrf
+            <button type="submit" class="qv-drop-item">
+              <i class="fas fa-copy" style="width:16px;color:#6366f1;"></i> Clone
+            </button>
+          </form>
+          <div style="height:1px;background:var(--border);"></div>
+          {{-- Print Preview --}}
+          <button type="button" class="qv-drop-item" onclick="window.print()">
+            <i class="fas fa-print" style="width:16px;color:#10b981;"></i> Print Preview
+          </button>
+          {{-- Export to PDF --}}
+          <a href="{{ route('admin.crm2.inventory.quotes.export-pdf', $item->id) }}" class="qv-drop-item" style="text-decoration:none;">
+            <i class="fas fa-file-pdf" style="width:16px;color:#ef4444;"></i> Export to PDF
+          </a>
+          {{-- Send Mail --}}
+          <button type="button" class="qv-drop-item" onclick="openSlider('slider-send-mail');document.getElementById('qvActDrop').style.display='none';">
+            <i class="fas fa-envelope" style="width:16px;color:#f59e0b;"></i> Send Mail
+          </button>
+          <div style="height:1px;background:var(--border);"></div>
+          {{-- Delete --}}
+          <form method="POST" action="{{ route('admin.crm2.inventory.quotes.destroy', $item->id) }}"
+                onsubmit="return confirm('Delete this quote permanently? This cannot be undone.')">
+            @csrf @method('DELETE')
+            <button type="submit" class="qv-drop-item danger">
+              <i class="fas fa-trash" style="width:16px;"></i> Delete
             </button>
           </form>
         </div>
@@ -813,23 +871,25 @@ function unassignSO(soId) {
 }
 
 // ── Convert dropdown toggle ──
+document.getElementById('qvConvertBtn')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const d = document.getElementById('qvConvertDrop');
+    d.style.display = d.style.display === 'none' ? 'block' : 'none';
+    document.getElementById('qvActDrop').style.display = 'none';
+});
+// ── 3-dot Actions dropdown toggle ──
+document.getElementById('qvActBtn')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const d = document.getElementById('qvActDrop');
+    d.style.display = d.style.display === 'none' ? 'block' : 'none';
+    document.getElementById('qvConvertDrop').style.display = 'none';
+});
+// ── Close both dropdowns on outside click ──
 document.addEventListener('click', function(e) {
-    const drop = document.getElementById('qvConvertDrop');
-    if (!drop) return;
-    const btn = drop.previousElementSibling;
-    if (!btn.contains(e.target) && !drop.contains(e.target)) {
-        drop.style.display = 'none';
-        drop.classList.remove('visible');
-    }
-});
-document.getElementById('qvConvertDrop')?.addEventListener('click', function(e) {
-    e.stopPropagation();
-});
-// Override toggle to use display style
-document.querySelector('[onclick*="qvConvertDrop"]')?.addEventListener('click', function(e) {
-    e.stopPropagation();
-    const drop = document.getElementById('qvConvertDrop');
-    drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
+    ['qvConvertDrop','qvActDrop'].forEach(id => {
+        const drop = document.getElementById(id);
+        if (drop) drop.style.display = 'none';
+    });
 });
 
 // ── Highlight active nav on scroll ──
