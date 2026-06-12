@@ -309,6 +309,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::put('/leads/{lead}', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadUpdate'])->name('leads.update');
         Route::delete('/leads/{lead}', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadDestroy'])->name('leads.destroy');
         Route::post('/leads/{lead}/convert', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadConvert'])->name('leads.convert');
+        Route::post('/leads/{lead}/clone', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadClone'])->name('leads.clone');
+        Route::delete('/leads/bulk-delete', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadBulkDelete'])->name('leads.bulk-delete');
+        Route::post('/leads/bulk-task', [\App\Http\Controllers\Admin\NewCrmController::class, 'leadBulkTask'])->name('leads.bulk-task');
         // Deals & Pipeline
         Route::get('/deals', [\App\Http\Controllers\Admin\NewCrmController::class, 'dealsIndex'])->name('deals');
         Route::get('/deals/create', [\App\Http\Controllers\Admin\NewCrmController::class, 'dealCreate'])->name('deals.create');
@@ -361,6 +364,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/sales/leads/create',           [$ctrl, 'salesLeadsCreate'])->name('sales.leads.create');
         Route::get('/sales/leads/{id}',             [$ctrl, 'salesLeadsShow'])->name('sales.leads.show');
         Route::post('/sales/leads/{id}/convert',    [$ctrl, 'salesLeadsConvert'])->name('sales.leads.convert');
+        Route::post('/sales/leads/{id}/clone',      [$ctrl, 'salesLeadsClone'])->name('sales.leads.clone');
+        Route::delete('/sales/leads/bulk-delete',   [$ctrl, 'salesLeadsBulkDelete'])->name('sales.leads.bulk-delete');
+        Route::post('/sales/leads/bulk-task',       [$ctrl, 'salesLeadsBulkTask'])->name('sales.leads.bulk-task');
         Route::get('/sales/contacts',               [$ctrl, 'salesContacts'])->name('sales.contacts');
         Route::get('/sales/contacts/create',        [$ctrl, 'salesContactsCreate'])->name('sales.contacts.create');
         Route::post('/sales/contacts',               [$ctrl, 'salesContactsStore'])->name('sales.contacts.store');

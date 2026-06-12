@@ -3975,4 +3975,63 @@ td{padding:6px 8px;border:1px solid #e5e7eb;font-size:11px;}
         @unlink($tmpHtml); @unlink($tmpPdf);
         return response($pdf, 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'attachment; filename="' . $filename . '"']);
     }
+
+    // ─── Leads: Clone ──────────────────────────────────────────────────────────
+    public function salesLeadsClone($id)
+    {
+        $lead = \App\Models\CrmLead::where('user_id', auth()->id())->findOrFail($id);
+        $clone = $lead->replicate();
+        $clone->first_name = ($lead->first_name ?? $lead->name ?? 'Lead') . ' (Copy)';
+        $clone->lead_status = 'New';
+        $clone->is_converted = false;
+        $clone->converted_date = null;
+        $clone->created_at = now();
+        $clone->updated_at = now();
+        $clone->save();
+        return redirect()->route('admin.crm2.sales.leads.show', $clone->id)
+            ->with('success', 'Lead cloned successfully.');
+    }
+
+    // ─── Leads: Bulk Delete ────────────────────────────────────────────────────
+    public function salesLeadsBulkDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return response()->json(['error' => 'No leads selected.'], 422);
+        }
+        \App\Models\CrmLead::where('user_id', auth()->id())->whereIn('id', $ids)->delete();
+        return response()->json(['success' => true, 'deleted' => count($ids)]);
+    }
+
+    // ─── Leads: Bulk Task ─────────────────────────────────────────────────────
+    public function salesLeadsBulkTask(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        $subject = $request->input('subject', 'Follow-up Task');
+        $dueDate = $request->input('due_date', now()->addDay()->format('Y-m-d'));
+        $assignedTo = $request->input('assigned_to', auth()->id());
+
+        if (empty($ids)) {
+            return response()->json(['error' => 'No leads selected.'], 422);
+        }
+
+        $created = 0;
+        foreach ($ids as $leadId) {
+            $lead = \App\Models\CrmLead::where('user_id', auth()->id())->find($leadId);
+            if (!$lead) continue;
+            \App\Models\CrmActivity::create([
+                'user_id'     => auth()->id(),
+                'lead_id'     => $lead->id,
+                'type'        => 'Task',
+                'subject'     => $subject,
+                'due_date'    => $dueDate,
+                'assigned_to' => $assignedTo,
+                'status'      => 'open',
+                'description' => 'Bulk task created from Leads listing.',
+            ]);
+            $created++;
+        }
+
+        return response()->json(['success' => true, 'created' => $created]);
+    }
 }

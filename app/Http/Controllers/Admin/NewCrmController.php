@@ -548,4 +548,53 @@ class NewCrmController extends Controller
             abort(403);
         }
     }
+
+    // ─────────────────────────────────────────────────────────────
+    // Lead Clone
+    // ─────────────────────────────────────────────────────────────
+    public function leadClone(CrmLead $lead)
+    {
+        $this->authorise($lead);
+        $clone = $lead->replicate();
+        $clone->first_name = 'Copy of ' . ($lead->first_name ?: $lead->name);
+        $clone->name = 'Copy of ' . ($lead->name ?: $lead->first_name . ' ' . $lead->last_name);
+        $clone->status = 'new';
+        $clone->lead_status = 'Not Contacted';
+        $clone->is_converted = false;
+        $clone->converted_date = null;
+        $clone->created_at = now();
+        $clone->updated_at = now();
+        $clone->save();
+        return redirect()->route('admin.crm2.sales.leads.show', $clone->id)
+            ->with('success', 'Lead cloned successfully.');
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Lead Bulk Delete
+    // ─────────────────────────────────────────────────────────────
+    public function leadBulkDelete(Request $request)
+    {
+        $ids = array_filter(explode(',', $request->input('ids', '')));
+        if (empty($ids)) {
+            return back()->with('error', 'No leads selected.');
+        }
+        \App\Models\CrmLead::whereIn('id', $ids)
+            ->where('user_id', $this->tid())
+            ->delete();
+        return back()->with('success', count($ids) . ' lead(s) deleted successfully.');
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Lead Bulk Create Task (redirects to task creation with lead IDs)
+    // ─────────────────────────────────────────────────────────────
+    public function leadBulkTask(Request $request)
+    {
+        $ids = array_filter(explode(',', $request->input('ids', '')));
+        if (empty($ids)) {
+            return back()->with('error', 'No leads selected.');
+        }
+        // Redirect to task create page with lead IDs pre-filled
+        return redirect()->route('admin.crm2.activities.tasks.create', ['lead_ids' => implode(',', $ids)])
+            ->with('info', 'Creating task for ' . count($ids) . ' lead(s).');
+    }
 }
