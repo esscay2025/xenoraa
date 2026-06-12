@@ -743,6 +743,33 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/settings', [\App\Http\Controllers\Admin\PosController::class, 'settings'])->name('settings');
         Route::post('/settings', [\App\Http\Controllers\Admin\PosController::class, 'saveSettings'])->name('settings.save');
     });
+    // ─── Accounts (Finance) Module ────────────────────────────────────────────
+    Route::prefix('accounts')->name('accounts.')->group(function () {
+        Route::get('/dashboard',             [\App\Http\Controllers\Admin\AccountsController::class, 'dashboard'])->name('dashboard');
+        Route::get('/bank-accounts',         [\App\Http\Controllers\Admin\AccountsController::class, 'bankAccounts'])->name('bank-accounts');
+        Route::post('/bank-accounts',        [\App\Http\Controllers\Admin\AccountsController::class, 'bankAccountsStore'])->name('bank-accounts.store');
+        Route::put('/bank-accounts/{id}',    [\App\Http\Controllers\Admin\AccountsController::class, 'bankAccountsUpdate'])->name('bank-accounts.update');
+        Route::delete('/bank-accounts/{id}', [\App\Http\Controllers\Admin\AccountsController::class, 'bankAccountsDelete'])->name('bank-accounts.delete');
+        Route::get('/transactions',          [\App\Http\Controllers\Admin\AccountsController::class, 'transactions'])->name('transactions');
+        Route::post('/transactions',         [\App\Http\Controllers\Admin\AccountsController::class, 'transactionsStore'])->name('transactions.store');
+        Route::delete('/transactions/{id}',  [\App\Http\Controllers\Admin\AccountsController::class, 'transactionsDelete'])->name('transactions.delete');
+        Route::get('/income',                [\App\Http\Controllers\Admin\AccountsController::class, 'income'])->name('income');
+        Route::post('/income',               [\App\Http\Controllers\Admin\AccountsController::class, 'incomeStore'])->name('income.store');
+        Route::put('/income/{id}',           [\App\Http\Controllers\Admin\AccountsController::class, 'incomeUpdate'])->name('income.update');
+        Route::delete('/income/{id}',        [\App\Http\Controllers\Admin\AccountsController::class, 'incomeDelete'])->name('income.delete');
+        Route::get('/expenses',              [\App\Http\Controllers\Admin\AccountsController::class, 'expenses'])->name('expenses');
+        Route::post('/expenses',             [\App\Http\Controllers\Admin\AccountsController::class, 'expensesStore'])->name('expenses.store');
+        Route::put('/expenses/{id}',         [\App\Http\Controllers\Admin\AccountsController::class, 'expensesUpdate'])->name('expenses.update');
+        Route::delete('/expenses/{id}',      [\App\Http\Controllers\Admin\AccountsController::class, 'expensesDelete'])->name('expenses.delete');
+        Route::get('/coa',                   [\App\Http\Controllers\Admin\AccountsController::class, 'chartOfAccounts'])->name('coa');
+        Route::post('/coa',                  [\App\Http\Controllers\Admin\AccountsController::class, 'coaStore'])->name('coa.store');
+        Route::put('/coa/{id}',              [\App\Http\Controllers\Admin\AccountsController::class, 'coaUpdate'])->name('coa.update');
+        Route::delete('/coa/{id}',           [\App\Http\Controllers\Admin\AccountsController::class, 'coaDelete'])->name('coa.delete');
+        Route::get('/journal',               [\App\Http\Controllers\Admin\AccountsController::class, 'journalEntries'])->name('journal');
+        Route::post('/journal',              [\App\Http\Controllers\Admin\AccountsController::class, 'journalStore'])->name('journal.store');
+        Route::delete('/journal/{id}',       [\App\Http\Controllers\Admin\AccountsController::class, 'journalDelete'])->name('journal.delete');
+        Route::get('/reports',               [\App\Http\Controllers\Admin\AccountsController::class, 'reports'])->name('reports');
+    });
 });
 
 // =============================================

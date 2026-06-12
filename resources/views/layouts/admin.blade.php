@@ -555,6 +555,7 @@
     elseif (request()->routeIs('admin.crm.*') && !request()->routeIs('admin.crm2*')) $activeModule = 'ai';
     elseif (request()->routeIs('admin.ecommerce*')) $activeModule = 'ecommerce';
     elseif (request()->routeIs('admin.pos*')) $activeModule = 'pos';
+    elseif (request()->routeIs('admin.accounts*')) $activeModule = 'accounts';
     elseif (request()->routeIs('admin.site*') || request()->routeIs('admin.settings*') || request()->routeIs('admin.blog*') || request()->routeIs('admin.forum*') || request()->routeIs('admin.jobs*') || request()->routeIs('admin.newsletter*') || request()->routeIs('admin.calendar*')) $activeModule = 'site';
 @endphp
 
@@ -630,6 +631,16 @@
                 title="Point of Sale">
             <i class="fas fa-cash-register"></i>
             <span class="xn-rail-label">POS</span>
+        </button>
+        @endif
+
+        {{-- Accounts (Finance) --}}
+        @if(('accounts'))
+        <button class="xn-rail-item {{ $activeModule === 'accounts' ? 'active' : '' }}"
+                onclick="xnOpenPanel('panel-accounts', this)"
+                title="Accounts">
+            <i class="fas fa-chart-pie"></i>
+            <span class="xn-rail-label">ACCTS</span>
         </button>
         @endif
 
@@ -861,6 +872,30 @@
         <a href="{{ route('admin.pos.sessions') }}" class="xn-panel-link {{ request()->routeIs('admin.pos.sessions*') ? 'active' : '' }}"><i class="fas fa-layer-group"></i> Sessions</a>
         <a href="{{ route('admin.pos.dashboard') }}" class="xn-panel-link {{ request()->routeIs('admin.pos.dashboard') ? 'active' : '' }}"><i class="fas fa-chart-line"></i> POS Reports</a>
         <a href="{{ route('admin.pos.settings') }}" class="xn-panel-link {{ request()->routeIs('admin.pos.settings*') ? 'active' : '' }}"><i class="fas fa-cog"></i> POS Settings</a>
+    </div>
+</div>
+@endif
+
+{{-- ── Accounts (Finance) Panel ───────────────────────── --}}
+@if(('accounts'))
+<div class="xn-panel" id="panel-accounts">
+    <div class="xn-panel-header">
+        <i class="fas fa-chart-pie"></i>
+        <span class="xn-panel-title">Accounts</span>
+        <button onclick="xnClosePanel()" style="margin-left:auto;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:0.9rem;"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="xn-panel-body">
+        <a href="{{ route('admin.accounts.dashboard') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.dashboard') ? 'active' : '' }}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <div class="xn-panel-section-label">Banking</div>
+        <a href="{{ route('admin.accounts.bank-accounts') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.bank-accounts*') ? 'active' : '' }}"><i class="fas fa-university"></i> Bank Accounts</a>
+        <a href="{{ route('admin.accounts.transactions') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.transactions*') ? 'active' : '' }}"><i class="fas fa-exchange-alt"></i> Transactions</a>
+        <div class="xn-panel-section-label">Money In / Out</div>
+        <a href="{{ route('admin.accounts.income') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.income*') ? 'active' : '' }}"><i class="fas fa-arrow-circle-down"></i> Income</a>
+        <a href="{{ route('admin.accounts.expenses') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.expenses*') ? 'active' : '' }}"><i class="fas fa-arrow-circle-up"></i> Expenses</a>
+        <div class="xn-panel-section-label">Accounting</div>
+        <a href="{{ route('admin.accounts.coa') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.coa*') ? 'active' : '' }}"><i class="fas fa-sitemap"></i> Chart of Accounts</a>
+        <a href="{{ route('admin.accounts.journal') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.journal*') ? 'active' : '' }}"><i class="fas fa-book"></i> Journal Entries</a>
+        <a href="{{ route('admin.accounts.reports') }}" class="xn-panel-link {{ request()->routeIs('admin.accounts.reports*') ? 'active' : '' }}"><i class="fas fa-file-invoice-dollar"></i> Reports</a>
     </div>
 </div>
 @endif

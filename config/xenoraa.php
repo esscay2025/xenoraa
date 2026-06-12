@@ -47,7 +47,7 @@ return [
             'analytics',
             'crm',            // CRM module
             'ai',             // AI Hub (AI Assistance, AI Conversations)
-            'pos',            // Point of Sale
+            'pos', 'accounts',            // Point of Sale
             'newsletter',     // Newsletter
         ],
         'business' => [
@@ -58,7 +58,7 @@ return [
             'analytics',
             'crm',
             'ai',
-            'pos',
+            'pos', 'accounts',
             'newsletter',
             // All future modules are included automatically via planHasModule()
         ],
