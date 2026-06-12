@@ -30,6 +30,10 @@ use App\Models\CrmService;
 use App\Models\CrmServiceBooking;
 use App\Models\CrmProject;
 use App\Models\CrmProjectTask;
+use App\Models\CrmProjectMilestone;
+use App\Models\CrmProjectIssue;
+use App\Models\CrmProjectTimeLog;
+use App\Models\CrmProjectNote;
 use App\Models\CrmNote;
 use App\Models\CrmMailConfig;
 use App\Models\CrmMailTemplate;
@@ -4193,5 +4197,283 @@ td{padding:6px 8px;border:1px solid #e5e7eb;font-size:11px;}
             ]);
         }
         return redirect()->route('admin.crm2.sales.deals')->with('success', 'Tasks created for '.count($ids).' deal(s).');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // PROJECTS — ENHANCED METHODS
+    // ══════════════════════════════════════════════════════════════
+
+    /** Show project view page with all sub-module data */
+    public function projectsShow(int $id)
+    {
+        $tid     = $this->tenantId();
+        $project = CrmProject::where('user_id', $tid)->with(['account','deal'])->findOrFail($id);
+        $tasks      = CrmProjectTask::where('project_id', $id)->with(['milestone'])->orderBy('sort_order')->orderByDesc('created_at')->get();
+        $milestones = CrmProjectMilestone::where('project_id', $id)->orderBy('target_date')->get();
+        $issues     = CrmProjectIssue::where('project_id', $id)->with(['task'])->orderByDesc('created_at')->get();
+        $timeLogs   = CrmProjectTimeLog::where('project_id', $id)->with(['task','logger'])->orderByDesc('log_date')->get();
+        $notes      = CrmProjectNote::where('project_id', $id)->with(['author'])->orderByDesc('created_at')->get();
+        return view('admin.crm2.projects.view-project', compact('project','tasks','milestones','issues','timeLogs','notes'));
+    }
+
+    /** Clone a project */
+    public function projectsClone(int $id)
+    {
+        $tid     = $this->tenantId();
+        $project = CrmProject::where('user_id', $tid)->findOrFail($id);
+        $clone   = $project->replicate();
+        $clone->name       = 'Copy of ' . $project->name;
+        $clone->status     = 'planning';
+        $clone->created_at = now();
+        $clone->updated_at = now();
+        $clone->save();
+        foreach (CrmProjectTask::where('project_id', $id)->get() as $task) {
+            $t = $task->replicate();
+            $t->project_id   = $clone->id;
+            $t->status       = 'todo';
+            $t->milestone_id = null;
+            $t->save();
+        }
+        return redirect()->route('admin.crm2.projects.show', $clone->id)->with('success', 'Project cloned successfully.');
+    }
+
+    /** Enhanced project listing with status filter */
+    public function projectsListEnhanced(Request $request)
+    {
+        $tid    = $this->tenantId();
+        $search = $request->input('search');
+        $status = $request->input('status');
+        $q = CrmProject::where('user_id', $tid)->with(['account','deal'])->withCount('tasks');
+        if ($search) $q->where('name','like',"%$search%");
+        if ($status) $q->where('status', $status);
+        $projects = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.projects.list', compact('projects'));
+    }
+
+    /** Enhanced create project form with accounts/deals */
+    public function projectsListCreateEnhanced()
+    {
+        $tid           = $this->tenantId();
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $deals_list    = CrmDeal::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.projects.create-project', compact('accounts_list','deals_list'));
+    }
+
+    /** Enhanced edit project form with accounts/deals */
+    public function projectsListEditEnhanced(int $id)
+    {
+        $tid           = $this->tenantId();
+        $project       = CrmProject::where('user_id', $tid)->findOrFail($id);
+        $accounts_list = CrmAccount::where('user_id', $tid)->orderBy('name')->get();
+        $deals_list    = CrmDeal::where('user_id', $tid)->orderBy('name')->get();
+        return view('admin.crm2.projects.edit-project', compact('project','accounts_list','deals_list'));
+    }
+
+    /** Enhanced tasks listing with filters */
+    public function projectsTasksEnhanced(Request $request)
+    {
+        $tid           = $this->tenantId();
+        $search        = $request->input('search');
+        $project_id    = $request->input('project_id');
+        $status        = $request->input('status');
+        $priority      = $request->input('priority');
+        $projects_list = CrmProject::where('user_id', $tid)->orderBy('name')->get();
+        $q = CrmProjectTask::whereHas('project', fn($q) => $q->where('user_id', $tid))
+                           ->with(['project','milestone']);
+        if ($search)     $q->where('name','like',"%$search%");
+        if ($project_id) $q->where('project_id', $project_id);
+        if ($status)     $q->where('status', $status);
+        if ($priority)   $q->where('priority', $priority);
+        $tasks = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
+        return view('admin.crm2.projects.tasks', compact('tasks','projects_list'));
+    }
+
+    /** Bulk delete projects */
+    public function projectsBulkDelete(Request $request)
+    {
+        $tid = $this->tenantId();
+        $ids = $request->input('ids', []);
+        if (!empty($ids)) {
+            CrmProject::whereIn('id', $ids)->where('user_id', $tid)->delete();
+        }
+        return redirect()->route('admin.crm2.projects.list')->with('success', count($ids).' project(s) deleted.');
+    }
+
+    /** Bulk status update for projects */
+    public function projectsBulkStatus(Request $request)
+    {
+        $tid    = $this->tenantId();
+        $ids    = $request->input('ids', []);
+        $status = $request->input('status');
+        if (!empty($ids) && $status) {
+            CrmProject::whereIn('id', $ids)->where('user_id', $tid)->update(['status' => $status]);
+        }
+        return redirect()->route('admin.crm2.projects.list')->with('success', count($ids).' project(s) updated.');
+    }
+
+    /** Bulk export projects as CSV */
+    public function projectsBulkExport(Request $request)
+    {
+        $tid  = $this->tenantId();
+        $ids  = $request->input('ids', []);
+        $rows = CrmProject::whereIn('id', $ids)->where('user_id', $tid)->with(['account','deal'])->get();
+        $csv  = "Name,Status,Priority,Account,Deal,Start Date,End Date,Budget,Progress\n";
+        foreach ($rows as $r) {
+            $csv .= implode(',', [
+                '"'.$r->name.'"', $r->status, $r->priority??'medium',
+                '"'.($r->account?->name??'').'"', '"'.($r->deal?->name??'').'"',
+                $r->start_date?->format('d M Y')??'', $r->end_date?->format('d M Y')??'',
+                $r->budget, $r->progress_percent.'%',
+            ]) . "\n";
+        }
+        return response($csv, 200, ['Content-Type'=>'text/csv','Content-Disposition'=>'attachment;filename=projects.csv']);
+    }
+
+    /** Bulk delete tasks */
+    public function projectsTasksBulkDelete(Request $request)
+    {
+        $tid = $this->tenantId();
+        $ids = $request->input('ids', []);
+        if (!empty($ids)) {
+            CrmProjectTask::whereIn('id', $ids)
+                ->whereHas('project', fn($q) => $q->where('user_id', $tid))
+                ->delete();
+        }
+        return redirect()->route('admin.crm2.projects.tasks')->with('success', count($ids).' task(s) deleted.');
+    }
+
+    /** Bulk export tasks as CSV */
+    public function projectsTasksBulkExport(Request $request)
+    {
+        $tid  = $this->tenantId();
+        $ids  = $request->input('ids', []);
+        $rows = CrmProjectTask::whereIn('id', $ids)
+                    ->whereHas('project', fn($q) => $q->where('user_id', $tid))
+                    ->with(['project','milestone'])->get();
+        $csv  = "Title,Project,Milestone,Priority,Status,Due Date\n";
+        foreach ($rows as $r) {
+            $csv .= implode(',', [
+                '"'.$r->name.'"', '"'.($r->project?->name??'').'"',
+                '"'.($r->milestone?->name??'').'"', $r->priority, $r->status,
+                $r->due_date?->format('d M Y')??'',
+            ]) . "\n";
+        }
+        return response($csv, 200, ['Content-Type'=>'text/csv','Content-Disposition'=>'attachment;filename=tasks.csv']);
+    }
+
+    // ── Milestones ────────────────────────────────────────────────
+
+    public function projectsMilestonesStore(Request $request, int $projectId)
+    {
+        $tid     = $this->tenantId();
+        $project = CrmProject::where('user_id', $tid)->findOrFail($projectId);
+        CrmProjectMilestone::create([
+            'project_id'  => $project->id,
+            'name'        => $request->input('name'),
+            'description' => $request->input('description'),
+            'target_date' => $request->input('target_date') ?: null,
+            'status'      => $request->input('status', 'pending'),
+        ]);
+        return redirect()->route('admin.crm2.projects.show', $projectId)->with('success', 'Milestone added.');
+    }
+
+    public function projectsMilestonesUpdate(Request $request, int $projectId, int $id)
+    {
+        $tid = $this->tenantId();
+        CrmProject::where('user_id', $tid)->findOrFail($projectId);
+        CrmProjectMilestone::where('id', $id)->where('project_id', $projectId)
+            ->update($request->only(['name','description','target_date','status']));
+        return redirect()->route('admin.crm2.projects.show', $projectId)->with('success', 'Milestone updated.');
+    }
+
+    public function projectsMilestonesDestroy(int $projectId, int $id)
+    {
+        $tid = $this->tenantId();
+        CrmProject::where('user_id', $tid)->findOrFail($projectId);
+        CrmProjectMilestone::where('id', $id)->where('project_id', $projectId)->delete();
+        return redirect()->route('admin.crm2.projects.show', $projectId)->with('success', 'Milestone deleted.');
+    }
+
+    // ── Issues ────────────────────────────────────────────────────
+
+    public function projectsIssuesStore(Request $request, int $projectId)
+    {
+        $tid     = $this->tenantId();
+        $project = CrmProject::where('user_id', $tid)->findOrFail($projectId);
+        CrmProjectIssue::create([
+            'project_id'  => $project->id,
+            'task_id'     => $request->input('task_id') ?: null,
+            'title'       => $request->input('title'),
+            'description' => $request->input('description'),
+            'severity'    => $request->input('severity', 'medium'),
+            'status'      => $request->input('status', 'open'),
+            'due_date'    => $request->input('due_date') ?: null,
+            'assigned_to' => auth()->id(),
+        ]);
+        return redirect()->route('admin.crm2.projects.show', $projectId)->with('success', 'Issue reported.');
+    }
+
+    public function projectsIssuesUpdate(Request $request, int $projectId, int $id)
+    {
+        $tid = $this->tenantId();
+        CrmProject::where('user_id', $tid)->findOrFail($projectId);
+        CrmProjectIssue::where('id', $id)->where('project_id', $projectId)
+            ->update($request->only(['title','description','severity','status','due_date']));
+        return redirect()->route('admin.crm2.projects.show', $projectId)->with('success', 'Issue updated.');
+    }
+
+    public function projectsIssuesDestroy(int $projectId, int $id)
+    {
+        $tid = $this->tenantId();
+        CrmProject::where('user_id', $tid)->findOrFail($projectId);
+        CrmProjectIssue::where('id', $id)->where('project_id', $projectId)->delete();
+        return redirect()->route('admin.crm2.projects.show', $projectId)->with('success', 'Issue deleted.');
+    }
+
+    // ── Time Logs ─────────────────────────────────────────────────
+
+    public function projectsTimeLogStore(Request $request, int $projectId)
+    {
+        $tid     = $this->tenantId();
+        $project = CrmProject::where('user_id', $tid)->findOrFail($projectId);
+        CrmProjectTimeLog::create([
+            'project_id' => $project->id,
+            'task_id'    => $request->input('task_id') ?: null,
+            'logged_by'  => auth()->id(),
+            'log_date'   => $request->input('log_date', date('Y-m-d')),
+            'hours'      => $request->input('hours'),
+            'notes'      => $request->input('notes'),
+        ]);
+        return redirect()->route('admin.crm2.projects.show', $projectId)->with('success', 'Time logged.');
+    }
+
+    public function projectsTimeLogDestroy(int $projectId, int $id)
+    {
+        $tid = $this->tenantId();
+        CrmProject::where('user_id', $tid)->findOrFail($projectId);
+        CrmProjectTimeLog::where('id', $id)->where('project_id', $projectId)->delete();
+        return redirect()->route('admin.crm2.projects.show', $projectId)->with('success', 'Time log deleted.');
+    }
+
+    // ── Notes ─────────────────────────────────────────────────────
+
+    public function projectsNotesStore(Request $request, int $projectId)
+    {
+        $tid     = $this->tenantId();
+        $project = CrmProject::where('user_id', $tid)->findOrFail($projectId);
+        CrmProjectNote::create([
+            'project_id' => $project->id,
+            'created_by' => auth()->id(),
+            'body'       => $request->input('body'),
+        ]);
+        return redirect()->route('admin.crm2.projects.show', $projectId)->with('success', 'Note saved.');
+    }
+
+    public function projectsNotesDestroy(int $projectId, int $id)
+    {
+        $tid = $this->tenantId();
+        CrmProject::where('user_id', $tid)->findOrFail($projectId);
+        CrmProjectNote::where('id', $id)->where('project_id', $projectId)->delete();
+        return redirect()->route('admin.crm2.projects.show', $projectId)->with('success', 'Note deleted.');
     }
 }

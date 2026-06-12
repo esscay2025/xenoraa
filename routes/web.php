@@ -598,19 +598,41 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         // Legacy redirect
         Route::get('/services',                     [$ctrl, 'servicesCatalog'])->name('services');
 
-        // Projects sub-module routes
-        Route::get('/projects/list',                [$ctrl, 'projectsList'])->name('projects.list');
-        Route::get('/projects/list/create',         [$ctrl, 'projectsListCreate'])->name('projects.list.create');
-        Route::get('/projects/tasks',               [$ctrl, 'projectsTasks'])->name('projects.tasks');
-        Route::get('/projects/tasks/create',        [$ctrl, 'projectsTasksCreate'])->name('projects.tasks.create');
-        Route::get('/projects/list/{id}/edit',      [$ctrl, 'projectsListEdit'])->name('projects.list.edit');
-        Route::get('/projects/tasks/{id}/edit',     [$ctrl, 'projectsTasksEdit'])->name('projects.tasks.edit');
-        Route::post('/projects',                    [$ctrl, 'projectsStore'])->name('projects.store');
-        Route::patch('/projects/{type}/{id}',       [$ctrl, 'projectsUpdate'])->name('projects.update');
-        Route::patch('/projects/task/{id}/status',  [$ctrl, 'projectTaskStatus'])->name('projects.task.status');
-        Route::delete('/projects/{type}/{id}',      [$ctrl, 'projectsDestroy'])->name('projects.destroy');
-        // Legacy redirect
-        Route::get('/projects',                     [$ctrl, 'projectsList'])->name('projects');
+        // Projects sub-module routes — Enhanced
+        Route::get('/projects',                                      [$ctrl, 'projectsListEnhanced'])->name('projects.list');
+        Route::get('/projects/list',                                 [$ctrl, 'projectsListEnhanced'])->name('projects.list.alt');
+        Route::get('/projects/create',                               [$ctrl, 'projectsListCreateEnhanced'])->name('projects.list.create');
+        Route::get('/projects/tasks',                                [$ctrl, 'projectsTasksEnhanced'])->name('projects.tasks');
+        Route::get('/projects/tasks/create',                         [$ctrl, 'projectsTasksCreate'])->name('projects.tasks.create');
+        Route::get('/projects/{id}',                                 [$ctrl, 'projectsShow'])->name('projects.show')->where('id','[0-9]+');
+        Route::get('/projects/{id}/edit',                            [$ctrl, 'projectsListEditEnhanced'])->name('projects.list.edit');
+        Route::get('/projects/tasks/{id}/edit',                      [$ctrl, 'projectsTasksEdit'])->name('projects.tasks.edit');
+        Route::get('/projects/{id}/clone',                           [$ctrl, 'projectsClone'])->name('projects.clone');
+        Route::post('/projects',                                     [$ctrl, 'projectsStore'])->name('projects.store');
+        Route::patch('/projects/{type}/{id}',                        [$ctrl, 'projectsUpdate'])->name('projects.update');
+        Route::patch('/projects/task/{id}/status',                   [$ctrl, 'projectTaskStatus'])->name('projects.task.status');
+        Route::delete('/projects/{type}/{id}',                       [$ctrl, 'projectsDestroy'])->name('projects.destroy');
+        Route::delete('/projects/bulk-delete',                       [$ctrl, 'projectsBulkDelete'])->name('projects.bulk-delete');
+        Route::post('/projects/bulk-status',                         [$ctrl, 'projectsBulkStatus'])->name('projects.bulk-status');
+        Route::post('/projects/bulk-export',                         [$ctrl, 'projectsBulkExport'])->name('projects.bulk-export');
+        Route::delete('/projects/tasks/bulk-delete',                 [$ctrl, 'projectsTasksBulkDelete'])->name('projects.tasks.bulk-delete');
+        Route::post('/projects/tasks/bulk-export',                   [$ctrl, 'projectsTasksBulkExport'])->name('projects.tasks.bulk-export');
+        // Milestones
+        Route::post('/projects/{projectId}/milestones',              [$ctrl, 'projectsMilestonesStore'])->name('projects.milestones.store');
+        Route::patch('/projects/{projectId}/milestones/{id}',        [$ctrl, 'projectsMilestonesUpdate'])->name('projects.milestones.update');
+        Route::delete('/projects/{projectId}/milestones/{id}',       [$ctrl, 'projectsMilestonesDestroy'])->name('projects.milestones.destroy');
+        // Issues
+        Route::post('/projects/{projectId}/issues',                  [$ctrl, 'projectsIssuesStore'])->name('projects.issues.store');
+        Route::patch('/projects/{projectId}/issues/{id}',            [$ctrl, 'projectsIssuesUpdate'])->name('projects.issues.update');
+        Route::delete('/projects/{projectId}/issues/{id}',           [$ctrl, 'projectsIssuesDestroy'])->name('projects.issues.destroy');
+        // Time Logs
+        Route::post('/projects/{projectId}/timelog',                 [$ctrl, 'projectsTimeLogStore'])->name('projects.timelog.store');
+        Route::delete('/projects/{projectId}/timelog/{id}',          [$ctrl, 'projectsTimeLogDestroy'])->name('projects.timelog.destroy');
+        // Notes
+        Route::post('/projects/{projectId}/notes',                   [$ctrl, 'projectsNotesStore'])->name('projects.notes.store');
+        Route::delete('/projects/{projectId}/notes/{id}',            [$ctrl, 'projectsNotesDestroy'])->name('projects.notes.destroy');
+        // Legacy
+        Route::get('/projects/list/legacy',                          [$ctrl, 'projectsList'])->name('projects');
 
         // ── Integrations sub-module routes ──────────────────────────────────
         Route::get('/integrations/mail-config',       [$ctrl, 'integrationMailConfig'])->name('integrations.mail-config');
