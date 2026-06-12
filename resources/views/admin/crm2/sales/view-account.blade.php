@@ -1,6 +1,20 @@
 @extends('layouts.admin')
 @section('title', $account->name)
 @section('page-title', 'Account Detail')
+@push('styles')
+<style>
+/* 3-dot action menu */
+.xn-bulk-wrap { position: relative; display: inline-block; }
+.xn-bulk-btn { width: 34px; height: 34px; border-radius: 7px; border: 1px solid var(--border,#e2e8f0); background: var(--bg-card,#fff); color: var(--text-secondary,#64748b); font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+.xn-bulk-btn:hover { background: var(--bg-hover,#f1f5f9); }
+.xn-bulk-drop { display: none; position: absolute; right: 0; top: calc(100% + 4px); min-width: 200px; background: var(--bg-card,#fff); border: 1px solid var(--border,#e2e8f0); border-radius: 9px; box-shadow: 0 8px 24px rgba(0,0,0,.12); z-index: 999; padding: 5px 0; }
+.xn-bulk-drop.open { display: block; }
+.xn-bulk-item { display: flex; align-items: center; gap: .6rem; padding: .55rem 1rem; font-size: .84rem; color: var(--text-primary,#1a1a2e); cursor: pointer; transition: background .12s; border: none; background: none; width: 100%; text-align: left; text-decoration: none; }
+.xn-bulk-item:hover { background: var(--bg-hover,#f1f5f9); }
+.xn-bulk-item i { width: 16px; text-align: center; }
+.xn-bulk-item.danger { color: #ef4444; }
+</style>
+@endpush
 @section('content')
 <style>
 /* ── Layout ── */
@@ -173,13 +187,23 @@
           <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Edit
         </a>
-        <form method="POST" action="{{ route('admin.crm2.sales.accounts.destroy', $account->id) }}" onsubmit="return confirm('Delete this account?')" style="display:inline">
-          @csrf @method('DELETE')
-          <button type="submit" class="av-btn danger">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-            Delete
-          </button>
-        </form>
+        <a href="{{ route('admin.crm2.sales.accounts') }}" class="av-btn outline"><i class="fas fa-arrow-left"></i> Back</a>
+        {{-- 3-dot action menu --}}
+        <div class="xn-bulk-wrap">
+          <button class="xn-bulk-btn" id="lvActBtn" onclick="toggleActMenu(event)" title="More actions">&#8942;</button>
+          <div class="xn-bulk-drop" id="lvActDrop">
+            <form method="POST" action="{{ route('admin.crm2.sales.accounts.clone', $account->id) }}" style="margin:0">
+              @csrf
+              <button type="submit" class="xn-bulk-item"><i class="fas fa-copy" style="color:#6366f1"></i> Clone Account</button>
+            </form>
+            <button class="xn-bulk-item" onclick="window.print()"><i class="fas fa-print" style="color:#10b981"></i> Print Preview</button>
+            <div style="border-top:1px solid var(--border,#e2e8f0);margin:4px 0"></div>
+            <form method="POST" action="{{ route('admin.crm2.sales.destroy', ['type'=>'account','id'=>$account->id]) }}" onsubmit="return confirm('Delete this account permanently?')" style="margin:0">
+              @csrf @method('DELETE')
+              <button type="submit" class="xn-bulk-item danger"><i class="fas fa-trash"></i> Delete Account</button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1509,6 +1533,19 @@ function deleteEmail(emailId, btn) {
     }
   }).catch(() => alert('Failed to delete.'));
 }
-
+function toggleActMenu(e) {
+  e.stopPropagation();
+  document.getElementById('lvActDrop').classList.toggle('open');
+}
+document.addEventListener('click', function() {
+  const d = document.getElementById('lvActDrop');
+  if (d) d.classList.remove('open');
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    const d = document.getElementById('lvActDrop');
+    if (d) d.classList.remove('open');
+  }
+});
 </script>
 @endsection

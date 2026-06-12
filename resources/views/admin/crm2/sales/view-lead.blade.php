@@ -1,6 +1,20 @@
 @extends('layouts.admin')
 @section('title', 'Lead: ' . ($lead->salutation ? $lead->salutation . ' ' : '') . $lead->first_name . ' ' . $lead->last_name)
 @section('page-title', 'Lead Details')
+@push('styles')
+<style>
+/* 3-dot action menu */
+.xn-bulk-wrap { position: relative; display: inline-block; }
+.xn-bulk-btn { width: 34px; height: 34px; border-radius: 7px; border: 1px solid var(--border,#e2e8f0); background: var(--bg-card,#fff); color: var(--text-secondary,#64748b); font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+.xn-bulk-btn:hover { background: var(--bg-hover,#f1f5f9); }
+.xn-bulk-drop { display: none; position: absolute; right: 0; top: calc(100% + 4px); min-width: 200px; background: var(--bg-card,#fff); border: 1px solid var(--border,#e2e8f0); border-radius: 9px; box-shadow: 0 8px 24px rgba(0,0,0,.12); z-index: 999; padding: 5px 0; }
+.xn-bulk-drop.open { display: block; }
+.xn-bulk-item { display: flex; align-items: center; gap: .6rem; padding: .55rem 1rem; font-size: .84rem; color: var(--text-primary,#1a1a2e); cursor: pointer; transition: background .12s; border: none; background: none; width: 100%; text-align: left; text-decoration: none; }
+.xn-bulk-item:hover { background: var(--bg-hover,#f1f5f9); }
+.xn-bulk-item i { width: 16px; text-align: center; }
+.xn-bulk-item.danger { color: #ef4444; }
+</style>
+@endpush
 @section('content')
 <style>
 .lv-wrap { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
@@ -116,24 +130,18 @@
       </a>
       <a href="{{ route('admin.crm2.sales.leads') }}" class="btn-lv btn-lv-ghost"><i class="fas fa-arrow-left"></i> Back</a>
       {{-- 3-dot action menu --}}
-      <div style="position:relative;display:inline-block">
-        <button class="btn-lv btn-lv-ghost" id="lvActBtn" onclick="toggleLvMenu(event)" title="More actions" style="width:34px;padding:0;font-size:1.1rem">&#8942;</button>
-        <div id="lvActDrop" style="display:none;position:absolute;right:0;top:calc(100% + 4px);min-width:190px;background:var(--bg-card,#fff);border:1px solid var(--border,#e2e8f0);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.13);z-index:999;padding:5px 0">
+      <div class="xn-bulk-wrap">
+        <button class="xn-bulk-btn" id="lvActBtn" onclick="toggleLvMenu(event)" title="More actions">&#8942;</button>
+        <div class="xn-bulk-drop" id="lvActDrop">
           <form method="POST" action="{{ route('admin.crm2.sales.leads.clone', $lead->id) }}" style="margin:0">
             @csrf
-            <button type="submit" style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem;font-size:.84rem;color:var(--text-primary,#1a1a2e);cursor:pointer;border:none;background:none;width:100%;text-align:left" onmouseover="this.style.background='var(--bg-hover,#f1f5f9)'" onmouseout="this.style.background='none'">
-              <i class="fas fa-copy" style="width:16px;text-align:center;color:#6366f1"></i> Clone Lead
-            </button>
+            <button type="submit" class="xn-bulk-item"><i class="fas fa-copy" style="color:#6366f1"></i> Clone Lead</button>
           </form>
-          <button onclick="window.print()" style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem;font-size:.84rem;color:var(--text-primary,#1a1a2e);cursor:pointer;border:none;background:none;width:100%;text-align:left" onmouseover="this.style.background='var(--bg-hover,#f1f5f9)'" onmouseout="this.style.background='none'">
-            <i class="fas fa-print" style="width:16px;text-align:center;color:#10b981"></i> Print Preview
-          </button>
+          <button class="xn-bulk-item" onclick="window.print()"><i class="fas fa-print" style="color:#10b981"></i> Print Preview</button>
           <div style="border-top:1px solid var(--border,#e2e8f0);margin:4px 0"></div>
           <form method="POST" action="{{ route('admin.crm2.sales.destroy', ['type'=>'lead','id'=>$lead->id]) }}" onsubmit="return confirm('Delete this lead permanently?')" style="margin:0">
             @csrf @method('DELETE')
-            <button type="submit" style="display:flex;align-items:center;gap:.6rem;padding:.55rem 1rem;font-size:.84rem;color:#ef4444;cursor:pointer;border:none;background:none;width:100%;text-align:left" onmouseover="this.style.background='var(--bg-hover,#f1f5f9)'" onmouseout="this.style.background='none'">
-              <i class="fas fa-trash" style="width:16px;text-align:center"></i> Delete Lead
-            </button>
+            <button type="submit" class="xn-bulk-item danger"><i class="fas fa-trash"></i> Delete Lead</button>
           </form>
         </div>
       </div>
@@ -165,9 +173,9 @@
         <div class="lv-section-body">
           <div class="lv-fields">
             <div class="lv-field"><label>Full Name</label><div class="val">{{ $lead->salutation ? $lead->salutation.' ' : '' }}{{ $lead->first_name ?: $lead->name }} {{ $lead->last_name }}</div></div>
-            <div class="lv-field"><label>Title</label><div class="val">{{ $lead->title ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Company</label><div class="val">{{ $lead->company ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Industry</label><div class="val">{{ $lead->industry ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="lv-field"><label>Title</label><div class="val">{!! $lead->title ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Company</label><div class="val">{!! $lead->company ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Industry</label><div class="val">{!! $lead->industry ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
           </div>
         </div>
       </div>
@@ -181,13 +189,13 @@
             <div class="lv-field"><label>Secondary Email</label><div class="val">@if($lead->secondary_email)<a href="mailto:{{ $lead->secondary_email }}">{{ $lead->secondary_email }}</a>@else<span style="color:var(--text-muted);font-style:italic;">—</span>@endif</div></div>
             <div class="lv-field"><label>Phone</label><div class="val">@if($lead->phone)<a href="tel:{{ $lead->phone }}">{{ $lead->phone }}</a>@else<span style="color:var(--text-muted);font-style:italic;">—</span>@endif</div></div>
             <div class="lv-field"><label>Mobile</label><div class="val">@if($lead->mobile)<a href="tel:{{ $lead->mobile }}">{{ $lead->mobile }}</a>@else<span style="color:var(--text-muted);font-style:italic;">—</span>@endif</div></div>
-            <div class="lv-field"><label>Fax</label><div class="val">{{ $lead->fax ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="lv-field"><label>Fax</label><div class="val">{!! $lead->fax ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
             <div class="lv-field"><label>Website</label><div class="val">@if($lead->website)<a href="{{ $lead->website }}" target="_blank">{{ $lead->website }}</a>@else<span style="color:var(--text-muted);font-style:italic;">—</span>@endif</div></div>
-            <div class="lv-field"><label><i class="fab fa-twitter" style="color:#1da1f2"></i> X</label><div class="val">{{ $lead->twitter ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="lv-field"><label><i class="fab fa-twitter" style="color:#1da1f2"></i> X</label><div class="val">{!! $lead->twitter ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
             <div class="lv-field"><label><i class="fab fa-linkedin" style="color:#0077b5"></i> LinkedIn</label><div class="val">@if($lead->linkedin)<a href="{{ $lead->linkedin }}" target="_blank">View Profile</a>@else<span style="color:var(--text-muted);font-style:italic;">—</span>@endif</div></div>
             <div class="lv-field"><label><i class="fab fa-facebook" style="color:#1877f2"></i> Facebook</label><div class="val">@if($lead->facebook)<a href="{{ $lead->facebook }}" target="_blank">View Profile</a>@else<span style="color:var(--text-muted);font-style:italic;">—</span>@endif</div></div>
-            <div class="lv-field"><label><i class="fab fa-instagram" style="color:#e1306c"></i> Instagram</label><div class="val">{{ $lead->instagram ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Email Opt Out</label><div class="val">{{ $lead->email_opt_out ? '<span style="color:#ef4444;font-weight:600">Yes</span>' : 'No' }}</div></div>
+            <div class="lv-field"><label><i class="fab fa-instagram" style="color:#e1306c"></i> Instagram</label><div class="val">{!! $lead->instagram ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Email Opt Out</label><div class="val">{!! $lead->email_opt_out ? '<span style="color:#ef4444;font-weight:600">Yes</span>' : 'No' !!}</div></div>
           </div>
         </div>
       </div>
@@ -197,12 +205,12 @@
         <div class="lv-section-header"><i class="fas fa-map-marker-alt"></i><span>Address Information</span></div>
         <div class="lv-section-body">
           <div class="lv-fields">
-            <div class="lv-field"><label>Flat / Building</label><div class="val">{{ $lead->flat_no ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Street</label><div class="val">{{ $lead->street ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>City</label><div class="val">{{ $lead->city ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>State</label><div class="val">{{ $lead->state ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Zip</label><div class="val">{{ $lead->zip ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Country</label><div class="val">{{ $lead->country ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="lv-field"><label>Flat / Building</label><div class="val">{!! $lead->flat_no ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Street</label><div class="val">{!! $lead->street ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>City</label><div class="val">{!! $lead->city ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>State</label><div class="val">{!! $lead->state ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Zip</label><div class="val">{!! $lead->zip ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Country</label><div class="val">{!! $lead->country ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
           </div>
         </div>
       </div>
@@ -212,8 +220,8 @@
         <div class="lv-section-header"><i class="fas fa-briefcase"></i><span>Business Information</span></div>
         <div class="lv-section-body">
           <div class="lv-fields">
-            <div class="lv-field"><label>Annual Revenue</label><div class="val">{{ $lead->annual_revenue ? '₹'.number_format($lead->annual_revenue,0) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>No. of Employees</label><div class="val">{{ $lead->no_of_employees ? number_format($lead->no_of_employees) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="lv-field"><label>Annual Revenue</label><div class="val">{!! $lead->annual_revenue ? '₹'.number_format($lead->annual_revenue,0) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>No. of Employees</label><div class="val">{!! $lead->no_of_employees ? number_format($lead->no_of_employees) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
           </div>
         </div>
       </div>
@@ -223,14 +231,14 @@
         <div class="lv-section-header"><i class="fas fa-star"></i><span>Lead Qualification</span></div>
         <div class="lv-section-body">
           <div class="lv-fields">
-            <div class="lv-field"><label>Budget</label><div class="val">{{ $lead->budget ? '₹'.number_format($lead->budget,0) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Deal Value</label><div class="val">{{ $lead->deal_value ? '₹'.number_format($lead->deal_value,0) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Expected Purchase</label><div class="val">{{ $lead->expected_purchase_date ? \Carbon\Carbon::parse($lead->expected_purchase_date)->format('d M Y') : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Priority</label><div class="val">{{ $lead->priority ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Interest Level</label><div class="val">{{ $lead->interest_level ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Decision Maker</label><div class="val">{{ $lead->decision_maker ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Competitor</label><div class="val">{{ $lead->competitor ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Follow-up Date</label><div class="val">{{ $lead->follow_up_date ? \Carbon\Carbon::parse($lead->follow_up_date)->format('d M Y') : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="lv-field"><label>Budget</label><div class="val">{!! $lead->budget ? '₹'.number_format($lead->budget,0) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Deal Value</label><div class="val">{!! $lead->deal_value ? '₹'.number_format($lead->deal_value,0) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Expected Purchase</label><div class="val">{!! $lead->expected_purchase_date ? \Carbon\Carbon::parse($lead->expected_purchase_date)->format('d M Y') : '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Priority</label><div class="val">{!! $lead->priority ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Interest Level</label><div class="val">{!! $lead->interest_level ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Decision Maker</label><div class="val">{!! $lead->decision_maker ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Competitor</label><div class="val">{!! $lead->competitor ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Follow-up Date</label><div class="val">{!! $lead->follow_up_date ? \Carbon\Carbon::parse($lead->follow_up_date)->format('d M Y') : '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
           </div>
           @if($lead->requirement)
           <div style="margin-top:.75rem">
@@ -245,12 +253,12 @@
         <div class="lv-section-header"><i class="fas fa-chart-line"></i><span>Lead Tracking</span></div>
         <div class="lv-section-body">
           <div class="lv-fields">
-            <div class="lv-field"><label>Lead Source</label><div class="val">{{ $lead->source ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Campaign Source</label><div class="val">{{ $lead->campaign_source ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Campaign Name</label><div class="val">{{ $lead->campaign_name ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Referral Source</label><div class="val">{{ $lead->referral_source ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="lv-field"><label>Lead Source</label><div class="val">{!! $lead->source ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Campaign Source</label><div class="val">{!! $lead->campaign_source ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Campaign Name</label><div class="val">{!! $lead->campaign_name ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Referral Source</label><div class="val">{!! $lead->referral_source ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
             <div class="lv-field"><label>Created Date</label><div class="val">{{ $lead->created_at->format('d M Y, h:i A') }}</div></div>
-            <div class="lv-field"><label>Last Activity</label><div class="val">{{ $lead->last_activity_date ? \Carbon\Carbon::parse($lead->last_activity_date)->format('d M Y') : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="lv-field"><label>Last Activity</label><div class="val">{!! $lead->last_activity_date ? \Carbon\Carbon::parse($lead->last_activity_date)->format('d M Y') : '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
             @if($lead->is_converted)
             <div class="lv-field"><label>Converted Date</label><div class="val">{{ $lead->converted_date ? \Carbon\Carbon::parse($lead->converted_date)->format('d M Y') : '—' }}</div></div>
             @endif
@@ -281,11 +289,11 @@
         <div class="lv-section-header"><i class="fas fa-info-circle"></i><span>Quick Info</span></div>
         <div class="lv-section-body" style="padding:.75rem">
           <div style="display:flex;flex-direction:column;gap:.6rem">
-            <div class="lv-field"><label>Lead Owner</label><div class="val">{{ $lead->owner ? $lead->owner->name : '<span class="lv-empty">Unassigned</span>' }}</div></div>
+            <div class="lv-field"><label>Lead Owner</label><div class="val">{!! $lead->owner ? $lead->owner->name : '<span class="lv-empty">Unassigned</span>' !!}</div></div>
             <div class="lv-field"><label>Status</label><div class="val">{{ $lead->lead_status ?? 'Not Contacted' }}</div></div>
-            <div class="lv-field"><label>Rating</label><div class="val">{{ $lead->rating ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Deal Value</label><div class="val">{{ $lead->deal_value ? '₹'.number_format($lead->deal_value,0) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
-            <div class="lv-field"><label>Follow-up</label><div class="val">{{ $lead->follow_up_date ? \Carbon\Carbon::parse($lead->follow_up_date)->format('d M Y') : '<span style="color:var(--text-muted);font-style:italic;">—</span>' }}</div></div>
+            <div class="lv-field"><label>Rating</label><div class="val">{!! $lead->rating ?: '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Deal Value</label><div class="val">{!! $lead->deal_value ? '₹'.number_format($lead->deal_value,0) : '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
+            <div class="lv-field"><label>Follow-up</label><div class="val">{!! $lead->follow_up_date ? \Carbon\Carbon::parse($lead->follow_up_date)->format('d M Y') : '<span style="color:var(--text-muted);font-style:italic;">—</span>' !!}</div></div>
           </div>
         </div>
       </div>
@@ -433,15 +441,14 @@ function setActivityType(type, btn) {
   btn.classList.remove('btn-lv-ghost');
   btn.classList.add('btn-lv-primary');
 }
-document.addEventListener('keydown', e => { if(e.key==='Escape') { closeConvertModal(); document.getElementById('lvActDrop').style.display='none'; } });
+document.addEventListener('keydown', e => { if(e.key==='Escape') { closeConvertModal(); document.getElementById('lvActDrop').classList.remove('open'); } });
 function toggleLvMenu(e) {
   e.stopPropagation();
-  const d = document.getElementById('lvActDrop');
-  d.style.display = d.style.display === 'block' ? 'none' : 'block';
+  document.getElementById('lvActDrop').classList.toggle('open');
 }
 document.addEventListener('click', function() {
   const d = document.getElementById('lvActDrop');
-  if (d) d.style.display = 'none';
+  if (d) d.classList.remove('open');
 });
 </script>
 @endsection

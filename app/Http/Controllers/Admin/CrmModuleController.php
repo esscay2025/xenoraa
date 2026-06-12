@@ -4034,4 +4034,164 @@ td{padding:6px 8px;border:1px solid #e5e7eb;font-size:11px;}
 
         return response()->json(['success' => true, 'created' => $created]);
     }
+
+    // ─── Contacts: Clone ─────────────────────────────────────────────────────────
+    public function salesContactsClone($id)
+    {
+        $contact = CrmContact::where('user_id', auth()->id())->findOrFail($id);
+        $clone = $contact->replicate();
+        $clone->first_name = ($contact->first_name ?? 'Contact') . ' (Copy)';
+        $clone->status = 'active';
+        $clone->created_at = now();
+        $clone->updated_at = now();
+        $clone->save();
+        return redirect()->route('admin.crm2.sales.contacts.show', $clone->id)
+            ->with('success', 'Contact cloned successfully.');
+    }
+
+    // ─── Contacts: Bulk Delete ────────────────────────────────────────────────────
+    public function salesContactsBulkDelete(Request $request)
+    {
+        $ids = array_filter(explode(',', $request->input('ids', '')));
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No contacts selected.');
+        }
+        CrmContact::where('user_id', auth()->id())->whereIn('id', $ids)->delete();
+        return redirect()->route('admin.crm2.sales.contacts')->with('success', count($ids).' contact(s) deleted.');
+    }
+
+    // ─── Contacts: Bulk Task ──────────────────────────────────────────────────────
+    public function salesContactsBulkTask(Request $request)
+    {
+        $ids = array_filter(explode(',', $request->input('ids', '')));
+        $subject = $request->input('subject', 'Follow-up Task');
+        $dueDate = $request->input('due_date', now()->addDay()->format('Y-m-d'));
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No contacts selected.');
+        }
+        foreach ($ids as $contactId) {
+            $contact = CrmContact::where('user_id', auth()->id())->find($contactId);
+            if (!$contact) continue;
+            \App\Models\CrmActivity::create([
+                'user_id'      => auth()->id(),
+                'contact_id'   => $contact->id,
+                'related_type' => 'contact',
+                'related_id'   => $contact->id,
+                'type'         => 'Task',
+                'subject'      => $subject,
+                'due_date'     => $dueDate,
+                'assigned_to'  => auth()->id(),
+                'status'       => 'open',
+                'description'  => 'Bulk task created from Contacts listing.',
+            ]);
+        }
+        return redirect()->route('admin.crm2.sales.contacts')->with('success', 'Tasks created for '.count($ids).' contact(s).');
+    }
+
+    // ─── Accounts: Clone ─────────────────────────────────────────────────────────
+    public function salesAccountsClone($id)
+    {
+        $account = CrmAccount::where('user_id', auth()->id())->findOrFail($id);
+        $clone = $account->replicate();
+        $clone->name = ($account->name ?? 'Account') . ' (Copy)';
+        $clone->status = 'active';
+        $clone->created_at = now();
+        $clone->updated_at = now();
+        $clone->save();
+        return redirect()->route('admin.crm2.sales.accounts.show', $clone->id)
+            ->with('success', 'Account cloned successfully.');
+    }
+
+    // ─── Accounts: Bulk Delete ────────────────────────────────────────────────────
+    public function salesAccountsBulkDelete(Request $request)
+    {
+        $ids = array_filter(explode(',', $request->input('ids', '')));
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No accounts selected.');
+        }
+        CrmAccount::where('user_id', auth()->id())->whereIn('id', $ids)->delete();
+        return redirect()->route('admin.crm2.sales.accounts')->with('success', count($ids).' account(s) deleted.');
+    }
+
+    // ─── Accounts: Bulk Task ──────────────────────────────────────────────────────
+    public function salesAccountsBulkTask(Request $request)
+    {
+        $ids = array_filter(explode(',', $request->input('ids', '')));
+        $subject = $request->input('subject', 'Follow-up Task');
+        $dueDate = $request->input('due_date', now()->addDay()->format('Y-m-d'));
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No accounts selected.');
+        }
+        foreach ($ids as $accountId) {
+            $account = CrmAccount::where('user_id', auth()->id())->find($accountId);
+            if (!$account) continue;
+            \App\Models\CrmActivity::create([
+                'user_id'      => auth()->id(),
+                'account_id'   => $account->id,
+                'related_type' => 'account',
+                'related_id'   => $account->id,
+                'type'         => 'Task',
+                'subject'      => $subject,
+                'due_date'     => $dueDate,
+                'assigned_to'  => auth()->id(),
+                'status'       => 'open',
+                'description'  => 'Bulk task created from Accounts listing.',
+            ]);
+        }
+        return redirect()->route('admin.crm2.sales.accounts')->with('success', 'Tasks created for '.count($ids).' account(s).');
+    }
+
+    // ─── Deals: Clone ────────────────────────────────────────────────────────────
+    public function salesDealsClone($id)
+    {
+        $deal = CrmDeal::where('user_id', auth()->id())->findOrFail($id);
+        $clone = $deal->replicate();
+        $clone->name  = (($deal->name ?? $deal->title ?? 'Deal') . ' (Copy)');
+        $clone->title = $clone->name;
+        $clone->stage = 'prospecting';
+        $clone->created_at = now();
+        $clone->updated_at = now();
+        $clone->save();
+        return redirect()->route('admin.crm2.sales.deals.show', $clone->id)
+            ->with('success', 'Deal cloned successfully.');
+    }
+
+    // ─── Deals: Bulk Delete ───────────────────────────────────────────────────────
+    public function salesDealsBulkDelete(Request $request)
+    {
+        $ids = array_filter(explode(',', $request->input('ids', '')));
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No deals selected.');
+        }
+        CrmDeal::where('user_id', auth()->id())->whereIn('id', $ids)->delete();
+        return redirect()->route('admin.crm2.sales.deals')->with('success', count($ids).' deal(s) deleted.');
+    }
+
+    // ─── Deals: Bulk Task ─────────────────────────────────────────────────────────
+    public function salesDealsBulkTask(Request $request)
+    {
+        $ids = array_filter(explode(',', $request->input('ids', '')));
+        $subject = $request->input('subject', 'Follow-up Task');
+        $dueDate = $request->input('due_date', now()->addDay()->format('Y-m-d'));
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'No deals selected.');
+        }
+        foreach ($ids as $dealId) {
+            $deal = CrmDeal::where('user_id', auth()->id())->find($dealId);
+            if (!$deal) continue;
+            \App\Models\CrmActivity::create([
+                'user_id'      => auth()->id(),
+                'deal_id'      => $deal->id,
+                'related_type' => 'deal',
+                'related_id'   => $deal->id,
+                'type'         => 'Task',
+                'subject'      => $subject,
+                'due_date'     => $dueDate,
+                'assigned_to'  => auth()->id(),
+                'status'       => 'open',
+                'description'  => 'Bulk task created from Deals listing.',
+            ]);
+        }
+        return redirect()->route('admin.crm2.sales.deals')->with('success', 'Tasks created for '.count($ids).' deal(s).');
+    }
 }
