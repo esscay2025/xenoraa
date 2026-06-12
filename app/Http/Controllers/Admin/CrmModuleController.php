@@ -2539,7 +2539,7 @@ class CrmModuleController extends Controller
         $allProducts      = CrmProduct::where('user_id',$uid)->get();
         $quotes           = CrmQuote::where('user_id',$uid)->where('account_id',$id)->get();
         $salesOrders      = CrmSalesOrder::where('user_id',$uid)->where('account_id',$id)->get();
-        $purchaseOrders   = CrmPurchaseOrder::where('user_id',$uid)->where('account_id',$id)->get();
+        $purchaseOrders   = collect(); // POs are linked to vendors, not accounts
         $invoices         = CrmInvoice::where('user_id',$uid)->where('account_id',$id)->get();
         $allDeals         = CrmDeal::where('user_id',$uid)->get();
         $allContacts      = CrmContact::where('user_id',$uid)->get();
