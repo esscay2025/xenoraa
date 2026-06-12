@@ -1,359 +1,397 @@
 @extends('layouts.admin')
 @section('title', 'Dashboard')
-@section('page-title', 'Dashboard')
 @section('content')
 
-<style>
-.db-section-title {
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--text-secondary);
-    margin: 2rem 0 0.75rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.db-section-title i { font-size: 0.85rem; }
-.db-stat-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-}
-.db-stat {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1rem 1.1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-    transition: box-shadow 0.15s;
-    text-decoration: none;
-    color: inherit;
-}
-.db-stat:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.15); border-color: var(--primary); }
-.db-stat-icon {
-    width: 36px; height: 36px;
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1rem;
-    margin-bottom: 0.25rem;
-}
-.db-stat-num { font-size: 1.6rem; font-weight: 700; line-height: 1; }
-.db-stat-label { font-size: 0.72rem; color: var(--text-secondary); font-weight: 500; }
-.db-stat-sub { font-size: 0.68rem; color: var(--text-muted, #6b7280); }
+<div class="crm2-page">
 
-.db-content-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.25rem;
-    margin-bottom: 2rem;
-}
-.db-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.1rem 1.25rem;
-}
-.db-card-header {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 0.85rem;
-}
-.db-card-title {
-    font-size: 0.72rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.07em;
-    color: var(--text-secondary);
-}
-.db-row {
-    padding: 0.55rem 0;
-    border-bottom: 1px solid var(--border);
-    display: flex; justify-content: space-between; align-items: center;
-    gap: 0.5rem;
-}
-.db-row:last-child { border-bottom: none; }
-.db-row-name { font-size: 0.82rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 170px; }
-.db-row-meta { font-size: 0.72rem; color: var(--text-secondary); white-space: nowrap; }
-
-.db-quick-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 0.75rem;
-    margin-bottom: 2rem;
-}
-.db-quick-btn {
-    display: flex; align-items: center; gap: 0.6rem;
-    padding: 0.65rem 1rem;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 0.8rem; font-weight: 500;
-    color: var(--text-primary);
-    text-decoration: none;
-    transition: all 0.15s;
-}
-.db-quick-btn:hover { border-color: var(--primary); background: rgba(99,102,241,0.06); color: var(--primary); }
-.db-quick-btn i { font-size: 0.9rem; width: 16px; text-align: center; }
-
-/* colour helpers */
-.ic-blue   { background: rgba(59,130,246,0.12); color: #60a5fa; }
-.ic-green  { background: rgba(34,197,94,0.12);  color: #4ade80; }
-.ic-amber  { background: rgba(245,158,11,0.12); color: #fbbf24; }
-.ic-red    { background: rgba(239,68,68,0.12);  color: #f87171; }
-.ic-purple { background: rgba(168,85,247,0.12); color: #c084fc; }
-.ic-indigo { background: rgba(99,102,241,0.12); color: #818cf8; }
-.ic-teal   { background: rgba(20,184,166,0.12); color: #2dd4bf; }
-.ic-pink   { background: rgba(236,72,153,0.12); color: #f472b6; }
-.ic-orange { background: rgba(249,115,22,0.12); color: #fb923c; }
-</style>
-
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-{{-- CRM MODULE --}}
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-<div class="db-section-title">
-    <i class="fas fa-handshake ic-blue" style="background:none;"></i> CRM
-</div>
-<div class="db-stat-grid">
-    <a href="{{ route('admin.crm2.sales.accounts') }}" class="db-stat">
-        <div class="db-stat-icon ic-blue"><i class="fas fa-building"></i></div>
-        <div class="db-stat-num">{{ $crmAccounts }}</div>
-        <div class="db-stat-label">Accounts</div>
-    </a>
-    <a href="{{ route('admin.crm2.sales.contacts') }}" class="db-stat">
-        <div class="db-stat-icon ic-teal"><i class="fas fa-address-book"></i></div>
-        <div class="db-stat-num">{{ $crmContacts }}</div>
-        <div class="db-stat-label">Contacts</div>
-    </a>
-    <a href="{{ route('admin.crm.leads') }}" class="db-stat">
-        <div class="db-stat-icon ic-amber"><i class="fas fa-user-tag"></i></div>
-        <div class="db-stat-num">{{ $crmLeads }}</div>
-        <div class="db-stat-label">Leads</div>
-    </a>
-    <a href="{{ route('admin.crm2.sales.deals') }}" class="db-stat">
-        <div class="db-stat-icon ic-green"><i class="fas fa-handshake"></i></div>
-        <div class="db-stat-num">{{ $crmDeals }}</div>
-        <div class="db-stat-label">Deals</div>
-        <div class="db-stat-sub">{{ $crmDealsOpen }} open · {{ $crmDealsWon }} won</div>
-    </a>
-    <a href="{{ route('admin.crm2.activities') }}" class="db-stat">
-        <div class="db-stat-icon ic-purple"><i class="fas fa-tasks"></i></div>
-        <div class="db-stat-num">{{ $crmActivities }}</div>
-        <div class="db-stat-label">Open Activities</div>
-    </a>
-</div>
-
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-{{-- INVENTORY MODULE --}}
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-<div class="db-section-title">
-    <i class="fas fa-boxes" style="color:#fb923c;"></i> Inventory
-</div>
-<div class="db-stat-grid">
-    <a href="{{ route('admin.crm2.inventory.quotes') }}" class="db-stat">
-        <div class="db-stat-icon ic-indigo"><i class="fas fa-file-invoice"></i></div>
-        <div class="db-stat-num">{{ $invQuotes }}</div>
-        <div class="db-stat-label">Quotes</div>
-    </a>
-    <a href="{{ route('admin.crm2.inventory.sales-orders') }}" class="db-stat">
-        <div class="db-stat-icon ic-green"><i class="fas fa-shopping-cart"></i></div>
-        <div class="db-stat-num">{{ $invSalesOrders }}</div>
-        <div class="db-stat-label">Sales Orders</div>
-    </a>
-    <a href="{{ route('admin.crm2.inventory.purchase-orders') }}" class="db-stat">
-        <div class="db-stat-icon ic-amber"><i class="fas fa-truck"></i></div>
-        <div class="db-stat-num">{{ $invPOs }}</div>
-        <div class="db-stat-label">Purchase Orders</div>
-    </a>
-    <a href="{{ route('admin.crm2.inventory.invoices') }}" class="db-stat">
-        <div class="db-stat-icon ic-red"><i class="fas fa-receipt"></i></div>
-        <div class="db-stat-num">{{ $invInvoices }}</div>
-        <div class="db-stat-label">Invoices</div>
-        <div class="db-stat-sub">{{ $invInvoicesDue }} pending</div>
-    </a>
-    <a href="{{ route('admin.crm2.inventory.vendors') }}" class="db-stat">
-        <div class="db-stat-icon ic-teal"><i class="fas fa-store"></i></div>
-        <div class="db-stat-num">{{ $invVendors }}</div>
-        <div class="db-stat-label">Vendors</div>
-    </a>
-    <div class="db-stat">
-        <div class="db-stat-icon ic-green"><i class="fas fa-rupee-sign"></i></div>
-        <div class="db-stat-num" style="font-size:1.2rem;">₹{{ number_format($invRevenue, 0) }}</div>
-        <div class="db-stat-label">Revenue (Paid)</div>
+  {{-- ── Page Header ─────────────────────────────────────────────────────── --}}
+  <div class="crm2-header">
+    <div>
+      <h1 class="crm2-title"><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+      <p class="crm2-subtitle">Welcome back, {{ Auth::user()->name }}. Here's your business overview.</p>
     </div>
-</div>
-
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-{{-- E-COMMERCE MODULE --}}
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-<div class="db-section-title">
-    <i class="fas fa-shopping-bag" style="color:#f472b6;"></i> E-Commerce
-</div>
-<div class="db-stat-grid">
-    <a href="{{ route('admin.ecommerce.products') }}" class="db-stat">
-        <div class="db-stat-icon ic-pink"><i class="fas fa-box-open"></i></div>
-        <div class="db-stat-num">{{ $ecomProducts }}</div>
-        <div class="db-stat-label">Products</div>
-        <div class="db-stat-sub">{{ $ecomActive }} active</div>
-    </a>
-    <a href="{{ route('admin.ecommerce.categories') }}" class="db-stat">
-        <div class="db-stat-icon ic-purple"><i class="fas fa-tags"></i></div>
-        <div class="db-stat-label" style="font-size:0.8rem; margin-top:0.25rem;">Categories</div>
-    </a>
-    <a href="{{ route('admin.ecommerce.reviews') }}" class="db-stat">
-        <div class="db-stat-icon ic-amber"><i class="fas fa-star"></i></div>
-        <div class="db-stat-label" style="font-size:0.8rem; margin-top:0.25rem;">Reviews</div>
-    </a>
-</div>
-
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-{{-- POINT OF SALE MODULE --}}
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-<div class="db-section-title">
-    <i class="fas fa-cash-register" style="color:#2dd4bf;"></i> Point of Sale
-</div>
-<div class="db-stat-grid">
-    <a href="{{ route('admin.pos.orders') }}" class="db-stat">
-        <div class="db-stat-icon ic-teal"><i class="fas fa-receipt"></i></div>
-        <div class="db-stat-num">{{ $posOrders }}</div>
-        <div class="db-stat-label">Total Orders</div>
-    </a>
-    <div class="db-stat">
-        <div class="db-stat-icon ic-green"><i class="fas fa-rupee-sign"></i></div>
-        <div class="db-stat-num" style="font-size:1.2rem;">₹{{ number_format($posTodaySales, 0) }}</div>
-        <div class="db-stat-label">Today's Sales</div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <a href="{{ route('admin.crm2.inventory.quotes.create') }}" class="crm2-btn crm2-btn-primary btn-sm">
+        <i class="fas fa-plus"></i> New Quote
+      </a>
+      <a href="{{ route('admin.crm2.sales.deals.create') }}" class="crm2-btn crm2-btn-secondary btn-sm">
+        <i class="fas fa-handshake"></i> New Deal
+      </a>
+      <a href="{{ route('admin.pos.terminal') }}" class="crm2-btn crm2-btn-secondary btn-sm">
+        <i class="fas fa-cash-register"></i> POS Terminal
+      </a>
     </div>
-    <a href="{{ route('admin.pos.sessions') }}" class="db-stat">
-        <div class="db-stat-icon {{ $posActiveSessions > 0 ? 'ic-green' : 'ic-red' }}"><i class="fas fa-store{{ $posActiveSessions > 0 ? '' : '-slash' }}"></i></div>
-        <div class="db-stat-num">{{ $posActiveSessions }}</div>
-        <div class="db-stat-label">Active Sessions</div>
-    </a>
-    <a href="{{ route('admin.pos.terminal') }}" class="db-stat">
-        <div class="db-stat-icon ic-indigo"><i class="fas fa-cash-register"></i></div>
-        <div class="db-stat-label" style="font-size:0.8rem; margin-top:0.25rem; font-weight:600;">Open Terminal</div>
-    </a>
-</div>
+  </div>
 
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-{{-- SITE BUILDER MODULE --}}
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-<div class="db-section-title">
-    <i class="fas fa-globe" style="color:#818cf8;"></i> Site Builder
-</div>
-<div class="db-stat-grid">
-    <a href="{{ route('admin.blog.index') }}" class="db-stat">
-        <div class="db-stat-icon ic-indigo"><i class="fas fa-pen-nib"></i></div>
-        <div class="db-stat-num">{{ $sitePosts }}</div>
-        <div class="db-stat-label">Published Posts</div>
-        <div class="db-stat-sub">{{ $siteDrafts }} drafts</div>
+  {{-- ── Section: CRM ──────────────────────────────────────────────────────── --}}
+  <div style="display:flex; align-items:center; gap:10px; margin:0 0 14px;">
+    <span style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--crm-secondary);">CRM</span>
+    <div style="flex:1; height:1px; background:var(--crm-border);"></div>
+    <a href="{{ route('admin.crm2.analysis') }}" style="font-size:0.75rem; color:var(--crm-primary); text-decoration:none; white-space:nowrap;">View Analysis <i class="fas fa-arrow-right" style="font-size:0.65rem;"></i></a>
+  </div>
+  <div class="crm2-kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); margin-bottom:28px;">
+    <a href="{{ route('admin.crm2.sales.accounts') }}" class="crm2-kpi-card indigo" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-building"></i></div>
+      <div class="kpi-body"><div class="kpi-value">{{ number_format($crmAccounts) }}</div><div class="kpi-label">Accounts</div></div>
     </a>
-    <a href="{{ route('admin.users.index') }}" class="db-stat">
-        <div class="db-stat-icon ic-blue"><i class="fas fa-users"></i></div>
-        <div class="db-stat-num">{{ $siteUsers }}</div>
-        <div class="db-stat-label">Team Members</div>
+    <a href="{{ route('admin.crm2.sales.contacts') }}" class="crm2-kpi-card teal" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-address-book"></i></div>
+      <div class="kpi-body"><div class="kpi-value">{{ number_format($crmContacts) }}</div><div class="kpi-label">Contacts</div></div>
     </a>
-    <a href="{{ route('admin.site.index') }}" class="db-stat">
-        <div class="db-stat-icon ic-purple"><i class="fas fa-cog"></i></div>
-        <div class="db-stat-label" style="font-size:0.8rem; margin-top:0.25rem; font-weight:600;">Site Settings</div>
+    <a href="{{ route('admin.crm.leads') }}" class="crm2-kpi-card yellow" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-user-tag"></i></div>
+      <div class="kpi-body"><div class="kpi-value">{{ number_format($crmLeads) }}</div><div class="kpi-label">Leads</div></div>
     </a>
-</div>
+    <a href="{{ route('admin.crm2.sales.deals') }}" class="crm2-kpi-card orange" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-funnel-dollar"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ number_format($crmDeals) }}</div>
+        <div class="kpi-label">Deals</div>
+        <div class="kpi-change up"><i class="fas fa-check-circle"></i> {{ $crmDealsWon }} won</div>
+      </div>
+    </a>
+    <a href="{{ route('admin.crm2.activities') }}" class="crm2-kpi-card purple" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-tasks"></i></div>
+      <div class="kpi-body"><div class="kpi-value">{{ number_format($crmActivities) }}</div><div class="kpi-label">Open Activities</div></div>
+    </a>
+    <div class="crm2-kpi-card green">
+      <div class="kpi-icon"><i class="fas fa-rupee-sign"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-value" style="font-size:1.15rem;">₹{{ number_format($crmWonValue, 0) }}</div>
+        <div class="kpi-label">Won Revenue</div>
+      </div>
+    </div>
+    <div class="crm2-kpi-card blue">
+      <div class="kpi-icon"><i class="fas fa-chart-bar"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-value" style="font-size:1.15rem;">₹{{ number_format($crmPipelineVal, 0) }}</div>
+        <div class="kpi-label">Pipeline Value</div>
+      </div>
+    </div>
+  </div>
 
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-{{-- QUICK ACTIONS --}}
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-<div class="db-section-title">
-    <i class="fas fa-bolt" style="color:#fbbf24;"></i> Quick Actions
-</div>
-<div class="db-quick-grid">
-    <a href="{{ route('admin.crm2.sales.accounts.create') }}" class="db-quick-btn"><i class="fas fa-building" style="color:#60a5fa;"></i> New Account</a>
-    <a href="{{ route('admin.crm2.sales.contacts.create') }}" class="db-quick-btn"><i class="fas fa-user-plus" style="color:#2dd4bf;"></i> New Contact</a>
-    <a href="{{ route('admin.crm2.sales.deals.create') }}" class="db-quick-btn"><i class="fas fa-handshake" style="color:#4ade80;"></i> New Deal</a>
-    <a href="{{ route('admin.crm2.inventory.quotes.create') }}" class="db-quick-btn"><i class="fas fa-file-invoice" style="color:#818cf8;"></i> New Quote</a>
-    <a href="{{ route('admin.crm2.inventory.sales-orders.create') }}" class="db-quick-btn"><i class="fas fa-shopping-cart" style="color:#4ade80;"></i> New Sales Order</a>
-    <a href="{{ route('admin.crm2.inventory.invoices.create') }}" class="db-quick-btn"><i class="fas fa-receipt" style="color:#f87171;"></i> New Invoice</a>
-    <a href="{{ route('admin.crm2.inventory.purchase-orders.create') }}" class="db-quick-btn"><i class="fas fa-truck" style="color:#fbbf24;"></i> New Purchase Order</a>
-    <a href="{{ route('admin.ecommerce.products.create') }}" class="db-quick-btn"><i class="fas fa-box-open" style="color:#f472b6;"></i> Add Product</a>
-    <a href="{{ route('admin.pos.terminal') }}" class="db-quick-btn"><i class="fas fa-cash-register" style="color:#2dd4bf;"></i> POS Terminal</a>
-    <a href="{{ route('admin.blog.create') }}" class="db-quick-btn"><i class="fas fa-pen-nib" style="color:#818cf8;"></i> New Blog Post</a>
-    <a href="{{ route('admin.calendar.index') }}" class="db-quick-btn"><i class="fas fa-calendar-alt" style="color:#60a5fa;"></i> Calendar</a>
-    <a href="{{ route('admin.crm.conversations') }}" class="db-quick-btn"><i class="fas fa-comments" style="color:#fbbf24;"></i> Chat Monitor</a>
-</div>
+  {{-- ── Section: Inventory ────────────────────────────────────────────────── --}}
+  <div style="display:flex; align-items:center; gap:10px; margin:0 0 14px;">
+    <span style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--crm-secondary);">Inventory</span>
+    <div style="flex:1; height:1px; background:var(--crm-border);"></div>
+    <a href="{{ route('admin.crm2.inventory') }}" style="font-size:0.75rem; color:var(--crm-primary); text-decoration:none; white-space:nowrap;">View All <i class="fas fa-arrow-right" style="font-size:0.65rem;"></i></a>
+  </div>
+  <div class="crm2-kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); margin-bottom:28px;">
+    <a href="{{ route('admin.crm2.inventory.quotes') }}" class="crm2-kpi-card indigo" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-file-invoice"></i></div>
+      <div class="kpi-body"><div class="kpi-value">{{ number_format($invQuotes) }}</div><div class="kpi-label">Quotes</div></div>
+    </a>
+    <a href="{{ route('admin.crm2.inventory.sales-orders') }}" class="crm2-kpi-card green" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-shopping-cart"></i></div>
+      <div class="kpi-body"><div class="kpi-value">{{ number_format($invSalesOrders) }}</div><div class="kpi-label">Sales Orders</div></div>
+    </a>
+    <a href="{{ route('admin.crm2.inventory.purchase-orders') }}" class="crm2-kpi-card yellow" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-truck"></i></div>
+      <div class="kpi-body"><div class="kpi-value">{{ number_format($invPOs) }}</div><div class="kpi-label">Purchase Orders</div></div>
+    </a>
+    <a href="{{ route('admin.crm2.inventory.invoices') }}" class="crm2-kpi-card red" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-receipt"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ number_format($invInvoices) }}</div>
+        <div class="kpi-label">Invoices</div>
+        @if($invInvoicesDue > 0)
+        <div class="kpi-change down"><i class="fas fa-clock"></i> {{ $invInvoicesDue }} pending</div>
+        @endif
+      </div>
+    </a>
+    <a href="{{ route('admin.crm2.inventory.vendors') }}" class="crm2-kpi-card teal" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-store"></i></div>
+      <div class="kpi-body"><div class="kpi-value">{{ number_format($invVendors) }}</div><div class="kpi-label">Vendors</div></div>
+    </a>
+    <div class="crm2-kpi-card green">
+      <div class="kpi-icon"><i class="fas fa-rupee-sign"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-value" style="font-size:1.15rem;">₹{{ number_format($invRevenue, 0) }}</div>
+        <div class="kpi-label">Revenue (Paid)</div>
+      </div>
+    </div>
+  </div>
 
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-{{-- RECENT ACTIVITY PANELS --}}
-{{-- ═══════════════════════════════════════════════════════════════════════ --}}
-<div class="db-section-title">
-    <i class="fas fa-history" style="color:#94a3b8;"></i> Recent Activity
-</div>
-<div class="db-content-grid">
+  {{-- ── Charts Row ────────────────────────────────────────────────────────── --}}
+  <div class="crm2-charts-grid" style="margin-bottom:28px;">
+    <div class="crm2-card chart-card">
+      <div class="crm2-card-header">
+        <h3><i class="fas fa-chart-area"></i> Invoice Revenue (Last 6 Months)</h3>
+      </div>
+      <div class="crm2-card-body"><canvas id="revenueChart" height="220"></canvas></div>
+    </div>
+    <div class="crm2-card chart-card">
+      <div class="crm2-card-header">
+        <h3><i class="fas fa-funnel-dollar"></i> Deal Pipeline by Stage</h3>
+      </div>
+      <div class="crm2-card-body"><canvas id="pipelineChart" height="220"></canvas></div>
+    </div>
+  </div>
+
+  {{-- ── Section: E-Commerce + POS + Site ────────────────────────────────── --}}
+  <div style="display:flex; align-items:center; gap:10px; margin:0 0 14px;">
+    <span style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--crm-secondary);">Other Modules</span>
+    <div style="flex:1; height:1px; background:var(--crm-border);"></div>
+  </div>
+  <div class="crm2-kpi-grid" style="grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); margin-bottom:28px;">
+    <a href="{{ route('admin.ecommerce.products') }}" class="crm2-kpi-card purple" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-box-open"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ number_format($ecomProducts) }}</div>
+        <div class="kpi-label">Products</div>
+        <div class="kpi-change up"><i class="fas fa-circle"></i> {{ $ecomActive }} active</div>
+      </div>
+    </a>
+    <a href="{{ route('admin.pos.orders') }}" class="crm2-kpi-card teal" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-receipt"></i></div>
+      <div class="kpi-body"><div class="kpi-value">{{ number_format($posOrders) }}</div><div class="kpi-label">POS Orders</div></div>
+    </a>
+    <div class="crm2-kpi-card green">
+      <div class="kpi-icon"><i class="fas fa-rupee-sign"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-value" style="font-size:1.15rem;">₹{{ number_format($posTodaySales, 0) }}</div>
+        <div class="kpi-label">Today's POS Sales</div>
+      </div>
+    </div>
+    <a href="{{ route('admin.pos.sessions') }}" class="crm2-kpi-card {{ $posActiveSessions > 0 ? 'green' : 'red' }}" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-store{{ $posActiveSessions > 0 ? '' : '-slash' }}"></i></div>
+      <div class="kpi-body"><div class="kpi-value">{{ $posActiveSessions }}</div><div class="kpi-label">Active Sessions</div></div>
+    </a>
+    <a href="{{ route('admin.blog.index') }}" class="crm2-kpi-card indigo" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-pen-nib"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-value">{{ number_format($sitePosts) }}</div>
+        <div class="kpi-label">Published Posts</div>
+        @if($siteDrafts > 0)
+        <div class="kpi-change" style="color:var(--crm-secondary);"><i class="fas fa-file"></i> {{ $siteDrafts }} drafts</div>
+        @endif
+      </div>
+    </a>
+    <a href="{{ route('admin.users.index') }}" class="crm2-kpi-card blue" style="text-decoration:none;">
+      <div class="kpi-icon"><i class="fas fa-users"></i></div>
+      <div class="kpi-body"><div class="kpi-value">{{ number_format($siteUsers) }}</div><div class="kpi-label">Team Members</div></div>
+    </a>
+  </div>
+
+  {{-- ── Recent Activity Tables ────────────────────────────────────────────── --}}
+  <div style="display:flex; align-items:center; gap:10px; margin:0 0 14px;">
+    <span style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--crm-secondary);">Recent Activity</span>
+    <div style="flex:1; height:1px; background:var(--crm-border);"></div>
+  </div>
+  <div class="crm2-charts-grid" style="margin-bottom:28px;">
 
     {{-- Recent Leads --}}
-    <div class="db-card">
-        <div class="db-card-header">
-            <span class="db-card-title"><i class="fas fa-user-tag" style="color:#fbbf24; margin-right:0.35rem;"></i> Recent Leads</span>
-            <a href="{{ route('admin.crm.leads') }}" class="btn btn-outline btn-xs">View All</a>
-        </div>
-        @forelse($recentLeads as $lead)
-        <div class="db-row">
-            <span class="db-row-name">{{ $lead->name ?? ($lead->first_name . ' ' . $lead->last_name) }}</span>
-            <span class="db-row-meta">{{ $lead->created_at->diffForHumans() }}</span>
-        </div>
-        @empty
-        <p class="text-sm text-muted">No leads yet.</p>
-        @endforelse
-    </div>
-
-    {{-- Recent Deals --}}
-    <div class="db-card">
-        <div class="db-card-header">
-            <span class="db-card-title"><i class="fas fa-handshake" style="color:#4ade80; margin-right:0.35rem;"></i> Recent Deals</span>
-            <a href="{{ route('admin.crm2.sales.deals') }}" class="btn btn-outline btn-xs">View All</a>
-        </div>
-        @forelse($recentDeals as $deal)
-        <div class="db-row">
-            <span class="db-row-name">{{ Str::limit($deal->name ?? $deal->deal_name ?? 'Untitled', 35) }}</span>
-            <span class="badge badge-{{ $deal->stage === 'Closed Won' ? 'success' : ($deal->stage === 'Closed Lost' ? 'danger' : 'info') }}" style="font-size:0.65rem;">{{ $deal->stage ?? 'Open' }}</span>
-        </div>
-        @empty
-        <p class="text-sm text-muted">No deals yet.</p>
-        @endforelse
+    <div class="crm2-card">
+      <div class="crm2-card-header">
+        <h3><i class="fas fa-user-tag"></i> Recent Leads</h3>
+        <a href="{{ route('admin.crm.leads') }}" class="crm2-btn crm2-btn-ghost btn-sm">View All</a>
+      </div>
+      <div class="crm2-card-body p-0">
+        @if($recentLeads->isEmpty())
+          <div class="crm2-empty" style="padding:2rem; text-align:center; color:var(--crm-secondary);"><i class="fas fa-user-tag" style="font-size:2rem; margin-bottom:0.5rem; display:block; opacity:0.3;"></i><p style="margin:0; font-size:0.85rem;">No leads yet.</p></div>
+        @else
+        <table class="crm2-table">
+          <thead><tr><th>Name</th><th>Source</th><th>Status</th><th>Added</th></tr></thead>
+          <tbody>
+            @foreach($recentLeads as $lead)
+            <tr>
+              <td style="font-weight:500;">{{ $lead->name ?? ($lead->first_name . ' ' . $lead->last_name) }}</td>
+              <td><span class="crm2-badge" style="background:rgba(99,102,241,0.1);color:#818cf8;">{{ $lead->source ?? '—' }}</span></td>
+              <td><span class="crm2-badge status-{{ strtolower(str_replace(' ','_',$lead->status ?? 'new')) }}">{{ $lead->status ?? 'New' }}</span></td>
+              <td style="color:var(--crm-secondary); font-size:0.78rem;">{{ $lead->created_at->diffForHumans() }}</td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+        @endif
+      </div>
     </div>
 
     {{-- Recent Invoices --}}
-    <div class="db-card">
-        <div class="db-card-header">
-            <span class="db-card-title"><i class="fas fa-receipt" style="color:#f87171; margin-right:0.35rem;"></i> Recent Invoices</span>
-            <a href="{{ route('admin.crm2.inventory.invoices') }}" class="btn btn-outline btn-xs">View All</a>
-        </div>
-        @forelse($recentInvoices as $inv)
-        <div class="db-row">
-            <span class="db-row-name">{{ $inv->invoice_number ?? $inv->subject }}</span>
-            <span class="badge badge-{{ $inv->status === 'Paid' ? 'success' : ($inv->status === 'Overdue' ? 'danger' : 'warning') }}" style="font-size:0.65rem;">{{ $inv->status }}</span>
-        </div>
-        @empty
-        <p class="text-sm text-muted">No invoices yet.</p>
-        @endforelse
+    <div class="crm2-card">
+      <div class="crm2-card-header">
+        <h3><i class="fas fa-receipt"></i> Recent Invoices</h3>
+        <a href="{{ route('admin.crm2.inventory.invoices') }}" class="crm2-btn crm2-btn-ghost btn-sm">View All</a>
+      </div>
+      <div class="crm2-card-body p-0">
+        @if($recentInvoices->isEmpty())
+          <div class="crm2-empty" style="padding:2rem; text-align:center; color:var(--crm-secondary);"><i class="fas fa-receipt" style="font-size:2rem; margin-bottom:0.5rem; display:block; opacity:0.3;"></i><p style="margin:0; font-size:0.85rem;">No invoices yet.</p></div>
+        @else
+        <table class="crm2-table">
+          <thead><tr><th>Invoice #</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody>
+            @foreach($recentInvoices as $inv)
+            <tr>
+              <td style="font-weight:500; font-size:0.82rem;">{{ $inv->invoice_number ?? '—' }}</td>
+              <td style="font-weight:600;">₹{{ number_format($inv->grand_total ?? 0, 0) }}</td>
+              <td><span class="crm2-badge status-{{ strtolower($inv->status ?? 'draft') }}">{{ $inv->status ?? 'Draft' }}</span></td>
+              <td style="color:var(--crm-secondary); font-size:0.78rem;">{{ $inv->created_at->diffForHumans() }}</td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+        @endif
+      </div>
+    </div>
+
+  </div>
+
+  <div class="crm2-charts-grid" style="margin-bottom:28px;">
+
+    {{-- Recent Deals --}}
+    <div class="crm2-card">
+      <div class="crm2-card-header">
+        <h3><i class="fas fa-handshake"></i> Recent Deals</h3>
+        <a href="{{ route('admin.crm2.sales.deals') }}" class="crm2-btn crm2-btn-ghost btn-sm">View All</a>
+      </div>
+      <div class="crm2-card-body p-0">
+        @if($recentDeals->isEmpty())
+          <div class="crm2-empty" style="padding:2rem; text-align:center; color:var(--crm-secondary);"><i class="fas fa-handshake" style="font-size:2rem; margin-bottom:0.5rem; display:block; opacity:0.3;"></i><p style="margin:0; font-size:0.85rem;">No deals yet.</p></div>
+        @else
+        <table class="crm2-table">
+          <thead><tr><th>Deal Name</th><th>Value</th><th>Stage</th><th>Added</th></tr></thead>
+          <tbody>
+            @foreach($recentDeals as $deal)
+            <tr>
+              <td style="font-weight:500;">{{ Str::limit($deal->name ?? $deal->deal_name ?? 'Untitled', 28) }}</td>
+              <td style="font-weight:600;">₹{{ number_format($deal->amount ?? 0, 0) }}</td>
+              <td><span class="crm2-badge stage-{{ strtolower(str_replace(' ','_',$deal->stage ?? 'prospecting')) }}">{{ ucwords(str_replace('_', ' ', $deal->stage ?? 'Prospecting')) }}</span></td>
+              <td style="color:var(--crm-secondary); font-size:0.78rem;">{{ $deal->created_at->diffForHumans() }}</td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+        @endif
+      </div>
     </div>
 
     {{-- Recent Blog Posts --}}
-    <div class="db-card">
-        <div class="db-card-header">
-            <span class="db-card-title"><i class="fas fa-pen-nib" style="color:#818cf8; margin-right:0.35rem;"></i> Recent Posts</span>
-            <a href="{{ route('admin.blog.index') }}" class="btn btn-outline btn-xs">View All</a>
-        </div>
-        @forelse($recentPosts as $post)
-        <div class="db-row">
-            <span class="db-row-name">{{ Str::limit($post->title, 35) }}</span>
-            <span class="badge {{ $post->status === 'published' ? 'badge-success' : 'badge-secondary' }}" style="font-size:0.65rem;">{{ $post->status }}</span>
-        </div>
-        @empty
-        <p class="text-sm text-muted">No posts yet.</p>
-        @endforelse
+    <div class="crm2-card">
+      <div class="crm2-card-header">
+        <h3><i class="fas fa-pen-nib"></i> Recent Posts</h3>
+        <a href="{{ route('admin.blog.index') }}" class="crm2-btn crm2-btn-ghost btn-sm">View All</a>
+      </div>
+      <div class="crm2-card-body p-0">
+        @if($recentPosts->isEmpty())
+          <div class="crm2-empty" style="padding:2rem; text-align:center; color:var(--crm-secondary);"><i class="fas fa-pen-nib" style="font-size:2rem; margin-bottom:0.5rem; display:block; opacity:0.3;"></i><p style="margin:0; font-size:0.85rem;">No posts yet.</p></div>
+        @else
+        <table class="crm2-table">
+          <thead><tr><th>Title</th><th>Status</th><th>Published</th></tr></thead>
+          <tbody>
+            @foreach($recentPosts as $post)
+            <tr>
+              <td style="font-weight:500;">{{ Str::limit($post->title, 35) }}</td>
+              <td><span class="crm2-badge status-{{ $post->status === 'published' ? 'active' : 'draft' }}">{{ ucfirst($post->status) }}</span></td>
+              <td style="color:var(--crm-secondary); font-size:0.78rem;">{{ $post->created_at->diffForHumans() }}</td>
+            </tr>
+            @endforeach
+          </tbody>
+        </table>
+        @endif
+      </div>
     </div>
+
+  </div>
+
+  {{-- ── Quick Actions ─────────────────────────────────────────────────────── --}}
+  <div style="display:flex; align-items:center; gap:10px; margin:0 0 14px;">
+    <span style="font-size:0.7rem; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--crm-secondary);">Quick Actions</span>
+    <div style="flex:1; height:1px; background:var(--crm-border);"></div>
+  </div>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap:10px; margin-bottom:32px;">
+    @php
+    $quickActions = [
+        ['route' => 'admin.crm2.sales.accounts.create', 'icon' => 'fas fa-building',      'color' => '#60a5fa', 'label' => 'New Account'],
+        ['route' => 'admin.crm2.sales.contacts.create', 'icon' => 'fas fa-user-plus',     'color' => '#2dd4bf', 'label' => 'New Contact'],
+        ['route' => 'admin.crm2.sales.deals.create',    'icon' => 'fas fa-handshake',     'color' => '#4ade80', 'label' => 'New Deal'],
+        ['route' => 'admin.crm2.inventory.quotes.create','icon' => 'fas fa-file-invoice', 'color' => '#818cf8', 'label' => 'New Quote'],
+        ['route' => 'admin.crm2.inventory.sales-orders.create','icon' => 'fas fa-shopping-cart','color' => '#4ade80','label' => 'New Sales Order'],
+        ['route' => 'admin.crm2.inventory.invoices.create','icon' => 'fas fa-receipt',    'color' => '#f87171', 'label' => 'New Invoice'],
+        ['route' => 'admin.crm2.inventory.purchase-orders.create','icon' => 'fas fa-truck','color' => '#fbbf24','label' => 'New Purchase Order'],
+        ['route' => 'admin.ecommerce.products.create',  'icon' => 'fas fa-box-open',      'color' => '#f472b6', 'label' => 'Add Product'],
+        ['route' => 'admin.pos.terminal',               'icon' => 'fas fa-cash-register', 'color' => '#2dd4bf', 'label' => 'POS Terminal'],
+        ['route' => 'admin.blog.create',                'icon' => 'fas fa-pen-nib',       'color' => '#818cf8', 'label' => 'New Blog Post'],
+        ['route' => 'admin.calendar.index',             'icon' => 'fas fa-calendar-alt',  'color' => '#60a5fa', 'label' => 'Calendar'],
+        ['route' => 'admin.crm.conversations',          'icon' => 'fas fa-comments',      'color' => '#fbbf24', 'label' => 'Chat Monitor'],
+    ];
+    @endphp
+    @foreach($quickActions as $qa)
+    <a href="{{ route($qa['route']) }}" style="display:flex; align-items:center; gap:10px; padding:12px 16px; background:var(--crm-surface); border:1px solid var(--crm-border); border-radius:var(--crm-radius); font-size:0.82rem; font-weight:500; color:var(--crm-text); text-decoration:none; transition:var(--crm-transition);"
+       onmouseover="this.style.borderColor='var(--crm-primary)'; this.style.background='var(--crm-hover)';"
+       onmouseout="this.style.borderColor='var(--crm-border)'; this.style.background='var(--crm-surface)';">
+      <i class="{{ $qa['icon'] }}" style="color:{{ $qa['color'] }}; font-size:0.95rem; width:16px; text-align:center;"></i>
+      {{ $qa['label'] }}
+    </a>
+    @endforeach
+  </div>
 
 </div>
 
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+Chart.defaults.font.family = 'Inter, -apple-system, sans-serif';
+Chart.defaults.color = '#94a3b8';
+
+// ── Revenue Chart ──────────────────────────────────────────────────────────
+const revData = @json($monthlyRevenue);
+if (document.getElementById('revenueChart')) {
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+      labels: revData.length ? revData.map(d => d.month) : ['Jan','Feb','Mar','Apr','May','Jun'],
+      datasets: [{
+        label: 'Revenue (₹)',
+        data: revData.length ? revData.map(d => d.revenue) : [0,0,0,0,0,0],
+        borderColor: '#6366f1',
+        backgroundColor: 'rgba(99,102,241,0.12)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 5,
+        pointBackgroundColor: '#6366f1',
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { callback: v => '₹' + v.toLocaleString() } },
+        x: { grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+
+// ── Pipeline Chart ─────────────────────────────────────────────────────────
+const pipeData = @json($dealsByStage);
+const stageColors = {
+  prospecting: '#6366f1', qualification: '#8b5cf6',
+  proposal: '#f59e0b', negotiation: '#f97316',
+  closed_won: '#22c55e', closed_lost: '#ef4444'
+};
+if (document.getElementById('pipelineChart')) {
+  new Chart(document.getElementById('pipelineChart'), {
+    type: 'bar',
+    data: {
+      labels: pipeData.map(d => d.stage.replace(/_/g,' ').replace(/\b\w/g, l => l.toUpperCase())),
+      datasets: [{
+        label: 'Deals',
+        data: pipeData.map(d => d.count),
+        backgroundColor: pipeData.map(d => stageColors[d.stage] || '#6366f1'),
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { stepSize: 1 } },
+        x: { grid: { color: 'rgba(255,255,255,0.05)' } }
+      }
+    }
+  });
+}
+</script>
+@endpush
 @endsection
