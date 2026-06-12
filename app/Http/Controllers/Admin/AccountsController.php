@@ -196,10 +196,10 @@ class AccountsController extends Controller
         $incomes           = $query->paginate(25);
         $totalIncome       = AccIncome::where('tenant_owner_id', $tid)->where('status', 'received')->sum('amount');
         $thisMonthIncome   = AccIncome::where('tenant_owner_id', $tid)->where('status', 'received')->whereMonth('income_date', now()->month)->whereYear('income_date', now()->year)->sum('amount');
+        $recurringCount = AccIncome::where('tenant_owner_id', $tid)->where('is_recurring', true)->count();
         $pendingIncome     = AccIncome::where('tenant_owner_id', $tid)->where('status', 'pending')->sum('amount');
-        $recurringCount    = AccIncome::where('tenant_owner_id', $tid)->where('is_recurring', true)->count();
-
-        return view('admin.accounts.income', compact('incomes', 'bankAccounts', 'totalIncome', 'thisMonthIncome', 'pendingIncome', 'recurringCount'));
+        $categories = AccIncome::where('tenant_owner_id', $tid)->whereNotNull('category')->distinct()->pluck('category')->sort()->values();
+        return view('admin.accounts.income', compact('incomes', 'bankAccounts', 'totalIncome', 'thisMonthIncome', 'pendingIncome', 'recurringCount', 'categories'));
     }
 
     public function incomeStore(Request $request)
@@ -271,7 +271,8 @@ class AccountsController extends Controller
         $pendingExpenses    = AccExpense::where('tenant_owner_id', $tid)->where('status', 'pending')->sum('amount');
         $billableExpenses   = AccExpense::where('tenant_owner_id', $tid)->where('is_billable', true)->sum('amount');
 
-        return view('admin.accounts.expenses', compact('expenses', 'bankAccounts', 'totalExpenses', 'thisMonthExpenses', 'pendingExpenses', 'billableExpenses'));
+        $categories = AccExpense::where('tenant_owner_id', $tid)->whereNotNull('category')->distinct()->pluck('category')->sort()->values();
+        return view('admin.accounts.expenses', compact('expenses', 'bankAccounts', 'totalExpenses', 'thisMonthExpenses', 'pendingExpenses', 'billableExpenses', 'categories'));
     }
 
     public function expensesStore(Request $request)
@@ -324,10 +325,10 @@ class AccountsController extends Controller
     }
 
     // ─── Chart of Accounts ──────────────────────────────────────
-    public function chartOfAccounts()
+    public function coa()
     {
         $accounts = AccChartOfAccount::where('tenant_owner_id', $this->tenantId())->orderBy('type')->orderBy('code')->orderBy('name')->get();
-        return view('admin.accounts.chart-of-accounts', compact('accounts'));
+        $accountsByType = $accounts->groupBy('type'); return view('admin.accounts.chart-of-accounts', compact('accounts', 'accountsByType'));
     }
 
     public function coaStore(Request $request)
@@ -372,7 +373,7 @@ class AccountsController extends Controller
     }
 
     // ─── Journal Entries ─────────────────────────────────────────
-    public function journalEntries()
+    public function journal()
     {
         $tid = $this->tenantId();
         $journalEntries = AccJournalEntry::where('tenant_owner_id', $tid)->with('lines')->orderByDesc('entry_date')->paginate(20);

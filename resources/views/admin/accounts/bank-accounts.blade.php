@@ -2,172 +2,180 @@
 @section('title', 'Bank Accounts')
 @push('styles')
 <style>
-.acc-page{padding:1.5rem 2rem;}
-.acc-page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem;}
-.acc-page-title{font-size:1.5rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.6rem;}
-.acc-page-title i{color:#6366f1;}
-.acc-bank-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-bottom:1.5rem;}
-.acc-bank-card{background:var(--card-bg);border:1px solid var(--border-color);border-radius:12px;padding:1.3rem 1.5rem;display:flex;flex-direction:column;gap:.8rem;position:relative;}
-.acc-bank-card-top{display:flex;align-items:center;gap:.8rem;}
-.acc-bank-card-icon{width:44px;height:44px;border-radius:10px;background:rgba(99,102,241,.15);display:flex;align-items:center;justify-content:center;color:#6366f1;font-size:1.1rem;}
-.acc-bank-card-info{flex:1;}
-.acc-bank-card-name{font-size:.95rem;font-weight:700;color:var(--text-primary);}
-.acc-bank-card-type{font-size:.75rem;color:var(--text-muted);}
-.acc-bank-card-balance{font-size:1.6rem;font-weight:800;color:var(--text-primary);}
-.acc-bank-card-balance.neg{color:#ef4444;}
-.acc-bank-card-meta{display:flex;gap:1rem;font-size:.75rem;color:var(--text-muted);}
-.acc-bank-card-actions{display:flex;gap:.5rem;}
-.acc-btn-sm{padding:.3rem .7rem;border-radius:6px;font-size:.75rem;font-weight:600;border:1px solid var(--border-color);background:var(--card-bg);color:var(--text-primary);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:.3rem;}
-.acc-btn-sm:hover{background:rgba(99,102,241,.1);border-color:#6366f1;color:#6366f1;}
-.acc-btn-sm.danger:hover{background:rgba(239,68,68,.1);border-color:#ef4444;color:#ef4444;}
-/* Modal */
-.acc-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;}
-.acc-modal-overlay.open{display:flex;}
-.acc-modal{background:var(--card-bg);border-radius:14px;padding:1.8rem;width:100%;max-width:480px;border:1px solid var(--border-color);}
-.acc-modal-title{font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:1.2rem;}
-.acc-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
-.acc-form-group{display:flex;flex-direction:column;gap:.3rem;}
-.acc-form-group.full{grid-column:1/-1;}
-.acc-form-label{font-size:.78rem;font-weight:600;color:var(--text-muted);}
-.acc-form-control{padding:.5rem .75rem;border-radius:7px;border:1px solid var(--border-color);background:var(--input-bg,var(--card-bg));color:var(--text-primary);font-size:.85rem;width:100%;}
-.acc-form-control:focus{outline:none;border-color:#6366f1;}
-.acc-modal-footer{display:flex;justify-content:flex-end;gap:.6rem;margin-top:1.2rem;}
-.acc-btn-primary{padding:.5rem 1.2rem;border-radius:7px;background:#6366f1;color:#fff;border:none;font-size:.85rem;font-weight:600;cursor:pointer;}
-.acc-btn-cancel{padding:.5rem 1.2rem;border-radius:7px;background:transparent;color:var(--text-muted);border:1px solid var(--border-color);font-size:.85rem;cursor:pointer;}
+.acc-bank-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+.acc-bank-card { background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; padding:1.2rem 1.4rem; display:flex; flex-direction:column; gap:.5rem; position:relative; }
+.acc-bank-card-icon { width:42px; height:42px; border-radius:10px; background:rgba(99,102,241,.15); display:flex; align-items:center; justify-content:center; color:#6366f1; font-size:1.1rem; margin-bottom:.3rem; }
+.acc-bank-card-name { font-size:1rem; font-weight:700; color:var(--text-primary); }
+.acc-bank-card-meta { font-size:.75rem; color:var(--text-muted); }
+.acc-bank-card-balance { font-size:1.4rem; font-weight:700; color:var(--text-primary); margin-top:.3rem; }
+.acc-bank-card-balance.neg { color:#ef4444; }
+.acc-bank-card-actions { display:flex; gap:.5rem; margin-top:.5rem; }
 </style>
 @endpush
-
 @section('content')
-<div class="acc-page">
-    <div class="acc-page-header">
-        <div class="acc-page-title"><i class="fas fa-university"></i> Bank Accounts</div>
-        <button class="xn-btn" onclick="openBankModal()" style="background:#6366f1;color:#fff;border:none;"><i class="fas fa-plus"></i> Add Account</button>
+<div class="crm2-page">
+  <div class="crm2-header">
+    <div>
+      <h1 class="crm2-title"><i class="fas fa-university"></i> Bank Accounts</h1>
+      <p class="crm2-subtitle">Manage your bank accounts, cash, and credit cards.</p>
     </div>
+    <button class="crm2-btn crm2-btn-primary" onclick="document.getElementById('addBankModal').style.display='flex'"><i class="fas fa-plus"></i> Add Account</button>
+  </div>
+  @if(session('success'))<div class="crm2-alert success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>@endif
+  @if(session('error'))<div class="crm2-alert danger"><i class="fas fa-exclamation-circle"></i> {{ session('error') }}</div>@endif
 
-    <div class="acc-bank-grid">
-        @forelse($bankAccounts as $ba)
-        <div class="acc-bank-card">
-            <div class="acc-bank-card-top">
-                <div class="acc-bank-card-icon"><i class="fas {{ $ba->type_icon }}"></i></div>
-                <div class="acc-bank-card-info">
-                    <div class="acc-bank-card-name">{{ $ba->name }}</div>
-                    <div class="acc-bank-card-type">{{ $ba->type_label }}@if($ba->bank_name) · {{ $ba->bank_name }}@endif@if($ba->account_number) · ****{{ substr($ba->account_number,-4) }}@endif</div>
-                </div>
-            </div>
-            <div class="acc-bank-card-balance {{ $ba->current_balance < 0 ? 'neg' : '' }}">₹{{ number_format($ba->current_balance, 2) }}</div>
-            <div class="acc-bank-card-meta">
-                <span><i class="fas fa-coins"></i> Opening: ₹{{ number_format($ba->opening_balance, 2) }}</span>
-                @if($ba->currency !== 'INR')<span>{{ $ba->currency }}</span>@endif
-            </div>
-            <div class="acc-bank-card-actions">
-                <a href="{{ route('admin.accounts.transactions', ['bank_account_id' => $ba->id]) }}" class="acc-btn-sm"><i class="fas fa-exchange-alt"></i> Transactions</a>
-                <button class="acc-btn-sm" onclick="editBankAccount({{ $ba->id }}, '{{ addslashes($ba->name) }}', '{{ $ba->account_type }}', '{{ addslashes($ba->bank_name ?? '') }}', '{{ $ba->account_number ?? '' }}', '{{ $ba->ifsc_code ?? '' }}', '{{ $ba->currency }}', {{ $ba->opening_balance }})"><i class="fas fa-edit"></i> Edit</button>
-                <form method="POST" action="{{ route('admin.accounts.bank-accounts.delete', $ba->id) }}" onsubmit="return confirm('Delete this account?')" style="display:inline;">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="acc-btn-sm danger"><i class="fas fa-trash"></i></button>
-                </form>
-            </div>
-        </div>
-        @empty
-        <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text-muted);">
-            <i class="fas fa-university" style="font-size:2.5rem;margin-bottom:.8rem;opacity:.3;display:block;"></i>
-            No bank accounts yet. Click <strong>Add Account</strong> to get started.
-        </div>
-        @endforelse
+  {{-- Summary KPIs --}}
+  <div class="crm2-card mb-4">
+    <div class="crm2-card-body" style="display:flex;gap:2rem;flex-wrap:wrap;align-items:center;">
+      <div>
+        <div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;">Total Cash Balance</div>
+        <div style="font-size:1.4rem;font-weight:700;color:#3b82f6;">₹{{ number_format($bankAccounts->sum('current_balance'), 2) }}</div>
+      </div>
+      <div>
+        <div style="font-size:.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;">Accounts</div>
+        <div style="font-size:1.4rem;font-weight:700;color:var(--text-primary);">{{ $bankAccounts->count() }}</div>
+      </div>
     </div>
+  </div>
+
+  {{-- Account Cards --}}
+  <div class="acc-bank-grid">
+    @forelse($bankAccounts as $ba)
+    <div class="acc-bank-card">
+      <div class="acc-bank-card-icon">
+        <i class="fas fa-{{ $ba->type === 'cash' ? 'wallet' : ($ba->type === 'credit_card' ? 'credit-card' : 'university') }}"></i>
+      </div>
+      <div class="acc-bank-card-name">{{ $ba->name }}</div>
+      <div class="acc-bank-card-meta">
+        {{ ucfirst(str_replace('_',' ',$ba->type)) }}
+        @if($ba->bank_name) · {{ $ba->bank_name }}@endif
+        @if($ba->account_number) · ****{{ substr($ba->account_number,-4) }}@endif
+      </div>
+      <div class="acc-bank-card-balance {{ $ba->current_balance < 0 ? 'neg' : '' }}">₹{{ number_format($ba->current_balance, 2) }}</div>
+      @if($ba->description)<div style="font-size:.75rem;color:var(--text-muted);">{{ $ba->description }}</div>@endif
+      <div class="acc-bank-card-actions">
+        <button class="crm2-btn crm2-btn-secondary" style="font-size:.75rem;padding:.3rem .7rem;" onclick="editBank({{ $ba->id }}, '{{ addslashes($ba->name) }}', '{{ $ba->type }}', '{{ addslashes($ba->bank_name ?? '') }}', '{{ addslashes($ba->account_number ?? '') }}', {{ $ba->opening_balance }}, '{{ addslashes($ba->description ?? '') }}')"><i class="fas fa-edit"></i> Edit</button>
+        <form method="POST" action="{{ route('admin.accounts.bank-accounts.delete', $ba->id) }}" onsubmit="return confirm('Delete this account?')" style="display:inline">
+          @csrf @method('DELETE')
+          <button type="submit" class="crm2-btn" style="font-size:.75rem;padding:.3rem .7rem;background:#ef4444;color:#fff;border:none;"><i class="fas fa-trash"></i></button>
+        </form>
+      </div>
+    </div>
+    @empty
+    <div class="crm2-empty" style="grid-column:1/-1;"><i class="fas fa-university"></i><p>No bank accounts yet. Add your first account.</p></div>
+    @endforelse
+  </div>
 </div>
 
-{{-- Add/Edit Modal --}}
-<div class="acc-modal-overlay" id="bankModal">
-    <div class="acc-modal">
-        <div class="acc-modal-title" id="bankModalTitle">Add Bank Account</div>
-        <form method="POST" id="bankModalForm" action="{{ route('admin.accounts.bank-accounts.store') }}">
-            @csrf
-            <input type="hidden" name="_method" id="bankModalMethod" value="POST">
-            <input type="hidden" name="bank_id" id="bankModalId" value="">
-            <div class="acc-form-grid">
-                <div class="acc-form-group full">
-                    <label class="acc-form-label">Account Name *</label>
-                    <input type="text" name="name" id="bName" class="acc-form-control" required placeholder="e.g. HDFC Current Account">
-                </div>
-                <div class="acc-form-group">
-                    <label class="acc-form-label">Account Type *</label>
-                    <select name="account_type" id="bType" class="acc-form-control">
-                        <option value="bank">Bank</option>
-                        <option value="cash">Cash</option>
-                        <option value="credit_card">Credit Card</option>
-                        <option value="savings">Savings</option>
-                        <option value="wallet">Wallet</option>
-                    </select>
-                </div>
-                <div class="acc-form-group">
-                    <label class="acc-form-label">Bank Name</label>
-                    <input type="text" name="bank_name" id="bBankName" class="acc-form-control" placeholder="e.g. HDFC Bank">
-                </div>
-                <div class="acc-form-group">
-                    <label class="acc-form-label">Account Number</label>
-                    <input type="text" name="account_number" id="bAccNo" class="acc-form-control" placeholder="Last 4 digits">
-                </div>
-                <div class="acc-form-group">
-                    <label class="acc-form-label">IFSC Code</label>
-                    <input type="text" name="ifsc_code" id="bIfsc" class="acc-form-control" placeholder="HDFC0001234">
-                </div>
-                <div class="acc-form-group">
-                    <label class="acc-form-label">Currency</label>
-                    <select name="currency" id="bCurrency" class="acc-form-control">
-                        <option value="INR">INR</option>
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                        <option value="GBP">GBP</option>
-                        <option value="AED">AED</option>
-                        <option value="SGD">SGD</option>
-                    </select>
-                </div>
-                <div class="acc-form-group full">
-                    <label class="acc-form-label">Opening Balance</label>
-                    <input type="number" name="opening_balance" id="bOpenBal" class="acc-form-control" value="0" step="0.01">
-                </div>
-            </div>
-            <div class="acc-modal-footer">
-                <button type="button" class="acc-btn-cancel" onclick="closeBankModal()">Cancel</button>
-                <button type="submit" class="acc-btn-primary">Save Account</button>
-            </div>
-        </form>
+{{-- Add Bank Account Modal --}}
+<div id="addBankModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;">
+  <div class="crm2-card" style="width:100%;max-width:480px;margin:1rem;">
+    <div class="crm2-card-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <h3 class="crm2-title" style="font-size:1.1rem;margin:0;"><i class="fas fa-university"></i> Add Bank Account</h3>
+        <button onclick="document.getElementById('addBankModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+      </div>
+      <form method="POST" action="{{ route('admin.accounts.bank-accounts.store') }}">
+        @csrf
+        <div class="crm2-form-group">
+          <label class="crm2-label">Account Name *</label>
+          <input type="text" name="name" class="crm2-input" required placeholder="e.g. HDFC Current Account">
+        </div>
+        <div class="crm2-form-group">
+          <label class="crm2-label">Account Type *</label>
+          <select name="type" class="crm2-select" required>
+            <option value="bank_account">Bank Account</option>
+            <option value="savings_account">Savings Account</option>
+            <option value="credit_card">Credit Card</option>
+            <option value="cash">Cash</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="crm2-form-group">
+          <label class="crm2-label">Bank Name</label>
+          <input type="text" name="bank_name" class="crm2-input" placeholder="e.g. HDFC Bank">
+        </div>
+        <div class="crm2-form-group">
+          <label class="crm2-label">Account Number</label>
+          <input type="text" name="account_number" class="crm2-input" placeholder="Last 4 digits or full number">
+        </div>
+        <div class="crm2-form-group">
+          <label class="crm2-label">Opening Balance (₹)</label>
+          <input type="number" name="opening_balance" class="crm2-input" value="0" step="0.01">
+        </div>
+        <div class="crm2-form-group">
+          <label class="crm2-label">Description</label>
+          <input type="text" name="description" class="crm2-input" placeholder="Optional note">
+        </div>
+        <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem;">
+          <button type="button" onclick="document.getElementById('addBankModal').style.display='none'" class="crm2-btn crm2-btn-ghost">Cancel</button>
+          <button type="submit" class="crm2-btn crm2-btn-primary"><i class="fas fa-save"></i> Save Account</button>
+        </div>
+      </form>
     </div>
+  </div>
+</div>
+
+{{-- Edit Bank Account Modal --}}
+<div id="editBankModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;">
+  <div class="crm2-card" style="width:100%;max-width:480px;margin:1rem;">
+    <div class="crm2-card-body">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <h3 class="crm2-title" style="font-size:1.1rem;margin:0;"><i class="fas fa-edit"></i> Edit Bank Account</h3>
+        <button onclick="document.getElementById('editBankModal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
+      </div>
+      <form id="editBankForm" method="POST">
+        @csrf @method('PUT')
+        <div class="crm2-form-group">
+          <label class="crm2-label">Account Name *</label>
+          <input type="text" id="editBankName" name="name" class="crm2-input" required>
+        </div>
+        <div class="crm2-form-group">
+          <label class="crm2-label">Account Type *</label>
+          <select id="editBankType" name="type" class="crm2-select" required>
+            <option value="bank_account">Bank Account</option>
+            <option value="savings_account">Savings Account</option>
+            <option value="credit_card">Credit Card</option>
+            <option value="cash">Cash</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="crm2-form-group">
+          <label class="crm2-label">Bank Name</label>
+          <input type="text" id="editBankBankName" name="bank_name" class="crm2-input">
+        </div>
+        <div class="crm2-form-group">
+          <label class="crm2-label">Account Number</label>
+          <input type="text" id="editBankAccNum" name="account_number" class="crm2-input">
+        </div>
+        <div class="crm2-form-group">
+          <label class="crm2-label">Opening Balance (₹)</label>
+          <input type="number" id="editBankOpenBal" name="opening_balance" class="crm2-input" step="0.01">
+        </div>
+        <div class="crm2-form-group">
+          <label class="crm2-label">Description</label>
+          <input type="text" id="editBankDesc" name="description" class="crm2-input">
+        </div>
+        <div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:1rem;">
+          <button type="button" onclick="document.getElementById('editBankModal').style.display='none'" class="crm2-btn crm2-btn-ghost">Cancel</button>
+          <button type="submit" class="crm2-btn crm2-btn-primary"><i class="fas fa-save"></i> Update Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 @endsection
-
 @push('scripts')
 <script>
-function openBankModal() {
-    document.getElementById('bankModalTitle').textContent = 'Add Bank Account';
-    document.getElementById('bankModalMethod').value = 'POST';
-    document.getElementById('bankModalForm').action = '{{ route("admin.accounts.bank-accounts.store") }}';
-    document.getElementById('bankModalId').value = '';
-    document.getElementById('bName').value = '';
-    document.getElementById('bType').value = 'bank';
-    document.getElementById('bBankName').value = '';
-    document.getElementById('bAccNo').value = '';
-    document.getElementById('bIfsc').value = '';
-    document.getElementById('bCurrency').value = 'INR';
-    document.getElementById('bOpenBal').value = '0';
-    document.getElementById('bankModal').classList.add('open');
+function editBank(id, name, type, bankName, accNum, openBal, desc) {
+  document.getElementById('editBankForm').action = '/admin/accounts/bank-accounts/' + id;
+  document.getElementById('editBankName').value = name;
+  document.getElementById('editBankType').value = type;
+  document.getElementById('editBankBankName').value = bankName;
+  document.getElementById('editBankAccNum').value = accNum;
+  document.getElementById('editBankOpenBal').value = openBal;
+  document.getElementById('editBankDesc').value = desc;
+  document.getElementById('editBankModal').style.display = 'flex';
 }
-function editBankAccount(id, name, type, bankName, accNo, ifsc, currency, openBal) {
-    document.getElementById('bankModalTitle').textContent = 'Edit Bank Account';
-    document.getElementById('bankModalMethod').value = 'PUT';
-    document.getElementById('bankModalForm').action = '/admin/accounts/bank-accounts/' + id;
-    document.getElementById('bankModalId').value = id;
-    document.getElementById('bName').value = name;
-    document.getElementById('bType').value = type;
-    document.getElementById('bBankName').value = bankName;
-    document.getElementById('bAccNo').value = accNo;
-    document.getElementById('bIfsc').value = ifsc;
-    document.getElementById('bCurrency').value = currency;
-    document.getElementById('bOpenBal').value = openBal;
-    document.getElementById('bankModal').classList.add('open');
-}
-function closeBankModal() { document.getElementById('bankModal').classList.remove('open'); }
-document.getElementById('bankModal').addEventListener('click', function(e) { if(e.target === this) closeBankModal(); });
 </script>
 @endpush

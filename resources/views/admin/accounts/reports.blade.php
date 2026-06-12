@@ -2,244 +2,137 @@
 @section('title', 'Financial Reports')
 @push('styles')
 <style>
-.acc-page{padding:1.5rem 2rem;}
-.acc-page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.75rem;}
-.acc-page-title{font-size:1.5rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:.6rem;}
-.acc-page-title i{color:#6366f1;}
-.acc-report-tabs{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:2px solid var(--border-color);padding-bottom:.5rem;}
-.acc-report-tab{padding:.45rem 1rem;border-radius:7px 7px 0 0;font-size:.83rem;font-weight:600;color:var(--text-muted);cursor:pointer;border:none;background:transparent;transition:all .15s;}
-.acc-report-tab:hover,.acc-report-tab.active{background:rgba(99,102,241,.12);color:#6366f1;}
-.acc-report-panel{display:none;}
-.acc-report-panel.active{display:block;}
-.acc-filters{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.2rem;align-items:center;}
-.acc-filter-input,.acc-filter-select{padding:.4rem .75rem;border-radius:7px;border:1px solid var(--border-color);background:var(--card-bg);color:var(--text-primary);font-size:.82rem;}
-.acc-btn-primary{padding:.42rem 1rem;border-radius:7px;background:#6366f1;color:#fff;border:none;font-size:.82rem;font-weight:600;cursor:pointer;}
-.acc-card{background:var(--card-bg);border:1px solid var(--border-color);border-radius:12px;overflow:hidden;margin-bottom:1.2rem;}
-.acc-report-section{padding:1.2rem 1.4rem;}
-.acc-report-section-title{font-size:.85rem;font-weight:700;color:var(--text-primary);margin-bottom:.8rem;padding-bottom:.5rem;border-bottom:1px solid var(--border-color);}
-.acc-report-row{display:flex;justify-content:space-between;padding:.4rem 0;font-size:.83rem;color:var(--text-primary);}
-.acc-report-row.total{font-weight:700;border-top:1px solid var(--border-color);margin-top:.4rem;padding-top:.6rem;}
-.acc-report-row.grand-total{font-weight:800;font-size:.95rem;border-top:2px solid var(--border-color);margin-top:.6rem;padding-top:.8rem;color:#6366f1;}
-.acc-report-row .label{color:var(--text-muted);}
-.acc-report-row.total .label,.acc-report-row.grand-total .label{color:var(--text-primary);}
-.acc-report-row .value{font-weight:600;}
-.acc-report-row .value.positive{color:#22c55e;}
-.acc-report-row .value.negative{color:#ef4444;}
-.acc-two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
-.acc-export-bar{display:flex;gap:.6rem;justify-content:flex-end;margin-bottom:.8rem;}
-.acc-btn-export{padding:.38rem .9rem;border-radius:7px;border:1px solid var(--border-color);background:var(--card-bg);color:var(--text-primary);font-size:.78rem;cursor:pointer;display:inline-flex;align-items:center;gap:.4rem;}
-.acc-btn-export:hover{border-color:#6366f1;color:#6366f1;}
-@media(max-width:700px){.acc-two-col{grid-template-columns:1fr;}}
+.report-type-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:1rem; margin-bottom:1.5rem; }
+.report-type-card { background:var(--card-bg); border:2px solid var(--border-color); border-radius:12px; padding:1.1rem 1.3rem; cursor:pointer; transition:border-color .15s,box-shadow .15s; display:flex; flex-direction:column; gap:.4rem; }
+.report-type-card:hover, .report-type-card.active { border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,.12); }
+.report-type-card .icon { width:36px; height:36px; border-radius:8px; background:rgba(99,102,241,.12); display:flex; align-items:center; justify-content:center; color:#6366f1; font-size:.9rem; }
+.report-type-card .label { font-size:.85rem; font-weight:600; color:var(--text-primary); }
+.report-type-card .desc { font-size:.72rem; color:var(--text-muted); }
+.report-section { margin-bottom:1.5rem; }
+.report-section-title { font-size:.82rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; padding:.5rem 0; border-bottom:1px solid var(--border-color); margin-bottom:.5rem; }
+.report-row { display:flex; align-items:center; padding:.45rem 0; border-bottom:1px solid var(--border-color); font-size:.83rem; }
+.report-row:last-child { border-bottom:none; }
+.report-row-label { flex:1; color:var(--text-primary); }
+.report-row-value { font-weight:600; color:var(--text-primary); min-width:120px; text-align:right; }
+.report-row.total { background:var(--bg-secondary,rgba(99,102,241,.05)); border-radius:6px; padding:.5rem .6rem; font-weight:700; }
+.report-row.total .report-row-value { color:#6366f1; }
 </style>
 @endpush
-
 @section('content')
-<div class="acc-page">
-    <div class="acc-page-header">
-        <div class="acc-page-title"><i class="fas fa-file-chart-line"></i> Financial Reports</div>
+<div class="crm2-page">
+  <div class="crm2-header">
+    <div>
+      <h1 class="crm2-title"><i class="fas fa-chart-bar"></i> Financial Reports</h1>
+      <p class="crm2-subtitle">Profit & Loss, Balance Sheet, Cash Flow and more.</p>
     </div>
-
-    {{-- Report Tabs --}}
-    <div class="acc-report-tabs">
-        <button class="acc-report-tab active" onclick="showReport('pl', this)"><i class="fas fa-chart-bar"></i> Profit & Loss</button>
-        <button class="acc-report-tab" onclick="showReport('bs', this)"><i class="fas fa-balance-scale"></i> Balance Sheet</button>
-        <button class="acc-report-tab" onclick="showReport('cf', this)"><i class="fas fa-water"></i> Cash Flow</button>
-        <button class="acc-report-tab" onclick="showReport('ar', this)"><i class="fas fa-file-invoice"></i> Aged Receivables</button>
-        <button class="acc-report-tab" onclick="showReport('ap', this)"><i class="fas fa-file-invoice-dollar"></i> Aged Payables</button>
-        <button class="acc-report-tab" onclick="showReport('exp', this)"><i class="fas fa-chart-pie"></i> Expense Summary</button>
+    <div style="display:flex;gap:.6rem;">
+      <button class="crm2-btn crm2-btn-secondary" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+      <a href="{{ request()->fullUrlWithQuery(['export'=>'csv']) }}" class="crm2-btn crm2-btn-ghost"><i class="fas fa-file-csv"></i> Export CSV</a>
     </div>
+  </div>
 
-    {{-- Date Range Filter --}}
-    <form method="GET" class="acc-filters" id="reportFilters">
-        <input type="hidden" name="report" id="reportType" value="{{ request('report', 'pl') }}">
-        <label style="font-size:.8rem;color:var(--text-muted);">Period:</label>
-        <input type="date" name="date_from" class="acc-filter-input" value="{{ $dateFrom }}" required>
-        <span style="color:var(--text-muted);font-size:.8rem;">to</span>
-        <input type="date" name="date_to" class="acc-filter-input" value="{{ $dateTo }}" required>
-        <button type="submit" class="acc-btn-primary"><i class="fas fa-sync-alt"></i> Generate</button>
-        <div class="acc-export-bar" style="margin-left:auto;margin-bottom:0;">
-            <a href="{{ request()->fullUrlWithQuery(['export' => 'csv']) }}" class="acc-btn-export"><i class="fas fa-file-csv"></i> CSV</a>
-            <button type="button" onclick="window.print()" class="acc-btn-export"><i class="fas fa-print"></i> Print</button>
+  {{-- Report Type Selector --}}
+  <div class="report-type-grid">
+    @php
+      $reportTypes = [
+        ['key'=>'pl', 'icon'=>'fa-chart-line', 'label'=>'Profit & Loss', 'desc'=>'Income vs Expenses summary'],
+        ['key'=>'balance_sheet', 'icon'=>'fa-balance-scale', 'label'=>'Balance Sheet', 'desc'=>'Assets, Liabilities & Equity'],
+        ['key'=>'cash_flow', 'icon'=>'fa-water', 'label'=>'Cash Flow', 'desc'=>'Cash in and out over time'],
+        ['key'=>'aged_receivables', 'icon'=>'fa-file-invoice-dollar', 'label'=>'Aged Receivables', 'desc'=>'Outstanding income by age'],
+        ['key'=>'aged_payables', 'icon'=>'fa-hand-holding-usd', 'label'=>'Aged Payables', 'desc'=>'Outstanding expenses by age'],
+        ['key'=>'expense_summary', 'icon'=>'fa-receipt', 'label'=>'Expense Summary', 'desc'=>'Expenses grouped by category'],
+      ];
+      $activeReport = request('report', 'pl');
+    @endphp
+    @foreach($reportTypes as $rt)
+    <a href="{{ route('admin.accounts.reports', ['report'=>$rt['key'], 'date_from'=>request('date_from'), 'date_to'=>request('date_to')]) }}" class="report-type-card {{ $activeReport === $rt['key'] ? 'active' : '' }}" style="text-decoration:none;">
+      <div class="icon"><i class="fas {{ $rt['icon'] }}"></i></div>
+      <div class="label">{{ $rt['label'] }}</div>
+      <div class="desc">{{ $rt['desc'] }}</div>
+    </a>
+    @endforeach
+  </div>
+
+  {{-- Date Range Filter --}}
+  <div class="crm2-card mb-4">
+    <div class="crm2-card-body">
+      <form method="GET" class="crm2-filter-form">
+        <input type="hidden" name="report" value="{{ $activeReport }}">
+        <div class="filter-group">
+          <label class="crm2-label" style="margin-bottom:.2rem;font-size:.72rem;">From</label>
+          <input type="date" name="date_from" value="{{ request('date_from', now()->startOfMonth()->format('Y-m-d')) }}" class="crm2-input">
         </div>
-    </form>
-
-    {{-- Profit & Loss --}}
-    <div class="acc-report-panel {{ request('report','pl') === 'pl' ? 'active' : '' }}" id="panel-pl">
-        <div class="acc-card">
-            <div class="acc-report-section">
-                <div style="text-align:center;margin-bottom:1.2rem;">
-                    <div style="font-size:1.1rem;font-weight:800;color:var(--text-primary);">Profit & Loss Statement</div>
-                    <div style="font-size:.8rem;color:var(--text-muted);">{{ \Carbon\Carbon::parse($dateFrom)->format('d M Y') }} — {{ \Carbon\Carbon::parse($dateTo)->format('d M Y') }}</div>
-                </div>
-                <div class="acc-report-section-title">Income</div>
-                @foreach($plIncome as $cat => $amount)
-                <div class="acc-report-row"><span class="label">{{ $cat }}</span><span class="value positive">₹{{ number_format($amount, 2) }}</span></div>
-                @endforeach
-                <div class="acc-report-row total"><span class="label">Total Income</span><span class="value positive">₹{{ number_format($plTotalIncome, 2) }}</span></div>
-
-                <div class="acc-report-section-title" style="margin-top:1.2rem;">Expenses</div>
-                @foreach($plExpenses as $cat => $amount)
-                <div class="acc-report-row"><span class="label">{{ $cat }}</span><span class="value negative">₹{{ number_format($amount, 2) }}</span></div>
-                @endforeach
-                <div class="acc-report-row total"><span class="label">Total Expenses</span><span class="value negative">₹{{ number_format($plTotalExpenses, 2) }}</span></div>
-
-                @php $netProfit = $plTotalIncome - $plTotalExpenses; @endphp
-                <div class="acc-report-row grand-total">
-                    <span class="label">Net {{ $netProfit >= 0 ? 'Profit' : 'Loss' }}</span>
-                    <span class="value {{ $netProfit >= 0 ? 'positive' : 'negative' }}">₹{{ number_format(abs($netProfit), 2) }}</span>
-                </div>
-            </div>
+        <div class="filter-group">
+          <label class="crm2-label" style="margin-bottom:.2rem;font-size:.72rem;">To</label>
+          <input type="date" name="date_to" value="{{ request('date_to', now()->format('Y-m-d')) }}" class="crm2-input">
         </div>
+        <button type="submit" class="crm2-btn crm2-btn-secondary"><i class="fas fa-sync"></i> Generate</button>
+        {{-- Quick range buttons --}}
+        <a href="{{ route('admin.accounts.reports', ['report'=>$activeReport, 'date_from'=>now()->startOfMonth()->format('Y-m-d'), 'date_to'=>now()->format('Y-m-d')]) }}" class="crm2-btn crm2-btn-ghost" style="font-size:.78rem;">This Month</a>
+        <a href="{{ route('admin.accounts.reports', ['report'=>$activeReport, 'date_from'=>now()->startOfQuarter()->format('Y-m-d'), 'date_to'=>now()->format('Y-m-d')]) }}" class="crm2-btn crm2-btn-ghost" style="font-size:.78rem;">This Quarter</a>
+        <a href="{{ route('admin.accounts.reports', ['report'=>$activeReport, 'date_from'=>now()->startOfYear()->format('Y-m-d'), 'date_to'=>now()->format('Y-m-d')]) }}" class="crm2-btn crm2-btn-ghost" style="font-size:.78rem;">This Year</a>
+      </form>
     </div>
+  </div>
 
-    {{-- Balance Sheet --}}
-    <div class="acc-report-panel {{ request('report') === 'bs' ? 'active' : '' }}" id="panel-bs">
-        <div class="acc-two-col">
-            <div class="acc-card">
-                <div class="acc-report-section">
-                    <div class="acc-report-section-title">Assets</div>
-                    @foreach($bsAssets as $name => $amount)
-                    <div class="acc-report-row"><span class="label">{{ $name }}</span><span class="value">₹{{ number_format($amount, 2) }}</span></div>
-                    @endforeach
-                    <div class="acc-report-row total"><span class="label">Total Assets</span><span class="value positive">₹{{ number_format($bsTotalAssets, 2) }}</span></div>
-                </div>
-            </div>
-            <div class="acc-card">
-                <div class="acc-report-section">
-                    <div class="acc-report-section-title">Liabilities</div>
-                    @foreach($bsLiabilities as $name => $amount)
-                    <div class="acc-report-row"><span class="label">{{ $name }}</span><span class="value negative">₹{{ number_format($amount, 2) }}</span></div>
-                    @endforeach
-                    <div class="acc-report-row total"><span class="label">Total Liabilities</span><span class="value negative">₹{{ number_format($bsTotalLiabilities, 2) }}</span></div>
-                    <div class="acc-report-section-title" style="margin-top:1rem;">Equity</div>
-                    @foreach($bsEquity as $name => $amount)
-                    <div class="acc-report-row"><span class="label">{{ $name }}</span><span class="value">₹{{ number_format($amount, 2) }}</span></div>
-                    @endforeach
-                    <div class="acc-report-row total"><span class="label">Total Equity</span><span class="value">₹{{ number_format($bsTotalEquity, 2) }}</span></div>
-                </div>
-            </div>
+  {{-- Report Output --}}
+  <div class="crm2-card">
+    <div class="crm2-card-body">
+      @if($activeReport === 'pl')
+        <div style="font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:1rem;"><i class="fas fa-chart-line" style="color:#6366f1;"></i> Profit & Loss Statement</div>
+        <div class="report-section">
+          <div class="report-section-title">Income</div>
+          @foreach($reportData['income_by_category'] ?? [] as $cat => $amt)
+          <div class="report-row"><span class="report-row-label">{{ $cat }}</span><span class="report-row-value" style="color:#22c55e;">₹{{ number_format($amt,2) }}</span></div>
+          @endforeach
+          <div class="report-row total"><span class="report-row-label">Total Income</span><span class="report-row-value" style="color:#22c55e;">₹{{ number_format($reportData['total_income'] ?? 0, 2) }}</span></div>
         </div>
-    </div>
+        <div class="report-section">
+          <div class="report-section-title">Expenses</div>
+          @foreach($reportData['expense_by_category'] ?? [] as $cat => $amt)
+          <div class="report-row"><span class="report-row-label">{{ $cat }}</span><span class="report-row-value" style="color:#ef4444;">₹{{ number_format($amt,2) }}</span></div>
+          @endforeach
+          <div class="report-row total"><span class="report-row-label">Total Expenses</span><span class="report-row-value" style="color:#ef4444;">₹{{ number_format($reportData['total_expenses'] ?? 0, 2) }}</span></div>
+        </div>
+        <div class="report-row total" style="margin-top:.5rem;">
+          <span class="report-row-label" style="font-size:.95rem;">Net Profit / (Loss)</span>
+          @php $net = ($reportData['total_income'] ?? 0) - ($reportData['total_expenses'] ?? 0); @endphp
+          <span class="report-row-value" style="font-size:1rem;color:{{ $net >= 0 ? '#22c55e' : '#ef4444' }};">₹{{ number_format($net, 2) }}</span>
+        </div>
 
-    {{-- Cash Flow --}}
-    <div class="acc-report-panel {{ request('report') === 'cf' ? 'active' : '' }}" id="panel-cf">
-        <div class="acc-card">
-            <div class="acc-report-section">
-                <div style="text-align:center;margin-bottom:1.2rem;">
-                    <div style="font-size:1.1rem;font-weight:800;color:var(--text-primary);">Cash Flow Statement</div>
-                    <div style="font-size:.8rem;color:var(--text-muted);">{{ \Carbon\Carbon::parse($dateFrom)->format('d M Y') }} — {{ \Carbon\Carbon::parse($dateTo)->format('d M Y') }}</div>
-                </div>
-                <div class="acc-report-section-title">Operating Activities</div>
-                <div class="acc-report-row"><span class="label">Cash received from customers</span><span class="value positive">₹{{ number_format($cfIncome, 2) }}</span></div>
-                <div class="acc-report-row"><span class="label">Cash paid for expenses</span><span class="value negative">-₹{{ number_format($cfExpenses, 2) }}</span></div>
-                <div class="acc-report-row total"><span class="label">Net Operating Cash Flow</span><span class="value {{ ($cfIncome - $cfExpenses) >= 0 ? 'positive' : 'negative' }}">₹{{ number_format($cfIncome - $cfExpenses, 2) }}</span></div>
-                <div class="acc-report-row grand-total"><span class="label">Net Change in Cash</span><span class="value {{ ($cfIncome - $cfExpenses) >= 0 ? 'positive' : 'negative' }}">₹{{ number_format($cfIncome - $cfExpenses, 2) }}</span></div>
-            </div>
+      @elseif($activeReport === 'balance_sheet')
+        <div style="font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:1rem;"><i class="fas fa-balance-scale" style="color:#6366f1;"></i> Balance Sheet</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+          <div>
+            <div class="report-section-title">Assets</div>
+            @foreach($reportData['assets'] ?? [] as $acc)
+            <div class="report-row"><span class="report-row-label">{{ $acc->name }}</span><span class="report-row-value">₹{{ number_format($acc->balance ?? 0, 2) }}</span></div>
+            @endforeach
+            <div class="report-row total"><span class="report-row-label">Total Assets</span><span class="report-row-value">₹{{ number_format(collect($reportData['assets'] ?? [])->sum('balance'), 2) }}</span></div>
+          </div>
+          <div>
+            <div class="report-section-title">Liabilities & Equity</div>
+            @foreach($reportData['liabilities'] ?? [] as $acc)
+            <div class="report-row"><span class="report-row-label">{{ $acc->name }}</span><span class="report-row-value">₹{{ number_format($acc->balance ?? 0, 2) }}</span></div>
+            @endforeach
+            @foreach($reportData['equity'] ?? [] as $acc)
+            <div class="report-row"><span class="report-row-label">{{ $acc->name }}</span><span class="report-row-value">₹{{ number_format($acc->balance ?? 0, 2) }}</span></div>
+            @endforeach
+            <div class="report-row total"><span class="report-row-label">Total L + E</span><span class="report-row-value">₹{{ number_format(collect($reportData['liabilities'] ?? [])->sum('balance') + collect($reportData['equity'] ?? [])->sum('balance'), 2) }}</span></div>
+          </div>
         </div>
-    </div>
 
-    {{-- Aged Receivables --}}
-    <div class="acc-report-panel {{ request('report') === 'ar' ? 'active' : '' }}" id="panel-ar">
-        <div class="acc-card">
-            <table class="acc-table" style="font-size:.83rem;">
-                <thead><tr><th>Customer</th><th>Invoice Ref</th><th>Due Date</th><th>0–30 Days</th><th>31–60 Days</th><th>61–90 Days</th><th>90+ Days</th><th>Total</th></tr></thead>
-                <tbody>
-                @forelse($agedReceivables as $ar)
-                <tr>
-                    <td>{{ $ar['customer'] }}</td>
-                    <td style="font-size:.75rem;color:var(--text-muted);">{{ $ar['reference'] }}</td>
-                    <td>{{ $ar['due_date'] }}</td>
-                    <td style="color:#22c55e;">{{ $ar['0_30'] > 0 ? '₹'.number_format($ar['0_30'],2) : '—' }}</td>
-                    <td style="color:#f59e0b;">{{ $ar['31_60'] > 0 ? '₹'.number_format($ar['31_60'],2) : '—' }}</td>
-                    <td style="color:#ef4444;">{{ $ar['61_90'] > 0 ? '₹'.number_format($ar['61_90'],2) : '—' }}</td>
-                    <td style="color:#dc2626;font-weight:700;">{{ $ar['90_plus'] > 0 ? '₹'.number_format($ar['90_plus'],2) : '—' }}</td>
-                    <td style="font-weight:700;">₹{{ number_format($ar['total'],2) }}</td>
-                </tr>
-                @empty
-                <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-muted);">No outstanding receivables.</td></tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+      @elseif($activeReport === 'expense_summary')
+        <div style="font-size:1rem;font-weight:700;color:var(--text-primary);margin-bottom:1rem;"><i class="fas fa-receipt" style="color:#6366f1;"></i> Expense Summary by Category</div>
+        @foreach($reportData['expense_by_category'] ?? [] as $cat => $amt)
+        <div class="report-row"><span class="report-row-label">{{ $cat }}</span><span class="report-row-value" style="color:#ef4444;">₹{{ number_format($amt,2) }}</span></div>
+        @endforeach
+        <div class="report-row total"><span class="report-row-label">Total Expenses</span><span class="report-row-value">₹{{ number_format($reportData['total_expenses'] ?? 0, 2) }}</span></div>
 
-    {{-- Aged Payables --}}
-    <div class="acc-report-panel {{ request('report') === 'ap' ? 'active' : '' }}" id="panel-ap">
-        <div class="acc-card">
-            <table class="acc-table" style="font-size:.83rem;">
-                <thead><tr><th>Vendor</th><th>Expense Ref</th><th>Date</th><th>0–30 Days</th><th>31–60 Days</th><th>61–90 Days</th><th>90+ Days</th><th>Total</th></tr></thead>
-                <tbody>
-                @forelse($agedPayables as $ap)
-                <tr>
-                    <td>{{ $ap['vendor'] }}</td>
-                    <td style="font-size:.75rem;color:var(--text-muted);">{{ $ap['reference'] }}</td>
-                    <td>{{ $ap['date'] }}</td>
-                    <td style="color:#22c55e;">{{ $ap['0_30'] > 0 ? '₹'.number_format($ap['0_30'],2) : '—' }}</td>
-                    <td style="color:#f59e0b;">{{ $ap['31_60'] > 0 ? '₹'.number_format($ap['31_60'],2) : '—' }}</td>
-                    <td style="color:#ef4444;">{{ $ap['61_90'] > 0 ? '₹'.number_format($ap['61_90'],2) : '—' }}</td>
-                    <td style="color:#dc2626;font-weight:700;">{{ $ap['90_plus'] > 0 ? '₹'.number_format($ap['90_plus'],2) : '—' }}</td>
-                    <td style="font-weight:700;">₹{{ number_format($ap['total'],2) }}</td>
-                </tr>
-                @empty
-                <tr><td colspan="8" style="text-align:center;padding:2rem;color:var(--text-muted);">No outstanding payables.</td></tr>
-                @endforelse
-                </tbody>
-            </table>
-        </div>
+      @else
+        <div class="crm2-empty"><i class="fas fa-chart-bar"></i><p>Select a report type above and click Generate.</p></div>
+      @endif
     </div>
-
-    {{-- Expense Summary --}}
-    <div class="acc-report-panel {{ request('report') === 'exp' ? 'active' : '' }}" id="panel-exp">
-        <div class="acc-two-col">
-            <div class="acc-card">
-                <div class="acc-report-section">
-                    <div class="acc-report-section-title">Expenses by Category</div>
-                    @foreach($expenseSummary as $cat => $amount)
-                    <div class="acc-report-row">
-                        <span class="label">{{ $cat }}</span>
-                        <span class="value negative">₹{{ number_format($amount, 2) }}</span>
-                    </div>
-                    @endforeach
-                    <div class="acc-report-row total"><span class="label">Total</span><span class="value negative">₹{{ number_format(array_sum($expenseSummary), 2) }}</span></div>
-                </div>
-            </div>
-            <div class="acc-card" style="padding:1.2rem 1.4rem;">
-                <div class="acc-report-section-title">Chart</div>
-                <canvas id="expSummaryChart" height="250"></canvas>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>
 @endsection
-
-@push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>
-function showReport(id, btn) {
-    document.querySelectorAll('.acc-report-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.acc-report-tab').forEach(b => b.classList.remove('active'));
-    document.getElementById('panel-' + id).classList.add('active');
-    btn.classList.add('active');
-    document.getElementById('reportType').value = id;
-}
-
-// Activate correct tab on load
-const activeReport = '{{ request("report","pl") }}';
-const activeTab = document.querySelector(`.acc-report-tab[onclick*="'${activeReport}'"]`);
-if (activeTab) { document.querySelectorAll('.acc-report-tab').forEach(b => b.classList.remove('active')); activeTab.classList.add('active'); }
-
-// Expense Summary Chart
-const expLabels = {!! json_encode(array_keys($expenseSummary)) !!};
-const expData = {!! json_encode(array_values($expenseSummary)) !!};
-if (expLabels.length > 0) {
-    new Chart(document.getElementById('expSummaryChart'), {
-        type: 'doughnut',
-        data: {
-            labels: expLabels,
-            datasets: [{ data: expData, backgroundColor: ['#6366f1','#22c55e','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f97316','#06b6d4'], borderWidth: 0 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { size: 10 } } } } }
-    });
-}
-</script>
-@endpush

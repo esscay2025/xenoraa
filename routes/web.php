@@ -761,11 +761,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::post('/expenses',             [\App\Http\Controllers\Admin\AccountsController::class, 'expensesStore'])->name('expenses.store');
         Route::put('/expenses/{id}',         [\App\Http\Controllers\Admin\AccountsController::class, 'expensesUpdate'])->name('expenses.update');
         Route::delete('/expenses/{id}',      [\App\Http\Controllers\Admin\AccountsController::class, 'expensesDelete'])->name('expenses.delete');
-        Route::get('/coa',                   [\App\Http\Controllers\Admin\AccountsController::class, 'chartOfAccounts'])->name('coa');
+        Route::get('/coa',                   [\App\Http\Controllers\Admin\AccountsController::class, 'coa'])->name('coa');
         Route::post('/coa',                  [\App\Http\Controllers\Admin\AccountsController::class, 'coaStore'])->name('coa.store');
         Route::put('/coa/{id}',              [\App\Http\Controllers\Admin\AccountsController::class, 'coaUpdate'])->name('coa.update');
         Route::delete('/coa/{id}',           [\App\Http\Controllers\Admin\AccountsController::class, 'coaDelete'])->name('coa.delete');
-        Route::get('/journal',               [\App\Http\Controllers\Admin\AccountsController::class, 'journalEntries'])->name('journal');
+        Route::get('/journal',               [\App\Http\Controllers\Admin\AccountsController::class, 'journal'])->name('journal');
         Route::post('/journal',              [\App\Http\Controllers\Admin\AccountsController::class, 'journalStore'])->name('journal.store');
         Route::delete('/journal/{id}',       [\App\Http\Controllers\Admin\AccountsController::class, 'journalDelete'])->name('journal.delete');
         Route::get('/reports',               [\App\Http\Controllers\Admin\AccountsController::class, 'reports'])->name('reports');
