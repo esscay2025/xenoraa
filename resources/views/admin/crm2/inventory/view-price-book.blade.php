@@ -162,22 +162,30 @@
           </div>
         </div>
       </div>
-      <div class="av-actions">
-        <a href="{{ route('admin.crm2.inventory.price-books.edit', $item->id) }}" class="av-btn outline">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          Edit
-        </a>
-        <a href="{{ route('admin.crm2.inventory.price-books') }}" class="av-btn outline">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-          Back
-        </a>
-        <form method="POST" action="{{ route('admin.crm2.inventory.destroy', ['type'=>'price_book','id'=>$item->id]) }}" onsubmit="return confirm('Delete this price book?')" style="display:inline">
-          @csrf @method('DELETE')
-          <button type="submit" class="av-btn danger">
-            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
-            Delete
-          </button>
-        </form>
+      <div class="av-actions" style="display:flex;align-items:center;gap:0.6rem;">
+        <a href="{{ route('admin.crm2.inventory.price-books.edit', $item->id) }}" class="av-btn outline">&#9998; Edit</a>
+        {{-- 3-dot Actions Menu --}}
+        <div style="position:relative;display:inline-block;">
+          <button id="pbvActBtn" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:7px;background:var(--bg-card);border:1.5px solid var(--border);color:var(--text-secondary);font-size:1.15rem;cursor:pointer;transition:all .15s;" title="More actions">&#8942;</button>
+          <div id="pbvActDrop" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--bg-card);border:1px solid var(--border);border-radius:8px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,0.35);z-index:999;overflow:hidden;">
+            <a href="{{ route('admin.crm2.inventory.price-books.clone', $item->id) }}" style="display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.82rem;color:var(--text-primary);text-decoration:none;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+              <i class="fas fa-copy" style="width:16px;color:#6366f1;"></i> Clone
+            </a>
+            <a href="{{ route('admin.crm2.inventory.price-books.export-pdf', $item->id) }}" style="display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.82rem;color:var(--text-primary);text-decoration:none;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+              <i class="fas fa-file-pdf" style="width:16px;color:#ef4444;"></i> Export to PDF
+            </a>
+            <button onclick="window.print()" style="display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.82rem;color:var(--text-primary);background:transparent;border:none;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+              <i class="fas fa-print" style="width:16px;color:#10b981;"></i> Print Preview
+            </button>
+            <hr style="border:none;border-top:1px solid var(--border);margin:0;">
+            <form method="POST" action="{{ route('admin.crm2.inventory.price-books.destroy', $item->id) }}" onsubmit="return confirm('Delete this price book? This cannot be undone.')">
+              @csrf @method('DELETE')
+              <button type="submit" style="display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.82rem;color:#f87171;background:transparent;border:none;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='rgba(220,38,38,.12)'" onmouseout="this.style.background='transparent'">
+                <i class="fas fa-trash" style="width:16px;"></i> Delete
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -784,5 +792,17 @@ function showImportFileName(input) {
 @if(session('error'))
   document.addEventListener('DOMContentLoaded', () => showToast('{{ session('error') }}', 'error'));
 @endif
+
+/* ── 3-dot Actions Menu ── */
+document.getElementById('pbvActBtn')?.addEventListener('click', function(e) {
+  e.stopPropagation();
+  const drop = document.getElementById('pbvActDrop');
+  drop.style.display = drop.style.display === 'block' ? 'none' : 'block';
+});
+document.addEventListener('click', function(e) {
+  const btn = document.getElementById('pbvActBtn');
+  const drop = document.getElementById('pbvActDrop');
+  if (btn && drop && !btn.contains(e.target) && !drop.contains(e.target)) drop.style.display = 'none';
+});
 </script>
 @endsection

@@ -460,10 +460,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::post('/inventory/price-books/{id}/attachments',               [$ctrl, 'priceBookAttachmentsStore'])->name('inventory.price-books.attachments.store');
         Route::get('/inventory/price-books/{id}/attachments/{attId}/download', [$ctrl, 'priceBookAttachmentsDownload'])->name('inventory.price-books.attachments.download');
         Route::delete('/inventory/price-books/{id}/attachments/{attId}',     [$ctrl, 'priceBookAttachmentsDestroy'])->name('inventory.price-books.attachments.destroy');
-        Route::delete('/inventory/price-books/bulk-delete',              [$ctrl, 'priceBooksBulkDelete'])->name('inventory.price-books.bulk-delete');
-        Route::post('/inventory/price-books/{id}/clone',                 [$ctrl, 'priceBookClone'])->name('inventory.price-books.clone');
-        Route::delete('/inventory/price-books/{id}',                     [$ctrl, 'priceBookDestroy'])->name('inventory.price-books.destroy');
-        Route::get('/inventory/price-books/{id}/export-pdf',             [$ctrl, 'priceBookExportPdf'])->name('inventory.price-books.export-pdf');
         Route::get('/inventory/quotes/{id}',           [$ctrl, 'inventoryQuotesShow'])->name('inventory.quotes.show');
         Route::post('/inventory/quotes/{id}/convert/sales-order', [$ctrl, 'quoteConvertToSalesOrder'])->name('inventory.quotes.convert.sales-order');
         Route::post('/inventory/quotes/{id}/convert/invoice',      [$ctrl, 'quoteConvertToInvoice'])->name('inventory.quotes.convert.invoice');
@@ -497,10 +493,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::post('/inventory/sales-orders/{id}/invoices/assign',          [$ctrl, 'soInvoicesAssign'])->name('inventory.sales-orders.invoices.assign');
         Route::delete('/inventory/sales-orders/{id}/invoices/{invId}/unassign', [$ctrl, 'soInvoicesUnassign'])->name('inventory.sales-orders.invoices.unassign');
         Route::post('/inventory/sales-orders/{id}/send-mail',                [$ctrl, 'soSendMail'])->name('inventory.sales-orders.send-mail');
-        Route::delete('/inventory/sales-orders/bulk-delete',             [$ctrl, 'salesOrdersBulkDelete'])->name('inventory.sales-orders.bulk-delete');
-        Route::post('/inventory/sales-orders/{id}/clone',                [$ctrl, 'salesOrderClone'])->name('inventory.sales-orders.clone');
-        Route::delete('/inventory/sales-orders/{id}',                    [$ctrl, 'salesOrderDestroy'])->name('inventory.sales-orders.destroy');
-        Route::get('/inventory/sales-orders/{id}/export-pdf',            [$ctrl, 'salesOrderExportPdf'])->name('inventory.sales-orders.export-pdf');
         Route::get('/inventory/purchase-orders/{id}',  [$ctrl, 'inventoryPurchaseOrdersShow'])->name('inventory.purchase-orders.show');
         // ── Purchase Order View sub-routes ───────────────────────────
         Route::post('/inventory/purchase-orders/{id}/notes',                    [$ctrl, 'poNotesStore'])->name('inventory.purchase-orders.notes.store');
@@ -512,10 +504,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/purchase-orders/{id}/attachments/{attId}/download', [$ctrl, 'poAttachmentsDownload'])->name('inventory.purchase-orders.attachments.download');
         Route::delete('/inventory/purchase-orders/{id}/attachments/{attId}',    [$ctrl, 'poAttachmentsDestroy'])->name('inventory.purchase-orders.attachments.destroy');
         Route::post('/inventory/purchase-orders/{id}/send-mail',                [$ctrl, 'poSendMail'])->name('inventory.purchase-orders.send-mail');
-        Route::delete('/inventory/purchase-orders/bulk-delete',          [$ctrl, 'purchaseOrdersBulkDelete'])->name('inventory.purchase-orders.bulk-delete');
-        Route::post('/inventory/purchase-orders/{id}/clone',             [$ctrl, 'purchaseOrderClone'])->name('inventory.purchase-orders.clone');
-        Route::delete('/inventory/purchase-orders/{id}',                 [$ctrl, 'purchaseOrderDestroy'])->name('inventory.purchase-orders.destroy');
-        Route::get('/inventory/purchase-orders/{id}/export-pdf',         [$ctrl, 'purchaseOrderExportPdf'])->name('inventory.purchase-orders.export-pdf');
         Route::get('/inventory/invoices/{id}',         [$ctrl, 'inventoryInvoicesShow'])->name('inventory.invoices.show');
         // ── Invoice View sub-routes ───────────────────────────────────────
         Route::post('/inventory/invoices/{id}/notes',                    [$ctrl, 'invoiceNotesStore'])->name('inventory.invoices.notes.store');
@@ -527,10 +515,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::get('/inventory/invoices/{id}/attachments/{attId}/download', [$ctrl, 'invoiceAttachmentsDownload'])->name('inventory.invoices.attachments.download');
         Route::delete('/inventory/invoices/{id}/attachments/{attId}',    [$ctrl, 'invoiceAttachmentsDestroy'])->name('inventory.invoices.attachments.destroy');
         Route::post('/inventory/invoices/{id}/send-mail',                [$ctrl, 'invoiceSendMail'])->name('inventory.invoices.send-mail');
-        Route::delete('/inventory/invoices/bulk-delete',                 [$ctrl, 'invoicesBulkDelete'])->name('inventory.invoices.bulk-delete');
-        Route::post('/inventory/invoices/{id}/clone',                    [$ctrl, 'invoiceClone'])->name('inventory.invoices.clone');
-        Route::delete('/inventory/invoices/{id}',                        [$ctrl, 'invoiceDestroy'])->name('inventory.invoices.destroy');
-        Route::get('/inventory/invoices/{id}/export-pdf',                [$ctrl, 'invoiceExportPdf'])->name('inventory.invoices.export-pdf');
         Route::get('/inventory/vendors/{id}',          [$ctrl, 'inventoryVendorsShow'])->name('inventory.vendors.show');
         // ── Vendor View sub-routes ────────────────────────────────────────
         Route::post('/inventory/vendors/{id}/notes',                        [$ctrl, 'vendorNotesStore'])->name('inventory.vendors.notes.store');
@@ -548,10 +532,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin', 'subsc
         Route::post('/inventory/vendors/{id}/contacts/assign',              [$ctrl, 'vendorContactsAssign'])->name('inventory.vendors.contacts.assign');
         Route::delete('/inventory/vendors/{id}/contacts/{contactId}',       [$ctrl, 'vendorContactsUnassign'])->name('inventory.vendors.contacts.unassign');
         Route::post('/inventory/vendors/{id}/send-mail',                    [$ctrl, 'vendorSendMail'])->name('inventory.vendors.send-mail');
-        Route::delete('/inventory/vendors/bulk-delete',                  [$ctrl, 'vendorsBulkDelete'])->name('inventory.vendors.bulk-delete');
-        Route::post('/inventory/vendors/{id}/clone',                     [$ctrl, 'vendorClone'])->name('inventory.vendors.clone');
-        Route::delete('/inventory/vendors/{id}',                         [$ctrl, 'vendorDestroy'])->name('inventory.vendors.destroy');
-        Route::get('/inventory/vendors/{id}/export-pdf',                 [$ctrl, 'vendorExportPdf'])->name('inventory.vendors.export-pdf');
         Route::delete('/inventory/{type}/{id}',     [$ctrl, 'inventoryDestroy'])->name('inventory.destroy');
         Route::post('/inventory/{type}/{id}/send-mail', [$ctrl, 'inventorySendMail'])->name('inventory.send-mail');
         // Legacy redirect

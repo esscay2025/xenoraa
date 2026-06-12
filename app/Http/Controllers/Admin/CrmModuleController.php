@@ -3728,4 +3728,251 @@ td{padding:6px 8px;border:1px solid #e5e7eb;font-size:11px;}
             'Content-Disposition' => 'attachment; filename="' . $filename . '"',
         ]);
     }
+
+    // ══════════════════════════════════════════════════════════════
+    // PRICE BOOKS — BULK DELETE / CLONE / DESTROY / EXPORT PDF
+    // ══════════════════════════════════════════════════════════════
+    public function priceBooksBulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) return redirect()->route('admin.crm2.inventory.price-books')->with('error', 'No price books selected.');
+        $deleted = \App\Models\CrmPriceBook::where('user_id', auth()->id())->whereIn('id', $ids)->delete();
+        return redirect()->route('admin.crm2.inventory.price-books')->with('success', $deleted . ' price book(s) deleted successfully.');
+    }
+
+    public function priceBookClone(int $id)
+    {
+        $item = \App\Models\CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
+        $clone = $item->replicate();
+        $clone->name = $item->name . ' (Copy)';
+        $clone->created_at = $clone->updated_at = now();
+        $clone->save();
+        return redirect()->route('admin.crm2.inventory.price-books.show', $clone->id)->with('success', 'Price book cloned successfully.');
+    }
+
+    public function priceBookDestroy(int $id)
+    {
+        \App\Models\CrmPriceBook::where('user_id', auth()->id())->findOrFail($id)->delete();
+        return redirect()->route('admin.crm2.inventory.price-books')->with('success', 'Price book deleted successfully.');
+    }
+
+    public function priceBookExportPdf(int $id)
+    {
+        $item = \App\Models\CrmPriceBook::where('user_id', auth()->id())->findOrFail($id);
+        $html  = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:12px;color:#222;padding:20px;}h1{font-size:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #e5e7eb;padding:6px 8px;font-size:11px;}th{background:#f3f4f6;}</style></head><body>';
+        $html .= '<h1>Price Book: ' . htmlspecialchars($item->name) . '</h1>';
+        $html .= '<table><tr><th>Field</th><th>Value</th></tr>';
+        $html .= '<tr><td>Pricing Model</td><td>' . htmlspecialchars($item->pricing_model ?? '—') . '</td></tr>';
+        $html .= '<tr><td>Pricing %</td><td>' . ($item->pricing_percentage ? $item->pricing_percentage . '%' : '—') . '</td></tr>';
+        $html .= '<tr><td>Currency</td><td>' . htmlspecialchars($item->currency ?? 'INR') . '</td></tr>';
+        $html .= '<tr><td>Active</td><td>' . ($item->is_active ? 'Yes' : 'No') . '</td></tr>';
+        $html .= '<tr><td>Description</td><td>' . nl2br(htmlspecialchars($item->description ?? '')) . '</td></tr>';
+        $html .= '</table></body></html>';
+        return $this->_renderPdf($html, 'PriceBook_' . $item->id . '_' . date('Ymd') . '.pdf');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // SALES ORDERS — BULK DELETE / CLONE / DESTROY / EXPORT PDF
+    // ══════════════════════════════════════════════════════════════
+    public function salesOrdersBulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) return redirect()->route('admin.crm2.inventory.sales-orders')->with('error', 'No sales orders selected.');
+        $deleted = \App\Models\CrmSalesOrder::where('user_id', auth()->id())->whereIn('id', $ids)->delete();
+        return redirect()->route('admin.crm2.inventory.sales-orders')->with('success', $deleted . ' sales order(s) deleted successfully.');
+    }
+
+    public function salesOrderClone(int $id)
+    {
+        $item = \App\Models\CrmSalesOrder::where('user_id', auth()->id())->findOrFail($id);
+        $clone = $item->replicate();
+        $clone->so_number = 'SO-' . strtoupper(\Illuminate\Support\Str::random(8));
+        $clone->status = 'draft';
+        $clone->created_at = $clone->updated_at = now();
+        $clone->save();
+        return redirect()->route('admin.crm2.inventory.sales-orders.show', $clone->id)->with('success', 'Sales order cloned successfully.');
+    }
+
+    public function salesOrderDestroy(int $id)
+    {
+        \App\Models\CrmSalesOrder::where('user_id', auth()->id())->findOrFail($id)->delete();
+        return redirect()->route('admin.crm2.inventory.sales-orders')->with('success', 'Sales order deleted successfully.');
+    }
+
+    public function salesOrderExportPdf(int $id)
+    {
+        $item = \App\Models\CrmSalesOrder::with(['account','contact','owner'])->where('user_id', auth()->id())->findOrFail($id);
+        $lineItems = is_array($item->line_items) ? $item->line_items : json_decode($item->line_items ?? '[]', true);
+        $html = $this->_buildInventoryPdfHtml('Sales Order', $item->so_number, $item->subject, $item->status, $item->account?->name, $item->contact ? ($item->contact->first_name . ' ' . $item->contact->last_name) : null, $item->owner?->name, $lineItems, $item->subtotal, $item->discount_amount, $item->tax_amount, $item->adjustment, $item->grand_total, $item->terms, $item->notes);
+        return $this->_renderPdf($html, 'SalesOrder_' . $item->so_number . '_' . date('Ymd') . '.pdf');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // PURCHASE ORDERS — BULK DELETE / CLONE / DESTROY / EXPORT PDF
+    // ══════════════════════════════════════════════════════════════
+    public function purchaseOrdersBulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) return redirect()->route('admin.crm2.inventory.purchase-orders')->with('error', 'No purchase orders selected.');
+        $deleted = \App\Models\CrmPurchaseOrder::where('user_id', auth()->id())->whereIn('id', $ids)->delete();
+        return redirect()->route('admin.crm2.inventory.purchase-orders')->with('success', $deleted . ' purchase order(s) deleted successfully.');
+    }
+
+    public function purchaseOrderClone(int $id)
+    {
+        $item = \App\Models\CrmPurchaseOrder::where('user_id', auth()->id())->findOrFail($id);
+        $clone = $item->replicate();
+        $clone->po_number = 'PO-' . strtoupper(\Illuminate\Support\Str::random(8));
+        $clone->status = 'draft';
+        $clone->created_at = $clone->updated_at = now();
+        $clone->save();
+        return redirect()->route('admin.crm2.inventory.purchase-orders.show', $clone->id)->with('success', 'Purchase order cloned successfully.');
+    }
+
+    public function purchaseOrderDestroy(int $id)
+    {
+        \App\Models\CrmPurchaseOrder::where('user_id', auth()->id())->findOrFail($id)->delete();
+        return redirect()->route('admin.crm2.inventory.purchase-orders')->with('success', 'Purchase order deleted successfully.');
+    }
+
+    public function purchaseOrderExportPdf(int $id)
+    {
+        $item = \App\Models\CrmPurchaseOrder::with(['vendor','owner'])->where('user_id', auth()->id())->findOrFail($id);
+        $lineItems = is_array($item->line_items) ? $item->line_items : json_decode($item->line_items ?? '[]', true);
+        $html = $this->_buildInventoryPdfHtml('Purchase Order', $item->po_number, $item->subject, $item->status, $item->vendor?->name, null, $item->owner?->name, $lineItems, $item->subtotal, $item->discount_amount, $item->tax_amount, $item->adjustment, $item->grand_total, $item->terms, $item->notes);
+        return $this->_renderPdf($html, 'PurchaseOrder_' . $item->po_number . '_' . date('Ymd') . '.pdf');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // INVOICES — BULK DELETE / CLONE / DESTROY / EXPORT PDF
+    // ══════════════════════════════════════════════════════════════
+    public function invoicesBulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) return redirect()->route('admin.crm2.inventory.invoices')->with('error', 'No invoices selected.');
+        $deleted = \App\Models\CrmInvoice::where('user_id', auth()->id())->whereIn('id', $ids)->delete();
+        return redirect()->route('admin.crm2.inventory.invoices')->with('success', $deleted . ' invoice(s) deleted successfully.');
+    }
+
+    public function invoiceClone(int $id)
+    {
+        $item = \App\Models\CrmInvoice::where('user_id', auth()->id())->findOrFail($id);
+        $clone = $item->replicate();
+        $clone->invoice_number = 'INV-' . strtoupper(\Illuminate\Support\Str::random(8));
+        $clone->status = 'draft';
+        $clone->invoice_date = now()->toDateString();
+        $clone->amount_paid = 0;
+        $clone->created_at = $clone->updated_at = now();
+        $clone->save();
+        return redirect()->route('admin.crm2.inventory.invoices.show', $clone->id)->with('success', 'Invoice cloned successfully.');
+    }
+
+    public function invoiceDestroy(int $id)
+    {
+        \App\Models\CrmInvoice::where('user_id', auth()->id())->findOrFail($id)->delete();
+        return redirect()->route('admin.crm2.inventory.invoices')->with('success', 'Invoice deleted successfully.');
+    }
+
+    public function invoiceExportPdf(int $id)
+    {
+        $item = \App\Models\CrmInvoice::with(['account','contact','owner'])->where('user_id', auth()->id())->findOrFail($id);
+        $lineItems = is_array($item->line_items) ? $item->line_items : json_decode($item->line_items ?? '[]', true);
+        $html = $this->_buildInventoryPdfHtml('Invoice', $item->invoice_number ?? 'INV-' . $item->id, $item->subject, $item->status, $item->account?->name, $item->contact ? ($item->contact->first_name . ' ' . $item->contact->last_name) : null, $item->owner?->name, $lineItems, $item->subtotal, $item->discount_amount, $item->tax_amount, $item->adjustment, $item->grand_total, $item->terms, $item->notes);
+        return $this->_renderPdf($html, 'Invoice_' . ($item->invoice_number ?? $item->id) . '_' . date('Ymd') . '.pdf');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // VENDORS — BULK DELETE / CLONE / DESTROY / EXPORT PDF
+    // ══════════════════════════════════════════════════════════════
+    public function vendorsBulkDelete(\Illuminate\Http\Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) return redirect()->route('admin.crm2.inventory.vendors')->with('error', 'No vendors selected.');
+        $deleted = \App\Models\CrmVendor::where('user_id', auth()->id())->whereIn('id', $ids)->delete();
+        return redirect()->route('admin.crm2.inventory.vendors')->with('success', $deleted . ' vendor(s) deleted successfully.');
+    }
+
+    public function vendorClone(int $id)
+    {
+        $item = \App\Models\CrmVendor::where('user_id', auth()->id())->findOrFail($id);
+        $clone = $item->replicate();
+        $clone->name = $item->name . ' (Copy)';
+        $clone->created_at = $clone->updated_at = now();
+        $clone->save();
+        return redirect()->route('admin.crm2.inventory.vendors.show', $clone->id)->with('success', 'Vendor cloned successfully.');
+    }
+
+    public function vendorDestroy(int $id)
+    {
+        \App\Models\CrmVendor::where('user_id', auth()->id())->findOrFail($id)->delete();
+        return redirect()->route('admin.crm2.inventory.vendors')->with('success', 'Vendor deleted successfully.');
+    }
+
+    public function vendorExportPdf(int $id)
+    {
+        $item = \App\Models\CrmVendor::where('user_id', auth()->id())->findOrFail($id);
+        $html  = '<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;font-size:12px;color:#222;padding:20px;}h1{font-size:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #e5e7eb;padding:6px 8px;font-size:11px;}th{background:#f3f4f6;}</style></head><body>';
+        $html .= '<h1>Vendor: ' . htmlspecialchars($item->name) . '</h1>';
+        $html .= '<table><tr><th>Field</th><th>Value</th></tr>';
+        $html .= '<tr><td>Email</td><td>' . htmlspecialchars($item->email ?? '—') . '</td></tr>';
+        $html .= '<tr><td>Phone</td><td>' . htmlspecialchars($item->phone ?? '—') . '</td></tr>';
+        $html .= '<tr><td>City</td><td>' . htmlspecialchars($item->city ?? '—') . '</td></tr>';
+        $html .= '<tr><td>Category</td><td>' . htmlspecialchars($item->category ?? '—') . '</td></tr>';
+        $html .= '<tr><td>Status</td><td>' . ucfirst($item->status ?? 'Active') . '</td></tr>';
+        $html .= '<tr><td>Website</td><td>' . htmlspecialchars($item->website ?? '—') . '</td></tr>';
+        $html .= '</table></body></html>';
+        return $this->_renderPdf($html, 'Vendor_' . $item->id . '_' . date('Ymd') . '.pdf');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // SHARED PDF HELPERS
+    // ══════════════════════════════════════════════════════════════
+    private function _buildInventoryPdfHtml(string $type, string $number, ?string $subject, ?string $status, ?string $account, ?string $contact, ?string $owner, array $lineItems, $subtotal, $discount, $tax, $adjustment, $grandTotal, ?string $terms, ?string $notes): string
+    {
+        $html  = '<!DOCTYPE html><html><head><meta charset="UTF-8">';
+        $html .= '<style>body{font-family:Arial,sans-serif;font-size:12px;color:#222;margin:0;padding:20px;}h1{font-size:20px;margin-bottom:4px;}.meta{color:#666;font-size:11px;margin-bottom:16px;}.section-title{font-size:13px;font-weight:bold;border-bottom:1px solid #ddd;padding-bottom:4px;margin:16px 0 8px;}table{width:100%;border-collapse:collapse;margin-bottom:12px;}th{background:#f3f4f6;text-align:left;padding:6px 8px;font-size:11px;border:1px solid #e5e7eb;}td{padding:6px 8px;border:1px solid #e5e7eb;font-size:11px;}.totals{float:right;width:260px;}.totals td:first-child{font-weight:bold;}.grand{font-size:14px;font-weight:bold;background:#f3f4f6;}</style></head><body>';
+        $html .= '<h1>' . $type . ': ' . htmlspecialchars($number) . '</h1>';
+        $html .= '<div class="meta">Subject: ' . htmlspecialchars($subject ?? '') . ' &nbsp;|&nbsp; Status: ' . ucfirst($status ?? '') . '</div>';
+        $html .= '<div class="section-title">Details</div>';
+        $html .= '<table><tr><th>Account</th><th>Contact</th><th>Owner</th></tr>';
+        $html .= '<tr><td>' . htmlspecialchars($account ?? '—') . '</td><td>' . htmlspecialchars($contact ?? '—') . '</td><td>' . htmlspecialchars($owner ?? '—') . '</td></tr></table>';
+        $html .= '<div class="section-title">Line Items</div>';
+        $html .= '<table><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Discount</th><th>Tax %</th><th>Total</th></tr>';
+        foreach ($lineItems as $li) {
+            $html .= '<tr><td>' . htmlspecialchars($li['product'] ?? '') . '</td><td>' . htmlspecialchars($li['qty'] ?? '') . '</td><td>₹' . number_format((float)($li['price'] ?? 0), 2) . '</td><td>₹' . number_format((float)($li['discount'] ?? 0), 2) . '</td><td>' . htmlspecialchars($li['tax'] ?? '0') . '%</td><td>₹' . number_format((float)($li['total'] ?? 0), 2) . '</td></tr>';
+        }
+        $html .= '</table>';
+        $html .= '<table class="totals"><tr><td>Subtotal</td><td>₹' . number_format((float)$subtotal, 2) . '</td></tr>';
+        $html .= '<tr><td>Discount</td><td>₹' . number_format((float)$discount, 2) . '</td></tr>';
+        $html .= '<tr><td>Tax</td><td>₹' . number_format((float)$tax, 2) . '</td></tr>';
+        $html .= '<tr><td>Adjustment</td><td>₹' . number_format((float)$adjustment, 2) . '</td></tr>';
+        $html .= '<tr class="grand"><td>Grand Total</td><td>₹' . number_format((float)$grandTotal, 2) . '</td></tr></table>';
+        if ($terms) $html .= '<div class="section-title">Terms & Conditions</div><p>' . nl2br(htmlspecialchars($terms)) . '</p>';
+        if ($notes) $html .= '<div class="section-title">Notes</div><p>' . nl2br(htmlspecialchars($notes)) . '</p>';
+        $html .= '</body></html>';
+        return $html;
+    }
+
+    private function _renderPdf(string $html, string $filename)
+    {
+        $tmpHtml = sys_get_temp_dir() . '/' . uniqid('inv_') . '.html';
+        $tmpPdf  = sys_get_temp_dir() . '/' . uniqid('inv_') . '.pdf';
+        file_put_contents($tmpHtml, $html);
+        $wk = shell_exec('which wkhtmltopdf 2>/dev/null');
+        if ($wk) shell_exec('wkhtmltopdf --quiet --page-size A4 ' . escapeshellarg($tmpHtml) . ' ' . escapeshellarg($tmpPdf) . ' 2>/dev/null');
+        if (!file_exists($tmpPdf) || filesize($tmpPdf) < 100) {
+            if (class_exists('\Dompdf\Dompdf')) {
+                $dompdf = new \Dompdf\Dompdf();
+                $dompdf->loadHtml($html);
+                $dompdf->setPaper('A4', 'portrait');
+                $dompdf->render();
+                file_put_contents($tmpPdf, $dompdf->output());
+            } else {
+                return response($html, 200, ['Content-Type' => 'text/html', 'Content-Disposition' => 'attachment; filename="' . str_replace('.pdf', '.html', $filename) . '"']);
+            }
+        }
+        $pdf = file_get_contents($tmpPdf);
+        @unlink($tmpHtml); @unlink($tmpPdf);
+        return response($pdf, 200, ['Content-Type' => 'application/pdf', 'Content-Disposition' => 'attachment; filename="' . $filename . '"']);
+    }
 }

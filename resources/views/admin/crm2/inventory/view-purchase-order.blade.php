@@ -162,6 +162,31 @@
       <h1>{{ $item->po_number }} &mdash; {{ $item->subject }}</h1>
       <span class="pov-badge {{ $item->status ?? 'draft' }}">{{ \App\Models\CrmPurchaseOrder::STATUSES[$item->status] ?? ucfirst($item->status ?? 'Draft') }}</span>
       <a href="{{ route('admin.crm2.inventory.purchase-orders.edit', $item->id) }}" class="pov-btn primary">&#9998; Edit</a>
+      {{-- 3-dot Actions Menu --}}
+      <div style="position:relative;display:inline-block;">
+        <button id="povActBtn" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:7px;background:var(--bg-card);border:1.5px solid var(--border);color:var(--text-secondary);font-size:1.15rem;cursor:pointer;transition:all .15s;" title="More actions">&#8942;</button>
+        <div id="povActDrop" style="display:none;position:absolute;right:0;top:calc(100% + 6px);background:var(--bg-card);border:1px solid var(--border);border-radius:8px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,0.35);z-index:999;overflow:hidden;">
+          <a href="{{ route('admin.crm2.inventory.purchase-orders.clone', $item->id) }}" style="display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.82rem;color:var(--text-primary);text-decoration:none;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+            <i class="fas fa-copy" style="width:16px;color:#6366f1;"></i> Clone
+          </a>
+          <a href="{{ route('admin.crm2.inventory.purchase-orders.export-pdf', $item->id) }}" style="display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.82rem;color:var(--text-primary);text-decoration:none;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+            <i class="fas fa-file-pdf" style="width:16px;color:#ef4444;"></i> Export to PDF
+          </a>
+          <button onclick="window.print()" style="display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.82rem;color:var(--text-primary);background:transparent;border:none;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+            <i class="fas fa-print" style="width:16px;color:#10b981;"></i> Print Preview
+          </button>
+          <button onclick="document.getElementById('povSendMailSlider').classList.add('open');document.getElementById('povSendMailOverlay').classList.add('open');" style="display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.82rem;color:var(--text-primary);background:transparent;border:none;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='var(--bg-hover)'" onmouseout="this.style.background='transparent'">
+            <i class="fas fa-envelope" style="width:16px;color:#3b82f6;"></i> Send Mail
+          </button>
+          <hr style="border:none;border-top:1px solid var(--border);margin:0;">
+          <form method="POST" action="{{ route('admin.crm2.inventory.purchase-orders.destroy', $item->id) }}" onsubmit="return confirm('Delete this purchase order? This cannot be undone.')">
+            @csrf @method('DELETE')
+            <button type="submit" style="display:flex;align-items:center;gap:.75rem;padding:.65rem 1rem;font-size:.82rem;color:#f87171;background:transparent;border:none;cursor:pointer;width:100%;text-align:left;" onmouseover="this.style.background='rgba(220,38,38,.12)'" onmouseout="this.style.background='transparent'">
+              <i class="fas fa-trash" style="width:16px;"></i> Delete
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
 
     {{-- ══ 1. PURCHASE ORDER INFORMATION ══ --}}
@@ -670,5 +695,16 @@ window.addEventListener('scroll', () => {
     });
     povNavLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + cur));
 }, {passive:true});
+// 3-dot Actions Menu
+document.getElementById('povActBtn')?.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const drop = document.getElementById('povActDrop');
+    drop.style.display = drop.style.display === 'block' ? 'none' : 'block';
+});
+document.addEventListener('click', function(e) {
+    const btn = document.getElementById('povActBtn');
+    const drop = document.getElementById('povActDrop');
+    if (btn && drop && !btn.contains(e.target) && !drop.contains(e.target)) drop.style.display = 'none';
+});
 </script>
 @endsection
