@@ -34,8 +34,8 @@ class DashboardController extends Controller
         $crmAccounts    = CrmAccount::where('user_id', $tid)->count();
         $crmContacts    = CrmContact::where('user_id', $tid)->count();
         $crmDeals       = CrmDeal::where('user_id', $tid)->count();
-        $crmDealsOpen   = CrmDeal::where('user_id', $tid)->whereNotIn('stage', ['Closed Won', 'Closed Lost'])->count();
-        $crmDealsWon    = CrmDeal::where('user_id', $tid)->where('stage', 'Closed Won')->count();
+        $crmDealsOpen   = CrmDeal::where('user_id', $tid)->whereNotIn('stage', ['closed_won', 'closed_lost'])->count();
+        $crmDealsWon    = CrmDeal::where('user_id', $tid)->where('stage', 'closed_won')->count();
         $crmActivities  = CrmActivity::where('user_id', $tid)->where('status', 'open')->count();
 
         // ── Inventory Stats ────────────────────────────────────────────────────
@@ -49,19 +49,19 @@ class DashboardController extends Controller
 
         // ── E-Commerce Stats ───────────────────────────────────────────────────
         $ecomProducts   = Product::where('user_id', $tid)->count();
-        $ecomActive     = Product::where('user_id', $tid)->where('status', 'active')->count();
+        $ecomActive     = Product::where('user_id', $tid)->where('is_active', true)->count();
 
         // ── POS Stats ──────────────────────────────────────────────────────────
-        $posOrders      = PosOrder::where('user_id', $tid)->count();
-        $posTodaySales  = PosOrder::where('user_id', $tid)
+        $posOrders      = PosOrder::where('tenant_id', $tid)->count();
+        $posTodaySales  = PosOrder::where('tenant_id', $tid)
                             ->whereDate('created_at', today())
                             ->sum('total');
-        $posActiveSessions = PosSession::where('user_id', $tid)->where('status', 'open')->count();
+        $posActiveSessions = PosSession::where('tenant_id', $tid)->where('status', 'open')->count();
 
         // ── Site Builder Stats ─────────────────────────────────────────────────
         $sitePosts      = BlogPost::where('user_id', $tid)->where('status', 'published')->count();
         $siteDrafts     = BlogPost::where('user_id', $tid)->where('status', 'draft')->count();
-        $siteUsers      = User::where('tenant_owner_id', $tid)->count();
+        $siteUsers      = User::where('tenant_owner_id', $tid)->orWhere('id', $tid)->count();
 
         // ── Recent Records ─────────────────────────────────────────────────────
         $recentLeads    = CrmLead::where('user_id', $tid)->orderByDesc('created_at')->take(5)->get();
