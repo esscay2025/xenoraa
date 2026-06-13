@@ -74,6 +74,7 @@
         /* ══════════════════════════════════════════════════════════
            RESET & BASE
         ══════════════════════════════════════════════════════════ */
+        html { scrollbar-gutter: stable; }
         * { box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;

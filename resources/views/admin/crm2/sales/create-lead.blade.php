@@ -51,6 +51,11 @@
     box-shadow: 0 3px 12px rgba(0,0,0,.10);
     flex-wrap: wrap;
     transition: left 0.22s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
 }
 /* Shift bar right when sidebar panel is open */
 body.xn-panel-open .lead-sticky-bar {
