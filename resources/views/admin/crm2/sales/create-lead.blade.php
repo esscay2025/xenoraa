@@ -3,7 +3,7 @@
 @section('page-title', 'New Lead')
 @section('content')
 <style>
-.lead-form-wrap { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 3rem;  padding-top: 0; }
+.lead-form-wrap { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 3rem;  padding-top: 0;  margin-top: 0; }
 .lead-form-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: .75rem; }
 .lead-form-header h1 { font-size: 1.4rem; font-weight: 700; color: var(--text-primary,#1a1a2e); display: flex; align-items: center; gap: .5rem; }
 .lead-section { background: var(--bg-card,#fff); border: 1px solid var(--border,#e2e8f0); border-radius: 10px; margin-bottom: 1.25rem; overflow: hidden; }
@@ -34,20 +34,31 @@
 .btn-lead-save:hover { opacity: .88; }
 .btn-lead-cancel { background: transparent; color: var(--text-secondary,#64748b); border: 1px solid var(--border,#e2e8f0); padding: .55rem 1.2rem; border-radius: 7px; font-size: .9rem; font-weight: 600; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: .4rem; }
 .btn-lead-cancel:hover { background: var(--bg-primary,#f8fafc); }
-/* Sticky top action bar */
+/* Sticky top action bar — fixed so it always stays visible */
 .lead-sticky-bar {
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    position: fixed;
+    top: 60px; /* below the global topbar (60px height) */
+    left: var(--rail-width, 60px); /* default: rail only closed */
+    right: 0;
+    z-index: 120;
     background: var(--bg-card,#fff);
-    border-bottom: 1px solid var(--border,#e2e8f0);
-    padding: .6rem 1rem;
+    border-bottom: 2px solid var(--accent,#6366f1);
+    padding: .75rem 1.5rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: .75rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    box-shadow: 0 3px 12px rgba(0,0,0,.10);
     flex-wrap: wrap;
+    transition: left 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+/* Shift bar right when sidebar panel is open */
+body.xn-panel-open .lead-sticky-bar {
+    left: calc(var(--rail-width, 60px) + var(--panel-width, 220px));
+}
+/* Spacer to push form content below the fixed bar */
+.lead-sticky-spacer {
+    height: 64px;
 }
 .lead-sticky-bar .lead-sticky-title {
     font-size: .95rem;
@@ -92,6 +103,8 @@
     </div>
   </div>
 
+  {{-- Spacer: pushes content below the fixed sticky bar --}}
+  <div class="lead-sticky-spacer"></div>
   @if($errors->any())
   <div class="crm2-alert danger" style="margin-bottom:1rem"><i class="fas fa-exclamation-circle"></i> Please fix the errors below.</div>
   @endif
@@ -101,7 +114,7 @@
     <input type="hidden" name="_type" value="lead">
 
     {{-- 1. Lead Profile --}}
-    <div class="lead-section">
+    <div class="lead-section" style="margin-top:1.5rem">
       <div class="lead-section-header" onclick="toggleSection(this)">
         <i class="fas fa-id-badge section-icon"></i>
         <span>1. Lead Profile</span>
