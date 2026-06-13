@@ -361,6 +361,7 @@
         /* ── Main content area ──────────────────────────────────── */
         .main-content {
             margin-left: var(--rail-width);
+            padding-top: 60px; /* offset for fixed topbar */
             flex: 1;
             display: flex;
             flex-direction: column;
@@ -381,9 +382,20 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: var(--rail-width);
+            right: 0;
             z-index: 150;
+            will-change: transform;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            transition: left 0.22s cubic-bezier(0.4,0,0.2,1);
+        }
+        body.xn-panel-open .topbar {
+            left: var(--sidebar-total);
         }
         .topbar-title {
             font-size: 1rem;
