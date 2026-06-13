@@ -170,16 +170,7 @@ body.xn-panel-open .xn-sticky-bar {
                                 <small class="crm2-hint">PNG, JPG, SVG — max 2MB. Recommended: 200×60px</small>
                             </div>
                         </div>
-                        <div style="display:flex;gap:1.5rem;margin-top:1rem;">
-                            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.875rem;">
-                                <input type="checkbox" name="show_logo" value="1" {{ old('show_logo',1) ? 'checked' : '' }} style="accent-color:var(--accent);">
-                                Show logo in email
-                            </label>
-                            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.875rem;">
-                                <input type="checkbox" name="show_footer" value="1" {{ old('show_footer',1) ? 'checked' : '' }} style="accent-color:var(--accent);">
-                                Show footer
-                            </label>
-                        </div>
+                        
                     </div>
                 </div>
 
@@ -247,12 +238,6 @@ body.xn-panel-open .xn-sticky-bar {
                 </div>
                 <div class="crm2-card">
                     <div class="crm2-card-body" style="padding:1.25rem;display:flex;flex-direction:column;gap:0.75rem;">
-                        <button type="submit" class="crm2-btn crm2-btn-primary" style="width:100%;">
-                            <i class="fas fa-save"></i> Create Template
-                        </button>
-                        <a href="{{ route('admin.crm2.settings.mail-templates') }}" class="crm2-btn crm2-btn-secondary" style="width:100%;text-align:center;">
-                            Cancel
-                        </a>
                     </div>
                 </div>
             </div>

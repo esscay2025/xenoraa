@@ -106,7 +106,6 @@ body.xn-panel-open .xn-sticky-bar {
       <div class="cf-breadcrumb"><a href="{{ route('admin.crm2.sales.accounts') }}">Accounts</a> / New Account</div>
       <h1><i class="fas fa-building"></i> New Account</h1>
     </div>
-    <a href="{{ route('admin.crm2.sales.accounts') }}" class="cf-btn cf-btn-ghost"><i class="fas fa-arrow-left"></i> Back</a>
   </div>
   @if($errors->any())<div class="crm2-alert error" style="margin-bottom:1rem"><i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}</div>@endif
   <form id="accountCreateForm" method="POST" action="{{ route('admin.crm2.sales.accounts.store') }}" enctype="multipart/form-data">
@@ -253,10 +252,7 @@ body.xn-panel-open .xn-sticky-bar {
         <div class="cf-field"><label>Notes</label><textarea name="notes" placeholder="Internal notes...">{{ old('notes') }}</textarea></div>
       </div>
     </div>
-    <div class="cf-actions">
-      <a href="{{ route('admin.crm2.sales.accounts') }}" class="cf-btn cf-btn-ghost">Cancel</a>
-      <button type="submit" class="cf-btn cf-btn-primary"><i class="fas fa-save"></i> Save Account</button>
-    </div>
+    
   </form>
 </div>
 <script>

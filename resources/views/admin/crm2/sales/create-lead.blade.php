@@ -29,7 +29,6 @@
 .lead-image-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 2px solid var(--border,#e2e8f0); display: none; }
 .lead-image-preview.show { display: block; }
 .lead-image-wrap { display: flex; align-items: center; gap: 1rem; }
-.lead-form-actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.5rem; flex-wrap: wrap; }
 .btn-lead-save { background: var(--accent,#6366f1); color: #fff; border: none; padding: .55rem 1.4rem; border-radius: 7px; font-size: .9rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: .4rem; transition: opacity .15s; }
 .btn-lead-save:hover { opacity: .88; }
 .btn-lead-cancel { background: transparent; color: var(--text-secondary,#64748b); border: 1px solid var(--border,#e2e8f0); padding: .55rem 1.2rem; border-radius: 7px; font-size: .9rem; font-weight: 600; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: .4rem; }

@@ -287,7 +287,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-
     /* ===== Cascading Country / State / City + Copy Address ===== */
     const GEO_DATA = {
         "India": {
@@ -620,7 +619,6 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
 
-
         <div class="cf-section">
             <div class="cf-section-header" onclick="toggleSection(this)">
                 <h3>Ordered Items</h3><span class="cf-chevron">&#9660;</span>
@@ -678,10 +676,6 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
         </div>
 
-        <div class="cf-actions">
-            <button type="submit" class="cf-btn cf-btn-primary">&#10003; Save Sales Order</button>
-            <a href="{{ route('admin.crm2.inventory.sales-orders') }}" class="cf-btn cf-btn-secondary">Cancel</a>
-        </div>
     </form>
 </div>
 @endsection

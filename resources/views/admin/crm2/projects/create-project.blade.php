@@ -76,7 +76,6 @@ body.xn-panel-open .xn-sticky-bar {
 
   <div class="crm2-header">
     <div><h1 class="crm2-title"><i class="fas fa-project-diagram"></i> New Project</h1><p class="crm2-subtitle">Create a new CRM project.</p></div>
-    <a href="{{ route('admin.crm2.projects.list') }}" class="crm2-btn crm2-btn-ghost"><i class="fas fa-arrow-left"></i> Back to Projects</a>
   </div>
   @if($errors->any())<div class="crm2-alert danger"><ul style="margin:0;padding-left:1.2rem;">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
   <div class="crm2-card"><div class="crm2-card-body">
@@ -122,10 +121,7 @@ body.xn-panel-open .xn-sticky-bar {
         </div>
         <div class="form-group full"><label>Description</label><textarea name="description" class="crm2-textarea" rows="5" placeholder="Describe the project scope, goals, and deliverables..."></textarea></div>
       </div>
-      <div style="display:flex;gap:1rem;margin-top:1.5rem;">
-        <button type="submit" class="crm2-btn crm2-btn-primary"><i class="fas fa-save"></i> Save Project</button>
-        <a href="{{ route('admin.crm2.projects.list') }}" class="crm2-btn crm2-btn-ghost">Cancel</a>
-      </div>
+      
     </form>
   </div></div>
 </div>

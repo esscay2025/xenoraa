@@ -298,10 +298,6 @@ function serializeLineItems(tableId, fieldId) {
             </div>
         </div>
 
-        <div class="cf-actions">
-            <button type="submit" class="cf-btn cf-btn-primary">&#10003; Save Vendor</button>
-            <a href="{{ route('admin.crm2.inventory.vendors') }}" class="cf-btn cf-btn-secondary">Cancel</a>
-        </div>
     </form>
 </div>
 @endsection

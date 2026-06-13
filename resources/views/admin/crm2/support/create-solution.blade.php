@@ -76,7 +76,6 @@ body.xn-panel-open .xn-sticky-bar {
 
   <div class="crm2-header">
     <div><h1 class="crm2-title"><i class="fas fa-lightbulb"></i> New Solution</h1><p class="crm2-subtitle">Add a knowledge base article or solution.</p></div>
-    <a href="{{ route('admin.crm2.support.solutions') }}" class="crm2-btn crm2-btn-ghost"><i class="fas fa-arrow-left"></i> Back to Solutions</a>
   </div>
   @if($errors->any())<div class="crm2-alert danger"><ul style="margin:0;padding-left:1.2rem;">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
   <div class="crm2-card"><div class="crm2-card-body">
@@ -87,10 +86,7 @@ body.xn-panel-open .xn-sticky-bar {
         <div class="form-group"><label>Status</label><select name="is_published" class="crm2-select"><option value="0">Draft</option><option value="1">Published</option></select></div>
         <div class="form-group full"><label>Content *</label><textarea name="content" class="crm2-textarea" rows="10" placeholder="Write the solution content here..." required></textarea></div>
       </div>
-      <div style="display:flex;gap:1rem;margin-top:1.5rem;">
-        <button type="submit" class="crm2-btn crm2-btn-primary"><i class="fas fa-save"></i> Save Solution</button>
-        <a href="{{ route('admin.crm2.support.solutions') }}" class="crm2-btn crm2-btn-ghost">Cancel</a>
-      </div>
+      
     </form>
   </div></div>
 </div>

@@ -76,7 +76,6 @@ body.xn-panel-open .xn-sticky-bar {
 
   <div class="crm2-header">
     <div><h1 class="crm2-title"><i class="fas fa-tasks"></i> New Task</h1><p class="crm2-subtitle">Create a new project task.</p></div>
-    <a href="{{ route('admin.crm2.projects.tasks') }}" class="crm2-btn crm2-btn-ghost"><i class="fas fa-arrow-left"></i> Back to Tasks</a>
   </div>
   @if($errors->any())<div class="crm2-alert danger"><ul style="margin:0;padding-left:1.2rem;">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul></div>@endif
   <div class="crm2-card"><div class="crm2-card-body">
@@ -90,10 +89,7 @@ body.xn-panel-open .xn-sticky-bar {
         <div class="form-group"><label>Due Date</label><input type="date" name="due_date" class="crm2-input"></div>
         <div class="form-group full"><label>Description</label><textarea name="description" class="crm2-textarea" rows="5"></textarea></div>
       </div>
-      <div style="display:flex;gap:1rem;margin-top:1.5rem;">
-        <button type="submit" class="crm2-btn crm2-btn-primary"><i class="fas fa-save"></i> Save Task</button>
-        <a href="{{ route('admin.crm2.projects.tasks') }}" class="crm2-btn crm2-btn-ghost">Cancel</a>
-      </div>
+      
     </form>
   </div></div>
 </div>
