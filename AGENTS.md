@@ -1,3 +1,14 @@
+- v4.16.0 (2026-06-13): Deals Kanban View
+  - Added List/Kanban view toggle to Deals landing page
+  - Kanban board: 6 columns (Prospecting, Qualification, Proposal, Negotiation, Closed Won, Closed Lost)
+  - Deal cards: name (linked), account, value, probability, expected close, owner
+  - Column headers show deal count badge and total pipeline value
+  - Drag-and-drop between columns using HTML5 Drag API (no external libraries)
+  - AJAX PATCH to /admin/deals/{deal}/stage updates stage on drop (optimistic UI)
+  - View preference saved in localStorage; List view paginated, Kanban unpaginated
+  - salesDeals controller updated to pass allDeals for Kanban view
+  - Commit: d3ad424
+
 
 - v4.1.0 (2026-06-09): Theme Propagation Fix + Jose Industries Branding
   - layouts/app.blade.php: Dynamic color scheme from tenant site_settings (color_bg, color_primary, color_secondary, color_text); auto-detects light vs dark theme via luminance calculation
