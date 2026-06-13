@@ -1,3 +1,12 @@
+## v4.21.0 (2026-06-13): Xenoraa Documentation Hub
+- New docs hub at /xenoraa/docs — 8 section cards with live search
+- Individual section pages at /xenoraa/docs/{slug} with sidebar, breadcrumbs, prev/next
+- 8 sections: Getting Started, Website Builder, E-Commerce, POS, CRM & Sales, Accounts & Finance, AI Hub, Billing
+- Each section: step-by-step guides, tips, warnings, tables, troubleshooting FAQ
+- Footer Documentation link updated to xenoraa.docs route
+- XenoraaController: docs(), docsSection(), markdownToHtml() methods
+- GitHub commit: 11611bf
+
 - v4.18.0 (2026-06-13): Xenoraa Public Site — New 3-Tier Pricing + Content Update
   Pricing Page: complete rewrite with Solo App (₹499), Duo Bundle (₹999), All-Access (₹1999)
   Tier 1: 1 app of choice (Website OR E-Commerce OR POS OR CRM)
