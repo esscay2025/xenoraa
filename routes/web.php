@@ -836,6 +836,7 @@ Route::prefix('superadmin')->name('superadmin.')->middleware(['auth', 'superadmi
     // Plan Modules Management
     Route::get('/plan-modules', [SuperAdminController::class, 'planModules'])->name('plan-modules');
     Route::post('/plan-modules', [SuperAdminController::class, 'savePlanModules'])->name('plan-modules.save');
+    Route::post('/plan-modules/update-tenant', [SuperAdminController::class, 'planModulesUpdateTenant'])->name('plan-modules.update');
     Route::get('/revenue', [SuperAdminController::class, 'revenue'])->name('revenue');
     Route::get('/domains', [SuperAdminController::class, 'domains'])->name('domains');
     Route::patch('/domains/{id}', [SuperAdminController::class, 'updateDomain'])->name('domains.update');

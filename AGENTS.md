@@ -290,3 +290,31 @@
   - WooCommerce-style tab navigation with URL parameter (?tab=general etc.)
   - All fields use ec- CSS classes for dark/light mode adaptive styling
   - Deployed and verified working on production server at gopi.blog
+- v4.22.0 (2026-06-13): App-Choice Subscription Model — Full Implementation
+  New 3-tier subscription model replacing old flat plan_modules system:
+  **Tier 1 — Solo App (₹499/mo):** 1 app slot, choose from Website, E-Commerce, POS, or CRM
+  **Tier 2 — Duo Bundle (₹999/mo):** 2 app slots, choose any 2 apps
+  **Tier 3 — All-Access (₹1,999/mo):** all 4 apps + every module
+  Layer 1 — Config (config/xenoraa.php):
+  - Added 'plans' section with solo_app, duo_bundle, all_access definitions (name, app_slots, available_apps, price, features)
+  - Added 'apps' section defining module lists per app (website, ecommerce, pos, crm)
+  - Kept legacy 'plan_modules' for backward compatibility
+  Layer 2 — Database (migration 2026_06_13_100000_add_selected_apps_to_users.php):
+  - Added selected_apps JSONB column to users table
+  - Dropped old users_plan_check constraint, added new one with new plan names
+  - Migrated existing tenants: starter→solo_app, professional→duo_bundle, business/business_pro→all_access
+  - Auto-assigned selected_apps for all existing tenants based on new plan
+  Layer 3 — User Model (app/Models/User.php):
+  - Added getSelectedApps(): returns active apps for the tenant (all 4 for all_access)
+  - Added hasApp(string $app): checks if tenant has a specific app activated
+  - Added getActiveModules(): returns flat array of all modules from selected apps
+  - Updated planHasModule(string $module): uses app-choice logic with legacy fallback
+  - Added selected_apps to $casts as 'array'
+  Layer 4 — Admin UI (superadmin/plan-modules.blade.php + SuperAdminController.php):
+  - Redesigned Plan Modules page → "Plan & App Assignment"
+  - Section 1: 3 plan definition cards (Solo App, Duo Bundle, All-Access) with pricing, app slots, tenant count
+  - Section 2: Per-tenant table with plan dropdown, app chip checkboxes, slot enforcement, AJAX Save per row
+  - New AJAX endpoint: POST /superadmin/plan-modules/update-tenant → planModulesUpdateTenant()
+  - Validates plan, selected_apps count vs slot limit, app keys; returns JSON success/error
+  - Route: superadmin.plan-modules.update registered in routes/web.php
+  End-to-end verified: solo_app+website blocks crm/ecommerce; duo_bundle+website+ecommerce blocks crm/pos; all_access gets everything

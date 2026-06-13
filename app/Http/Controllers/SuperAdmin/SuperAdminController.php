@@ -144,22 +144,34 @@ class SuperAdminController extends Controller
     /**
      * Plan Modules Management — show which modules each plan includes
      */
+    /**
+     * Plan & App Assignment — redesigned for app-choice subscription model.
+     * Shows 3-tier plan definitions and per-tenant app assignment table.
+     */
     public function planModules()
     {
-        $planModules = config('xenoraa.plan_modules', []);
         $plans       = config('xenoraa.plans', []);
-        $allModules  = [
-            'site_builder' => ['label' => 'Site Builder',          'icon' => 'fa-globe',         'desc' => 'Page manager, branding, domain, menu builder'],
-            'content'      => ['label' => 'Content (Blog + Forum)', 'icon' => 'fa-pen-nib',       'desc' => 'Blog posts, forum topics'],
-            'ecommerce'    => ['label' => 'E-Commerce / Shop',      'icon' => 'fa-shopping-cart',  'desc' => 'Products, orders, shop management'],
-            'recruitment'  => ['label' => 'Jobs / Recruitment',     'icon' => 'fa-briefcase',      'desc' => 'Job listings and applications'],
-            'analytics'    => ['label' => 'Analytics',              'icon' => 'fa-chart-bar',      'desc' => 'Traffic and engagement analytics'],
-            'crm'          => ['label' => 'CRM',                    'icon' => 'fa-users',          'desc' => 'Leads, contacts, projects, services, sales pipeline'],
-            'ai'           => ['label' => 'AI Hub (AI Assistance)', 'icon' => 'fa-robot',          'desc' => 'AI chatbot, AI conversations'],
-            'pos'          => ['label' => 'Point of Sale (POS)',    'icon' => 'fa-cash-register',  'desc' => 'POS terminal, orders, sessions'],
-            'newsletter'   => ['label' => 'Newsletter',             'icon' => 'fa-envelope',       'desc' => 'Email campaigns and subscriber management'],
-        ];
-        return view('superadmin.plan-modules', compact('planModules', 'plans', 'allModules'));
+        $appDefs     = config('xenoraa.apps', []);
+        $planModules = config('xenoraa.plan_modules', []);
+
+        // Load all tenants (non-superadmin) with their plan and selected_apps
+        $tenants = User::whereNotNull('plan')
+            ->where(function ($q) {
+                $q->where('role_id', '!=', 4)->orWhereNull('role_id');
+            })
+            ->orderBy('name')
+            ->select('id', 'name', 'email', 'plan', 'selected_apps', 'status', 'created_at')
+            ->get();
+
+        // Count tenants per plan for the plan cards
+        $tenantsByPlan = [];
+        foreach (array_keys($plans) as $pk) {
+            $tenantsByPlan[$pk] = $tenants->where('plan', $pk)->count();
+        }
+
+        return view('superadmin.plan-modules', compact(
+            'plans', 'appDefs', 'planModules', 'tenants', 'tenantsByPlan'
+        ));
     }
 
     /**
@@ -195,6 +207,49 @@ class SuperAdminController extends Controller
         }
         return back()->with('success', 'Plan module access updated successfully.');
     }
+    /**
+     * AJAX — Update a single tenant's plan and selected_apps.
+     * Called from the Plan & App Assignment page.
+     *
+     * POST /superadmin/plan-modules/update-tenant
+     * Body: { user_id, plan, selected_apps[] }
+     */
+    public function planModulesUpdateTenant(Request $request)
+    {
+        $validPlans = array_keys(config('xenoraa.plans', []));
+        $validApps  = array_keys(config('xenoraa.apps', []));
+
+        $validated = $request->validate([
+            'user_id'       => 'required|integer|exists:users,id',
+            'plan'          => 'required|string|in:' . implode(',', $validPlans),
+            'selected_apps'  => 'required|array|min:0',
+            'selected_apps.*' => 'string|in:' . implode(',', $validApps),
+        ]);
+
+        $user = User::findOrFail($validated['user_id']);
+
+        // Validate slot count
+        $planConfig = config('xenoraa.plans.' . $validated['plan'], []);
+        $slots      = $planConfig['app_slots'] ?? 1;
+        $apps       = array_values(array_intersect($validApps, $validated['selected_apps']));
+
+        if ($slots < 99 && count($apps) > $slots) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Selected apps (' . count($apps) . ') exceed plan slot limit (' . $slots . ').',
+            ], 422);
+        }
+
+        $user->plan          = $validated['plan'];
+        $user->selected_apps = $apps;
+        $user->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => $user->name . ' updated to ' . ($planConfig['name'] ?? $validated['plan']) . ' with ' . count($apps) . ' app(s).',
+        ]);
+    }
+
 
     /**
      * Revenue Overview

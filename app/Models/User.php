@@ -51,6 +51,7 @@ class User extends Authenticatable
         'password'          => 'hashed',
         'trial_ends_at'     => 'datetime',
         'plan_expires_at'   => 'datetime',
+        'selected_apps'     => 'array',
         'onboarding_completed' => 'boolean',
         'module_permissions'   => 'array',
         'business_info_ai'     => 'array',
@@ -247,25 +248,102 @@ class User extends Authenticatable
         return $plans[$plan]['features'][$feature] ?? false;
     }
 
-    /**
-     * Check if the tenant's subscription plan includes a given module.
-     * SuperAdmins and tenant owners on the 'business' plan always get everything.
-     * For other plans, check the plan_modules config.
+        /**
+     * Get the list of apps this tenant has activated.
+     * For all_access plan, always returns all 4 apps.
      */
-    public function planHasModule(string $module): bool
+    public function getSelectedApps(): array
     {
-        // SuperAdmins and tenant owners on business plan get all modules
+        $plan = $this->getPlan();
+
+        // All-Access and legacy Business plans always get all apps
+        if (in_array($plan, ['all_access', 'business', 'business_pro'])) {
+            return array_keys(config('xenoraa.apps', []));
+        }
+
+        // Decode selected_apps JSON column
+        $apps = $this->selected_apps;
+        if (is_string($apps)) {
+            $apps = json_decode($apps, true) ?? [];
+        }
+        if (is_array($apps) && count($apps) > 0) {
+            return $apps;
+        }
+
+        return ['website']; // safe default
+    }
+
+    /**
+     * Check if the tenant has a specific app activated.
+     */
+    public function hasApp(string $app): bool
+    {
         if ($this->isSuperAdmin()) {
             return true;
         }
-        $plan = $this->getPlan();
-        // Business Pro gets everything
-        if ($plan === 'business') {
+        return in_array($app, $this->getSelectedApps());
+    }
+
+    /**
+     * Get all modules this tenant can access based on their selected apps.
+     */
+    public function getActiveModules(): array
+    {
+        if ($this->isSuperAdmin()) {
+            return ['*'];
+        }
+
+        $apps    = $this->getSelectedApps();
+        $appDefs = config('xenoraa.apps', []);
+        $modules = [];
+
+        foreach ($apps as $appKey) {
+            $appModules = $appDefs[$appKey]['modules'] ?? [];
+            $modules    = array_merge($modules, $appModules);
+        }
+
+        // Core modules always available
+        $modules = array_merge($modules, ['analytics', 'settings', 'calendar', 'team']);
+
+        return array_unique($modules);
+    }
+
+    /**
+     * Check if the tenant's subscription plan includes a given module.
+     *
+     * New app-choice logic:
+     *   1. SuperAdmins always get everything.
+     *   2. all_access / business plans get everything.
+     *   3. Others: check if module is in any of the tenant's selected apps.
+     *   4. Legacy fallback: check old plan_modules config.
+     */
+    public function planHasModule(string $module): bool
+    {
+        if ($this->isSuperAdmin()) {
             return true;
         }
-        $planModules = config('xenoraa.plan_modules', []);
-        $allowed = $planModules[$plan] ?? [];
-        return in_array($module, $allowed) || in_array('*', $allowed);
+
+        $plan = $this->getPlan();
+
+        // All-Access and legacy Business plans get everything
+        if (in_array($plan, ['all_access', 'business', 'business_pro'])) {
+            return true;
+        }
+
+        // New app-choice model: check active modules from selected apps
+        $activeModules = $this->getActiveModules();
+        if (in_array('*', $activeModules) || in_array($module, $activeModules)) {
+            return true;
+        }
+
+        // Legacy fallback: check old plan_modules config
+        $planModules   = config('xenoraa.plan_modules', []);
+        $legacyAllowed = $planModules[$plan] ?? [];
+        if (in_array($module, $legacyAllowed) || in_array('*', $legacyAllowed)) {
+            return true;
+        }
+
+        return false;
     }
 
     public function isTrialing(): bool
