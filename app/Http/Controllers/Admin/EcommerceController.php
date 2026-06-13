@@ -240,13 +240,17 @@ class EcommerceController extends Controller
         ]);
     }
 
-    private function uniqueSlug(string $name): string
+    private function uniqueSlug(string $name, ?int $userId = null): string
     {
         $base = Str::slug($name);
         $slug = $base;
         $i    = 1;
-        while (Product::where('slug', $slug)->exists()) {
+        $query = Product::where('slug', $slug);
+        if ($userId) $query->where('user_id', $userId);
+        while ($query->exists()) {
             $slug = $base . '-' . $i++;
+            $query = Product::where('slug', $slug);
+            if ($userId) $query->where('user_id', $userId);
         }
         return $slug;
     }
@@ -460,30 +464,40 @@ class EcommerceController extends Controller
                 $type = 'simple';
             }
 
-            Product::create([
-                'user_id'           => $tid,
-                'name'              => $name,
-                'slug'              => $this->uniqueSlug($name),
-                'short_description' => trim($row[$col['short_description'] ?? 1] ?? ''),
-                'description'       => trim($row[$col['description'] ?? 2] ?? ''),
-                'category_id'       => $categoryId,
-                'price'             => $price,
-                'sale_price'        => ($row[$col['sale_price'] ?? 5] ?? '') !== '' ? (float)$row[$col['sale_price'] ?? 5] : null,
-                'cost_price'        => ($row[$col['cost_price'] ?? 6] ?? '') !== '' ? (float)$row[$col['cost_price'] ?? 6] : null,
-                'sku'               => trim($row[$col['sku'] ?? 7] ?? '') ?: null,
-                'stock_quantity'    => ($row[$col['stock_quantity'] ?? 8] ?? '') !== '' ? (int)$row[$col['stock_quantity'] ?? 8] : null,
-                'stock_status'      => $stockStatus,
-                'type'              => $type,
-                'weight'            => ($row[$col['weight'] ?? 11] ?? '') !== '' ? (float)$row[$col['weight'] ?? 11] : null,
-                'dimensions'        => trim($row[$col['dimensions'] ?? 12] ?? '') ?: null,
-                'featured_image'    => trim($row[$col['featured_image'] ?? 13] ?? '') ?: null,
-                'meta_title'        => trim($row[$col['meta_title'] ?? 14] ?? '') ?: null,
-                'meta_description'  => trim($row[$col['meta_description'] ?? 15] ?? '') ?: null,
-                'is_active'         => (int)($row[$col['is_active'] ?? 16] ?? 1) === 1,
-                'is_featured'       => (int)($row[$col['is_featured'] ?? 17] ?? 0) === 1,
-                'manage_stock'      => true,
-            ]);
-            $imported++;
+            $skuVal = trim($row[$col['sku'] ?? 7] ?? '') ?: null;
+            // Check for duplicate SKU within this tenant
+            if ($skuVal && Product::where('user_id', $tid)->where('sku', $skuVal)->exists()) {
+                $errors[] = "Row {$lineNum}: Skipped — SKU '{$skuVal}' already exists for this account.";
+                continue;
+            }
+            try {
+                Product::create([
+                    'user_id'           => $tid,
+                    'name'              => $name,
+                    'slug'              => $this->uniqueSlug($name, $tid),
+                    'short_description' => trim($row[$col['short_description'] ?? 1] ?? ''),
+                    'description'       => trim($row[$col['description'] ?? 2] ?? ''),
+                    'category_id'       => $categoryId,
+                    'price'             => $price,
+                    'sale_price'        => ($row[$col['sale_price'] ?? 5] ?? '') !== '' ? (float)$row[$col['sale_price'] ?? 5] : null,
+                    'cost_price'        => ($row[$col['cost_price'] ?? 6] ?? '') !== '' ? (float)$row[$col['cost_price'] ?? 6] : null,
+                    'sku'               => $skuVal,
+                    'stock_quantity'    => ($row[$col['stock_quantity'] ?? 8] ?? '') !== '' ? (int)$row[$col['stock_quantity'] ?? 8] : null,
+                    'stock_status'      => $stockStatus,
+                    'type'              => $type,
+                    'weight'            => ($row[$col['weight'] ?? 11] ?? '') !== '' ? (float)$row[$col['weight'] ?? 11] : null,
+                    'dimensions'        => trim($row[$col['dimensions'] ?? 12] ?? '') ?: null,
+                    'featured_image'    => trim($row[$col['featured_image'] ?? 13] ?? '') ?: null,
+                    'meta_title'        => trim($row[$col['meta_title'] ?? 14] ?? '') ?: null,
+                    'meta_description'  => trim($row[$col['meta_description'] ?? 15] ?? '') ?: null,
+                    'is_active'         => (int)($row[$col['is_active'] ?? 16] ?? 1) === 1,
+                    'is_featured'       => (int)($row[$col['is_featured'] ?? 17] ?? 0) === 1,
+                    'manage_stock'      => true,
+                ]);
+                $imported++;
+            } catch (\Exception $e) {
+                $errors[] = "Row {$lineNum}: Failed to import '{$name}' — " . $e->getMessage();
+            }
         }
 
         $msg = "Successfully imported {$imported} product" . ($imported !== 1 ? 's' : '') . '.';
