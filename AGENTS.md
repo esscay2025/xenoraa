@@ -1,3 +1,20 @@
+- v4.17.0 (2026-06-13): SSL for vignesh.solutions + Product Import Fix
+  SSL Fix (vignesh.solutions):
+  - Created /etc/nginx/sites-available/vignesh.solutions Nginx config (same Laravel app root as gopi.blog)
+  - Issued Let's Encrypt SSL cert via certbot --nginx for vignesh.solutions + www.vignesh.solutions
+  - Certificate valid until 2026-09-11, auto-renewal configured by certbot
+  - vignesh.solutions now returns HTTP/2 200 with correct CN=vignesh.solutions
+  - Root cause: no Nginx server block existed for vignesh.solutions; server was serving abirami.info cert
+
+  Product Import Fix (Store Module):
+  - Installed phpoffice/phpspreadsheet v5.8.0 via Composer (Excel .xlsx/.xls import now works)
+  - Fixed products_sku_unique and products_slug_unique DB constraints from global to per-tenant
+    (CREATE UNIQUE INDEX ON products(user_id, sku) and products(user_id, slug))
+  - uniqueSlug() updated to check uniqueness per tenant (user_id parameter added)
+  - productImport() now pre-checks for duplicate SKU per tenant before insert
+  - Product::create wrapped in try/catch — each failed row shows specific error, no 500 crash
+  - Commit: e5b3ec0
+
 - v4.16.0 (2026-06-13): Deals Kanban View
   - Added List/Kanban view toggle to Deals landing page
   - Kanban board: 6 columns (Prospecting, Qualification, Proposal, Negotiation, Closed Won, Closed Lost)
