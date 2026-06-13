@@ -1,4 +1,58 @@
 @extends('layouts.admin')
+@push('styles')
+<style>
+/* ── Sticky Top Action Bar ─────────────────────────────────────── */
+.xn-sticky-bar {
+    position: fixed;
+    top: 60px;
+    left: var(--rail-width, 60px);
+    right: 0;
+    z-index: 120;
+    background: var(--bg-card, #fff);
+    border-bottom: 2px solid var(--accent, #6366f1);
+    padding: .75rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    box-shadow: 0 3px 12px rgba(0,0,0,.10);
+    flex-wrap: wrap;
+    will-change: transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transition: left 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+body.xn-panel-open .xn-sticky-bar {
+    left: calc(var(--rail-width, 60px) + var(--panel-width, 220px));
+}
+.xn-sticky-spacer { height: 64px; }
+.xn-sticky-title {
+    display: flex; align-items: center; gap: .5rem;
+    font-size: .95rem; font-weight: 700; color: var(--text-primary, #1a1a2e);
+}
+.xn-sticky-title i { color: var(--accent, #6366f1); }
+.xn-sticky-actions { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.xn-sticky-btn {
+    padding: .45rem 1.1rem; border-radius: 7px; font-size: .82rem; font-weight: 600;
+    cursor: pointer; border: none; display: inline-flex; align-items: center; gap: .35rem;
+    transition: all .18s; text-decoration: none;
+}
+.xn-sticky-btn-primary { background: var(--accent, #6366f1); color: #fff; }
+.xn-sticky-btn-primary:hover { opacity: .88; color: #fff; }
+.xn-sticky-btn-outline {
+    background: var(--bg-card, #fff); color: var(--accent, #6366f1);
+    border: 1px solid var(--accent, #6366f1);
+}
+.xn-sticky-btn-outline:hover { background: var(--accent, #6366f1); color: #fff; }
+.xn-sticky-btn-ghost {
+    background: transparent; color: var(--text-secondary, #64748b);
+    border: 1px solid var(--border, #e2e8f0);
+}
+.xn-sticky-btn-ghost:hover { background: var(--bg-primary, #f8fafc); }
+</style>
+@endpush
 @section('content')
 
 <style>
@@ -449,11 +503,28 @@ document.addEventListener('DOMContentLoaded', function() {
     </script>
 
 <div class="cf-page">
+  {{-- Sticky Top Action Bar --}}
+  <div class="xn-sticky-bar">
+    <div class="xn-sticky-title">
+      <i class="fas fa-clipboard-list"></i>
+      Create Sales Order
+    </div>
+    <div class="xn-sticky-actions">
+      <a href="{{ route('admin.crm2.inventory.sales-orders') }}" class="xn-sticky-btn xn-sticky-btn-ghost">
+        <i class="fas fa-arrow-left"></i> Cancel
+      </a>
+      <button type="submit" form="soCreateForm" class="xn-sticky-btn xn-sticky-btn-primary">
+        <i class="fas fa-save"></i> Save Sales Order
+      </button>
+    </div>
+  </div>
+  <div class="xn-sticky-spacer"></div>
+
     <div class="cf-header">
         <a href="{{ route('admin.crm2.inventory.sales-orders') }}" class="cf-back">&#8592; Sales Orders</a>
         <h1>New Sales Order</h1>
     </div>
-    <form method="POST" action="{{ route('admin.crm2.inventory.store') }}" onsubmit="serializeLineItems('so_items','so_items_json')">
+    <form id="soCreateForm" method="POST" action="{{ route('admin.crm2.inventory.store') }}" onsubmit="serializeLineItems('so_items','so_items_json')">
         @csrf
         <input type="hidden" name="type" value="sales_order">
 
