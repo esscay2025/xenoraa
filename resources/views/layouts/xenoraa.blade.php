@@ -398,7 +398,7 @@
                 <div class="xn-footer-heading">Resources</div>
                 <ul class="xn-footer-links">
                     <li><a href="{{ route('xenoraa.blog') }}">Blog</a></li>
-                    <li><a href="#">Documentation</a></li>
+                    <li><a href="{{ route('xenoraa.docs') }}">Documentation</a></li>
                     <li><a href="#">API Reference</a></li>
                     <li><a href="#">Support</a></li>
                 </ul>

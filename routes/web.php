@@ -796,6 +796,8 @@ Route::prefix('')->name('xenoraa.')->group(function () {
     Route::get('/xenoraa/get-started', [XenoraaController::class, 'getStarted'])->name('get-started');
     Route::get('/xenoraa/about', [XenoraaController::class, 'about'])->name('about');
     Route::get('/xenoraa/careers', [XenoraaController::class, 'careers'])->name('careers');
+    Route::get('/xenoraa/docs', [XenoraaController::class, 'docs'])->name('docs');
+    Route::get('/xenoraa/docs/{slug}', [XenoraaController::class, 'docsSection'])->name('docs.section');
 
 });
 
