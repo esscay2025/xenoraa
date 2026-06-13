@@ -406,8 +406,8 @@
             <div>
                 <div class="xn-footer-heading">Company</div>
                 <ul class="xn-footer-links">
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Careers</a></li>
+                    <li><a href="{{ route('xenoraa.about') }}">About Us</a></li>
+                    <li><a href="{{ route('xenoraa.careers') }}">Careers</a></li>
                     <li><a href="{{ route('legal.privacy') }}">Privacy Policy</a></li>
                     <li><a href="{{ route('legal.terms') }}">Terms of Service</a></li>
                 </ul>

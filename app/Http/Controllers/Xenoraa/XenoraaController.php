@@ -46,4 +46,15 @@ class XenoraaController extends Controller
     {
         return view('xenoraa.get-started');
     }
+
+    public function about()
+    {
+        return view('xenoraa.about');
+    }
+
+    public function careers()
+    {
+        return view('xenoraa.careers');
+    }
+
 }
