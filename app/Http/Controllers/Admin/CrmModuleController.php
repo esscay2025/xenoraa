@@ -1988,7 +1988,9 @@ class CrmModuleController extends Controller
         if ($search) $q->where('title','like',"%$search%");
         if ($request->stage) $q->where('stage', $request->stage);
         $deals = $q->orderByDesc('created_at')->paginate(25)->withQueryString();
-        return view('admin.crm2.sales.deals', compact('deals', 'accounts_list', 'contacts_list'));
+        // All deals for Kanban view (unpaginated, with owner relation)
+        $allDeals = CrmDeal::where('user_id', $tid)->with(['account','contact','owner'])->orderByDesc('created_at')->get();
+        return view('admin.crm2.sales.deals', compact('deals', 'allDeals', 'accounts_list', 'contacts_list'));
     }
 
     public function salesDealsCreate(Request $request)
