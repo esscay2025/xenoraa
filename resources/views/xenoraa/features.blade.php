@@ -38,7 +38,7 @@
         <div class="xn-features-detail">
             <div>
                 <div class="xn-feature-tag"><i class="fas fa-user-circle"></i> Personal Branding</div>
-                <h2 class="xn-heading-md">Your Digital Identity,<br><span style="color:#a855f7;">Perfectly Crafted</span></h2>
+                <h2 class="xn-heading-md">Your Business,<br><span style="color:#a855f7;">Perfectly Crafted</span></h2>
                 <div class="xn-divider"></div>
                 <p class="xn-body">Create a powerful public profile that showcases your experience, achievements, services, projects, and expertise. Your profile lives at <strong style="color:#fff;">xenoraa.com/yourname</strong> or your own custom domain.</p>
                 <div class="xn-mini-features">
@@ -119,18 +119,18 @@
         <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;">
             @php
             $allFeatures = [
-                ['icon'=>'fa-calendar-alt','title'=>'Smart Calendar','desc'=>'Schedule appointments, consultations, meetings, events, and reminders.'],
-                ['icon'=>'fa-sticky-note','title'=>'Notes & Knowledge Hub','desc'=>'Store ideas, meeting notes, documents, and important information securely.'],
-                ['icon'=>'fa-pen-nib','title'=>'Blog Publishing','desc'=>'Share articles, updates, achievements, and thought leadership content.'],
-                ['icon'=>'fa-briefcase','title'=>'Portfolio Showcase','desc'=>'Display projects, certifications, testimonials, and media appearances.'],
-                ['icon'=>'fa-tasks','title'=>'Task Management','desc'=>'Never miss important deadlines, meetings, follow-ups, or commitments.'],
-                ['icon'=>'fa-chart-bar','title'=>'Analytics & Insights','desc'=>'Track profile views, engagement, lead sources, and business performance.'],
-                ['icon'=>'fa-globe','title'=>'Custom Domain','desc'=>'Launch your professional website using your own domain and branding.'],
-                ['icon'=>'fa-envelope','title'=>'Email Marketing','desc'=>'Newsletter subscriptions, automated emails, and subscriber management.'],
-                ['icon'=>'fa-forum','title'=>'Community Forum','desc'=>'Build a community around your brand with discussion forums.'],
-                ['icon'=>'fa-comments','title'=>'Live Chat Monitor','desc'=>'Monitor and reply to all visitor conversations from your admin panel.'],
-                ['icon'=>'fa-dollar-sign','title'=>'Expense Tracking','desc'=>'Track business and personal expenses with approval workflows.'],
-                ['icon'=>'fa-user-tie','title'=>'Job Board','desc'=>'Post jobs, receive applications, and manage your hiring pipeline.'],
+                ['icon'=>'fa-globe','title'=>'Website & Site Builder','desc'=>'Build a professional website with a drag-and-drop page builder, blog, portfolio, and SEO tools.'],
+                ['icon'=>'fa-shopping-bag','title'=>'E-Commerce Store','desc'=>'Sell products online with full inventory, order management, reviews, and CSV import/export.'],
+                ['icon'=>'fa-cash-register','title'=>'Point of Sale (POS)','desc'=>'Run your retail counter from any device — sessions, receipts, daily reports, and shift management.'],
+                ['icon'=>'fa-users','title'=>'CRM & Sales Pipeline','desc'=>'Manage leads, contacts, accounts, deals, and forecasts with a full Kanban sales pipeline.'],
+                ['icon'=>'fa-file-invoice-dollar','title'=>'Inventory & Invoicing','desc'=>'Quotes, sales orders, purchase orders, invoices, and vendor management — all in one workflow.'],
+                ['icon'=>'fa-calculator','title'=>'Accounts & Finance','desc'=>'Track income, expenses, bank accounts, chart of accounts, journal entries, and financial reports.'],
+                ['icon'=>'fa-project-diagram','title'=>'Projects & Tasks','desc'=>'Plan and track projects with task boards, milestones, deadlines, and team assignments.'],
+                ['icon'=>'fa-calendar-check','title'=>'Services & Booking','desc'=>'Manage service offerings, client bookings, schedules, and service delivery workflows.'],
+                ['icon'=>'fa-headset','title'=>'Support & Cases','desc'=>'Handle customer support cases, solutions knowledge base, and case resolution tracking.'],
+                ['icon'=>'fa-robot','title'=>'AI Hub & Assistant','desc'=>'AI-powered content generation, chat widget, conversation history, and custom AI training.'],
+                ['icon'=>'fa-chart-bar','title'=>'Analytics & Insights','desc'=>'Track profile views, lead sources, sales performance, and business KPIs from one dashboard.'],
+                ['icon'=>'fa-globe-americas','title'=>'Custom Domain & SSL','desc'=>'Map your own domain (e.g., vignesh.solutions) with automatic SSL certificate provisioning.'],
             ];
             @endphp
             @foreach($allFeatures as $f)
@@ -147,7 +147,7 @@
 {{-- CTA --}}
 <section class="xn-section" style="background:#000;text-align:center;">
     <div class="xn-container">
-        <h2 class="xn-heading-lg" style="max-width:600px;margin:0 auto 1rem;">Ready to Build Your<br><span style="color:#a855f7;">Digital Identity?</span></h2>
+        <h2 class="xn-heading-lg" style="max-width:600px;margin:0 auto 1rem;">Ready to Build Your<br><span style="color:#a855f7;">Business?</span></h2>
         <p class="xn-body" style="max-width:480px;margin:0 auto 2.5rem;">Get started today and experience the full power of Xenoraa for your business.</p>
         <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-primary-lg">Get Started Now 🚀</a>
     </div>

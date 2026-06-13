@@ -184,7 +184,7 @@
     <div class="xn-hero-overlay"></div>
     <div class="xn-hero-content">
         <div>
-            <div class="xn-hero-eyebrow">The Professional Identity Platform</div>
+            <div class="xn-hero-eyebrow">Website · E-Commerce · POS · CRM</div>
             <h1 class="xn-hero-title">
                 BUILD YOUR<br>
                 <span class="accent">DIGITAL</span><br>
@@ -361,54 +361,58 @@
             <p class="xn-body" style="margin-top:1rem;">Start free and scale as you grow. No hidden fees, no long-term contracts.</p>
         </div>
         <div class="xn-pricing-cards">
+            {{-- Solo App --}}
             <div class="xn-pricing-card">
-                <div class="xn-price-plan">Starter</div>
+                <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#a855f7;margin-bottom:0.25rem;">Tier 1</div>
+                <div class="xn-price-plan">Solo App</div>
                 <div class="xn-price-amount">₹499 <span>/ mo</span></div>
                 <div class="xn-price-yearly">₹4,999 / year — save ₹989</div>
-                <div class="xn-price-desc">Perfect for individuals building their professional presence.</div>
+                <div class="xn-price-desc">One app — Website, E-Commerce, POS, or CRM. Full features, your choice.</div>
                 <ul class="xn-price-features">
-                    <li><i class="fas fa-check"></i> Personal Profile Website</li>
-                    <li><i class="fas fa-check"></i> Portfolio Showcase</li>
-                    <li><i class="fas fa-check"></i> Blog Publishing</li>
-                    <li><i class="fas fa-check"></i> Notes & Reminders</li>
-                    <li><i class="fas fa-check"></i> Basic Analytics</li>
+                    <li><i class="fas fa-check"></i> 1 app of your choice</li>
+                    <li><i class="fas fa-check"></i> Custom domain mapping</li>
+                    <li><i class="fas fa-check"></i> AI Content Assistant</li>
+                    <li><i class="fas fa-check"></i> Analytics &amp; Insights</li>
+                    <li><i class="fas fa-check"></i> Email support</li>
                 </ul>
-                <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-ghost" style="width:100%;text-align:center;display:block;padding:0.75rem;">Get Started</a>
+                <a href="{{ route('xenoraa.get-started') }}?plan=solo" class="xn-btn-ghost" style="width:100%;text-align:center;display:block;padding:0.75rem;">Get Started</a>
             </div>
+            {{-- Duo Bundle --}}
             <div class="xn-pricing-card popular">
                 <div class="xn-popular-badge">Most Popular</div>
-                <div class="xn-price-plan">Professional</div>
+                <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#a855f7;margin-bottom:0.25rem;">Tier 2</div>
+                <div class="xn-price-plan">Duo Bundle</div>
                 <div class="xn-price-amount">₹999 <span>/ mo</span></div>
                 <div class="xn-price-yearly">₹9,999 / year — save ₹1,989</div>
-                <div class="xn-price-desc">Designed for consultants, advocates, doctors, coaches, and creators.</div>
+                <div class="xn-price-desc">Two apps, deeply integrated. Website+CRM, E-Commerce+POS, or Website+E-Commerce.</div>
                 <ul class="xn-price-features">
-                    <li><i class="fas fa-check"></i> Everything in Starter</li>
-                    <li><i class="fas fa-check"></i> CRM Management</li>
-                    <li><i class="fas fa-check"></i> Custom Domain Support</li>
-                    <li><i class="fas fa-check"></i> AI Content Assistant</li>
-                    <li><i class="fas fa-check"></i> Lead Tracking</li>
-                    <li><i class="fas fa-check"></i> Priority Support</li>
+                    <li><i class="fas fa-check"></i> 2 apps of your choice</li>
+                    <li><i class="fas fa-check"></i> Cross-app data integration</li>
+                    <li><i class="fas fa-check"></i> AI Chat Widget</li>
+                    <li><i class="fas fa-check"></i> Accounts &amp; Finance module</li>
+                    <li><i class="fas fa-check"></i> Priority support</li>
                 </ul>
-                <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-primary" style="width:100%;text-align:center;display:block;padding:0.75rem;font-size:0.9rem;">Get Started</a>
+                <a href="{{ route('xenoraa.get-started') }}?plan=duo" class="xn-btn-primary" style="width:100%;text-align:center;display:block;padding:0.75rem;font-size:0.9rem;">Get Started</a>
             </div>
+            {{-- All-Access --}}
             <div class="xn-pricing-card">
-                <div class="xn-price-plan">Business Pro</div>
+                <div style="font-size:0.65rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;color:#a855f7;margin-bottom:0.25rem;">Tier 3</div>
+                <div class="xn-price-plan">All-Access</div>
                 <div class="xn-price-amount">₹1,999 <span>/ mo</span></div>
                 <div class="xn-price-yearly">₹19,999 / year — save ₹3,989</div>
-                <div class="xn-price-desc">Built for growing professionals, founders, and organizations.</div>
+                <div class="xn-price-desc">All 4 apps unlocked — Website, E-Commerce, POS &amp; CRM. The complete ecosystem.</div>
                 <ul class="xn-price-features">
-                    <li><i class="fas fa-check"></i> Everything in Professional</li>
-                    <li><i class="fas fa-check"></i> E-Commerce Store</li>
-                    <li><i class="fas fa-check"></i> Team Members</li>
-                    <li><i class="fas fa-check"></i> Automation Workflows</li>
-                    <li><i class="fas fa-check"></i> API Access</li>
-                    <li><i class="fas fa-check"></i> White Label Branding</li>
+                    <li><i class="fas fa-check"></i> All 4 apps included</li>
+                    <li><i class="fas fa-check"></i> Projects, Tasks &amp; Services</li>
+                    <li><i class="fas fa-check"></i> AI Hub &amp; Automation</li>
+                    <li><i class="fas fa-check"></i> Team members (up to 5)</li>
+                    <li><i class="fas fa-check"></i> White label &amp; API access</li>
                 </ul>
-                <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-ghost" style="width:100%;text-align:center;display:block;padding:0.75rem;">Get Started</a>
+                <a href="{{ route('xenoraa.get-started') }}?plan=allaccess" class="xn-btn-ghost" style="width:100%;text-align:center;display:block;padding:0.75rem;">Get Started</a>
             </div>
         </div>
         <div style="text-align:center;margin-top:2rem;">
-            <a href="{{ route('xenoraa.pricing') }}" style="color:#a855f7;text-decoration:none;font-size:0.875rem;">View full pricing details →</a>
+            <a href="{{ route('xenoraa.pricing') }}" style="color:#a855f7;text-decoration:none;font-size:0.875rem;">View full pricing &amp; app details →</a>
         </div>
     </div>
 </section>
@@ -437,8 +441,8 @@
 <section class="xn-section xn-cta-section">
     <div class="xn-container" style="text-align:center;">
         <div class="xn-label">Get Started Today</div>
-        <h2 class="xn-heading-lg" style="max-width:700px;margin:0 auto 1rem;">Your Profile Is More Than<br><span style="color:#a855f7;">A Website.</span></h2>
-        <p class="xn-body-lg" style="max-width:560px;margin:0 auto 2.5rem;">It's your digital headquarters. Join Xenoraa and transform the way you manage your professional identity, business relationships, and personal growth.</p>
+        <h2 class="xn-heading-lg" style="max-width:700px;margin:0 auto 1rem;">Your Business Deserves<br><span style="color:#a855f7;">One Platform.</span></h2>
+        <p class="xn-body-lg" style="max-width:560px;margin:0 auto 2.5rem;">Website, E-Commerce, POS, and CRM — all in one place. Join Xenoraa and run your entire business from a single, beautifully designed platform.</p>
         <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
             <a href="{{ route('xenoraa.get-started') }}" class="xn-btn-primary-lg">Get Started Now 🚀</a>
             <a href="{{ route('xenoraa.features') }}" class="xn-btn-outline-lg">Explore Features</a>
