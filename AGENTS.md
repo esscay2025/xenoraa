@@ -1,3 +1,13 @@
+- v4.18.0 (2026-06-13): Xenoraa Public Site — New 3-Tier Pricing + Content Update
+  Pricing Page: complete rewrite with Solo App (₹499), Duo Bundle (₹999), All-Access (₹1999)
+  Tier 1: 1 app of choice (Website OR E-Commerce OR POS OR CRM)
+  Tier 2: 2-app combo (Website+E-Commerce, E-Commerce+POS, Website+CRM)
+  Tier 3: All 4 apps + Inventory, Projects, Services, Support, AI Hub
+  Monthly/Yearly toggle, 4 app pills, full comparison table, FAQ section
+  Home Page: updated pricing cards + hero copy for 4-app model
+  Features Page: 12 feature cards, updated heading
+  GitHub commit: cd56a33
+
 - v4.17.0 (2026-06-13): SSL for vignesh.solutions + Product Import Fix
   SSL Fix (vignesh.solutions):
   - Created /etc/nginx/sites-available/vignesh.solutions Nginx config (same Laravel app root as gopi.blog)
