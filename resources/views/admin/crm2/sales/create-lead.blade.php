@@ -3,7 +3,7 @@
 @section('page-title', 'New Lead')
 @section('content')
 <style>
-.lead-form-wrap { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+.lead-form-wrap { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 3rem;  padding-top: 0; }
 .lead-form-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: .75rem; }
 .lead-form-header h1 { font-size: 1.4rem; font-weight: 700; color: var(--text-primary,#1a1a2e); display: flex; align-items: center; gap: .5rem; }
 .lead-section { background: var(--bg-card,#fff); border: 1px solid var(--border,#e2e8f0); border-radius: 10px; margin-bottom: 1.25rem; overflow: hidden; }
@@ -34,6 +34,35 @@
 .btn-lead-save:hover { opacity: .88; }
 .btn-lead-cancel { background: transparent; color: var(--text-secondary,#64748b); border: 1px solid var(--border,#e2e8f0); padding: .55rem 1.2rem; border-radius: 7px; font-size: .9rem; font-weight: 600; cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: .4rem; }
 .btn-lead-cancel:hover { background: var(--bg-primary,#f8fafc); }
+/* Sticky top action bar */
+.lead-sticky-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-card,#fff);
+    border-bottom: 1px solid var(--border,#e2e8f0);
+    padding: .6rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    flex-wrap: wrap;
+}
+.lead-sticky-bar .lead-sticky-title {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--text-primary,#1a1a2e);
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+}
+.lead-sticky-bar .lead-sticky-actions {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    flex-wrap: wrap;
+}
 @media(max-width:640px){
   .lead-grid { grid-template-columns: 1fr; }
   .lead-salutation-row { grid-template-columns: 1fr 1fr; }
@@ -42,16 +71,32 @@
 </style>
 
 <div class="lead-form-wrap">
-  <div class="lead-form-header">
-    <h1><i class="fas fa-user-plus" style="color:var(--accent,#6366f1)"></i> Create New Lead</h1>
-    <a href="{{ route('admin.crm2.sales.leads') }}" class="btn-lead-cancel"><i class="fas fa-arrow-left"></i> Back to Leads</a>
+  {{-- Sticky top action bar --}}
+  <div class="lead-sticky-bar" id="leadStickyBar">
+    <div class="lead-sticky-title">
+      <i class="fas fa-user-plus" style="color:var(--accent,#6366f1)"></i>
+      Create New Lead
+    </div>
+    <div class="lead-sticky-actions">
+      <a href="{{ route('admin.crm2.sales.leads') }}" class="btn-lead-cancel">
+        <i class="fas fa-arrow-left"></i> Cancel
+      </a>
+      <button type="submit" form="leadCreateForm" name="_action" value="save_new"
+              class="btn-lead-save"
+              style="background:var(--bg-card,#fff);color:var(--accent,#6366f1);border:1px solid var(--accent,#6366f1)">
+        <i class="fas fa-plus"></i> Save &amp; New
+      </button>
+      <button type="submit" form="leadCreateForm" class="btn-lead-save">
+        <i class="fas fa-save"></i> Save Lead
+      </button>
+    </div>
   </div>
 
   @if($errors->any())
   <div class="crm2-alert danger" style="margin-bottom:1rem"><i class="fas fa-exclamation-circle"></i> Please fix the errors below.</div>
   @endif
 
-  <form method="POST" action="{{ route('admin.crm2.sales.store') }}" enctype="multipart/form-data">
+  <form id="leadCreateForm" method="POST" action="{{ route('admin.crm2.sales.store') }}" enctype="multipart/form-data">
     @csrf
     <input type="hidden" name="_type" value="lead">
 
@@ -384,15 +429,7 @@
       </div>
     </div>
 
-    <div class="lead-form-actions">
-      <a href="{{ route('admin.crm2.sales.leads') }}" class="btn-lead-cancel"><i class="fas fa-times"></i> Cancel</a>
-      <button type="submit" name="_action" value="save_new" class="btn-lead-save" style="background:var(--bg-card,#fff);color:var(--accent,#6366f1);border:1px solid var(--accent,#6366f1)">
-        <i class="fas fa-plus"></i> Save &amp; New
-      </button>
-      <button type="submit" class="btn-lead-save">
-        <i class="fas fa-save"></i> Save Lead
-      </button>
-    </div>
+
   </form>
 </div>
 
